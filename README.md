@@ -164,7 +164,8 @@ One-time setup:
 2. Create a token at https://vercel.com/account/tokens.
 3. Run `npx vercel link` in the repo root and read `orgId` / `projectId` from `.vercel/project.json`.
 4. Add repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_WEB_PROJECT_ID`.
-5. Disable Vercel's own Git auto-deploy for this project (or don't connect the repo) so it doesn't deploy twice.
+Vercel's own Git deployments are turned off for the web project (`git.deploymentEnabled: false` in
+`frontend/vercel.json`), so connecting the repo doesn't deploy twice.
 
 ### Projects
 
