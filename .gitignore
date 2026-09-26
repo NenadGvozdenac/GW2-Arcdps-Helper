@@ -8,3 +8,6 @@ out/
 .env.local
 *.local
 .env.production
+
+# TypeScript incremental build cache
+*.tsbuildinfo
