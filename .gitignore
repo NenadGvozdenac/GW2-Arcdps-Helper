@@ -1,0 +1,10 @@
+node_modules/
+dist/
+out/
+.vercel/
+
+# Environment files: production values never go to git (templates: .env.production.example)
+.env
+.env.local
+*.local
+.env.production

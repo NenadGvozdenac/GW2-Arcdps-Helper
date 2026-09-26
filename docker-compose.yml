@@ -1,0 +1,40 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gw2
+      POSTGRES_PASSWORD: gw2
+      POSTGRES_DB: gw2arcdpshelper
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gw2 -d gw2arcdpshelper"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    env_file: ./backend/.env.development
+    environment:
+      # Inside Docker the database is the "db" service, not localhost.
+      DATABASE_URL: postgres://gw2:gw2@db:5432/gw2arcdpshelper
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  db-data:

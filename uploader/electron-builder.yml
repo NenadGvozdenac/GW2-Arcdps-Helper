@@ -1,0 +1,24 @@
+appId: com.gw2arcdpshelper.uploader
+productName: GW2 ArcDPS Helper Uploader
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - out/**
+  - resources/**
+  - package.json
+extraMetadata:
+  main: out/main/index.js
+asarUnpack:
+  - resources/**
+win:
+  icon: resources/icon.png
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: ${productName}-Setup-${version}.${ext}
+portable:
+  artifactName: ${productName}-Portable-${version}.${ext}

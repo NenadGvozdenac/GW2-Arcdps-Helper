@@ -1,0 +1,106 @@
+# GW2 ArcDPS Helper — Docker and migration shortcuts.
+# Recipes only use docker/npm/node so they work whether make runs them through sh or cmd.exe.
+
+COMPOSE := docker compose
+DB_USER := gw2
+DB_NAME := gw2arcdpshelper
+
+.DEFAULT_GOAL := help
+.PHONY: help up down restart build rebuild logs ps clean db-up db-shell \
+        migrate migrate-status migration migrate-local migrate-prod \
+        uploader-install uploader-dev uploader-prod uploader-build uploader-dist
+
+help:
+	@echo GW2 ArcDPS Helper make targets:
+	@echo   Containers
+	@echo     make up              Build if needed and start db, backend and frontend
+	@echo     make down            Stop and remove containers - data is kept
+	@echo     make restart         down + up
+	@echo     make build           Build images
+	@echo     make rebuild         Build images without cache, then start
+	@echo     make logs            Follow logs of all services
+	@echo     make ps              Show container status
+	@echo     make clean           Stop containers AND delete the database volume
+	@echo   Database / migrations
+	@echo     make db-up           Start only the database - for local npm run dev
+	@echo     make db-shell        Open psql in the db container
+	@echo     make migrate         Rebuild the backend image and apply pending migrations
+	@echo     make migrate-status  List applied migrations
+	@echo     make migration name=add_something   Create the next numbered .sql migration
+	@echo     make migrate-local   Apply migrations to the local database - backend/.env.development
+	@echo     make migrate-prod    Apply migrations to the production database - backend/.env.production
+	@echo   Desktop uploader
+	@echo     make uploader-install  Install uploader dependencies
+	@echo     make uploader-dev      Run the uploader against the local Docker stack - http://localhost:8080
+	@echo     make uploader-prod     Run the uploader against production - URLs in uploader/.env.production
+	@echo     make uploader-build    Typecheck and build the uploader for production
+	@echo     make uploader-dist     Build the production Windows installer and portable exe - uploader/dist
+
+# ---------- containers ----------
+
+up:
+	$(COMPOSE) up -d --build
+	@echo App: http://localhost:8080   API: http://localhost:3000/api
+
+down:
+	$(COMPOSE) down
+
+restart: down up
+
+build:
+	$(COMPOSE) build
+
+rebuild:
+	$(COMPOSE) build --no-cache
+	$(COMPOSE) up -d
+
+logs:
+	$(COMPOSE) logs -f
+
+ps:
+	$(COMPOSE) ps
+
+clean:
+	$(COMPOSE) down -v
+
+# ---------- database / migrations ----------
+
+db-up:
+	$(COMPOSE) up -d db
+
+db-shell:
+	$(COMPOSE) exec db psql -U $(DB_USER) -d $(DB_NAME)
+
+# Migrations are baked into the backend image, so rebuild it first to pick up new .sql files.
+migrate:
+	$(COMPOSE) build backend
+	$(COMPOSE) run --rm backend node dist/db/migrate.js
+
+migrate-status:
+	$(COMPOSE) exec db psql -U $(DB_USER) -d $(DB_NAME) -c "SELECT name, applied_at FROM schema_migrations ORDER BY name"
+
+migration:
+	npm --prefix backend run migration:new -- $(name)
+
+migrate-local:
+	npm --prefix backend run migrate
+
+migrate-prod:
+	npm --prefix backend run migrate:production
+
+# ---------- desktop uploader ----------
+
+uploader-install:
+	npm --prefix uploader install
+
+uploader-dev:
+	npm --prefix uploader run dev
+
+uploader-prod:
+	npm --prefix uploader run dev:prod
+
+uploader-build:
+	npm --prefix uploader run build
+
+uploader-dist:
+	npm --prefix uploader run dist
