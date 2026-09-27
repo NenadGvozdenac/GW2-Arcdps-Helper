@@ -1,4 +1,4 @@
-import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
@@ -9,6 +9,7 @@ import {
   DownloadIcon,
   FileChartColumnIcon,
   FolderOpenIcon,
+  Gamepad2Icon,
   HistoryIcon,
   KeyRoundIcon,
   LayersIcon,
@@ -21,10 +22,12 @@ import {
   UsersIcon,
   type LucideIcon,
 } from "lucide-react";
-import { SOURCE_URL, UPLOADER_DOWNLOAD_URL } from "../../config/constants";
+import { RELEASES_URL, SOURCE_URL } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { ENCOUNTERS } from "../../domain/data/encounters";
+import { downloadService } from "../../services/downloadService";
 import { encounterService } from "../../services/encounterService";
+import type { Downloads } from "../../domain/types/release.types";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
@@ -66,7 +69,21 @@ const FAQ: { q: TranslationKey; a: TranslationKey }[] = [
 ];
 
 function useLandingController() {
+  // Links fall back to the Releases page until GitHub answers (or when nothing is released yet).
+  const [downloads, setDownloads] = useState<Downloads>({ uploader: null, addon: null });
+  useEffect(() => {
+    let cancelled = false;
+    downloadService.latest().then((d) => !cancelled && setDownloads(d));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return {
+    uploaderUrl: downloads.uploader?.url ?? RELEASES_URL,
+    uploaderVersion: downloads.uploader?.version ?? null,
+    addonUrl: downloads.addon?.url ?? RELEASES_URL,
+    addonVersion: downloads.addon?.version ?? null,
     stats: [
       { value: encounterService.groupsFor("raid").length, label: "landing.hero.stat1" as TranslationKey },
       { value: encounterService.groupsFor("fractal").length, label: "landing.hero.stat2" as TranslationKey },
@@ -119,7 +136,7 @@ function GithubMark({ className }: { className?: string }) {
 }
 
 export default function LandingPage() {
-  const { stats } = useLandingController();
+  const { stats, uploaderUrl, uploaderVersion, addonUrl, addonVersion } = useLandingController();
   const { t } = useI18n();
 
   return (
@@ -189,6 +206,15 @@ export default function LandingPage() {
               <Button asChild size="lg" variant="outline">
                 <a href="#how">{t("landing.hero.secondary")}</a>
               </Button>
+            </Reveal>
+            <Reveal delay={280} className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+              <span>{t("landing.hero.download")}</span>
+              <a href={uploaderUrl} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-[var(--brand)]">
+                <DownloadIcon className="size-4" /> {t("landing.hero.downloadUploader")}
+              </a>
+              <a href={addonUrl} className="inline-flex items-center gap-1.5 font-medium text-foreground hover:text-[var(--brand)]">
+                <Gamepad2Icon className="size-4" /> {t("landing.hero.downloadAddon")}
+              </a>
             </Reveal>
             <Reveal delay={320}>
               <dl className="mt-12 grid max-w-lg grid-cols-4 gap-4 border-t pt-6">
@@ -282,11 +308,25 @@ export default function LandingPage() {
             </ul>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Button asChild size="lg">
-                <a href={UPLOADER_DOWNLOAD_URL} target="_blank" rel="noreferrer">
+                <a href={uploaderUrl}>
                   <DownloadIcon /> {t("landing.uploader.download")}
                 </a>
               </Button>
-              <span className="text-xs text-muted-foreground">{t("landing.uploader.downloadHint")}</span>
+              <span className="text-xs text-muted-foreground">
+                {uploaderVersion && `v${uploaderVersion} · `}
+                {t("landing.uploader.downloadHint")}
+              </span>
+            </div>
+            <div className="mt-6 rounded-xl border bg-card/60 p-4">
+              <div className="flex flex-wrap items-center gap-4">
+                <Button asChild variant="outline">
+                  <a href={addonUrl}>
+                    <Gamepad2Icon /> {t("landing.uploader.downloadAddon")}
+                  </a>
+                </Button>
+                {addonVersion && <span className="text-xs text-muted-foreground">v{addonVersion}</span>}
+              </div>
+              <p className="mt-3 text-xs text-muted-foreground text-pretty">{t("landing.uploader.addonHint")}</p>
             </div>
           </Reveal>
           <Reveal delay={150}>
