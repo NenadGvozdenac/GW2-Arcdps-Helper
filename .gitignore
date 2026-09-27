@@ -16,3 +16,6 @@ out/
 .env*
 !.env.development
 !.env.*.example
+
+# Claude Code MCP servers are configured per user (~/.claude.json), not in the repo
+.mcp.json
