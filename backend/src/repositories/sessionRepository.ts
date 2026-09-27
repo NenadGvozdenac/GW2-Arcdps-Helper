@@ -128,6 +128,16 @@ export const sessionRepository = {
     return row ?? null;
   },
 
+  /** Deletes several of the owner's sessions; returns how many were deleted (other users' ids are ignored). */
+  async deleteMany(ownerId: string, ids: string[]): Promise<number> {
+    if (!ids.length) return 0;
+    const deleted = await getDb()
+      .delete(sessions)
+      .where(and(ownedBy(ownerId), inArray(sessions.id, ids)))
+      .returning({ id: sessions.id });
+    return deleted.length;
+  },
+
   async delete(ownerId: string, id: string): Promise<boolean> {
     const deleted = await getDb()
       .delete(sessions)

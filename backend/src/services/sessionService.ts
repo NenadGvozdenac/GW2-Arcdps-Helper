@@ -146,6 +146,9 @@ export const sessionService = {
     };
   },
 
+  /** Deletes several sessions at once (their logs are kept); returns how many were deleted. */
+  deleteMany: (ownerId: string, ids: string[]) => sessionRepository.deleteMany(ownerId, [...new Set(ids)]),
+
   /** Deletes the session; its logs are kept (they just no longer belong to a session). */
   async delete(ownerId: string, id: string): Promise<void> {
     if (!(await sessionRepository.delete(ownerId, id))) throw sessionNotFound();

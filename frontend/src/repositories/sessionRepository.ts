@@ -37,6 +37,9 @@ export const sessionRepository = {
     return toSession((await http.patch<{ session: SessionDto }>(sessionPath(id), patch)).session);
   },
 
+  /** Deletes several sessions at once (their logs are kept). */
+  deleteMany: (ids: string[]) => http.post<{ deleted: number }>("/sessions/bulk-delete", { ids }),
+
   /** Saves the manual order (all session ids, in display order). */
   reorder: (ids: string[]) => http.put<void>("/sessions/order", { ids }),
 

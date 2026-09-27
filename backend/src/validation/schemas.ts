@@ -57,6 +57,8 @@ export const reorderSessionsSchema = z.object({
   ids: z.array(z.uuid("Invalid session ID.")).min(1).max(1000),
 });
 
+export const deleteSessionsSchema = reorderSessionsSchema;
+
 export const shareTokenParamSchema = z.object({
   token: z.string().regex(/^[\w-]{16,64}$/, "Invalid share link."),
 });

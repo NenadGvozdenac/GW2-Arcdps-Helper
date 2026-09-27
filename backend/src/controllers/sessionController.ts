@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { sessionService } from "../services/sessionService";
 import type { AuthLocals } from "../types/auth.types";
 import {
+  deleteSessionsSchema,
   idParamSchema,
   reorderSessionsSchema,
   shareTokenParamSchema,
@@ -65,6 +66,12 @@ export const sessionController = {
   async shared(req: Request, res: Response) {
     const { token } = validate(shareTokenParamSchema, req.params);
     res.json(await sessionService.getShared(token));
+  },
+
+  /** Bulk delete: `{ ids }`; the sessions' logs are kept. */
+  async removeMany(req: Request, res: Response<unknown, AuthLocals>) {
+    const { ids } = validate(deleteSessionsSchema, req.body);
+    res.json({ deleted: await sessionService.deleteMany(res.locals.userId, ids) });
   },
 
   async remove(req: Request, res: Response<unknown, AuthLocals>) {

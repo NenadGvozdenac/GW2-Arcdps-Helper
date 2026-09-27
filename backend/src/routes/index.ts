@@ -36,6 +36,7 @@ export function createRouter(): Router {
   router.post("/sessions", requireAuth, sessionController.start);
   router.get("/sessions/active", requireAuth, sessionController.active);
   router.put("/sessions/order", requireAuth, sessionController.reorder);
+  router.post("/sessions/bulk-delete", requireAuth, sessionController.removeMany);
   router.patch("/sessions/:id", requireAuth, sessionController.update);
   router.post("/sessions/:id/end", requireAuth, sessionController.end);
   router.post("/sessions/:id/resume", requireAuth, sessionController.resume);

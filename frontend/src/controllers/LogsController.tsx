@@ -19,6 +19,8 @@ interface LogsContextValue {
   remove: (id: string) => Promise<void>;
   /** Deletes a session; its logs stay. */
   removeSession: (id: string) => Promise<void>;
+  /** Deletes several sessions at once; their logs stay. */
+  removeSessions: (ids: string[]) => Promise<void>;
   /** Re-opens a session that ended automatically; another active session is ended by the server. */
   resumeSession: (id: string) => Promise<void>;
   /** Creates (or with false, revokes) the session's public link. */
@@ -83,6 +85,13 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     await sessionService.delete(id);
     setSessions((prev) => prev.filter((s) => s.id !== id));
     setLogs((prev) => prev.map((l) => (l.sessionId === id ? { ...l, sessionId: null } : l)));
+  }, []);
+
+  const removeSessions = useCallback(async (ids: string[]) => {
+    await sessionService.deleteMany(ids);
+    const gone = new Set(ids);
+    setSessions((prev) => prev.filter((s) => !gone.has(s.id)));
+    setLogs((prev) => prev.map((l) => (l.sessionId && gone.has(l.sessionId) ? { ...l, sessionId: null } : l)));
   }, []);
 
   const resumeSession = useCallback(async (id: string) => {
@@ -157,6 +166,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       refresh,
       remove,
       removeSession,
+      removeSessions,
       resumeSession,
       setSessionShared,
       setLogShared,
@@ -173,6 +183,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       refresh,
       remove,
       removeSession,
+      removeSessions,
       resumeSession,
       setSessionShared,
       setLogShared,

@@ -18,6 +18,7 @@ function span(logs: Log[]): SessionSummary["span"] {
 export const sessionService = {
   list: () => sessionRepository.list(),
   delete: (id: string) => sessionRepository.delete(id),
+  deleteMany: (ids: string[]) => sessionRepository.deleteMany(ids),
   resume: (id: string) => sessionRepository.resume(id),
 
   /** Only sessions that ended by themselves after 6 hours can be resumed. */
