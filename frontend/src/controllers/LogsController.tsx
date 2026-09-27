@@ -108,7 +108,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id, refresh]);
 
-  // Pages show a spinner until both the user and their logs are known.
+  // Layout shows a full-screen spinner until both the user and their logs are known.
   const value = useMemo(
     () => ({
       logs,

@@ -3,8 +3,8 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../controllers/AuthController";
 
 /**
- * While a saved sign-in is being restored the page is rendered anyway: it shows a spinner
- * (LogsController reports loading until the user is known), so every page has exactly one loading state.
+ * While a saved sign-in is being restored the route is rendered anyway: Layout shows one full-screen spinner
+ * (LogsController reports loading until the user and their logs are known), then header and page appear together.
  */
 export function RequireAuth() {
   const { user, loading } = useAuth();

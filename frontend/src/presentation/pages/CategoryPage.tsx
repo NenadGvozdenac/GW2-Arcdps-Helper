@@ -16,7 +16,6 @@ import BossRow from "../components/BossRow";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
-import { PageSpinner } from "../components/Spinner";
 
 type PageCategory = Exclude<Category, "other">;
 
@@ -27,7 +26,7 @@ const MODES: { value: CmMode; label: TranslationKey }[] = [
 ];
 
 function useCategoryController(category: PageCategory) {
-  const { logs, loading } = useLogs();
+  const { logs } = useLogs();
   const [params, setParams] = useSearchParams();
   const [mode, setMode] = useState<CmMode>("all");
   const [showPrevious, setShowPrevious] = useState(false);
@@ -77,7 +76,6 @@ function useCategoryController(category: PageCategory) {
 
   return {
     ...view,
-    loading,
     mode,
     setMode,
     showPrevious,
@@ -94,7 +92,6 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
   const { t, fmt } = useI18n();
   const { summary, previous } = c;
 
-  if (c.loading) return <PageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">

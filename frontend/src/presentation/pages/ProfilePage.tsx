@@ -18,11 +18,10 @@ import { Label } from "@/presentation/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import PageHeader from "../components/PageHeader";
-import { PageSpinner } from "../components/Spinner";
 import { describeError } from "../utils/describeError";
 
 function useProfileController() {
-  const { user, loading, updateProfile } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [gw2Account, setGw2Account] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -42,14 +41,13 @@ function useProfileController() {
     }
   }
 
-  return { loading, email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
+  return { email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
 }
 
 export default function ProfilePage() {
   const c = useProfileController();
   const { t, lang, setLang, languages } = useI18n();
 
-  if (c.loading) return <PageSpinner />;
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">

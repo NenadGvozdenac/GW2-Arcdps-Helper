@@ -8,20 +8,18 @@ import type { SessionView } from "../../domain/types/session.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Card, CardContent } from "@/presentation/components/ui/card";
 import PageHeader from "../components/PageHeader";
-import { PageSpinner } from "../components/Spinner";
 import { failBadge, successBadge } from "../components/ResultBadge";
 
 function useSessionsController() {
-  const { logs, sessions, loading } = useLogs();
+  const { logs, sessions } = useLogs();
   const views = useMemo(() => sessionService.views(sessions, logs), [sessions, logs]);
-  return { loading, views };
+  return { views };
 }
 
 export default function SessionsPage() {
   const c = useSessionsController();
   const { t } = useI18n();
 
-  if (c.loading) return <PageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">

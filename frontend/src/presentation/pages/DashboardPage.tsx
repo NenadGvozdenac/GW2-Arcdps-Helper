@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import ClearCard from "../components/ClearCard";
-import { PageSpinner } from "../components/Spinner";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
@@ -25,14 +24,13 @@ const SECTIONS: { category: Exclude<Category, "other">; label: TranslationKey; t
 
 function useDashboardController() {
   const { accountLabel } = useAuth();
-  const { logs, loading, error } = useLogs();
+  const { logs, error } = useLogs();
 
   return useMemo(() => {
     const weekly = statsService.lastWeeklyReset();
     const kills = logs.filter((l) => l.success).length;
     return {
       accountLabel,
-      loading,
       error,
       totals: {
         logs: logs.length,
@@ -47,14 +45,13 @@ function useDashboardController() {
       })),
       today: statsService.logsBetween(logs, statsService.lastDailyReset()),
     };
-  }, [logs, loading, error, accountLabel]);
+  }, [logs, error, accountLabel]);
 }
 
 export default function DashboardPage() {
-  const { accountLabel, loading, error, totals, clearCards, today } = useDashboardController();
+  const { accountLabel, error, totals, clearCards, today } = useDashboardController();
   const { t } = useI18n();
 
-  if (loading) return <PageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">

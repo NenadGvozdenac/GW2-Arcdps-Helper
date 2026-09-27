@@ -24,7 +24,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/presentation/lib/utils";
 import ResultBadge from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
-import { PageSpinner } from "../components/Spinner";
 import { describeError } from "../utils/describeError";
 import { professionColor } from "../utils/professionColors";
 
@@ -38,7 +37,7 @@ const CATEGORY_PATH: Record<Category, string> = {
 function useLogDetailController(id: string | undefined) {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { logs, loading, remove: removeLog } = useLogs();
+  const { logs, remove: removeLog } = useLogs();
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -77,7 +76,6 @@ function useLogDetailController(id: string | undefined) {
   }
 
   return {
-    loading,
     log,
     backLink,
     totals,
@@ -90,10 +88,9 @@ function useLogDetailController(id: string | undefined) {
 
 export default function LogDetailPage() {
   const { id } = useParams();
-  const { loading, log, backLink, totals, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
+  const { log, backLink, totals, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
   const { t, fmt } = useI18n();
 
-  if (loading) return <PageSpinner />;
   if (!log || !totals) {
     return (
       <div className="flex flex-col items-start gap-4">

@@ -22,12 +22,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/pre
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
-import { PageSpinner } from "../components/Spinner";
 import StatCard from "../components/StatCard";
 import { describeError } from "../utils/describeError";
 
 function useSessionDetailController(id: string | undefined) {
-  const { logs, sessions, loading, removeSession, resumeSession } = useLogs();
+  const { logs, sessions, removeSession, resumeSession } = useLogs();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [resuming, setResuming] = useState(false);
@@ -64,7 +63,7 @@ function useSessionDetailController(id: string | undefined) {
     }
   }
 
-  return { loading, view, deleting, resuming, error, remove, resume };
+  return { view, deleting, resuming, error, remove, resume };
 }
 
 export default function SessionDetailPage() {
@@ -72,7 +71,6 @@ export default function SessionDetailPage() {
   const c = useSessionDetailController(id);
   const { t, fmt } = useI18n();
 
-  if (c.loading) return <PageSpinner />;
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="self-start">

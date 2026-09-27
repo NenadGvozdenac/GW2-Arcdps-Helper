@@ -13,12 +13,11 @@ import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
-import { PageSpinner } from "../components/Spinner";
 
 const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all" };
 
 function useAllLogsController() {
-  const { logs, loading } = useLogs();
+  const { logs } = useLogs();
   const [filter, setFilter] = useState<LogFilter>(INITIAL_FILTER);
   const [limit, setLimit] = useState(LOGS_PAGE_SIZE);
 
@@ -36,7 +35,6 @@ function useAllLogsController() {
   }
 
   return {
-    loading,
     filter,
     updateFilter,
     groupOptions,
@@ -51,7 +49,6 @@ export default function AllLogsPage() {
   const c = useAllLogsController();
   const { t } = useI18n();
 
-  if (c.loading) return <PageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">
