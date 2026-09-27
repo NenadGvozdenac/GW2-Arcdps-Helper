@@ -7,7 +7,7 @@ and sends every new log to dps.report and to GW2 ArcDPS Helper automatically —
 
 ```
 .
-├── docker-compose.yml       db (Postgres) + backend (Express) + frontend (nginx)
+├── docker-compose.yml       db (Postgres) + backend (tsx watch) + frontend (Vite dev server) — hot reload
 ├── backend/                 Express + TypeScript API — runs in Docker or on Vercel (zero-config Express)
 │   └── src/
 │       ├── app.ts           Express app (default export = Vercel entry point)
@@ -72,7 +72,7 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 
 | Target | What it does |
 |---|---|
-| `make up` | Build if needed and start db, backend and frontend |
+| `make up` | Build if needed and start db, backend and frontend **with hot reload** (runs in the foreground; Ctrl+C stops) |
 | `make down` | Stop and remove containers (database data is kept) |
 | `make restart` | `down` + `up` |
 | `make build` / `make rebuild` | Build images / build without cache and start |

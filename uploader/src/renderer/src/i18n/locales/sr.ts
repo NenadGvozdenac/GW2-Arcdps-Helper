@@ -20,7 +20,6 @@ export const sr: Messages = {
   login: {
     title: "Prijava na GW2 ArcDPS Helper",
     subtitle: "Logovi koje uploaduješ čuvaju se na tvom GW2 ArcDPS Helper nalogu.",
-    server: "Server: {url}",
     email: "Email",
     password: "Lozinka",
     signIn: "Prijavi se",

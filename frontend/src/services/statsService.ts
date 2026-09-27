@@ -50,6 +50,20 @@ export const statsService = {
     return category === "fractal" ? statsService.lastDailyReset(now) : statsService.lastWeeklyReset(now);
   },
 
+  /** Start of the reset period before the current one: yesterday for fractals, last week for raids and strikes. */
+  previousResetFor(category: Category, now = new Date()): Date {
+    const d = statsService.resetFor(category, now);
+    d.setUTCDate(d.getUTCDate() - (category === "fractal" ? 1 : 7));
+    return d;
+  },
+
+  /** Logs recorded in [from, to), newest first. */
+  logsBetween(logs: Log[], from: Date, to?: Date): Log[] {
+    return logs
+      .filter((l) => l.encounterTime >= from && (!to || l.encounterTime < to))
+      .sort((a, b) => b.encounterTime.getTime() - a.encounterTime.getTime());
+  },
+
   /** Groups logs of one category by encounter key, honouring the Normal/CM toggle. */
   logsByEncounter(logs: Log[], category: Category, mode: CmMode): Map<string, Log[]> {
     const map = new Map<string, Log[]>();

@@ -33,7 +33,7 @@ function useLoginController() {
 
   const openRegister = () => uploaderBridge.openExternal(`${environment.webUrl}/register`);
 
-  return { server: environment.apiUrl, email, setEmail, password, setPassword, busy, error, submit, openRegister };
+  return { email, setEmail, password, setPassword, busy, error, submit, openRegister };
 }
 
 export default function LoginPage() {
@@ -58,7 +58,6 @@ export default function LoginPage() {
             <div className="space-y-1.5">
               <CardTitle className="text-xl">{t("login.title")}</CardTitle>
               <CardDescription>{t("login.subtitle")}</CardDescription>
-              <p className="text-xs text-muted-foreground">{t("login.server", { url: c.server })}</p>
             </div>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">

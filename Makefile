@@ -13,7 +13,7 @@ DB_NAME := gw2arcdpshelper
 help:
 	@echo GW2 ArcDPS Helper make targets:
 	@echo   Containers
-	@echo     make up              Build if needed and start db, backend and frontend
+	@echo     make up              Build if needed and start db, backend and frontend with hot reload - Ctrl+C stops
 	@echo     make down            Stop and remove containers - data is kept
 	@echo     make restart         down + up
 	@echo     make build           Build images
@@ -38,9 +38,11 @@ help:
 
 # ---------- containers ----------
 
+# Runs in the foreground: Compose watches the sources and syncs changes into the containers (hot reload).
+# --detach cannot be combined with --watch.
 up:
-	$(COMPOSE) up -d --build
 	@echo App: http://localhost:8080   API: http://localhost:3000/api
+	$(COMPOSE) up --build --watch
 
 down:
 	$(COMPOSE) down
@@ -52,7 +54,7 @@ build:
 
 rebuild:
 	$(COMPOSE) build --no-cache
-	$(COMPOSE) up -d
+	$(COMPOSE) up --watch
 
 logs:
 	$(COMPOSE) logs -f
@@ -74,7 +76,7 @@ db-shell:
 # Migrations are baked into the backend image, so rebuild it first to pick up new .sql files.
 migrate:
 	$(COMPOSE) build backend
-	$(COMPOSE) run --rm backend node dist/db/migrate.js
+	$(COMPOSE) run --rm backend npx tsx src/db/migrate.ts
 
 migrate-status:
 	$(COMPOSE) exec db psql -U $(DB_USER) -d $(DB_NAME) -c "SELECT name, applied_at FROM schema_migrations ORDER BY name"

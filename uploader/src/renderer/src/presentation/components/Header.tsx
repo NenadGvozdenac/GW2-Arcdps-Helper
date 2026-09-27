@@ -1,11 +1,10 @@
-import { LogOutIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
 import Brand from "./Brand";
-import LanguageSwitcher from "./LanguageSwitcher";
 
 export type Tab = "uploads" | "settings";
 
@@ -28,15 +27,21 @@ export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (t
             <span className={cn("size-2 rounded-full", watch.watching ? "bg-success" : "bg-muted-foreground/40")} />
             {t("header.tabUploads")}
           </button>
-          <button className={tabClass(tab === "settings")} onClick={() => onTabChange("settings")}>
-            {t("header.tabSettings")}
-          </button>
         </nav>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <span className="max-w-40 truncate px-2 text-sm font-medium" title={user?.email}>
             {user?.displayName}
           </span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("size-8", tab === "settings" && "bg-accent text-accent-foreground")}
+            onClick={() => onTabChange(tab === "settings" ? "uploads" : "settings")}
+            title={t("header.tabSettings")}
+            aria-pressed={tab === "settings"}
+          >
+            <SettingsIcon />
+          </Button>
           <Button variant="ghost" size="icon" className="size-8" onClick={() => uploaderBridge.logout()} title={t("header.signOut")}>
             <LogOutIcon />
           </Button>

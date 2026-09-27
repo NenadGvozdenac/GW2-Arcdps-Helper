@@ -53,7 +53,8 @@ export const en = {
     logsThisWeek: "Logs this week",
     dailyClear: "Daily clear",
     weeklyClear: "Weekly clear",
-    recentLogs: "Recent logs",
+    todayLogs: "Today's logs",
+    todayLogsHint: "Since the daily reset (00:00 UTC) · {count} logs",
     allLogsLink: "All logs",
   },
   categories: {
@@ -68,6 +69,10 @@ export const en = {
     modeAll: "All",
     modeNormal: "Normal",
     modeCm: "CM",
+    showYesterday: "Yesterday's logs",
+    showLastWeek: "Last week's logs",
+    hidePrevious: "Hide",
+    previousRange: "{from} – {to} · {count} logs",
   },
   boss: {
     noLogs: "no logs",
@@ -142,6 +147,8 @@ export const en = {
     displayName: "Name / nickname",
     gw2Account: "GW2 account",
     gw2AccountHint: "Used to highlight your row in player tables.",
+    language: "Language",
+    languageHint: "Language of the website. Saved in this browser.",
   },
   validation: {
     displayNameRequired: "Please enter a name.",

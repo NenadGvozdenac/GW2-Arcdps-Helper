@@ -15,8 +15,13 @@ services:
       timeout: 3s
       retries: 20
 
+  # Local development with hot reload: `make up` runs with --watch, so Compose syncs changed files into the
+  # containers, where tsx watch restarts the API and Vite hot-reloads the page.
+  # This works on Windows/OneDrive folders without Docker Desktop file sharing or file-system polling.
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      target: dev
     env_file: ./backend/.env.development
     environment:
       # Inside Docker the database is the "db" service, not localhost.
@@ -27,14 +32,38 @@ services:
     ports:
       - "3000:3000"
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./backend/src
+          target: /app/src
+        - action: rebuild
+          path: ./backend/package.json
+        - action: rebuild
+          path: ./backend/tsconfig.json
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      target: dev
+    environment:
+      # vite.config.ts proxies /api here.
+      API_PROXY_TARGET: http://backend:3000
     depends_on:
       - backend
     ports:
-      - "8080:80"
+      - "8080:8080"
     restart: unless-stopped
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules/
+            - dist/
+        - action: rebuild
+          path: ./frontend/package.json
 
 volumes:
   db-data:

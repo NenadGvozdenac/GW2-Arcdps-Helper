@@ -19,7 +19,6 @@ export const en = {
   login: {
     title: "Sign in to GW2 ArcDPS Helper",
     subtitle: "Logs you upload are saved to your GW2 ArcDPS Helper account.",
-    server: "Server: {url}",
     email: "Email",
     password: "Password",
     signIn: "Sign in",

@@ -54,7 +54,8 @@ export const sr: Messages = {
     logsThisWeek: "Logova ove nedelje",
     dailyClear: "Dnevni clear",
     weeklyClear: "Nedeljni clear",
-    recentLogs: "Poslednji logovi",
+    todayLogs: "Današnji logovi",
+    todayLogsHint: "Od dnevnog reseta (00:00 UTC) · logova: {count}",
     allLogsLink: "Svi logovi",
   },
   categories: {
@@ -69,6 +70,10 @@ export const sr: Messages = {
     modeAll: "Sve",
     modeNormal: "Normal",
     modeCm: "CM",
+    showYesterday: "Logovi od juče",
+    showLastWeek: "Logovi od prošle nedelje",
+    hidePrevious: "Sakrij",
+    previousRange: "{from} – {to} · logova: {count}",
   },
   boss: {
     noLogs: "nema logova",
@@ -143,6 +148,8 @@ export const sr: Messages = {
     displayName: "Ime / nadimak",
     gw2Account: "GW2 nalog",
     gw2AccountHint: "Koristi se da se tvoj red istakne u tabeli igrača.",
+    language: "Jezik",
+    languageHint: "Jezik sajta. Čuva se u ovom browseru.",
   },
   validation: {
     displayNameRequired: "Unesi ime.",

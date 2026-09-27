@@ -6,7 +6,6 @@ import type { TranslationKey } from "../../i18n/i18n.types";
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
 import Brand from "./Brand";
-import LanguageSwitcher from "./LanguageSwitcher";
 
 const NAV: { to: string; label: TranslationKey; end?: boolean }[] = [
   { to: "/", label: "nav.overview", end: true },
@@ -50,7 +49,6 @@ export default function Layout() {
                 <UploadIcon /> {t("nav.upload")}
               </Link>
             </Button>
-            <LanguageSwitcher />
             <Button asChild variant="ghost" size="sm" className="max-w-40">
               <Link to="/profile" title={user?.email ?? ""}>
                 <span className="truncate">{displayName}</span>

@@ -9,7 +9,7 @@ import type { Category } from "../../domain/types/encounter.types";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import ClearCard from "../components/ClearCard";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
@@ -22,8 +22,6 @@ const SECTIONS: { category: Exclude<Category, "other">; label: TranslationKey; t
   { category: "fractal", label: "nav.fractals", to: "/fractals" },
   { category: "strike", label: "nav.strikes", to: "/strikes" },
 ];
-
-const RECENT_COUNT = 10;
 
 function useDashboardController() {
   const { displayName } = useAuth();
@@ -47,13 +45,13 @@ function useDashboardController() {
         resetLabel: (s.category === "fractal" ? "dashboard.dailyClear" : "dashboard.weeklyClear") as TranslationKey,
         progress: statsService.clearProgress(logs, s.category, statsService.resetFor(s.category)),
       })),
-      recent: logs.slice(0, RECENT_COUNT),
+      today: statsService.logsBetween(logs, statsService.lastDailyReset()),
     };
   }, [logs, loading, error, displayName]);
 }
 
 export default function DashboardPage() {
-  const { displayName, loading, error, totals, clearCards, recent } = useDashboardController();
+  const { displayName, loading, error, totals, clearCards, today } = useDashboardController();
   const { t } = useI18n();
 
   return (
@@ -85,14 +83,17 @@ export default function DashboardPage() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{t("dashboard.recentLogs")}</CardTitle>
+          <div className="space-y-1.5">
+            <CardTitle>{t("dashboard.todayLogs")}</CardTitle>
+            <CardDescription>{t("dashboard.todayLogsHint", { count: today.length })}</CardDescription>
+          </div>
           <Button asChild variant="ghost" size="sm">
             <Link to="/logs">
               {t("dashboard.allLogsLink")} <ArrowRightIcon />
             </Link>
           </Button>
         </CardHeader>
-        <CardContent>{loading ? <Spinner /> : <LogTable logs={recent} showGroup />}</CardContent>
+        <CardContent>{loading ? <Spinner /> : <LogTable logs={today} showGroup />}</CardContent>
       </Card>
     </div>
   );
