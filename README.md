@@ -32,7 +32,7 @@ and sends every new log to dps.report and to GW2 ArcDPS Helper automatically —
         ├── domain/          types/ + data/ (boss catalogue)
         ├── repositories/    HTTP client, API calls, localStorage access
         ├── services/        business logic — no React
-        ├── controllers/     shared providers: I18nController, AuthController, LogsController
+        ├── controllers/     shared providers: I18nController, AuthController, LogsController, SessionsController
         └── presentation/    components, pages, router, styles; each page/component keeps its
                              `useXxxController` hook in the same .tsx file
 ```

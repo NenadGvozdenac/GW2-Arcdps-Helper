@@ -1,19 +1,55 @@
-import { and, asc, desc, eq, inArray, isNull, lt, min } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull, lt, min } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs, sessions } from "../db/schema";
 import type { Log } from "../types/log.types";
 import type { Session, SessionEndReason, SessionPatch } from "../types/session.types";
 
 const ownedBy = (ownerId: string) => eq(sessions.ownerId, ownerId);
+/** Pinned first, then the manual (drag & drop) order, newest first as tie-breaker. */
+const displayOrder = [desc(sessions.pinned), asc(sessions.sortOrder), desc(sessions.startedAt), desc(sessions.id)];
+
+/** The columns of a log that a session's summary needs. */
+export type SessionLogStat = Pick<Log, "sessionId" | "groupId" | "success" | "encounterTime" | "durationMs">;
 
 export const sessionRepository = {
-  /** In display order: pinned first, then the manual (drag & drop) order, newest first as tie-breaker. */
+  /** In display order. */
   listByOwner(ownerId: string): Promise<Session[]> {
     return getDb()
       .select()
       .from(sessions)
       .where(ownedBy(ownerId))
-      .orderBy(desc(sessions.pinned), asc(sessions.sortOrder), desc(sessions.startedAt));
+      .orderBy(...displayOrder);
+  },
+
+  /** One page of the owner's sessions in display order, plus how many there are in total. */
+  async page(ownerId: string, page: number, pageSize: number): Promise<{ rows: Session[]; total: number }> {
+    const [rows, [{ total }]] = await Promise.all([
+      getDb()
+        .select()
+        .from(sessions)
+        .where(ownedBy(ownerId))
+        .orderBy(...displayOrder)
+        .limit(pageSize)
+        .offset((page - 1) * pageSize),
+      getDb().select({ total: count() }).from(sessions).where(ownedBy(ownerId)),
+    ]);
+    return { rows, total };
+  },
+
+  /** Just enough of these sessions' logs to summarize them (no players), oldest first. */
+  logStatsOf(ownerId: string, sessionIds: string[]): Promise<SessionLogStat[]> {
+    if (!sessionIds.length) return Promise.resolve([]);
+    return getDb()
+      .select({
+        sessionId: logs.sessionId,
+        groupId: logs.groupId,
+        success: logs.success,
+        encounterTime: logs.encounterTime,
+        durationMs: logs.durationMs,
+      })
+      .from(logs)
+      .where(and(eq(logs.ownerId, ownerId), inArray(logs.sessionId, sessionIds)))
+      .orderBy(asc(logs.encounterTime));
   },
 
   /** The most recently started session. */
@@ -63,26 +99,25 @@ export const sessionRepository = {
     return row ?? null;
   },
 
-  /** Stores the manual order: each id gets its index. Ids that aren't the owner's are ignored. */
-  async reorder(ownerId: string, ids: string[]): Promise<void> {
+  /**
+   * Moves session `id` to where `overId` is in the display order (drag & drop) and stores the whole manual order:
+   * each session gets its index.
+   */
+  async move(ownerId: string, id: string, overId: string): Promise<void> {
     await getDb().transaction(async (tx) => {
-      for (const [index, id] of ids.entries()) {
+      const rows = await tx.select({ id: sessions.id }).from(sessions).where(ownedBy(ownerId)).orderBy(...displayOrder);
+      const ids = rows.map((r) => r.id);
+      const from = ids.indexOf(id);
+      const to = ids.indexOf(overId);
+      if (from < 0 || to < 0) return;
+      ids.splice(to, 0, ...ids.splice(from, 1));
+      for (const [index, sessionId] of ids.entries()) {
         await tx
           .update(sessions)
           .set({ sortOrder: index })
-          .where(and(ownedBy(ownerId), eq(sessions.id, id)));
+          .where(and(ownedBy(ownerId), eq(sessions.id, sessionId)));
       }
     });
-  },
-
-  /** How many of these ids are sessions of the owner (to validate a reorder request). */
-  async countOwned(ownerId: string, ids: string[]): Promise<number> {
-    if (!ids.length) return 0;
-    const rows = await getDb()
-      .select({ id: sessions.id })
-      .from(sessions)
-      .where(and(ownedBy(ownerId), inArray(sessions.id, ids)));
-    return rows.length;
   },
 
   /** Marks an active session as ended; returns null if it doesn't exist or was already ended. */

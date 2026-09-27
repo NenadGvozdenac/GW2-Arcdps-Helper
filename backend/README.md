@@ -106,7 +106,8 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
 | PATCH | `/sessions/:id` | ✓ | `{ name?, pinned? }` | `{ session }` — rename / pin |
 | POST | `/sessions/bulk-delete` | ✓ | `{ ids }` | `{ deleted }` — their logs are kept |
-| PUT | `/sessions/order` | ✓ | `{ ids }` (all sessions, in display order) | `204` — manual order |
+| GET | `/sessions/page?page=&pageSize=` | ✓ | – | `{ sessions: { session, logCount, kills, wipes, groupIds, span }[], total, page, pageSize }` — one page in display order (pinned first), 10 per page by default |
+| POST | `/sessions/:id/move` | ✓ | `{ overId }` | `204` — drag & drop: the session takes `overId`'s place (both pinned or both not) |
 | POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
 | POST | `/sessions/:id/share` | ✓ | – | `{ session }` with `shareToken` — creates the public link (idempotent) |
@@ -120,6 +121,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
 | POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |
+| GET | `/logs/search?search=&category=&groupId=&result=&page=&pageSize=` | ✓ | – | `{ logs, total, page, pageSize }` — one page (20 by default) of matching logs, newest first; with `idsOnly=true` `{ ids }` of every match |
 | POST | `/logs` | ✓ | `{ urls: string[] (1–10), sessionId? }` — logs of an active session are posted to Discord when it ends | `{ results: SubmitResult[] }` |
 | GET | `/logs/:id` | ✓ | – | `{ log }` |
 | DELETE | `/logs/:id` | ✓ | – | `204` |

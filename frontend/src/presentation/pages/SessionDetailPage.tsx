@@ -4,6 +4,7 @@ import { AlertCircleIcon, ArrowLeftIcon, HistoryIcon, Loader2Icon, RotateCcwIcon
 import { useI18n } from "../../controllers/I18nController";
 import { useAuth } from "../../controllers/AuthController";
 import { useLogs } from "../../controllers/LogsController";
+import { useSessions } from "../../controllers/SessionsController";
 import { sessionService } from "../../services/sessionService";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
 import {
@@ -30,7 +31,8 @@ import StatCard from "../components/StatCard";
 import { describeError } from "../utils/describeError";
 
 function useSessionDetailController(id: string | undefined) {
-  const { logs, sessions, removeSession, resumeSession, setSessionShared } = useLogs();
+  const { logs } = useLogs();
+  const { sessions, removeSession, resumeSession, setSessionShared } = useSessions();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [resuming, setResuming] = useState(false);

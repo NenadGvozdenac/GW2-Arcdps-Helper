@@ -1,7 +1,14 @@
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { EncounterGroup } from "../domain/types/encounter.types";
 import type { Log } from "../domain/types/log.types";
-import type { PracticeRun, Session, SessionPatch, SessionSummary, SessionView } from "../domain/types/session.types";
+import type {
+  PracticeRun,
+  Session,
+  SessionPage,
+  SessionPatch,
+  SessionSummary,
+  SessionView,
+} from "../domain/types/session.types";
 import { encounterService } from "./encounterService";
 
 /** Training golems (Standard / Medium / Large Kitty Golem, …) from the Special Forces Training Area. */
@@ -17,6 +24,18 @@ function span(logs: Log[]): SessionSummary["span"] {
 
 export const sessionService = {
   list: () => sessionRepository.list(),
+
+  /** One page of the sessions list; the server adds up each session's logs. */
+  async page(page: number, pageSize: number): Promise<SessionPage> {
+    const body = await sessionRepository.page(page, pageSize);
+    return {
+      sessions: body.sessions.map(({ groupIds, ...item }) => ({
+        ...item,
+        groups: groupIds.flatMap((id) => encounterService.groupById(id) ?? []),
+      })),
+      total: body.total,
+    };
+  },
   delete: (id: string) => sessionRepository.delete(id),
   deleteMany: (ids: string[]) => sessionRepository.deleteMany(ids),
   resume: (id: string) => sessionRepository.resume(id),
@@ -63,7 +82,7 @@ export const sessionService = {
   },
 
   update: (id: string, patch: SessionPatch) => sessionRepository.update(id, patch),
-  reorder: (ids: string[]) => sessionRepository.reorder(ids),
+  move: (id: string, overId: string) => sessionRepository.move(id, overId),
 
   /** Display order: pinned sessions first, otherwise keeping the given (manual) order. */
   pinnedFirst: (sessions: Session[]) => [...sessions.filter((s) => s.pinned), ...sessions.filter((s) => !s.pinned)],

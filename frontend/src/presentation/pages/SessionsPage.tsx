@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DndContext,
@@ -33,8 +33,9 @@ import {
 import { SESSIONS_PAGE_SIZE } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
+import { useSessions } from "../../controllers/SessionsController";
 import { sessionService } from "../../services/sessionService";
-import type { SessionView } from "../../domain/types/session.types";
+import type { SessionListItem, SessionPage } from "../../domain/types/session.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import {
   AlertDialog,
@@ -57,21 +58,57 @@ import Pagination from "../components/Pagination";
 import { failBadge, successBadge } from "../components/ResultBadge";
 import { describeError } from "../utils/describeError";
 
+/**
+ * Fetches one page of the sessions list at a time (the server adds up each session's logs). Re-fetches when the page
+ * changes, or when the shared session list / logs change (polling, pin, rename, delete, move).
+ */
+function useSessionPage(page: number) {
+  const { sessions } = useSessions();
+  const { logs } = useLogs();
+  const [result, setResult] = useState<SessionPage>({ sessions: [], total: 0 });
+  const [loaded, setLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [version, setVersion] = useState(0);
+  const latest = useRef(0);
+
+  const signature =
+    sessions.map((s) => `${s.id}:${s.pinned}:${s.name}:${s.endedAt?.getTime()}:${s.shareToken}`).join("|") +
+    `#${logs.length}`;
+
+  useEffect(() => {
+    const request = ++latest.current;
+    setLoading(true);
+    sessionService
+      .page(page, SESSIONS_PAGE_SIZE)
+      .then((next) => {
+        if (request !== latest.current) return;
+        setResult(next);
+        setLoaded(true);
+        setError(null);
+      })
+      .catch((err) => request === latest.current && setError(err))
+      .finally(() => request === latest.current && setLoading(false));
+  }, [page, signature, version]);
+
+  return { ...result, setResult, reload: () => setVersion((v) => v + 1), loaded, loading, error };
+}
+
 function useSessionsController() {
-  const { logs, sessions, updateSession, reorderSessions, removeSessions } = useLogs();
+  const { sessions, updateSession, removeSessions, moveSession } = useSessions();
   const [organizing, setOrganizing] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [page, setPage] = useState(1);
-  const views = useMemo(() => sessionService.views(sessions, logs), [sessions, logs]);
-  const pinned = views.filter((v) => v.session.pinned);
-  const others = views.filter((v) => !v.session.pinned);
-  // Pinned sessions come first, so a page can hold some of each. Clamped when deleting shrinks the list.
-  const currentPage = Math.min(page, Math.max(1, Math.ceil(views.length / SESSIONS_PAGE_SIZE)));
-  const onPage = new Set(
-    views.slice((currentPage - 1) * SESSIONS_PAGE_SIZE, currentPage * SESSIONS_PAGE_SIZE).map((v) => v.session.id),
-  );
+  const result = useSessionPage(page);
+  const pinned = result.sessions.filter((v) => v.session.pinned);
+  const others = result.sessions.filter((v) => !v.session.pinned);
+  const lastPage = Math.max(1, Math.ceil(result.total / SESSIONS_PAGE_SIZE));
+  // Deleting can leave you past the last page — step back to it.
+  useEffect(() => {
+    if (!result.loading && page > lastPage) setPage(lastPage);
+  }, [result.loading, page, lastPage]);
 
   async function run(action: () => Promise<void>) {
     setError(null);
@@ -82,18 +119,20 @@ function useSessionsController() {
     }
   }
 
-  /** Moves a session within its own group (pinned or not, across all pages) and saves the whole order. */
+  /** Drag & drop within a group (pinned or not): shown right away, then saved; the list reloads either way. */
   function move(activeId: string, overId: string) {
-    const group = pinned.some((v) => v.session.id === activeId) ? pinned : others;
-    const from = group.findIndex((v) => v.session.id === activeId);
-    const to = group.findIndex((v) => v.session.id === overId);
+    const from = result.sessions.findIndex((v) => v.session.id === activeId);
+    const to = result.sessions.findIndex((v) => v.session.id === overId);
     if (from < 0 || to < 0 || from === to) return;
-    const moved = arrayMove(group, from, to).map((v) => v.session.id);
-    const ids =
-      group === pinned
-        ? [...moved, ...others.map((v) => v.session.id)]
-        : [...pinned.map((v) => v.session.id), ...moved];
-    void run(() => reorderSessions(ids));
+    result.setResult((prev) => ({ ...prev, sessions: arrayMove(prev.sessions, from, to) }));
+    void run(async () => {
+      try {
+        await moveSession(activeId, overId);
+      } finally {
+        // Also reloads when saving failed, so the list shows the real order again.
+        result.reload();
+      }
+    });
   }
 
   function toggleSelected(id: string) {
@@ -115,32 +154,34 @@ function useSessionsController() {
   }
 
   return {
-    empty: views.length === 0,
-    pinned: pinned.filter((v) => onPage.has(v.session.id)),
-    others: others.filter((v) => onPage.has(v.session.id)),
-    anyPinned: pinned.length > 0,
-    total: views.length,
-    page: currentPage,
+    empty: result.loaded && result.total === 0,
+    pinned,
+    others,
+    anyPinned: sessions.some((s) => s.pinned),
+    total: result.total,
+    page,
+    loading: result.loading,
     setPage: (p: number) => {
       setPage(p);
       window.scrollTo({ top: 0, behavior: "instant" });
     },
-    error,
+    error: error ?? result.error,
     organizing,
     selected,
     deleting,
-    allSelected: views.length > 0 && selected.size === views.length,
+    // "Select all" covers every session, also the ones on other pages (the shared list has all their ids).
+    allSelected: sessions.length > 0 && selected.size === sessions.length,
     move,
     toggleSelected,
     deleteSelected,
     toggleAll: () =>
-      setSelected((prev) => (prev.size === views.length ? new Set() : new Set(views.map((v) => v.session.id)))),
+      setSelected((prev) => (prev.size === sessions.length ? new Set() : new Set(sessions.map((s) => s.id)))),
     startOrganizing: () => setOrganizing(true),
     stopOrganizing: () => {
       setOrganizing(false);
       setSelected(new Set());
     },
-    togglePin: (v: SessionView) => run(() => updateSession(v.session.id, { pinned: !v.session.pinned })),
+    togglePin: (v: SessionListItem) => run(() => updateSession(v.session.id, { pinned: !v.session.pinned })),
   };
 }
 
@@ -220,13 +261,13 @@ export default function SessionsPage() {
           <CardContent className="py-6 text-center text-sm text-muted-foreground">{t("sessions.empty")}</CardContent>
         </Card>
       ) : (
-        <>
+        <div className={cn("flex flex-col gap-6 transition-opacity", c.loading && "opacity-60")} aria-busy={c.loading}>
           {c.pinned.length > 0 && <SessionSection title={t("sessions.pinned")} views={c.pinned} c={c} />}
           {c.others.length > 0 && (
             <SessionSection title={c.anyPinned ? t("sessions.others") : null} views={c.others} c={c} />
           )}
           <Pagination page={c.page} pageSize={SESSIONS_PAGE_SIZE} total={c.total} onPageChange={c.setPage} />
-        </>
+        </div>
       )}
     </div>
   );
@@ -235,7 +276,7 @@ export default function SessionsPage() {
 type Controller = ReturnType<typeof useSessionsController>;
 
 /** A list of session cards; while organizing it is drag & drop sortable (pinned and other sessions separately). */
-function SessionSection({ title, views, c }: { title: string | null; views: SessionView[]; c: Controller }) {
+function SessionSection({ title, views, c }: { title: string | null; views: SessionListItem[]; c: Controller }) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -268,7 +309,7 @@ function SessionSection({ title, views, c }: { title: string | null; views: Sess
   );
 }
 
-function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
+function SessionCard({ view: v, c }: { view: SessionListItem; c: Controller }) {
   const { t, fmt } = useI18n();
   const id = v.session.id;
   const active = !v.session.endedAt;
@@ -282,7 +323,7 @@ function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
     <>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <h3 className="min-w-0 truncate font-semibold">{v.session.name || t("sessions.unnamed")}</h3>
-        {v.logs.length > 0 && (
+        {v.logCount > 0 && (
           <div className="flex flex-wrap items-center gap-1.5">
             <span aria-hidden className="mr-1.5 text-muted-foreground">
               ·
@@ -325,7 +366,7 @@ function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
             <TimerIcon className="size-3.5" /> {fmt.span(v.span.durationMs)}
           </span>
         )}
-        <span>{v.logs.length ? t("sessions.logsCount", { count: v.logs.length }) : t("sessions.noLogsYet")}</span>
+        <span>{v.logCount ? t("sessions.logsCount", { count: v.logCount }) : t("sessions.noLogsYet")}</span>
       </div>
     </>
   );

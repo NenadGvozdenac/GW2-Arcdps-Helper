@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { LogOutIcon, SettingsIcon, UploadIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useLogs } from "../../controllers/LogsController";
+import { useSessions } from "../../controllers/SessionsController";
 import { useI18n } from "../../controllers/I18nController";
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
@@ -14,11 +15,12 @@ import { NAV } from "./navigation";
 /** App shell for signed-in pages; renders `children` when given (the "/" route), otherwise the nested route. */
 export default function Layout({ children }: { children?: ReactNode }) {
   const { user, accountLabel, logout } = useAuth();
-  const { loading } = useLogs();
+  const { loading: logsLoading } = useLogs();
+  const { loading: sessionsLoading } = useSessions();
   const { t } = useI18n();
 
-  // One spinner for the whole screen until the user and their logs are loaded, then everything at once.
-  if (loading) return <FullPageSpinner />;
+  // One spinner for the whole screen until the user, their logs and sessions are loaded, then everything at once.
+  if (logsLoading || sessionsLoading) return <FullPageSpinner />;
 
   return (
     <div className="flex min-h-svh flex-col">

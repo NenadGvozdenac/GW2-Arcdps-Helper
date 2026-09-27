@@ -12,6 +12,9 @@ export const MAX_URLS_PER_CALL = 10;
 /** Logs per page of GET /logs/search. */
 export const LOGS_PAGE_SIZE = 20;
 export const LOGS_PAGE_SIZE_MAX = 100;
+/** Sessions per page of GET /sessions/page. */
+export const SESSIONS_PAGE_SIZE = 10;
+export const SESSIONS_PAGE_SIZE_MAX = 100;
 export const PARALLEL_FETCHES = 4;
 
 /**

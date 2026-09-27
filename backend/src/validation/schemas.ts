@@ -5,6 +5,8 @@ import {
   LOGS_PAGE_SIZE_MAX,
   MAX_URLS_PER_CALL,
   SESSION_NAME_MAX,
+  SESSIONS_PAGE_SIZE,
+  SESSIONS_PAGE_SIZE_MAX,
 } from "../config/constants";
 
 /** The GW2 account (Name.1234) is the user's identity — required. */
@@ -74,11 +76,20 @@ export const updateSessionSchema = z
   })
   .refine((v) => v.name !== undefined || v.pinned !== undefined, "Nothing to update.");
 
-export const reorderSessionsSchema = z.object({
-  ids: z.array(z.uuid("Invalid session ID.")).min(1).max(1000),
+/** Query of GET /sessions/page (1-based page). */
+export const sessionPageSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(SESSIONS_PAGE_SIZE_MAX).default(SESSIONS_PAGE_SIZE),
 });
 
-export const deleteSessionsSchema = reorderSessionsSchema;
+/** Body of POST /sessions/:id/move: the session takes the place of `overId` (drag & drop). */
+export const moveSessionSchema = z.object({
+  overId: z.uuid("Invalid session ID."),
+});
+
+export const deleteSessionsSchema = z.object({
+  ids: z.array(z.uuid("Invalid session ID.")).min(1).max(1000),
+});
 
 export const deleteLogsSchema = z.object({
   ids: z.array(z.uuid("Invalid log ID.")).min(1).max(1000),

@@ -18,6 +18,24 @@ export interface SharedSessionResponse {
   logs: SharedLog[];
 }
 
+/** A session on the sessions list, with what its logs add up to (so the list doesn't need the logs). */
+export interface SessionListItem {
+  session: Session;
+  logCount: number;
+  kills: number;
+  wipes: number;
+  /** Wings / fractals / strikes played, in the order they were first played. */
+  groupIds: string[];
+  span: LogSpan | null;
+}
+
+/** One page of the sessions list, in display order. */
+export interface SessionPage {
+  sessions: SessionListItem[];
+  /** How many sessions the user has in total. */
+  total: number;
+}
+
 /** When a group of logs happened: start of the first fight to the end of the last one. */
 export interface LogSpan {
   start: Date;

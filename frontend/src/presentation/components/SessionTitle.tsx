@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CheckIcon, Loader2Icon, PencilIcon, XIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
-import { useLogs } from "../../controllers/LogsController";
+import { useSessions } from "../../controllers/SessionsController";
 import type { Session } from "../../domain/types/session.types";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
@@ -10,7 +10,7 @@ const NAME_MAX = 80;
 
 /** The session name as page title, with a pencil to rename it in place (Enter saves, Escape cancels). */
 export default function SessionTitle({ session, onError }: { session: Session; onError: (err: unknown) => void }) {
-  const { updateSession } = useLogs();
+  const { updateSession } = useSessions();
   const { t } = useI18n();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(session.name);

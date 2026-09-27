@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { I18nProvider } from "./controllers/I18nController";
 import { AuthProvider } from "./controllers/AuthController";
 import { LogsProvider } from "./controllers/LogsController";
+import { SessionsProvider } from "./controllers/SessionsController";
 import AppRouter from "./presentation/AppRouter";
 import "./presentation/styles.css";
 
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")!).render(
       <I18nProvider>
         <AuthProvider>
           <LogsProvider>
-            <AppRouter />
+            <SessionsProvider>
+              <AppRouter />
+            </SessionsProvider>
           </LogsProvider>
         </AuthProvider>
       </I18nProvider>

@@ -1,19 +1,34 @@
 import { randomBytes } from "node:crypto";
 import { SESSION_TTL_MS, SHARE_TOKEN_BYTES } from "../config/constants";
-import { sessionRepository } from "../repositories/sessionRepository";
+import { sessionRepository, type SessionLogStat } from "../repositories/sessionRepository";
 import type { Log } from "../types/log.types";
-import type { LogSpan, Session, SessionEndReason, SessionPatch, SharedSessionResponse } from "../types/session.types";
+import type {
+  LogSpan,
+  Session,
+  SessionEndReason,
+  SessionListItem,
+  SessionPage,
+  SessionPatch,
+  SharedSessionResponse,
+} from "../types/session.types";
 import { sessionNotFound, sessionNotResumable, validationError } from "../utils/httpError";
 import { discordService } from "./discordService";
 import { toSharedLog } from "./logService";
 import { userService } from "./userService";
 
 /** Start of the first fight to the end of the last one; null when there are no logs. */
-export function logSpan(logs: Log[]): LogSpan | null {
+export function logSpan(logs: Pick<Log, "encounterTime" | "durationMs">[]): LogSpan | null {
   if (!logs.length) return null;
   const start = Math.min(...logs.map((l) => l.encounterTime.getTime()));
   const end = Math.max(...logs.map((l) => l.encounterTime.getTime() + l.durationMs));
   return { start: new Date(start), end: new Date(end), durationMs: end - start };
+}
+
+/** Totals of one session's logs (oldest first) for the sessions list. */
+function summarize(session: Session, logs: SessionLogStat[]): SessionListItem {
+  const kills = logs.filter((l) => l.success).length;
+  const groupIds = [...new Set(logs.flatMap((l) => (l.groupId ? [l.groupId] : [])))];
+  return { session, logCount: logs.length, kills, wipes: logs.length - kills, groupIds, span: logSpan(logs) };
 }
 
 const newExpiry = () => new Date(Date.now() + SESSION_TTL_MS);
@@ -50,6 +65,19 @@ export const sessionService = {
     return sessionRepository.listByOwner(ownerId);
   },
 
+  /** One page of the sessions list (display order), each with the totals of its logs. */
+  async page(ownerId: string, page: number, pageSize: number): Promise<SessionPage> {
+    await expireOverdue(ownerId);
+    const { rows, total } = await sessionRepository.page(ownerId, page, pageSize);
+    const stats = await sessionRepository.logStatsOf(
+      ownerId,
+      rows.map((s) => s.id),
+    );
+    const bySession = new Map<string, SessionLogStat[]>();
+    for (const l of stats) if (l.sessionId) bySession.set(l.sessionId, [...(bySession.get(l.sessionId) ?? []), l]);
+    return { sessions: rows.map((s) => summarize(s, bySession.get(s.id) ?? [])), total };
+  },
+
   async getActive(ownerId: string): Promise<Session | null> {
     await expireOverdue(ownerId);
     const [active] = await sessionRepository.listActive(ownerId);
@@ -69,13 +97,15 @@ export const sessionService = {
     return session;
   },
 
-  /** Saves the manual order of the user's sessions (ids in display order). */
-  async reorder(ownerId: string, ids: string[]): Promise<void> {
-    const unique = [...new Set(ids)];
-    if ((await sessionRepository.countOwned(ownerId, unique)) !== unique.length) {
-      throw validationError("Unknown session in the new order.");
-    }
-    await sessionRepository.reorder(ownerId, unique);
+  /** Drag & drop: puts the session where `overId` is. Pinned and other sessions are ordered separately. */
+  async move(ownerId: string, id: string, overId: string): Promise<void> {
+    const [session, over] = await Promise.all([
+      sessionRepository.findById(ownerId, id),
+      sessionRepository.findById(ownerId, overId),
+    ]);
+    if (!session || !over) throw sessionNotFound();
+    if (session.pinned !== over.pinned) throw validationError("Pinned and other sessions are ordered separately.");
+    await sessionRepository.move(ownerId, id, overId);
   },
 
   async get(ownerId: string, id: string): Promise<Session> {

@@ -54,7 +54,8 @@ src/
 │   └── data/          encounter catalogue (wings, fractal CMs, strikes)
 ├── repositories/      the only layer that does I/O: HTTP client, API calls, localStorage
 ├── services/          business logic without React (auth, logs, stats, encounters, profile, language)
-├── controllers/       app-wide React providers: I18nController, AuthController, LogsController
+├── controllers/       app-wide React providers: I18nController, AuthController, LogsController, SessionsController
+├── hooks/             reusable React hooks without state of their own (usePolling)
 └── presentation/
     ├── AppRouter.tsx  routes + auth guards
     ├── pages/         one file per page; its `useXxxController` hook lives in the same file
@@ -73,7 +74,11 @@ call `fetch` or `localStorage` directly.
   `login`, `register`, `logout`, `updateProfile`. The JWT is kept in `localStorage` (`gw2arcdpshelper.token`).
 - **Logs:** `LogsController` loads all of the user's logs once and shares them with every page. It re-fetches every
   30 s while the tab is visible and immediately when you return to the tab; logs that appeared since the previous
-  refresh are briefly highlighted.
+  refresh are briefly highlighted. "All logs" doesn't use that list: it asks the server for one page (20) at a time,
+  searched and filtered there (`GET /logs/search`).
+- **Sessions:** `SessionsController` loads the user's sessions and their actions (rename, pin, share, resume, move,
+  delete), polling like the logs. The "Sessions" page asks the server for one page (10) at a time, with each session's
+  kills / wipes / duration already added up (`GET /sessions/page`).
 - **Stats:** raid/fractal/strike pages derive everything client-side with `statsService` (kills, wipes, best time,
   cleared since the weekly reset — Monday 07:30 UTC — or the daily reset for fractals).
 - **Errors:** services throw `ValidationError` (translation key) or `ApiError` (backend `code`);

@@ -1,4 +1,4 @@
-import type { Session, SessionPatch, SharedSession } from "../domain/types/session.types";
+import type { Session, SessionListItem, SessionPatch, SharedSession } from "../domain/types/session.types";
 import { fromSharedLogDto, type SharedLogDto } from "./logMapper";
 import { http } from "./httpClient";
 
@@ -20,11 +20,34 @@ const toSession = (dto: SessionDto): Session => ({
   pinned: dto.pinned,
 });
 
+/** A sessions-list item as the server sends it: wings / fractals / strikes as ids. */
+export type SessionListItemDto = Omit<SessionListItem, "groups"> & { groupIds: string[] };
+
 const sessionPath = (id: string) => `/sessions/${encodeURIComponent(id)}`;
 
 export const sessionRepository = {
   async list(): Promise<Session[]> {
     return (await http.get<{ sessions: SessionDto[] }>("/sessions")).sessions.map(toSession);
+  },
+
+  /** One page of the sessions list, with each session's totals computed by the server. */
+  async page(page: number, pageSize: number): Promise<{ sessions: SessionListItemDto[]; total: number }> {
+    const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) }).toString();
+    const body = await http.get<{
+      sessions: (Omit<SessionListItemDto, "session" | "span"> & {
+        session: SessionDto;
+        span: { start: string; end: string; durationMs: number } | null;
+      })[];
+      total: number;
+    }>(`/sessions/page?${query}`);
+    return {
+      sessions: body.sessions.map((s) => ({
+        ...s,
+        session: toSession(s.session),
+        span: s.span && { start: new Date(s.span.start), end: new Date(s.span.end), durationMs: s.span.durationMs },
+      })),
+      total: body.total,
+    };
   },
 
   /** Re-opens a session that ended automatically after 6 hours. */
@@ -40,8 +63,8 @@ export const sessionRepository = {
   /** Deletes several sessions at once (their logs are kept). */
   deleteMany: (ids: string[]) => http.post<{ deleted: number }>("/sessions/bulk-delete", { ids }),
 
-  /** Saves the manual order (all session ids, in display order). */
-  reorder: (ids: string[]) => http.put<void>("/sessions/order", { ids }),
+  /** Drag & drop: the session takes the place of `overId`. */
+  move: (id: string, overId: string) => http.post<void>(`${sessionPath(id)}/move`, { overId }),
 
   /** Creates (or returns the existing) public link token. */
   async share(id: string): Promise<Session> {

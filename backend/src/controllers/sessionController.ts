@@ -4,7 +4,8 @@ import type { AuthLocals } from "../types/auth.types";
 import {
   deleteSessionsSchema,
   idParamSchema,
-  reorderSessionsSchema,
+  moveSessionSchema,
+  sessionPageSchema,
   shareTokenParamSchema,
   startSessionSchema,
   updateSessionSchema,
@@ -14,6 +15,12 @@ import { validate } from "../validation/validate";
 export const sessionController = {
   async list(_req: Request, res: Response<unknown, AuthLocals>) {
     res.json({ sessions: await sessionService.list(res.locals.userId) });
+  },
+
+  /** GET /sessions/page?page=&pageSize= — one page of the sessions list with each session's totals. */
+  async page(req: Request, res: Response<unknown, AuthLocals>) {
+    const { page, pageSize } = validate(sessionPageSchema, req.query);
+    res.json({ ...(await sessionService.page(res.locals.userId, page, pageSize)), page, pageSize });
   },
 
   /** The active session, plus (when there is none) the last session if it expired and can be resumed. */
@@ -45,10 +52,11 @@ export const sessionController = {
     res.json({ session: await sessionService.update(res.locals.userId, id, patch) });
   },
 
-  /** Saves the drag & drop order (all session ids, in display order). */
-  async reorder(req: Request, res: Response<unknown, AuthLocals>) {
-    const { ids } = validate(reorderSessionsSchema, req.body);
-    await sessionService.reorder(res.locals.userId, ids);
+  /** Drag & drop: the session takes the place of `overId`. */
+  async move(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    const { overId } = validate(moveSessionSchema, req.body);
+    await sessionService.move(res.locals.userId, id, overId);
     res.status(204).end();
   },
 

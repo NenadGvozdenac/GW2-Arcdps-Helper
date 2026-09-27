@@ -49,6 +49,24 @@ export interface SessionSummary {
   groups: EncounterGroup[];
 }
 
+/** A session on the sessions list with the totals of its logs, computed by the server (GET /sessions/page). */
+export interface SessionListItem {
+  session: Session;
+  logCount: number;
+  kills: number;
+  wipes: number;
+  /** Wings / fractals / strikes played, in the order they were first played. */
+  groups: EncounterGroup[];
+  span: SessionSummary["span"];
+}
+
+/** One page of the sessions list, in display order (pinned first). */
+export interface SessionPage {
+  sessions: SessionListItem[];
+  /** How many sessions the user has in total. */
+  total: number;
+}
+
 /** A session with its logs and what can be computed from them. */
 export interface SessionView extends SessionSummary {
   session: Session;
