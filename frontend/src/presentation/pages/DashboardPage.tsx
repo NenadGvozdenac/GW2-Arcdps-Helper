@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/pre
 import ClearCard from "../components/ClearCard";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
+import SetupTipCard from "../components/SetupTipCard";
 import StatCard from "../components/StatCard";
 import { describeError } from "../utils/describeError";
 
@@ -60,6 +61,7 @@ export default function DashboardPage() {
         description={t("dashboard.subtitle")}
       />
 
+      <SetupTipCard />
       {error != null && (
         <Alert variant="destructive">
           <AlertCircleIcon />

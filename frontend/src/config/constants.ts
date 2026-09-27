@@ -22,6 +22,8 @@ export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
 export const LOGS_PAGE_SIZE_STORAGE_KEY = "gw2arcdpshelper.logsPageSize";
 export const DOWNLOADS_STORAGE_KEY = "gw2arcdpshelper.downloads";
+/** + ".<userId>": the overview's "finish your setup" tip was closed for that account. */
+export const SETUP_TIP_DISMISSED_STORAGE_KEY = "gw2arcdpshelper.setupTipDismissed";
 /**
  * How long the latest download links are reused before GitHub is asked again. The public GitHub API allows 60
  * requests per hour per IP, shared with Nexus' update check on the same PC.

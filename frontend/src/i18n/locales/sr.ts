@@ -216,6 +216,14 @@ export const sr: Messages = {
       source: "Izvorni kod",
     },
   },
+  setupTip: {
+    title: "Psst, komandante! 🏷️",
+    body: "Jedno brzo podešavanje i svaki kill vredi više:|Dva brza podešavanja i svaki kill vredi više:|Dva brza podešavanja i svaki kill vredi više:",
+    dpsReportToken: "Dodaj svoj dps.report token, da svaki upload završi i na tvom dps.report nalogu.",
+    discordWebhook: "Poveži Discord webhook, da tvoj skvad odmah vidi svaki kill (i svaki wipe…).",
+    open: "Otvori podešavanja",
+    dismiss: "Ne prikazuj više",
+  },
   dashboard: {
     greeting: "Zdravo, {name} 👋",
     fallbackName: "tyrian",

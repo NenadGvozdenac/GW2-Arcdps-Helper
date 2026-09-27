@@ -215,6 +215,14 @@ export const en = {
       source: "Source code",
     },
   },
+  setupTip: {
+    title: "Psst, commander! 🏷️",
+    body: "One quick setting makes every kill count for more:|Two quick settings make every kill count for more:",
+    dpsReportToken: "Add your dps.report token, so every upload also lands in your own dps.report account.",
+    discordWebhook: "Connect a Discord webhook, so your squad sees every kill (and every wipe…) right away.",
+    open: "Open settings",
+    dismiss: "Don't show this again",
+  },
   dashboard: {
     greeting: "Hi, {name} 👋",
     fallbackName: "Tyrian",
