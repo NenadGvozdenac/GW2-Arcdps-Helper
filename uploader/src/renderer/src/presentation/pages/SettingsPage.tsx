@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { AlertCircleIcon, CheckIcon, ExternalLinkIcon, FolderOpenIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, FolderOpenIcon } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
@@ -42,10 +42,7 @@ function useSettingsController() {
     setTimeout(() => setSaved(false), 2000);
   }
 
-  // The dps.report token is stored on the account and edited on the website's profile page.
-  const openProfile = () => uploaderBridge.openExternal(`${environment.webUrl}/profile`);
-
-  return { form, set, user, environment, saved, error, browseFolder, save, openProfile };
+  return { form, set, user, environment, saved, error, browseFolder, save };
 }
 
 export default function SettingsPage() {
@@ -88,23 +85,6 @@ export default function SettingsPage() {
               <Input value={c.form.logFolder} onChange={(e) => c.set("logFolder", e.target.value)} className="font-mono text-xs" />
               <Button type="button" variant="outline" onClick={c.browseFolder}>
                 <FolderOpenIcon /> {t("common.browse")}
-              </Button>
-            </div>
-
-            <div className="grid gap-2 rounded-lg border p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <Label className="font-medium">{t("settings.dpsReportToken")}</Label>
-                {c.user?.dpsReportToken ? (
-                  <Badge variant="outline" className="border-success/30 bg-success/10 text-success">
-                    {t("settings.dpsReportTokenSet")}
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">{t("settings.dpsReportTokenNotSet")}</Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">{t("settings.dpsReportTokenHint")}</p>
-              <Button type="button" variant="outline" size="sm" className="self-start" onClick={c.openProfile}>
-                <ExternalLinkIcon /> {t("settings.dpsReportTokenManage")}
               </Button>
             </div>
 

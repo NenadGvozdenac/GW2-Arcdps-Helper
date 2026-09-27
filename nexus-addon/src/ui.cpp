@@ -342,16 +342,5 @@ namespace UI
 			ApplyWatching();
 		}
 		if (!Util::DirectoryExists(g_logFolder)) ImGui::TextColored(RED, "This folder does not exist.");
-
-		// The dps.report token is stored on the account and edited on the website; the addon only reads it.
-		ImGui::TextUnformatted("dps.report user token:");
-		ImGui::SameLine();
-		if (!acc.signedIn) ImGui::TextColored(GREY, "sign in to use the one from your account");
-		else if (!acc.dpsReportToken.empty()) ImGui::TextColored(GREEN, "set on your account");
-		else ImGui::TextColored(GREY, "not set (anonymous uploads)");
-		TextWrappedColored(GREY,
-			"With it, your uploads also appear in your dps.report account. Set or change it on the website "
-			"(Profile) - the website, the desktop uploader and this addon all use it.");
-		if (ImGui::SmallButton("Open profile on the website")) Util::OpenUrl(std::string(WEB_URL) + "/profile");
 	}
 }

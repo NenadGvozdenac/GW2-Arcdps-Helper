@@ -88,12 +88,6 @@ export const sr: Messages = {
     logFolder: "ArcDPS folder sa logovima",
     logFolderHint: "Obično Documents\\Guild Wars 2\\addons\\arcdps\\arcdps.cbtlogs. Prate se i podfolderi.",
     server: "Povezano na {url}",
-    dpsReportToken: "dps.report user token",
-    dpsReportTokenSet: "Podešen",
-    dpsReportTokenNotSet: "Nije podešen",
-    dpsReportTokenHint:
-      "Sa njim se tvoji uploadi pojavljuju i na tvom dps.report nalogu. Čuva se na tvom GW2 ArcDPS Helper nalogu i koriste ga sajt, ova aplikacija i Nexus addon — podešavaš ga na sajtu.",
-    dpsReportTokenManage: "Podesi na sajtu",
     watchOnStartup: "Automatski pokreni praćenje kad se aplikacija upali",
     desktopNotifications: "Prikaži notifikaciju za svaki uploadovan log",
     language: "Jezik",

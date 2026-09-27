@@ -88,12 +88,6 @@ export const en = {
     logFolder: "ArcDPS log folder",
     logFolderHint: "Usually Documents\\Guild Wars 2\\addons\\arcdps\\arcdps.cbtlogs. Sub-folders are watched too.",
     server: "Connected to {url}",
-    dpsReportToken: "dps.report user token",
-    dpsReportTokenSet: "Set",
-    dpsReportTokenNotSet: "Not set",
-    dpsReportTokenHint:
-      "With it, your uploads also appear in your dps.report account. It is stored on your GW2 ArcDPS Helper account and used by the website, this app and the Nexus addon — set or change it on the website.",
-    dpsReportTokenManage: "Manage on the website",
     watchOnStartup: "Start watching automatically when the app starts",
     desktopNotifications: "Show a notification for every uploaded log",
     language: "Language",

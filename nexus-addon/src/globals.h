@@ -11,8 +11,6 @@ extern NexusLinkData_t* NexusLink;
 
 inline constexpr const char* ADDON_NAME = "GW2 ArcDPS Helper";
 inline constexpr const char* ADDON_FOLDER = "GW2ArcDPSHelper"; // <GW2>/addons/GW2ArcDPSHelper
-inline constexpr const char* WEB_URL = "https://gw2-arcdps-helper.vercel.app";
-
 // Nexus log + alert helpers; safe to call from any thread.
 void LogInfo(const std::string& message);
 void LogWarn(const std::string& message);
