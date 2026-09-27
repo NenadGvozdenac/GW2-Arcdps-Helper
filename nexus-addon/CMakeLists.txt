@@ -30,6 +30,14 @@ add_library(gw2-arcdps-helper SHARED
 
 target_include_directories(gw2-arcdps-helper PRIVATE third_party src)
 target_compile_definitions(gw2-arcdps-helper PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX UNICODE _UNICODE)
+
+# Version shown in Nexus; CI passes the addon-vX.Y.Z tag (-DADDON_VERSION=X.Y.Z).
+set(ADDON_VERSION "0.0.0" CACHE STRING "Addon version X.Y.Z")
+if(NOT ADDON_VERSION MATCHES "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$")
+  message(FATAL_ERROR "ADDON_VERSION must look like 1.2.3, got '${ADDON_VERSION}'")
+endif()
+target_compile_definitions(gw2-arcdps-helper PRIVATE
+  ADDON_VERSION_MAJOR=${CMAKE_MATCH_1} ADDON_VERSION_MINOR=${CMAKE_MATCH_2} ADDON_VERSION_PATCH=${CMAKE_MATCH_3})
 target_link_libraries(gw2-arcdps-helper PRIVATE winhttp crypt32 shell32 ole32)
 
 if(MSVC)

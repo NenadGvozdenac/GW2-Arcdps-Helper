@@ -30,7 +30,12 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Configure
-        run: cmake -S . -B build -A x64
+        shell: bash
+        run: |
+          # addon-v0.2.0 -> 0.2.0 (shown as the addon version in Nexus); other builds are 0.0.0.
+          VERSION=0.0.0
+          if [[ "$GITHUB_REF" == refs/tags/addon-v* ]]; then VERSION="${GITHUB_REF_NAME#addon-v}"; fi
+          cmake -S . -B build -A x64 -DADDON_VERSION="$VERSION"
 
       - name: Build
         run: cmake --build build --config Release

@@ -56,6 +56,7 @@ Pick one of these:
 | GitHub Actions *Build Nexus addon* | nothing | DLL as a run artifact; tag `addon-vX.Y.Z` publishes a Release |
 
 The official build is the MSVC one. The zig build is handy when Visual Studio is not installed.
+To publish a new version, see [Releasing a new version](../README.md#releasing-a-new-version).
 
 ## Install
 

@@ -18,6 +18,13 @@
 #include "util.h"
 #include "watcher.h"
 
+// Release builds get the version from the addon-vX.Y.Z tag (CMake -DADDON_VERSION=X.Y.Z); local builds are 0.0.0.
+#ifndef ADDON_VERSION_MAJOR
+#define ADDON_VERSION_MAJOR 0
+#define ADDON_VERSION_MINOR 0
+#define ADDON_VERSION_PATCH 0
+#endif
+
 AddonAPI_t* APIDefs = nullptr;
 HMODULE hSelf = nullptr;
 NexusLinkData_t* NexusLink = nullptr;
@@ -153,7 +160,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.Signature = 0xA7D5C0DE; // unique id; not a Raidcore-hosted addon
 	AddonDef.APIVersion = NEXUS_API_VERSION;
 	AddonDef.Name = ADDON_NAME;
-	AddonDef.Version = { 0, 1, 0, 0 };
+	AddonDef.Version = { ADDON_VERSION_MAJOR, ADDON_VERSION_MINOR, ADDON_VERSION_PATCH, 0 };
 	AddonDef.Author = "NenadG";
 	AddonDef.Description = "Uploads new ArcDPS logs to dps.report and GW2 ArcDPS Helper, and records sessions - right from the game.";
 	AddonDef.Load = AddonLoad;

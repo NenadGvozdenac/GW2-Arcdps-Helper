@@ -92,10 +92,58 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 | `make uploader-dev` | Run the uploader against the local Docker stack (hot reload) |
 | `make uploader-prod` | Run the uploader against production (URLs in `uploader/.env.production`) |
 | `make uploader-build` / `uploader-dist` | Build the uploader / build the Windows installer + portable exe |
+| `make addon-zig` | Build the Nexus addon DLL with zig (`winget install zig.zig`) → `nexus-addon/build` |
+| `make addon-build` | Build the Nexus addon DLL with CMake + Visual Studio 2022 → `nexus-addon/build/Release` |
 
 The backend uses Drizzle ORM: tables live in `backend/src/db/schema.ts`, and drizzle-kit generates the migrations
 from it. Applied migrations are recorded in `drizzle.__drizzle_migrations`. The backend container also applies them
 on startup.
+
+## Releasing a new version
+
+The desktop uploader and the Nexus addon are released separately. You push a git tag, GitHub Actions builds it and
+publishes a GitHub Release, and the download links on the landing page switch to the new files by themselves. The
+page asks the GitHub API for the newest release of each tag, so no redeploy is needed.
+
+| What | Tag | Workflow | Release files |
+|---|---|---|---|
+| Desktop uploader | `uploader-vX.Y.Z` | `build-uploader.yml` | installer (`…-Setup-X.Y.Z.exe`) + portable exe |
+| Nexus addon | `addon-vX.Y.Z` | `build-nexus-addon.yml` | `gw2-arcdps-helper.dll` |
+
+1. Commit and push your changes to `main`. The tag builds the commit it points to.
+2. Pick a version higher than the last one. List the existing ones with `git tag -l "uploader-v*"` or
+   `git tag -l "addon-v*"`.
+3. Create the tag and push it. In PowerShell, run each command on its own line (Windows PowerShell has no `&&`):
+
+   ```powershell
+   git tag uploader-v0.2.0
+   git push origin uploader-v0.2.0
+
+   git tag addon-v0.2.0
+   git push origin addon-v0.2.0
+   ```
+
+4. Follow the build under **Actions** on GitHub. After a few minutes the release appears under **Releases**, and the
+   website links point to it.
+
+Notes:
+
+- **You don't edit version numbers by hand.** The uploader's `package.json` version and the addon version shown in
+  Nexus are set from the tag at build time. Local builds of the addon report `0.0.0`.
+- **A push to `main` without a tag** still builds both, but only as run artifacts (**Actions** → the run →
+  **Artifacts**), which is handy for testing before a release.
+- **If a tagged build fails,** fix it, push the fix, then move the tag to the new commit:
+
+  ```powershell
+  git tag -d addon-v0.2.0
+  git push origin :refs/tags/addon-v0.2.0
+  git tag addon-v0.2.0
+  git push origin addon-v0.2.0
+  ```
+
+  A release is only created when the build succeeds, so there is nothing else to clean up.
+- **Updating is manual for players.** The uploader is updated by installing the new setup exe over the old one. The
+  addon is updated by disabling it in Nexus, replacing the DLL in `<Guild Wars 2>\addons`, and enabling it again.
 
 ## Vercel
 
