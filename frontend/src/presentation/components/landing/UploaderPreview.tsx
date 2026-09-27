@@ -11,7 +11,7 @@ const UPLOADS = [
 export default function UploaderPreview() {
   const { t } = useI18n();
   return (
-    <div className="landing-border landing-float overflow-hidden rounded-2xl bg-card/90 shadow-2xl shadow-black/40" aria-hidden="true">
+    <div className="landing-border overflow-hidden rounded-2xl bg-card/90 shadow-2xl shadow-black/40" aria-hidden="true">
       <div className="flex items-center gap-2 border-b px-4 py-2.5">
         <span
           className="size-5 bg-[var(--brand)] [mask-image:url(/logo.png)] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"
