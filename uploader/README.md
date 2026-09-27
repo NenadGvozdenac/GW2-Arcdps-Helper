@@ -17,6 +17,18 @@ It replaces the old Java `AutoLogUploader`; Discord posting was intentionally dr
 Failed uploads can be retried; if the file already reached dps.report only the GW2 ArcDPS Helper step is repeated.
 While watching, closing the window keeps the app running in the tray.
 
+## Updates
+
+The installed app updates itself (`src/main/services/updateService.ts`, packaged builds only). About 10 seconds after
+start, and then every 6 hours, it asks the GitHub API for the newest `uploader-vX.Y.Z` release that has a
+`latest.yml`. If that release is newer, it points electron-updater at it, which downloads the setup exe in the
+background and checks its sha512. A bar at the top then offers **Restart and update**; otherwise the update is
+installed silently when the app quits. The portable exe can't update itself, so it only shows a download link.
+
+GitHub's "latest release" can't be used, because the Nexus addon (`vX.Y.Z` tags) is released from the same
+repository. Artifact names have no spaces, because GitHub turns spaces into dots and `latest.yml` must name the
+exact file.
+
 ## Structure
 
 ```

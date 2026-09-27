@@ -16,9 +16,15 @@ win:
   target:
     - nsis
     - portable
+# No spaces in file names: GitHub turns them into dots in release assets, and latest.yml must name the exact file.
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
-  artifactName: ${productName}-Setup-${version}.${ext}
+  artifactName: GW2-ArcDPS-Helper-Uploader-Setup-${version}.${ext}
 portable:
-  artifactName: ${productName}-Portable-${version}.${ext}
+  artifactName: GW2-ArcDPS-Helper-Uploader-Portable-${version}.${ext}
+# Makes electron-builder write dist/latest.yml (version, file, sha512) for electron-updater. The URL is only a default:
+# the app looks up the newest uploader-v* release itself and points the updater at it (src/main/services/updateService.ts).
+publish:
+  provider: generic
+  url: https://github.com/NenadGvozdenac/GW2-Arcdps-Helper/releases/latest/download

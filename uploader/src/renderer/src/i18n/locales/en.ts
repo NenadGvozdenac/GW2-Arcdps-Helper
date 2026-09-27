@@ -99,6 +99,13 @@ export const en = {
     language: "Language",
     account: "Signed in as {name} ({email})",
   },
+  update: {
+    downloading: "Downloading version {version}… {progress}%",
+    ready: "Version {version} is ready. It is installed when you restart the app.",
+    restart: "Restart and update",
+    available: "Version {version} is available. The portable version can't update itself.",
+    download: "Download",
+  },
   errors: {
     NOT_SIGNED_IN: "You are not signed in.",
     LOG_FOLDER_MISSING: "The log folder does not exist. Choose it first.",

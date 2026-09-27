@@ -99,6 +99,13 @@ export const sr: Messages = {
     language: "Jezik",
     account: "Prijavljen kao {name} ({email})",
   },
+  update: {
+    downloading: "Preuzima se verzija {version}… {progress}%",
+    ready: "Verzija {version} je spremna. Instalira se kad ponovo pokreneš aplikaciju.",
+    restart: "Restartuj i ažuriraj",
+    available: "Dostupna je verzija {version}. Portable verzija ne može sama da se ažurira.",
+    download: "Preuzmi",
+  },
   errors: {
     NOT_SIGNED_IN: "Nisi prijavljen.",
     LOG_FOLDER_MISSING: "Folder sa logovima ne postoji. Prvo ga izaberi.",

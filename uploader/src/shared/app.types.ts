@@ -1,6 +1,7 @@
 import type { BackendSession, BackendUser } from "./backend.types";
 import type { AppEnvironment } from "./environment.types";
 import type { Settings } from "./settings.types";
+import type { UpdateState } from "./update.types";
 import type { UploadEntry } from "./upload.types";
 import type { WatchState } from "./watch.types";
 
@@ -22,6 +23,7 @@ export interface AppState {
   watch: WatchState;
   session: SessionState;
   uploads: UploadEntry[]; // newest first
+  update: UpdateState;
 }
 
 /** Error returned from an IPC call; `code` is translated in the renderer. */
@@ -62,4 +64,7 @@ export interface UploaderApi {
   retryUpload(id: string): Promise<void>;
   clearFinished(): Promise<void>;
   openExternal(url: string): Promise<void>;
+
+  /** Quits and installs a downloaded update (update.status === "ready"). */
+  installUpdate(): Promise<void>;
 }

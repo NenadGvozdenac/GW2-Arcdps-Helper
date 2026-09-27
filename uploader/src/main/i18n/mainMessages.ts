@@ -18,6 +18,8 @@ const en = {
   chooseFolderTitle: "Choose your ArcDPS log folder (arcdps.cbtlogs)",
   chooseFilesTitle: "Choose ArcDPS logs to upload",
   logFilesFilter: "ArcDPS logs",
+  updateReadyTitle: "Version {version} is ready",
+  updateReadyBody: "It is installed when you restart the app (or use “Restart and update”).",
 };
 
 const sr: typeof en = {
@@ -36,6 +38,8 @@ const sr: typeof en = {
   chooseFolderTitle: "Izaberi ArcDPS folder sa logovima (arcdps.cbtlogs)",
   chooseFilesTitle: "Izaberi ArcDPS logove za upload",
   logFilesFilter: "ArcDPS logovi",
+  updateReadyTitle: "Verzija {version} je spremna",
+  updateReadyBody: "Instalira se kad ponovo pokreneš aplikaciju (ili klikni „Restartuj i ažuriraj“).",
 };
 
 export type MainMessages = typeof en;

@@ -28,6 +28,8 @@ const api: UploaderApi = {
   retryUpload: (id) => ipcRenderer.invoke(IPC.retryUpload, id),
   clearFinished: () => ipcRenderer.invoke(IPC.clearFinished),
   openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url),
+
+  installUpdate: () => ipcRenderer.invoke(IPC.installUpdate),
 };
 
 contextBridge.exposeInMainWorld("uploader", api);

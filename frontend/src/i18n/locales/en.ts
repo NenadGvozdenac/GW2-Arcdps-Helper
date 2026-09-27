@@ -169,7 +169,8 @@ export const en = {
           "Check the log folder. It is found automatically (Documents\\Guild Wars 2\\addons\\arcdps\\arcdps.cbtlogs). If ArcDPS saves logs elsewhere, use “Choose folder”.",
         step4: "Press “Start watching”. In Settings, turn on “Start watching automatically” so you never forget.",
         step5: "Play. Closing the window keeps the app running in the tray, and each log shows up on the website shortly after the fight.",
-        updates: "Download the new installer from this page and run it. Your sign-in and settings are kept.",
+        updates:
+          "Automatic: new versions download in the background and install when you restart the app. The portable version shows a download link instead.",
         download: "Download the installer",
       },
       addon: {

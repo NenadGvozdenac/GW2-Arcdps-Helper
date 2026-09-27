@@ -6,6 +6,7 @@ import { authService } from "./services/authService";
 import { sessionService } from "./services/sessionService";
 import { logger } from "./services/logger";
 import { stateStore } from "./services/stateStore";
+import { updateService } from "./services/updateService";
 import { watchService } from "./services/watchService";
 import { createTray } from "./tray";
 import { createMainWindow, getMainWindow, markQuitting, showMainWindow } from "./window";
@@ -37,6 +38,7 @@ if (!app.requestSingleInstanceLock()) {
     registerIpc(getMainWindow);
     createMainWindow();
     createTray();
+    updateService.start();
 
     const { settings, user, logFolderExists } = stateStore.get();
     if (settings.watchOnStartup && user && logFolderExists) {

@@ -170,7 +170,8 @@ export const sr: Messages = {
           "Proveri folder sa logovima. Pronalazi se sam (Documents\\Guild Wars 2\\addons\\arcdps\\arcdps.cbtlogs). Ako ArcDPS čuva logove negde drugde, klikni „Izaberi folder“.",
         step4: "Pritisni „Pokreni praćenje“. U Podešavanjima uključi „Automatski pokreni praćenje kad se aplikacija upali“ da ne zaboraviš.",
         step5: "Igraj. Kad zatvoriš prozor, aplikacija i dalje radi u trayu, a svaki log se pojavi na sajtu ubrzo posle borbe.",
-        updates: "Preuzmi novi instaler sa ove stranice i pokreni ga. Prijava i podešavanja ostaju.",
+        updates:
+          "Automatski: nove verzije se preuzimaju u pozadini i instaliraju kad ponovo pokreneš aplikaciju. Portable verzija umesto toga prikaže link za preuzimanje.",
         download: "Preuzmi instaler",
       },
       addon: {

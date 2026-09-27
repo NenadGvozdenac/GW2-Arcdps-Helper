@@ -5,6 +5,7 @@ import { uploadsRepository } from "../repositories/uploadsRepository";
 import type { AppState, SessionState } from "../../shared/app.types";
 import type { BackendUser } from "../../shared/backend.types";
 import type { Settings } from "../../shared/settings.types";
+import type { UpdateState } from "../../shared/update.types";
 import type { UploadEntry } from "../../shared/upload.types";
 import type { WatchState } from "../../shared/watch.types";
 
@@ -17,6 +18,7 @@ function createStateStore() {
   let uploads: UploadEntry[] = [];
   let watch: WatchState = { watching: false, startedAt: null };
   let session: SessionState = { active: null, ending: false, resumable: null };
+  let update: UpdateState = { status: "idle", version: null, progress: null, downloadUrl: null };
 
   const listeners = new Set<Listener>();
   let saveUploadsTimer: NodeJS.Timeout | undefined;
@@ -29,6 +31,7 @@ function createStateStore() {
     watch,
     session,
     uploads,
+    update,
   });
 
   const emit = () => {
@@ -55,6 +58,7 @@ function createStateStore() {
     getUser: () => user,
     getWatch: () => watch,
     getSession: () => session,
+    getUpdate: () => update,
     getUpload: (id: string) => uploads.find((u) => u.id === id),
 
     subscribe(listener: Listener): () => void {
@@ -80,6 +84,11 @@ function createStateStore() {
 
     setSession(next: SessionState) {
       session = next;
+      emit();
+    },
+
+    setUpdate(next: UpdateState) {
+      update = next;
       emit();
     },
 

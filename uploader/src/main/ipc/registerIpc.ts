@@ -8,6 +8,7 @@ import { isLogFile } from "../services/folderWatcher";
 import { sessionService } from "../services/sessionService";
 import { settingsService } from "../services/settingsService";
 import { stateStore } from "../services/stateStore";
+import { updateService } from "../services/updateService";
 import { uploadService } from "../services/uploadService";
 import { watchService } from "../services/watchService";
 import { toIpcError } from "../utils/appError";
@@ -66,6 +67,8 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
 
   ipcMain.handle(IPC.retryUpload, (_e, id: string) => uploadService.retry(id));
   ipcMain.handle(IPC.clearFinished, () => uploadService.clearFinished());
+
+  ipcMain.handle(IPC.installUpdate, () => updateService.install());
 
   // Only http(s) links leave the app; everything else is ignored.
   ipcMain.handle(IPC.openExternal, (_e, url: string) => {
