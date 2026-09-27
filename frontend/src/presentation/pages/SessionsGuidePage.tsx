@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeftIcon, FlagIcon, HistoryIcon, MessageSquareIcon, PlayIcon, TimerIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
@@ -7,8 +6,6 @@ import type { TranslationKey } from "../../i18n/i18n.types";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import Brand from "../components/Brand";
-import LanguageSwitcher from "../components/LanguageSwitcher";
 import PageHeader from "../components/PageHeader";
 
 const STEPS: { title: TranslationKey; body: TranslationKey }[] = [
@@ -24,35 +21,7 @@ const FACTS: { icon: typeof TimerIcon; title: TranslationKey; body: TranslationK
   { icon: FlagIcon, title: "sessionsGuide.endTitle", body: "sessionsGuide.endBody" },
 ];
 
-/**
- * How sessions work. Public (opened from the desktop uploader's "?" next to Session): signed-in users get the normal
- * app layout (see GuideRoute in AppRouter), guests a minimal top bar with sign-in links.
- */
-export function GuestGuideShell({ children }: { children: ReactNode }) {
-  const { t } = useI18n();
-  return (
-    <div className="flex min-h-svh flex-col">
-      <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
-          <Link to="/">
-            <Brand />
-          </Link>
-          <div className="ml-auto flex items-center gap-2">
-            <LanguageSwitcher />
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/login">{t("landing.nav.signIn")}</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/register">{t("landing.nav.getStarted")}</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">{children}</main>
-    </div>
-  );
-}
-
+/** How sessions work (public page at /guide/sessions, opened from the desktop uploader's "?" next to Session). */
 export default function SessionsGuidePage() {
   const { user } = useAuth();
   const { t } = useI18n();

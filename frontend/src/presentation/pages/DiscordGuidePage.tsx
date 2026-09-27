@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowLeftIcon, InfoIcon, MessageSquareIcon, ShieldAlertIcon } from "lucide-react";
+import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
@@ -16,17 +17,20 @@ const STEPS: { title: TranslationKey; body: TranslationKey }[] = [
   { title: "discordGuide.step6Title", body: "discordGuide.step6Body" },
 ];
 
-/** How to create a Discord webhook and connect it in Settings. */
+/** How to create a Discord webhook and connect it in Settings (public page at /guide/discord). */
 export default function DiscordGuidePage() {
+  const { user } = useAuth();
   const { t } = useI18n();
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
-      <Button asChild variant="ghost" size="sm" className="self-start">
-        <Link to="/profile">
-          <ArrowLeftIcon /> {t("discordGuide.back")}
-        </Link>
-      </Button>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+      {user && (
+        <Button asChild variant="ghost" size="sm" className="self-start">
+          <Link to="/profile">
+            <ArrowLeftIcon /> {t("discordGuide.back")}
+          </Link>
+        </Button>
+      )}
 
       <PageHeader title={t("discordGuide.title")} description={t("discordGuide.intro")} />
 
@@ -71,9 +75,11 @@ export default function DiscordGuidePage() {
         <AlertDescription>{t("discordGuide.safetyBody")}</AlertDescription>
       </Alert>
 
-      <Button asChild className="self-start">
-        <Link to="/profile">{t("discordGuide.openSettings")}</Link>
-      </Button>
+      {user && (
+        <Button asChild className="self-start">
+          <Link to="/profile">{t("discordGuide.openSettings")}</Link>
+        </Button>
+      )}
     </div>
   );
 }

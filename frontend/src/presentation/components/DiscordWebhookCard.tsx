@@ -94,7 +94,7 @@ export default function DiscordWebhookCard() {
               spellCheck={false}
             />
             <Link
-              to="/settings/discord"
+              to="/guide/discord"
               className="inline-flex items-center gap-1.5 self-start text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
             >
               <CircleHelpIcon className="size-4" /> {t("discord.howTo")}
