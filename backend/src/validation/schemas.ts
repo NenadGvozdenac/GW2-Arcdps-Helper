@@ -46,6 +46,10 @@ export const startSessionSchema = z.object({
   name: z.string().trim().max(SESSION_NAME_MAX).default(""),
 });
 
+export const shareTokenParamSchema = z.object({
+  token: z.string().regex(/^[\w-]{16,64}$/, "Invalid share link."),
+});
+
 export const idParamSchema = z.object({
   id: z.uuid("Invalid ID."),
 });

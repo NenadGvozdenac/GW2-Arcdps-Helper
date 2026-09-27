@@ -53,8 +53,13 @@ export const sessions = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true })
       .notNull()
       .default(sql`now() + interval '6 hours'`),
+    /** Secret for the public read-only link (/shared/sessions/<token>); null = not shared. */
+    shareToken: text("share_token"),
   },
-  (t) => [index("sessions_owner_started_idx").on(t.ownerId, t.startedAt.desc())],
+  (t) => [
+    index("sessions_owner_started_idx").on(t.ownerId, t.startedAt.desc()),
+    uniqueIndex("sessions_share_token_idx").on(t.shareToken),
+  ],
 );
 
 export const logs = pgTable(

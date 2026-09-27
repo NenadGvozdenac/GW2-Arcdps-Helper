@@ -62,6 +62,21 @@ export const sessionRepository = {
     return row ?? null;
   },
 
+  /** Sets (or with null, removes) the public share token. */
+  async setShareToken(ownerId: string, id: string, shareToken: string | null): Promise<Session | null> {
+    const [row] = await getDb()
+      .update(sessions)
+      .set({ shareToken })
+      .where(and(ownedBy(ownerId), eq(sessions.id, id)))
+      .returning();
+    return row ?? null;
+  },
+
+  async findByShareToken(shareToken: string): Promise<Session | null> {
+    const [row] = await getDb().select().from(sessions).where(eq(sessions.shareToken, shareToken)).limit(1);
+    return row ?? null;
+  },
+
   async delete(ownerId: string, id: string): Promise<boolean> {
     const deleted = await getDb()
       .delete(sessions)

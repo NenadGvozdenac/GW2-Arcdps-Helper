@@ -106,6 +106,9 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
 | POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
+| POST | `/sessions/:id/share` | ✓ | – | `{ session }` with `shareToken` — creates the public link (idempotent) |
+| DELETE | `/sessions/:id/share` | ✓ | – | `{ session }` — revokes the link |
+| GET | `/shared/sessions/:token` | – | – | `{ session, owner, logs }` — public, read-only |
 | DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
 | POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |

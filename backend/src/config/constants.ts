@@ -26,6 +26,8 @@ export const DISCORD_DESCRIPTION_LIMIT = 4096;
 export const SESSION_NAME_MAX = 80;
 /** A session that isn't ended within this time is ended automatically (and can then be resumed). */
 export const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
+/** Random bytes in a session share token (base64url-encoded in the link): unguessable, like a secret. */
+export const SHARE_TOKEN_BYTES = 18;
 
 export const JWT_EXPIRES_IN = "30d";
 export const BCRYPT_ROUNDS = 10;

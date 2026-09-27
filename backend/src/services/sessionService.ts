@@ -1,7 +1,8 @@
-import { SESSION_TTL_MS } from "../config/constants";
+import { randomBytes } from "node:crypto";
+import { SESSION_TTL_MS, SHARE_TOKEN_BYTES } from "../config/constants";
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { Log } from "../types/log.types";
-import type { LogSpan, Session, SessionEndReason } from "../types/session.types";
+import type { LogSpan, Session, SessionEndReason, SharedSessionResponse } from "../types/session.types";
 import { sessionNotFound, sessionNotResumable } from "../utils/httpError";
 import { discordService } from "./discordService";
 import { userService } from "./userService";
@@ -92,6 +93,40 @@ export const sessionService = {
     const resumed = await sessionRepository.resume(ownerId, id, newExpiry());
     if (!resumed) throw sessionNotResumable();
     return resumed;
+  },
+
+  /** Creates the public read-only link for the session (or returns the existing one). */
+  async share(ownerId: string, id: string): Promise<Session> {
+    const session = await sessionService.get(ownerId, id);
+    if (session.shareToken) return session;
+    const token = randomBytes(SHARE_TOKEN_BYTES).toString("base64url");
+    return (await sessionRepository.setShareToken(ownerId, id, token)) ?? session;
+  },
+
+  /** Revokes the public link; the old URL stops working. */
+  async unshare(ownerId: string, id: string): Promise<Session> {
+    await sessionService.get(ownerId, id);
+    const session = await sessionRepository.setShareToken(ownerId, id, null);
+    if (!session) throw sessionNotFound();
+    return session;
+  },
+
+  /** What anyone with the share link may see: the session, whose it is and all of its logs. */
+  async getShared(token: string): Promise<SharedSessionResponse> {
+    let session = await sessionRepository.findByShareToken(token);
+    if (!session) throw sessionNotFound();
+    // Keep the auto-end after 6 hours consistent for viewers too.
+    await expireOverdue(session.ownerId);
+    session = (await sessionRepository.findByShareToken(token)) ?? session;
+    const [owner, logs] = await Promise.all([
+      userService.get(session.ownerId),
+      sessionRepository.logsOf(session.ownerId, session.id),
+    ]);
+    return {
+      session: { name: session.name, startedAt: session.startedAt, endedAt: session.endedAt, endReason: session.endReason },
+      owner: owner.gw2Account,
+      logs: logs.map(({ ownerId: _o, sessionId: _s, ...log }) => log),
+    };
   },
 
   /** Deletes the session; its logs are kept (they just no longer belong to a session). */

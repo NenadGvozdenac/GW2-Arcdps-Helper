@@ -21,6 +21,8 @@ interface LogsContextValue {
   removeSession: (id: string) => Promise<void>;
   /** Re-opens a session that ended automatically; another active session is ended by the server. */
   resumeSession: (id: string) => Promise<void>;
+  /** Creates (or with false, revokes) the session's public link. */
+  setSessionShared: (id: string, shared: boolean) => Promise<void>;
 }
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -83,6 +85,11 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     setSessions(await sessionService.list());
   }, []);
 
+  const setSessionShared = useCallback(async (id: string, shared: boolean) => {
+    const updated = shared ? await sessionService.share(id) : await sessionService.unshare(id);
+    setSessions((prev) => prev.map((s) => (s.id === id ? updated : s)));
+  }, []);
+
   useEffect(() => {
     setLogs([]);
     setSessions([]);
@@ -120,8 +127,9 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       remove,
       removeSession,
       resumeSession,
+      setSessionShared,
     }),
-    [logs, sessions, authLoading, loading, error, freshIds, refresh, remove, removeSession, resumeSession],
+    [logs, sessions, authLoading, loading, error, freshIds, refresh, remove, removeSession, resumeSession, setSessionShared],
   );
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 }

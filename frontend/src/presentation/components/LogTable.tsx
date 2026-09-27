@@ -14,12 +14,20 @@ function useLogTableController() {
   const { freshIds } = useLogs();
   return {
     isFresh: (log: Log) => freshIds.has(log.id),
-    openLog: (log: Log) => navigate(`/logs/${log.id}`),
+    openLog: (log: Log, external: boolean) =>
+      external ? window.open(log.url, "_blank", "noopener,noreferrer") : navigate(`/logs/${log.id}`),
     groupLabel: (log: Log) => encounterService.groupById(log.groupId)?.short ?? "—",
   };
 }
 
-export default function LogTable({ logs, showGroup = false }: { logs: Log[]; showGroup?: boolean }) {
+interface Props {
+  logs: Log[];
+  showGroup?: boolean;
+  /** Rows open the log on dps.report instead of the (sign-in only) log page — for shared sessions. */
+  openOnDpsReport?: boolean;
+}
+
+export default function LogTable({ logs, showGroup = false, openOnDpsReport = false }: Props) {
   const { openLog, groupLabel, isFresh } = useLogTableController();
   const { t, fmt } = useI18n();
   if (!logs.length) return <p className="py-8 text-center text-sm text-muted-foreground">{t("common.noLogs")}</p>;
@@ -38,7 +46,11 @@ export default function LogTable({ logs, showGroup = false }: { logs: Log[]; sho
       </TableHeader>
       <TableBody>
         {logs.map((l) => (
-          <TableRow key={l.id} className={cn("cursor-pointer", isFresh(l) && "row-fresh")} onClick={() => openLog(l)}>
+          <TableRow
+            key={l.id}
+            className={cn("cursor-pointer", isFresh(l) && "row-fresh")}
+            onClick={() => openLog(l, openOnDpsReport)}
+          >
             <TableCell className="whitespace-normal">
               <div className="flex min-w-40 items-center gap-2.5">
                 {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 shrink-0 rounded-md" loading="lazy" />}
@@ -50,7 +62,9 @@ export default function LogTable({ logs, showGroup = false }: { logs: Log[]; sho
               <ResultBadge log={l} />
             </TableCell>
             <TableCell className="text-right font-mono tabular-nums">{fmt.duration(l.durationMs)}</TableCell>
-            <TableCell className="hidden text-muted-foreground md:table-cell">{fmt.dateTime(l.encounterTime)}</TableCell>
+            <TableCell className="hidden text-muted-foreground md:table-cell">
+              {fmt.dateTime(l.encounterTime)}
+            </TableCell>
             <TableCell className="hidden text-right sm:table-cell">
               <Button asChild variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
                 <a href={l.url} target="_blank" rel="noreferrer">

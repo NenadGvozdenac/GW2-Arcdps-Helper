@@ -20,6 +20,7 @@ import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import LogTable from "../components/LogTable";
+import SessionShareCard from "../components/SessionShareCard";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
@@ -70,7 +71,6 @@ export default function SessionDetailPage() {
   const { id } = useParams();
   const c = useSessionDetailController(id);
   const { t, fmt } = useI18n();
-
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="self-start">
@@ -171,6 +171,8 @@ export default function SessionDetailPage() {
         <StatCard label={t("sessions.kills")} value={kills} tone="success" />
         <StatCard label={t("sessions.wipes")} value={wipes} tone="fail" />
       </div>
+
+      <SessionShareCard session={session} />
 
       <Card>
         <CardHeader>

@@ -24,7 +24,9 @@ function useDiscordWebhookController() {
   const [notice, setNotice] = useState<TranslationKey | null>(null);
   const [error, setError] = useState<unknown>(null);
 
-  useEffect(() => setUrl(saved), [saved]);
+  useEffect(() => {
+    setUrl(saved);
+  }, [saved]);
 
   async function run(action: Action, fn: () => Promise<void>, success: TranslationKey) {
     setBusy(action);

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { sessionService } from "../services/sessionService";
 import type { AuthLocals } from "../types/auth.types";
-import { idParamSchema, startSessionSchema } from "../validation/schemas";
+import { idParamSchema, shareTokenParamSchema, startSessionSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 export const sessionController = {
@@ -29,6 +29,22 @@ export const sessionController = {
   async resume(req: Request, res: Response<unknown, AuthLocals>) {
     const { id } = validate(idParamSchema, req.params);
     res.json({ session: await sessionService.resume(res.locals.userId, id) });
+  },
+
+  async share(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ session: await sessionService.share(res.locals.userId, id) });
+  },
+
+  async unshare(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ session: await sessionService.unshare(res.locals.userId, id) });
+  },
+
+  /** Public (no sign-in): a shared session with all of its logs. */
+  async shared(req: Request, res: Response) {
+    const { token } = validate(shareTokenParamSchema, req.params);
+    res.json(await sessionService.getShared(token));
   },
 
   async remove(req: Request, res: Response<unknown, AuthLocals>) {

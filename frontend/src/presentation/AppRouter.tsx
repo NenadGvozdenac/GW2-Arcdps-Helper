@@ -15,6 +15,7 @@ import DiscordGuidePage from "./pages/DiscordGuidePage";
 import SessionDetailPage from "./pages/SessionDetailPage";
 import SessionsPage from "./pages/SessionsPage";
 import SessionsGuidePage from "./pages/SessionsGuidePage";
+import SharedSessionPage from "./pages/SharedSessionPage";
 import GuestGuideShell from "./components/GuestGuideShell";
 
 /** A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. */
@@ -25,7 +26,10 @@ const guide = (page: ReactNode) => (
 /** A new page starts at the top (the SPA would otherwise keep the previous page's scroll position). */
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  useEffect(() => {
+    // Block body on purpose: newer browsers return a Promise from scrollTo, which React would treat as a cleanup.
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [pathname]);
   return null;
 }
 
@@ -54,6 +58,7 @@ export default function AppRouter() {
         {/* Guides are public (opened from the desktop uploader too), in the app layout when signed in. */}
         <Route path="guide/sessions" element={guide(<SessionsGuidePage />)} />
         <Route path="guide/discord" element={guide(<DiscordGuidePage />)} />
+        <Route path="shared/sessions/:token" element={guide(<SharedSessionPage />)} />
         <Route path="settings/discord" element={<Navigate to="/guide/discord" replace />} />
         <Route element={<RequireAuth />}>
           <Route element={<Layout />}>

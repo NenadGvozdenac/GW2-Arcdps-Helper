@@ -33,6 +33,10 @@ export function createRouter(): Router {
   router.get("/sessions/active", requireAuth, sessionController.active);
   router.post("/sessions/:id/end", requireAuth, sessionController.end);
   router.post("/sessions/:id/resume", requireAuth, sessionController.resume);
+  router.post("/sessions/:id/share", requireAuth, sessionController.share);
+  router.delete("/sessions/:id/share", requireAuth, sessionController.unshare);
+  // Public: anyone with the link can view a shared session.
+  router.get("/shared/sessions/:token", sessionController.shared);
   router.delete("/sessions/:id", requireAuth, sessionController.remove);
 
   return router;

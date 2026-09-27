@@ -20,7 +20,6 @@ export default function SessionsPage() {
   const c = useSessionsController();
   const { t } = useI18n();
 
-
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -65,6 +64,11 @@ function SessionCard({ view: v }: { view: SessionView }) {
             {active && (
               <Badge variant="outline" className={successBadge}>
                 {t("sessions.active")}
+              </Badge>
+            )}
+            {v.session.shareToken && (
+              <Badge variant="outline" title={t("sessions.sharedHint")}>
+                {t("sessions.shared")}
               </Badge>
             )}
             {v.session.endReason === "expired" && (
