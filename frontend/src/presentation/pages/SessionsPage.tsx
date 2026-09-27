@@ -280,8 +280,28 @@ function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
 
   const body = (
     <>
-      <div className="flex items-center gap-3">
-        <h3 className="truncate font-semibold">{v.session.name || t("sessions.unnamed")}</h3>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+        <h3 className="min-w-0 truncate font-semibold">{v.session.name || t("sessions.unnamed")}</h3>
+        {v.logs.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span aria-hidden className="mr-1.5 text-muted-foreground">
+              ·
+            </span>
+            <Badge variant="outline" className={successBadge}>
+              {t("sessions.killsCount", { count: v.kills })}
+            </Badge>
+            {v.wipes > 0 && (
+              <Badge variant="outline" className={failBadge}>
+                {t("sessions.wipesCount", { count: v.wipes })}
+              </Badge>
+            )}
+            {v.groups.map((g) => (
+              <Badge key={g.id} variant="secondary" className="font-mono" title={g.name}>
+                {g.short}
+              </Badge>
+            ))}
+          </div>
+        )}
         {active && (
           <Badge variant="outline" className={successBadge}>
             {t("sessions.active")}
@@ -307,23 +327,6 @@ function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
         )}
         <span>{v.logs.length ? t("sessions.logsCount", { count: v.logs.length }) : t("sessions.noLogsYet")}</span>
       </div>
-      {v.logs.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <Badge variant="outline" className={successBadge}>
-            {v.kills} {t("sessions.kills")}
-          </Badge>
-          {v.wipes > 0 && (
-            <Badge variant="outline" className={failBadge}>
-              {v.wipes} {t("sessions.wipes")}
-            </Badge>
-          )}
-          {v.groups.map((g) => (
-            <Badge key={g.id} variant="secondary" className="font-mono" title={g.name}>
-              {g.short}
-            </Badge>
-          ))}
-        </div>
-      )}
     </>
   );
 
@@ -353,9 +356,9 @@ function SessionCard({ view: v, c }: { view: SessionView; c: Controller }) {
               <GripVerticalIcon className="size-4" />
             </button>
             {/* While organizing, clicking the card selects it instead of opening it. */}
-            <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3 py-5 pr-4">
-              <Checkbox className="mt-1" checked={checked} onCheckedChange={() => c.toggleSelected(id)} />
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3 py-5 pr-5">
               <div className="flex min-w-0 flex-1 flex-col gap-3">{body}</div>
+              <Checkbox checked={checked} onCheckedChange={() => c.toggleSelected(id)} />
             </label>
           </>
         ) : (
