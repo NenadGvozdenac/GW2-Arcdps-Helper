@@ -1,5 +1,5 @@
 import type { Session, SharedSession } from "../domain/types/session.types";
-import { toLog, type LogDto } from "./logMapper";
+import { fromSharedLogDto, type SharedLogDto } from "./logMapper";
 import { http } from "./httpClient";
 
 /** Session as serialized over JSON (dates are ISO strings). */
@@ -46,7 +46,7 @@ export const sessionRepository = {
     const body = await http.get<{
       session: { name: string; startedAt: string; endedAt: string | null; endReason: Session["endReason"] };
       owner: string;
-      logs: Omit<LogDto, "ownerId" | "sessionId">[];
+      logs: SharedLogDto[];
     }>(`/shared/sessions/${encodeURIComponent(token)}`);
     return {
       session: {
@@ -56,7 +56,7 @@ export const sessionRepository = {
         endReason: body.session.endReason,
       },
       owner: body.owner,
-      logs: body.logs.map((l) => toLog({ ...l, ownerId: "", sessionId: null })),
+      logs: body.logs.map(fromSharedLogDto),
     };
   },
 

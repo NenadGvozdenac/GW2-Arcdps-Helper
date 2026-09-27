@@ -45,4 +45,16 @@ export interface Log extends LogSummary {
   uploadedAt: Date;
   /** Session the log was recorded in (desktop uploader), or null. */
   sessionId: string | null;
+  /** Secret of the public link (/shared/logs/<token>); null = not shared. */
+  shareToken: string | null;
+}
+
+/** A log as shown on a public shared page (without internal owner / session ids or its share secret). */
+export type SharedLog = Omit<Log, "ownerId" | "sessionId" | "shareToken">;
+
+/** GET /shared/logs/:token — a log anyone with the link may view. */
+export interface SharedLogResponse {
+  log: SharedLog;
+  /** GW2 account of the player who shared it (empty if they haven't set one). */
+  owner: string;
 }

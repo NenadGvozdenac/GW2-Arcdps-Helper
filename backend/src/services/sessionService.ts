@@ -5,6 +5,7 @@ import type { Log } from "../types/log.types";
 import type { LogSpan, Session, SessionEndReason, SharedSessionResponse } from "../types/session.types";
 import { sessionNotFound, sessionNotResumable } from "../utils/httpError";
 import { discordService } from "./discordService";
+import { toSharedLog } from "./logService";
 import { userService } from "./userService";
 
 /** Start of the first fight to the end of the last one; null when there are no logs. */
@@ -125,7 +126,7 @@ export const sessionService = {
     return {
       session: { name: session.name, startedAt: session.startedAt, endedAt: session.endedAt, endReason: session.endReason },
       owner: owner.gw2Account,
-      logs: logs.map(({ ownerId: _o, sessionId: _s, ...log }) => log),
+      logs: logs.map(toSharedLog),
     };
   },
 

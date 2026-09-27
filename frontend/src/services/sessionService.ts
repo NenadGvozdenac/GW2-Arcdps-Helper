@@ -65,6 +65,5 @@ export const sessionService = {
   unshare: (id: string) => sessionRepository.unshare(id),
   getShared: (token: string) => sessionRepository.getShared(token),
 
-  /** Full URL of a session's public page. */
-  shareUrl: (token: string) => `${window.location.origin}/shared/sessions/${token}`,
+
 };

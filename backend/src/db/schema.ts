@@ -90,11 +90,14 @@ export const logs = pgTable(
     uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
     /** Session the log was recorded in; deleting the session keeps the log. */
     sessionId: uuid("session_id").references(() => sessions.id, { onDelete: "set null" }),
+    /** Secret for the public read-only link (/shared/logs/<token>); null = not shared. */
+    shareToken: text("share_token"),
   },
   (t) => [
     foreignKey({ name: "logs_owner_id_fkey", columns: [t.ownerId], foreignColumns: [users.id] }).onDelete("cascade"),
     unique("logs_owner_id_permalink_key").on(t.ownerId, t.permalink),
     index("logs_owner_time_idx").on(t.ownerId, t.encounterTime.desc()),
     index("logs_session_idx").on(t.sessionId),
+    uniqueIndex("logs_share_token_idx").on(t.shareToken),
   ],
 );

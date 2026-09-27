@@ -22,14 +22,14 @@ import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import LogTable from "../components/LogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
-import SessionShareButton from "../components/SessionShareButton";
+import ShareButton from "../components/ShareButton";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
 import { describeError } from "../utils/describeError";
 
 function useSessionDetailController(id: string | undefined) {
-  const { logs, sessions, removeSession, resumeSession } = useLogs();
+  const { logs, sessions, removeSession, resumeSession, setSessionShared } = useLogs();
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [resuming, setResuming] = useState(false);
@@ -71,7 +71,16 @@ function useSessionDetailController(id: string | undefined) {
     }
   }
 
-  return { practice, view, deleting, resuming, error, remove, resume };
+  return {
+    setShared: (shared: boolean) => (view ? setSessionShared(view.session.id, shared) : Promise.resolve()),
+    practice,
+    view,
+    deleting,
+    resuming,
+    error,
+    remove,
+    resume,
+  };
 }
 
 export default function SessionDetailPage() {
@@ -123,7 +132,12 @@ export default function SessionDetailPage() {
         }
         actions={
           <div className="flex gap-2">
-            <SessionShareButton session={session} />
+            <ShareButton
+              kind="sessions"
+              shareToken={session.shareToken}
+              onSetShared={(shared) => c.setShared(shared)}
+              hint={t("sessions.sharedHint")}
+            />
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" className="text-destructive" disabled={c.deleting}>

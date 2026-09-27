@@ -108,6 +108,9 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
 | POST | `/sessions/:id/share` | ✓ | – | `{ session }` with `shareToken` — creates the public link (idempotent) |
 | DELETE | `/sessions/:id/share` | ✓ | – | `{ session }` — revokes the link |
+| POST | `/logs/:id/share` | ✓ | – | `{ log }` with `shareToken` — creates the public link (idempotent) |
+| DELETE | `/logs/:id/share` | ✓ | – | `{ log }` — revokes the link |
+| GET | `/shared/logs/:token` | – | – | `{ log, owner }` — public, read-only |
 | GET | `/shared/sessions/:token` | – | – | `{ session, owner, logs }` — public, read-only |
 | DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |

@@ -27,6 +27,10 @@ export function createRouter(): Router {
   router.post("/logs/upload", requireAuth, logFileUpload, logController.upload);
   router.get("/logs/:id", requireAuth, logController.get);
   router.delete("/logs/:id", requireAuth, logController.remove);
+  router.post("/logs/:id/share", requireAuth, logController.share);
+  router.delete("/logs/:id/share", requireAuth, logController.unshare);
+  // Public: anyone with the link can view a shared log.
+  router.get("/shared/logs/:token", logController.shared);
 
   router.get("/sessions", requireAuth, sessionController.list);
   router.post("/sessions", requireAuth, sessionController.start);

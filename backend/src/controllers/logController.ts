@@ -7,7 +7,7 @@ import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
 import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../types/submit.types";
 import { invalidLogFile } from "../utils/httpError";
-import { idParamSchema, submitLogsSchema } from "../validation/schemas";
+import { idParamSchema, shareTokenParamSchema, submitLogsSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 /**
@@ -52,6 +52,22 @@ export const logController = {
     await notifyDiscord(res.locals.userId, [result]);
     const body: UploadLogFileResponse = { fileName, result };
     res.json(body);
+  },
+
+  async share(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ log: await logService.share(res.locals.userId, id) });
+  },
+
+  async unshare(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ log: await logService.unshare(res.locals.userId, id) });
+  },
+
+  /** Public (no sign-in): a shared log. */
+  async shared(req: Request, res: Response) {
+    const { token } = validate(shareTokenParamSchema, req.params);
+    res.json(await logService.getShared(token));
   },
 
   async remove(req: Request, res: Response<unknown, AuthLocals>) {

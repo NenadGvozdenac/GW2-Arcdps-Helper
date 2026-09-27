@@ -40,6 +40,15 @@ export interface Log {
   accounts: string[];
   /** Session the log was recorded in (desktop uploader), or null. */
   sessionId: string | null;
+  /** Secret of the public link (/shared/logs/<token>); null = not shared. */
+  shareToken: string | null;
+}
+
+/** A log opened through its public share link. */
+export interface SharedLog {
+  log: Log;
+  /** GW2 account of the player who shared it (may be empty). */
+  owner: string;
 }
 
 export type CmMode = "all" | "normal" | "cm";

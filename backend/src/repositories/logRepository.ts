@@ -46,6 +46,21 @@ export const logRepository = {
       .where(and(ownedBy(ownerId), eq(logs.id, id)));
   },
 
+  /** Sets (or with null, removes) the public share token. */
+  async setShareToken(ownerId: string, id: string, shareToken: string | null): Promise<Log | null> {
+    const [row] = await getDb()
+      .update(logs)
+      .set({ shareToken })
+      .where(and(ownedBy(ownerId), eq(logs.id, id)))
+      .returning();
+    return row ?? null;
+  },
+
+  async findByShareToken(shareToken: string): Promise<Log | null> {
+    const [row] = await getDb().select().from(logs).where(eq(logs.shareToken, shareToken)).limit(1);
+    return row ?? null;
+  },
+
   async delete(ownerId: string, id: string): Promise<boolean> {
     const deleted = await getDb()
       .delete(logs)
