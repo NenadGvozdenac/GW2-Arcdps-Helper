@@ -114,6 +114,12 @@ function useSessionsController() {
   useEffect(() => {
     if (page > lastPage) setPage(lastPage);
   }, [page, lastPage]);
+  // Nothing left to organize (e.g. every session was just deleted): leave organizing, whose "Done" button is gone.
+  useEffect(() => {
+    if (result.total > 0) return;
+    setOrganizing(false);
+    setSelected(new Set());
+  }, [result.total]);
 
   async function run(action: () => Promise<void>) {
     setError(null);
