@@ -1,7 +1,13 @@
 import type { Request, Response } from "express";
 import { sessionService } from "../services/sessionService";
 import type { AuthLocals } from "../types/auth.types";
-import { idParamSchema, shareTokenParamSchema, startSessionSchema } from "../validation/schemas";
+import {
+  idParamSchema,
+  reorderSessionsSchema,
+  shareTokenParamSchema,
+  startSessionSchema,
+  updateSessionSchema,
+} from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 export const sessionController = {
@@ -29,6 +35,20 @@ export const sessionController = {
   async resume(req: Request, res: Response<unknown, AuthLocals>) {
     const { id } = validate(idParamSchema, req.params);
     res.json({ session: await sessionService.resume(res.locals.userId, id) });
+  },
+
+  /** Rename and / or pin. */
+  async update(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    const patch = validate(updateSessionSchema, req.body);
+    res.json({ session: await sessionService.update(res.locals.userId, id, patch) });
+  },
+
+  /** Saves the drag & drop order (all session ids, in display order). */
+  async reorder(req: Request, res: Response<unknown, AuthLocals>) {
+    const { ids } = validate(reorderSessionsSchema, req.body);
+    await sessionService.reorder(res.locals.userId, ids);
+    res.status(204).end();
   },
 
   async share(req: Request, res: Response<unknown, AuthLocals>) {

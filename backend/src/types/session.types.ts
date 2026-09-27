@@ -7,6 +7,9 @@ export type SessionEndReason = "manual" | "expired";
 /** Row of the `sessions` table (see src/db/schema.ts). endedAt is null while the session is active. */
 export type Session = typeof sessions.$inferSelect;
 
+/** Fields the owner may change on a session. */
+export type SessionPatch = Partial<Pick<Session, "name" | "pinned">>;
+
 /** GET /shared/sessions/:token — a session anyone with the link may view. */
 export interface SharedSessionResponse {
   session: Pick<Session, "name" | "startedAt" | "endedAt" | "endReason">;

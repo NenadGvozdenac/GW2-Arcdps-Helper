@@ -22,6 +22,7 @@ import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import LogTable from "../components/LogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
+import SessionTitle from "../components/SessionTitle";
 import ShareButton from "../components/ShareButton";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
@@ -72,6 +73,7 @@ function useSessionDetailController(id: string | undefined) {
   }
 
   return {
+    setError,
     setShared: (shared: boolean) => (view ? setSessionShared(view.session.id, shared) : Promise.resolve()),
     practice,
     view,
@@ -112,7 +114,7 @@ export default function SessionDetailPage() {
       {back}
 
       <PageHeader
-        title={session.name || t("sessions.unnamed")}
+        title={<SessionTitle session={session} onError={c.setError} />}
         description={
           <div className="flex flex-wrap items-center gap-2">
             {!session.endedAt && (

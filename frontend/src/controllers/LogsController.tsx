@@ -3,7 +3,7 @@ import { FRESH_HIGHLIGHT_MS, POLL_INTERVAL_MS } from "../config/constants";
 import { logService } from "../services/logService";
 import { sessionService } from "../services/sessionService";
 import type { Log } from "../domain/types/log.types";
-import type { Session } from "../domain/types/session.types";
+import type { Session, SessionPatch } from "../domain/types/session.types";
 import { useAuth } from "./AuthController";
 
 interface LogsContextValue {
@@ -25,6 +25,10 @@ interface LogsContextValue {
   setSessionShared: (id: string, shared: boolean) => Promise<void>;
   /** Creates (or with false, revokes) the log's public link. */
   setLogShared: (id: string, shared: boolean) => Promise<void>;
+  /** Renames and / or pins a session. */
+  updateSession: (id: string, patch: SessionPatch) => Promise<void>;
+  /** Saves a new manual order (session ids in display order); applied immediately, rolled back if saving fails. */
+  reorderSessions: (ids: string[]) => Promise<void>;
 }
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -97,6 +101,26 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     setLogs((prev) => prev.map((l) => (l.id === id ? updated : l)));
   }, []);
 
+  const updateSession = useCallback(async (id: string, patch: SessionPatch) => {
+    const updated = await sessionService.update(id, patch);
+    setSessions((prev) => sessionService.pinnedFirst(prev.map((s) => (s.id === id ? updated : s))));
+  }, []);
+
+  const reorderSessions = useCallback(async (ids: string[]) => {
+    let previous: Session[] = [];
+    setSessions((prev) => {
+      previous = prev;
+      const byId = new Map(prev.map((s) => [s.id, s]));
+      return ids.flatMap((id) => byId.get(id) ?? []);
+    });
+    try {
+      await sessionService.reorder(ids);
+    } catch (err) {
+      setSessions(previous);
+      throw err;
+    }
+  }, []);
+
   useEffect(() => {
     setLogs([]);
     setSessions([]);
@@ -136,8 +160,25 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       resumeSession,
       setSessionShared,
       setLogShared,
+      updateSession,
+      reorderSessions,
     }),
-    [logs, sessions, authLoading, loading, error, freshIds, refresh, remove, removeSession, resumeSession, setSessionShared, setLogShared],
+    [
+      logs,
+      sessions,
+      authLoading,
+      loading,
+      error,
+      freshIds,
+      refresh,
+      remove,
+      removeSession,
+      resumeSession,
+      setSessionShared,
+      setLogShared,
+      updateSession,
+      reorderSessions,
+    ],
   );
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 }

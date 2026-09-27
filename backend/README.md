@@ -104,6 +104,8 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/sessions` | ✓ | – | `{ sessions }` (newest first; `endedAt` null = active). A session not ended within 6 h is ended automatically (`endReason: "expired"`) |
 | POST | `/sessions` | ✓ | `{ name? }` | `201 { session }` — ends a still-active session first |
 | GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
+| PATCH | `/sessions/:id` | ✓ | `{ name?, pinned? }` | `{ session }` — rename / pin |
+| PUT | `/sessions/order` | ✓ | `{ ids }` (all sessions, in display order) | `204` — manual order |
 | POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
 | POST | `/sessions/:id/share` | ✓ | – | `{ session }` with `shareToken` — creates the public link (idempotent) |

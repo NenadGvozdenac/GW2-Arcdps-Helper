@@ -46,6 +46,17 @@ export const startSessionSchema = z.object({
   name: z.string().trim().max(SESSION_NAME_MAX).default(""),
 });
 
+export const updateSessionSchema = z
+  .object({
+    name: z.string().trim().max(SESSION_NAME_MAX).optional(),
+    pinned: z.boolean().optional(),
+  })
+  .refine((v) => v.name !== undefined || v.pinned !== undefined, "Nothing to update.");
+
+export const reorderSessionsSchema = z.object({
+  ids: z.array(z.uuid("Invalid session ID.")).min(1).max(1000),
+});
+
 export const shareTokenParamSchema = z.object({
   token: z.string().regex(/^[\w-]{16,64}$/, "Invalid share link."),
 });

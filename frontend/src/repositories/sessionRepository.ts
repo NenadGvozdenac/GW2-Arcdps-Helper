@@ -1,4 +1,4 @@
-import type { Session, SharedSession } from "../domain/types/session.types";
+import type { Session, SessionPatch, SharedSession } from "../domain/types/session.types";
 import { fromSharedLogDto, type SharedLogDto } from "./logMapper";
 import { http } from "./httpClient";
 
@@ -17,6 +17,7 @@ const toSession = (dto: SessionDto): Session => ({
   endReason: dto.endReason,
   expiresAt: new Date(dto.expiresAt),
   shareToken: dto.shareToken,
+  pinned: dto.pinned,
 });
 
 const sessionPath = (id: string) => `/sessions/${encodeURIComponent(id)}`;
@@ -30,6 +31,14 @@ export const sessionRepository = {
   async resume(id: string): Promise<Session> {
     return toSession((await http.post<{ session: SessionDto }>(`/sessions/${encodeURIComponent(id)}/resume`)).session);
   },
+
+  /** Rename and / or pin. */
+  async update(id: string, patch: SessionPatch): Promise<Session> {
+    return toSession((await http.patch<{ session: SessionDto }>(sessionPath(id), patch)).session);
+  },
+
+  /** Saves the manual order (all session ids, in display order). */
+  reorder: (ids: string[]) => http.put<void>("/sessions/order", { ids }),
 
   /** Creates (or returns the existing) public link token. */
   async share(id: string): Promise<Session> {

@@ -14,7 +14,12 @@ export interface Session {
   expiresAt: Date;
   /** Secret of the public link (/shared/sessions/<token>); null = not shared. */
   shareToken: string | null;
+  /** Pinned sessions are listed first. */
+  pinned: boolean;
 }
+
+/** What the owner can change on a session. */
+export type SessionPatch = Partial<Pick<Session, "name" | "pinned">>;
 
 /** A session opened through its public share link. */
 export interface SharedSession {

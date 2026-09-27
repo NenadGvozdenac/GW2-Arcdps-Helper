@@ -1,14 +1,30 @@
-import { and, asc, desc, eq, isNull, lt } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, min } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs, sessions } from "../db/schema";
 import type { Log } from "../types/log.types";
-import type { Session, SessionEndReason } from "../types/session.types";
+import type { Session, SessionEndReason, SessionPatch } from "../types/session.types";
 
 const ownedBy = (ownerId: string) => eq(sessions.ownerId, ownerId);
 
 export const sessionRepository = {
+  /** In display order: pinned first, then the manual (drag & drop) order, newest first as tie-breaker. */
   listByOwner(ownerId: string): Promise<Session[]> {
-    return getDb().select().from(sessions).where(ownedBy(ownerId)).orderBy(desc(sessions.startedAt));
+    return getDb()
+      .select()
+      .from(sessions)
+      .where(ownedBy(ownerId))
+      .orderBy(desc(sessions.pinned), asc(sessions.sortOrder), desc(sessions.startedAt));
+  },
+
+  /** The most recently started session. */
+  async latest(ownerId: string): Promise<Session | null> {
+    const [row] = await getDb()
+      .select()
+      .from(sessions)
+      .where(ownedBy(ownerId))
+      .orderBy(desc(sessions.startedAt))
+      .limit(1);
+    return row ?? null;
   },
 
   async findById(ownerId: string, id: string): Promise<Session | null> {
@@ -29,9 +45,44 @@ export const sessionRepository = {
       .orderBy(desc(sessions.startedAt));
   },
 
+  /** New sessions go to the top of the manual order. */
   async create(ownerId: string, name: string, expiresAt: Date): Promise<Session> {
-    const [row] = await getDb().insert(sessions).values({ ownerId, name, expiresAt }).returning();
+    const db = getDb();
+    const [{ lowest }] = await db.select({ lowest: min(sessions.sortOrder) }).from(sessions).where(ownedBy(ownerId));
+    const sortOrder = (lowest ?? 1) - 1;
+    const [row] = await db.insert(sessions).values({ ownerId, name, expiresAt, sortOrder }).returning();
     return row;
+  },
+
+  async update(ownerId: string, id: string, patch: SessionPatch): Promise<Session | null> {
+    const [row] = await getDb()
+      .update(sessions)
+      .set(patch)
+      .where(and(ownedBy(ownerId), eq(sessions.id, id)))
+      .returning();
+    return row ?? null;
+  },
+
+  /** Stores the manual order: each id gets its index. Ids that aren't the owner's are ignored. */
+  async reorder(ownerId: string, ids: string[]): Promise<void> {
+    await getDb().transaction(async (tx) => {
+      for (const [index, id] of ids.entries()) {
+        await tx
+          .update(sessions)
+          .set({ sortOrder: index })
+          .where(and(ownedBy(ownerId), eq(sessions.id, id)));
+      }
+    });
+  },
+
+  /** How many of these ids are sessions of the owner (to validate a reorder request). */
+  async countOwned(ownerId: string, ids: string[]): Promise<number> {
+    if (!ids.length) return 0;
+    const rows = await getDb()
+      .select({ id: sessions.id })
+      .from(sessions)
+      .where(and(ownedBy(ownerId), inArray(sessions.id, ids)));
+    return rows.length;
   },
 
   /** Marks an active session as ended; returns null if it doesn't exist or was already ended. */

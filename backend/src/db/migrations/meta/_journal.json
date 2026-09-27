@@ -43,6 +43,13 @@
       "when": 1790508298015,
       "tag": "0005_log_sharing",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790508848129,
+      "tag": "0006_session_order",
+      "breakpoints": true
     }
   ]
 }

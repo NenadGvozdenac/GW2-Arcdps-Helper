@@ -2,8 +2,8 @@ import { randomBytes } from "node:crypto";
 import { SESSION_TTL_MS, SHARE_TOKEN_BYTES } from "../config/constants";
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { Log } from "../types/log.types";
-import type { LogSpan, Session, SessionEndReason, SharedSessionResponse } from "../types/session.types";
-import { sessionNotFound, sessionNotResumable } from "../utils/httpError";
+import type { LogSpan, Session, SessionEndReason, SessionPatch, SharedSessionResponse } from "../types/session.types";
+import { sessionNotFound, sessionNotResumable, validationError } from "../utils/httpError";
 import { discordService } from "./discordService";
 import { toSharedLog } from "./logService";
 import { userService } from "./userService";
@@ -58,8 +58,24 @@ export const sessionService = {
 
   /** The most recent session, if it ended by expiring — offered to be resumed. */
   async getResumable(ownerId: string): Promise<Session | null> {
-    const [latest] = await sessionRepository.listByOwner(ownerId);
+    const latest = await sessionRepository.latest(ownerId);
     return latest?.endReason === "expired" ? latest : null;
+  },
+
+  /** Renames and / or pins the session. */
+  async update(ownerId: string, id: string, patch: SessionPatch): Promise<Session> {
+    const session = await sessionRepository.update(ownerId, id, patch);
+    if (!session) throw sessionNotFound();
+    return session;
+  },
+
+  /** Saves the manual order of the user's sessions (ids in display order). */
+  async reorder(ownerId: string, ids: string[]): Promise<void> {
+    const unique = [...new Set(ids)];
+    if ((await sessionRepository.countOwned(ownerId, unique)) !== unique.length) {
+      throw validationError("Unknown session in the new order.");
+    }
+    await sessionRepository.reorder(ownerId, unique);
   },
 
   async get(ownerId: string, id: string): Promise<Session> {

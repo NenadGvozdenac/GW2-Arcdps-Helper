@@ -55,6 +55,10 @@ export const sessions = pgTable(
       .default(sql`now() + interval '6 hours'`),
     /** Secret for the public read-only link (/shared/sessions/<token>); null = not shared. */
     shareToken: text("share_token"),
+    /** Pinned sessions are listed first. */
+    pinned: boolean().notNull().default(false),
+    /** Manual order (drag & drop on the website), ascending; new sessions get the lowest value so they come first. */
+    sortOrder: integer("sort_order").notNull().default(0),
   },
   (t) => [
     index("sessions_owner_started_idx").on(t.ownerId, t.startedAt.desc()),

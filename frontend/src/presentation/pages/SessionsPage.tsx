@@ -1,19 +1,79 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRightIcon, CircleHelpIcon, TimerIcon } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import {
+  AlertCircleIcon,
+  ChevronRightIcon,
+  CircleHelpIcon,
+  GripVerticalIcon,
+  PinIcon,
+  PinOffIcon,
+  TimerIcon,
+} from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { sessionService } from "../../services/sessionService";
 import type { SessionView } from "../../domain/types/session.types";
+import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Badge } from "@/presentation/components/ui/badge";
+import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent } from "@/presentation/components/ui/card";
+import { cn } from "@/presentation/lib/utils";
 import PageHeader from "../components/PageHeader";
 import { failBadge, successBadge } from "../components/ResultBadge";
+import { describeError } from "../utils/describeError";
 
 function useSessionsController() {
-  const { logs, sessions } = useLogs();
+  const { logs, sessions, updateSession, reorderSessions } = useLogs();
+  const [error, setError] = useState<unknown>(null);
   const views = useMemo(() => sessionService.views(sessions, logs), [sessions, logs]);
-  return { views };
+  const pinned = views.filter((v) => v.session.pinned);
+  const others = views.filter((v) => !v.session.pinned);
+
+  async function run(action: () => Promise<void>) {
+    setError(null);
+    try {
+      await action();
+    } catch (err) {
+      setError(err);
+    }
+  }
+
+  /** Moves a session within its own list (pinned or not) and saves the whole order. */
+  function move(list: SessionView[], activeId: string, overId: string) {
+    const from = list.findIndex((v) => v.session.id === activeId);
+    const to = list.findIndex((v) => v.session.id === overId);
+    if (from < 0 || to < 0 || from === to) return;
+    const moved = arrayMove(list, from, to).map((v) => v.session.id);
+    const ids =
+      list === pinned ? [...moved, ...others.map((v) => v.session.id)] : [...pinned.map((v) => v.session.id), ...moved];
+    void run(() => reorderSessions(ids));
+  }
+
+  return {
+    empty: views.length === 0,
+    pinned,
+    others,
+    error,
+    move,
+    togglePin: (v: SessionView) => run(() => updateSession(v.session.id, { pinned: !v.session.pinned })),
+  };
 }
 
 export default function SessionsPage() {
@@ -36,31 +96,104 @@ export default function SessionsPage() {
           </>
         }
       />
-      {c.views.length ? (
-        <div className="flex flex-col gap-4">
-          {c.views.map((v) => (
-            <SessionCard key={v.session.id} view={v} />
-          ))}
-        </div>
-      ) : (
+
+      {c.error != null && (
+        <Alert variant="destructive">
+          <AlertCircleIcon />
+          <AlertDescription>{describeError(c.error, t)}</AlertDescription>
+        </Alert>
+      )}
+
+      {c.empty ? (
         <Card>
           <CardContent className="py-6 text-center text-sm text-muted-foreground">{t("sessions.empty")}</CardContent>
         </Card>
+      ) : (
+        <>
+          {c.pinned.length > 0 && (
+            <SessionSection title={t("sessions.pinned")} views={c.pinned} onMove={c.move} onTogglePin={c.togglePin} />
+          )}
+          {c.others.length > 0 && (
+            <SessionSection
+              title={c.pinned.length ? t("sessions.others") : null}
+              views={c.others}
+              onMove={c.move}
+              onTogglePin={c.togglePin}
+            />
+          )}
+        </>
       )}
     </div>
   );
 }
 
-function SessionCard({ view: v }: { view: SessionView }) {
-  const { t, fmt } = useI18n();
-  const active = !v.session.endedAt;
+interface SectionProps {
+  title: string | null;
+  views: SessionView[];
+  onMove: (list: SessionView[], activeId: string, overId: string) => void;
+  onTogglePin: (v: SessionView) => void;
+}
+
+/** A drag & drop sortable list; pinned and other sessions are sorted separately. */
+function SessionSection({ title, views, onMove, onTogglePin }: SectionProps) {
+  const sensors = useSensors(
+    // A small distance keeps clicks on the card working.
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+  const onDragEnd = ({ active, over }: DragEndEvent) => {
+    if (over) onMove(views, String(active.id), String(over.id));
+  };
 
   return (
-    <Link to={`/sessions/${v.session.id}`} className="group block">
-      <Card className="gap-3 py-5 transition-colors group-hover:border-foreground/20">
-        <CardContent className="flex flex-col gap-3 px-5">
+    <section className="flex flex-col gap-3">
+      {title && <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={views.map((v) => v.session.id)} strategy={verticalListSortingStrategy}>
+          <div className="flex flex-col gap-3">
+            {views.map((v) => (
+              <SessionCard key={v.session.id} view={v} onTogglePin={() => onTogglePin(v)} />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
+    </section>
+  );
+}
+
+function SessionCard({ view: v, onTogglePin }: { view: SessionView; onTogglePin: () => void }) {
+  const { t, fmt } = useI18n();
+  const active = !v.session.endedAt;
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: v.session.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn("relative", isDragging && "z-10")}
+    >
+      <Card
+        className={cn(
+          "group flex-row items-stretch gap-0 py-0 transition-colors hover:border-foreground/20",
+          isDragging && "shadow-lg shadow-black/40 ring-1 ring-foreground/20",
+        )}
+      >
+        <button
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          className="flex w-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-l-xl text-muted-foreground hover:bg-accent/50 hover:text-foreground active:cursor-grabbing"
+          aria-label={t("sessions.dragHandle")}
+          title={t("sessions.dragHandle")}
+        >
+          <GripVerticalIcon className="size-4" />
+        </button>
+
+        <Link to={`/sessions/${v.session.id}`} className="flex min-w-0 flex-1 flex-col gap-3 py-5 pr-2 pl-1">
           <div className="flex items-center gap-3">
-            <h2 className="truncate font-semibold">{v.session.name || t("sessions.unnamed")}</h2>
+            <h3 className="truncate font-semibold">{v.session.name || t("sessions.unnamed")}</h3>
             {active && (
               <Badge variant="outline" className={successBadge}>
                 {t("sessions.active")}
@@ -76,7 +209,6 @@ function SessionCard({ view: v }: { view: SessionView }) {
                 {t("sessions.expired")}
               </Badge>
             )}
-            <ChevronRightIcon className="ml-auto size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
             <span>{fmt.dateTime(v.span?.start ?? v.session.startedAt)}</span>
@@ -104,8 +236,30 @@ function SessionCard({ view: v }: { view: SessionView }) {
               ))}
             </div>
           )}
-        </CardContent>
+        </Link>
+
+        <div className="flex shrink-0 items-start gap-1 py-4 pr-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn("size-8", v.session.pinned ? "text-foreground" : "text-muted-foreground")}
+            onClick={onTogglePin}
+            aria-label={v.session.pinned ? t("sessions.unpin") : t("sessions.pin")}
+            title={v.session.pinned ? t("sessions.unpin") : t("sessions.pin")}
+            aria-pressed={v.session.pinned}
+          >
+            {v.session.pinned ? <PinOffIcon /> : <PinIcon />}
+          </Button>
+          <Link
+            to={`/sessions/${v.session.id}`}
+            className="grid size-8 place-items-center text-muted-foreground"
+            tabIndex={-1}
+            aria-hidden="true"
+          >
+            <ChevronRightIcon className="size-4 transition-transform group-hover:translate-x-0.5" />
+          </Link>
+        </div>
       </Card>
-    </Link>
+    </div>
   );
 }

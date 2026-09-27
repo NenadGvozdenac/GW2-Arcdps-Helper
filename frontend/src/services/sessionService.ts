@@ -1,7 +1,7 @@
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { EncounterGroup } from "../domain/types/encounter.types";
 import type { Log } from "../domain/types/log.types";
-import type { PracticeRun, Session, SessionSummary, SessionView } from "../domain/types/session.types";
+import type { PracticeRun, Session, SessionPatch, SessionSummary, SessionView } from "../domain/types/session.types";
 import { encounterService } from "./encounterService";
 
 /** Training golems (Standard / Medium / Large Kitty Golem, …) from the Special Forces Training Area. */
@@ -60,6 +60,12 @@ export const sessionService = {
     }
     return { bestPerSpec: [...best.values()].sort((a, b) => b.player.dps - a.player.dps) };
   },
+
+  update: (id: string, patch: SessionPatch) => sessionRepository.update(id, patch),
+  reorder: (ids: string[]) => sessionRepository.reorder(ids),
+
+  /** Display order: pinned sessions first, otherwise keeping the given (manual) order. */
+  pinnedFirst: (sessions: Session[]) => [...sessions.filter((s) => s.pinned), ...sessions.filter((s) => !s.pinned)],
 
   share: (id: string) => sessionRepository.share(id),
   unshare: (id: string) => sessionRepository.unshare(id),
