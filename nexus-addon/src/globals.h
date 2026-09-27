@@ -16,3 +16,6 @@ inline constexpr const char* ADDON_FOLDER = "GW2ArcDPSHelper"; // <GW2>/addons/G
 void LogInfo(const std::string& message);
 void LogWarn(const std::string& message);
 void Alert(const std::string& message);
+
+/** "1.2.3" from the release tag; "0.0.0" for local builds. */
+const char* AddonVersion();

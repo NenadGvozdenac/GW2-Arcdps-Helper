@@ -64,6 +64,32 @@ namespace
 			"\"Auto-upload new logs\" here - with both on, every log is uploaded twice.");
 	}
 
+	void Bullet(const char* text)
+	{
+		ImGui::Bullet();
+		ImGui::TextWrapped("%s", text);
+	}
+
+	/** Short guide at the top of the options, with the version (handy to see that an update arrived). */
+	void RenderHowItWorks()
+	{
+		bool local = strcmp(AddonVersion(), "0.0.0") == 0;
+		ImGui::Text("%s  v%s%s", ADDON_NAME, AddonVersion(), local ? " (local build)" : "");
+		if (!ImGui::TreeNode("How it works")) return;
+
+		Bullet("After every fight ArcDPS writes a log. The addon picks it up from the ArcDPS log folder, uploads it to "
+			"dps.report and saves it to your GW2 ArcDPS Helper account (sign in below). Without an account, logs only go "
+			"to dps.report.");
+		Bullet("Open the window with ALT+SHIFT+U or the icon in the Nexus bar. Click a log to open it on dps.report, "
+			"right-click to copy the link, and use Retry if an upload failed.");
+		Bullet("Record starts a session on the website: every log until you press Stop belongs to it, and one Discord "
+			"summary is posted when it ends. A session you forget ends by itself after 6 hours.");
+		Bullet("Use either this addon or the desktop uploader - with both running, every log is uploaded twice.");
+		Bullet(local ? "Local build: Nexus does not update it."
+			: "Updates install themselves: Nexus checks GitHub when the addon loads and every 30 minutes.");
+		ImGui::TreePop();
+	}
+
 	const char* StageText(const Upload& u)
 	{
 		switch (u.stage)
@@ -259,6 +285,9 @@ namespace UI
 			Copy(g_logFolder, sizeof(g_logFolder), s.logFolder);
 			g_optionsInit = true;
 		}
+
+		RenderHowItWorks();
+		ImGui::Separator();
 
 		ImGui::TextUnformatted("GW2 ArcDPS Helper account");
 		if (acc.signedIn)
