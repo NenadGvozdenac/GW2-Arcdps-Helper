@@ -114,7 +114,9 @@ uploader-dist:
 # ---------- nexus addon ----------
 
 # addon-zig needs zig (https://ziglang.org, e.g. `winget install zig.zig`); override the path with `make addon-zig ZIG=...`.
-ZIG ?= zig
+# A winget install is found even when this shell started before it was added to PATH.
+ZIG_WINGET := $(firstword $(wildcard $(subst \,/,$(LOCALAPPDATA))/Microsoft/WinGet/Packages/zig.zig_*/zig-*/zig.exe))
+ZIG ?= $(if $(ZIG_WINGET),"$(ZIG_WINGET)",zig)
 ADDON := nexus-addon
 ADDON_SOURCES := $(wildcard $(ADDON)/src/*.cpp) $(ADDON)/src/resources.rc \
                  $(addprefix $(ADDON)/third_party/imgui/,imgui.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp)
@@ -128,3 +130,4 @@ addon-zig:
 	$(ZIG) c++ -target x86_64-windows-gnu -shared -std=c++17 -O2 -s -DWIN32_LEAN_AND_MEAN -DNOMINMAX -DUNICODE -D_UNICODE \
 		-Wno-nontrivial-memcall -Wno-nullability-completeness -isystem $(ADDON)/third_party -I$(ADDON)/src $(ADDON_SOURCES) -lwinhttp -lcrypt32 -lshell32 -lole32 \
 		-o $(ADDON)/build/gw2-arcdps-helper.dll
+	@echo Built $(ADDON)/build/gw2-arcdps-helper.dll - copy it to "<Guild Wars 2>/addons"
