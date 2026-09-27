@@ -1,8 +1,11 @@
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { EncounterGroup } from "../domain/types/encounter.types";
 import type { Log } from "../domain/types/log.types";
-import type { Session, SessionSummary, SessionView } from "../domain/types/session.types";
+import type { PracticeRun, Session, SessionSummary, SessionView } from "../domain/types/session.types";
 import { encounterService } from "./encounterService";
+
+/** Training golems (Standard / Medium / Large Kitty Golem, …) from the Special Forces Training Area. */
+const isGolem = (log: Log) => /golem/i.test(log.bossName);
 
 /** Start of the first fight to the end of the last one. */
 function span(logs: Log[]): SessionSummary["span"] {
@@ -40,6 +43,22 @@ export const sessionService = {
       if (g && !groups.includes(g)) groups.push(g);
     }
     return { logs: sorted, span: span(sorted), kills, wipes: sorted.length - kills, groups };
+  },
+
+  /**
+   * Returns a PracticeRun when every log of the session is a training golem (null otherwise), with the highest-DPS
+   * log of `account` (Name.1234) for each specialization they played.
+   */
+  practiceRun(logs: Log[], account: string): PracticeRun | null {
+    if (!logs.length || !logs.every(isGolem)) return null;
+    const best = new Map<string, PracticeRun["bestPerSpec"][number]>();
+    for (const log of logs) {
+      const player = log.players.find((p) => account && p.account.toLowerCase() === account.toLowerCase());
+      if (!player?.profession) continue;
+      const current = best.get(player.profession);
+      if (!current || player.dps > current.player.dps) best.set(player.profession, { log, player });
+    }
+    return { bestPerSpec: [...best.values()].sort((a, b) => b.player.dps - a.player.dps) };
   },
 
   share: (id: string) => sessionRepository.share(id),

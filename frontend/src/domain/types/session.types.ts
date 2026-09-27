@@ -1,5 +1,5 @@
 import type { EncounterGroup } from "./encounter.types";
-import type { Log } from "./log.types";
+import type { Log, PlayerSummary } from "./log.types";
 
 /** A group of logs recorded together (started / ended in the desktop uploader). */
 export interface Session {
@@ -22,6 +22,15 @@ export interface SharedSession {
   /** GW2 account of the player who shared it (may be empty). */
   owner: string;
   logs: Log[];
+}
+
+/** A session made only of training-golem logs. */
+export interface PracticeRun {
+  /**
+   * The player's highest-DPS log for every specialization they played (so different classes aren't compared),
+   * highest DPS first. Empty when the player isn't in the logs (or their GW2 account isn't known).
+   */
+  bestPerSpec: { log: Log; player: PlayerSummary }[];
 }
 
 /** Totals of a group of logs (oldest first). */

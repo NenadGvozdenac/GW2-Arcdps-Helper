@@ -7,6 +7,7 @@ import type { SharedSession } from "../../domain/types/session.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import LogTable from "../components/LogTable";
+import PracticeRunCard from "../components/PracticeRunCard";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
 
@@ -35,7 +36,9 @@ function useSharedSessionController(token: string | undefined) {
   }, [token]);
 
   const summary = useMemo(() => (data ? sessionService.summarize(data.logs) : null), [data]);
-  return { state, data, summary };
+  // The best log is the sharing player's (the session owner's).
+  const practice = useMemo(() => (data ? sessionService.practiceRun(data.logs, data.owner) : null), [data]);
+  return { state, data, summary, practice };
 }
 
 /** Public, read-only view of a session opened through its share link (no sign-in needed). */
@@ -84,8 +87,10 @@ export default function SharedSessionPage() {
         }
       />
 
+      {c.practice && <PracticeRunCard practice={c.practice} openOnDpsReport />}
+
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t("sessions.duration")} value={span ? fmt.duration(span.durationMs) : "—"} mono />
+        <StatCard label={t("sessions.duration")} value={span ? fmt.span(span.durationMs) : "—"} mono />
         <StatCard label={t("sessions.logs")} value={logs.length} />
         <StatCard label={t("sessions.kills")} value={kills} tone="success" />
         <StatCard label={t("sessions.wipes")} value={wipes} tone="fail" />

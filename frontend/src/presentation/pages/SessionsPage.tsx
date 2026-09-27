@@ -82,7 +82,7 @@ function SessionCard({ view: v }: { view: SessionView }) {
             <span>{fmt.dateTime(v.span?.start ?? v.session.startedAt)}</span>
             {v.span && (
               <span className="inline-flex items-center gap-1 font-mono tabular-nums text-foreground">
-                <TimerIcon className="size-3.5" /> {fmt.duration(v.span.durationMs)}
+                <TimerIcon className="size-3.5" /> {fmt.span(v.span.durationMs)}
               </span>
             )}
             <span>{v.logs.length ? t("sessions.logsCount", { count: v.logs.length }) : t("sessions.noLogsYet")}</span>

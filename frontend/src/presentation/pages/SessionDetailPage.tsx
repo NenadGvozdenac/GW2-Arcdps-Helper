@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertCircleIcon, ArrowLeftIcon, HistoryIcon, Loader2Icon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
+import { useAuth } from "../../controllers/AuthController";
 import { useLogs } from "../../controllers/LogsController";
 import { sessionService } from "../../services/sessionService";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
@@ -20,7 +21,8 @@ import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import LogTable from "../components/LogTable";
-import SessionShareCard from "../components/SessionShareCard";
+import PracticeRunCard from "../components/PracticeRunCard";
+import SessionShareButton from "../components/SessionShareButton";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
@@ -33,10 +35,15 @@ function useSessionDetailController(id: string | undefined) {
   const [resuming, setResuming] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
+  const { user } = useAuth();
   const view = useMemo(() => {
     const session = sessions.find((s) => s.id === id);
     return session ? sessionService.views([session], logs)[0] : null;
   }, [sessions, logs, id]);
+  const practice = useMemo(
+    () => (view ? sessionService.practiceRun(view.logs, user?.gw2Account ?? "") : null),
+    [view, user?.gw2Account],
+  );
 
   async function remove() {
     if (!view) return;
@@ -64,7 +71,7 @@ function useSessionDetailController(id: string | undefined) {
     }
   }
 
-  return { view, deleting, resuming, error, remove, resume };
+  return { practice, view, deleting, resuming, error, remove, resume };
 }
 
 export default function SessionDetailPage() {
@@ -115,27 +122,32 @@ export default function SessionDetailPage() {
           </div>
         }
         actions={
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" className="text-destructive" disabled={c.deleting}>
-                <Trash2Icon /> {t("common.delete")}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t("sessions.confirmDelete")}</AlertDialogTitle>
-                <AlertDialogDescription>{t("sessions.deleteHint")}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={c.remove}>
-                  {t("common.delete")}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <div className="flex gap-2">
+            <SessionShareButton session={session} />
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" className="text-destructive" disabled={c.deleting}>
+                  <Trash2Icon /> {t("common.delete")}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>{t("sessions.confirmDelete")}</AlertDialogTitle>
+                  <AlertDialogDescription>{t("sessions.deleteHint")}</AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                  <AlertDialogAction variant="destructive" onClick={c.remove}>
+                    {t("common.delete")}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         }
       />
+
+      {c.practice && <PracticeRunCard practice={c.practice} />}
 
       {!session.endedAt && (
         <Alert>
@@ -166,13 +178,11 @@ export default function SessionDetailPage() {
       )}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t("sessions.duration")} value={span ? fmt.duration(span.durationMs) : "—"} mono />
+        <StatCard label={t("sessions.duration")} value={span ? fmt.span(span.durationMs) : "—"} mono />
         <StatCard label={t("sessions.logs")} value={logs.length} />
         <StatCard label={t("sessions.kills")} value={kills} tone="success" />
         <StatCard label={t("sessions.wipes")} value={wipes} tone="fail" />
       </div>
-
-      <SessionShareCard session={session} />
 
       <Card>
         <CardHeader>
