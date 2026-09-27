@@ -105,6 +105,10 @@ namespace
 		api->GUI_Register(RT_OptionsRender, UI::RenderOptions);
 		api->GUI_RegisterCloseOnEscape(ADDON_NAME, &UI::ShowWindow);
 
+		// Nexus shows keybinds by identifier, translated: without these it lists "KB_GW2ARCDPSHELPER_…".
+		// English is Nexus' fallback for every other language.
+		api->Localization_Set(KB_TOGGLE_WINDOW, "en", "Show / hide window");
+		api->Localization_Set(KB_TOGGLE_RECORDING, "en", "Start / stop recording");
 		api->InputBinds_RegisterWithString(KB_TOGGLE_WINDOW, OnKeybind, "ALT+SHIFT+U");
 		api->InputBinds_RegisterWithString(KB_TOGGLE_RECORDING, OnKeybind, "(null)");
 
@@ -171,10 +175,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.Name = ADDON_NAME;
 	AddonDef.Version = { ADDON_VERSION_MAJOR, ADDON_VERSION_MINOR, ADDON_VERSION_PATCH, 0 };
 	AddonDef.Author = "NenadG";
-	AddonDef.Description =
-		"In-game uploader for GW2 ArcDPS Helper. Every new ArcDPS log is uploaded to dps.report and saved to your "
-		"account automatically. Press Record to group a raid night into a session with one Discord summary at the end. "
-		"Window: ALT+SHIFT+U. Sign in under the addon's options.";
+	AddonDef.Description = "Uploads new ArcDPS logs to dps.report and GW2 ArcDPS Helper, and records sessions - right from the game.";
 	AddonDef.Load = AddonLoad;
 	AddonDef.Unload = AddonUnload;
 	AddonDef.Flags = AF_None;
