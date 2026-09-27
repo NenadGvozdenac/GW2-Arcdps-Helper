@@ -1,27 +1,30 @@
 import type { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../controllers/AuthController";
-import { AppSkeleton } from "./Skeletons";
 
+/**
+ * While a saved sign-in is being restored the page is rendered anyway: it shows its own skeleton
+ * (LogsController reports loading until the user is known), so every page has exactly one loading state.
+ */
 export function RequireAuth() {
   const { user, loading } = useAuth();
   const location = useLocation();
-  if (loading) return <AppSkeleton />;
+  if (loading) return <Outlet />;
   if (!user) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   return <Outlet />;
 }
 
-/** "/" shows the landing page to guests and `signedIn` to signed-in users. */
+/** "/" shows the landing page to guests and `signedIn` to signed-in users (also while their session is restored). */
 export function HomeRoute({ guest, signedIn }: { guest: ReactNode; signedIn: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return <AppSkeleton />;
-  return <>{user ? signedIn : guest}</>;
+  return <>{user || loading ? signedIn : guest}</>;
 }
 
 export function RequireGuest() {
   const { user, loading } = useAuth();
   const location = useLocation();
-  if (loading) return <AppSkeleton />;
+  // A saved sign-in is being restored and will most likely redirect away — don't flash the form.
+  if (loading) return null;
   if (user) {
     const from = (location.state as { from?: string } | null)?.from ?? "/";
     return <Navigate to={from} replace />;

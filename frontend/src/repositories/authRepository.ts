@@ -15,6 +15,8 @@ export const authRepository = {
     return res.user;
   },
 
+  hasToken: (): boolean => !!tokenStorage.get(),
+
   /** Returns the current user, or null if there is no valid session. */
   async me(): Promise<User | null> {
     if (!tokenStorage.get()) return null;

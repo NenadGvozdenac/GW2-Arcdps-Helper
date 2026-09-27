@@ -5,15 +5,23 @@ import { useI18n } from "../../controllers/I18nController";
 import type { Language } from "../../i18n/i18n.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import PageHeader from "../components/PageHeader";
+import { ProfileFormSkeleton } from "../components/Skeletons";
 import { describeError } from "../utils/describeError";
 
 function useProfileController() {
-  const { user, updateProfile } = useAuth();
+  const { user, loading, updateProfile } = useAuth();
   const [gw2Account, setGw2Account] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -33,7 +41,7 @@ function useProfileController() {
     }
   }
 
-  return { email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
+  return { loading, email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
 }
 
 export default function ProfilePage() {
@@ -43,47 +51,51 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <PageHeader title={t("profile.title")} />
-      <Card>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            c.save();
-          }}
-        >
-          <CardContent className="flex flex-col gap-5">
-            <div className="grid gap-2">
-              <Label htmlFor="email">{t("profile.email")}</Label>
-              <Input id="email" value={c.email} disabled />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="gw2Account">{t("profile.gw2Account")}</Label>
-              <Input
-                id="gw2Account"
-                value={c.gw2Account}
-                onChange={(e) => c.setGw2Account(e.target.value)}
-                placeholder="Name.1234"
-                required
-              />
-              <p className="text-sm text-muted-foreground">{t("profile.gw2AccountHint")}</p>
-            </div>
-            {c.error != null && (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                <AlertDescription>{describeError(c.error, t)}</AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-          <CardFooter className="gap-3">
-            <Button type="submit">{t("common.save")}</Button>
-            {c.saved && (
-              <span className="inline-flex items-center gap-1 text-sm text-success">
-                <CheckIcon className="size-4" /> {t("common.saved")}
-              </span>
-            )}
-          </CardFooter>
-        </form>
-      </Card>
+      {c.loading ? (
+        <ProfileFormSkeleton />
+      ) : (
+        <Card>
+          <form
+            className="flex flex-col gap-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              c.save();
+            }}
+          >
+            <CardContent className="flex flex-col gap-5">
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t("profile.email")}</Label>
+                <Input id="email" value={c.email} disabled />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="gw2Account">{t("profile.gw2Account")}</Label>
+                <Input
+                  id="gw2Account"
+                  value={c.gw2Account}
+                  onChange={(e) => c.setGw2Account(e.target.value)}
+                  placeholder="Name.1234"
+                  required
+                />
+                <p className="text-sm text-muted-foreground">{t("profile.gw2AccountHint")}</p>
+              </div>
+              {c.error != null && (
+                <Alert variant="destructive">
+                  <AlertCircleIcon />
+                  <AlertDescription>{describeError(c.error, t)}</AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+            <CardFooter className="gap-3">
+              <Button type="submit">{t("common.save")}</Button>
+              {c.saved && (
+                <span className="inline-flex items-center gap-1 text-sm text-success">
+                  <CheckIcon className="size-4" /> {t("common.saved")}
+                </span>
+              )}
+            </CardFooter>
+          </form>
+        </Card>
+      )}
       <Card>
         <CardHeader>
           <CardTitle>{t("profile.language")}</CardTitle>

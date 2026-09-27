@@ -4,6 +4,7 @@ import { LogOutIcon, SettingsIcon, UploadIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { Button } from "@/presentation/components/ui/button";
+import { Skeleton } from "@/presentation/components/ui/skeleton";
 import { cn } from "@/presentation/lib/utils";
 import Brand from "./Brand";
 import MobileMenu from "./MobileMenu";
@@ -44,9 +45,13 @@ export default function Layout({ children }: { children?: ReactNode }) {
                 <UploadIcon /> {t("nav.upload")}
               </Link>
             </Button>
-            <span className="max-w-40 truncate px-2 text-sm font-medium" title={user?.email ?? ""}>
-              {accountLabel}
-            </span>
+            {user ? (
+              <span className="max-w-40 truncate px-2 text-sm font-medium" title={user.email}>
+                {accountLabel}
+              </span>
+            ) : (
+              <Skeleton className="mx-2 h-4 w-24" />
+            )}
             <Button asChild variant="ghost" size="icon" className="size-8">
               <NavLink
                 to="/profile"

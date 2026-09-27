@@ -17,13 +17,16 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 /** Holds the signed-in user for the whole app and exposes auth actions. */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  // Without a saved sign-in there is nothing to restore, so guests are never in a loading state.
+  const [loading, setLoading] = useState(authService.hasSavedSession);
 
   useEffect(() => {
+    if (!loading) return;
     authService
       .restoreSession()
       .then(setUser)
       .finally(() => setLoading(false));
+    // Runs once on start-up.
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {

@@ -25,7 +25,7 @@ const isTabVisible = () => document.visibilityState === "visible";
  * so logs sent by the desktop uploader show up without reloading the page.
  */
 export function LogsProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [logs, setLogs] = useState<Log[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
@@ -85,9 +85,10 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id, refresh]);
 
+  // Pages show their skeleton until both the user and their logs are known.
   const value = useMemo(
-    () => ({ logs, loading, error, freshIds, refresh, remove }),
-    [logs, loading, error, freshIds, refresh, remove],
+    () => ({ logs, loading: authLoading || loading, error, freshIds, refresh, remove }),
+    [logs, authLoading, loading, error, freshIds, refresh, remove],
   );
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 }

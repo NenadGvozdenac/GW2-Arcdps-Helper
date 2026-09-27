@@ -13,6 +13,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/presentation/components/ui/sheet";
+import { Skeleton } from "@/presentation/components/ui/skeleton";
 import { cn } from "@/presentation/lib/utils";
 import { NAV } from "./navigation";
 
@@ -39,7 +40,7 @@ export default function MobileMenu() {
       </SheetTrigger>
       <SheetContent side="right" className="w-72 gap-0" closeLabel={t("nav.closeMenu")}>
         <SheetHeader className="border-b pr-10">
-          <SheetTitle className="truncate">{accountLabel}</SheetTitle>
+          <SheetTitle className="truncate">{user ? accountLabel : <Skeleton className="h-5 w-32" />}</SheetTitle>
           {user?.email && user.email !== accountLabel && (
             <SheetDescription className="truncate">{user.email}</SheetDescription>
           )}

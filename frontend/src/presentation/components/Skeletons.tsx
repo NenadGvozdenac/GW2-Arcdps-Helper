@@ -145,33 +145,24 @@ export function LogDetailSkeleton() {
   );
 }
 
-/** Whole app (top bar + overview) while the saved sign-in is being restored. */
-export function AppSkeleton() {
+/** Settings: the profile form (email + GW2 account + save button). */
+export function ProfileFormSkeleton() {
   return (
-    <div className="flex min-h-svh flex-col" aria-busy="true">
-      <header className="border-b">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
-          <Skeleton className="h-8 w-44" />
-          <div className="hidden flex-1 gap-2 md:flex">
-            {range(5).map((i) => (
-              <Skeleton key={i} className="h-7 w-20" />
-            ))}
-          </div>
-          <div className="ml-auto hidden items-center gap-2 md:flex">
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="size-8" />
-            <Skeleton className="size-8" />
-          </div>
-          <Skeleton className="ml-auto size-9 md:hidden" />
+    <Card aria-busy="true">
+      <CardContent className="flex flex-col gap-5">
+        <div className="grid gap-2">
+          <Skeleton className="h-3.5 w-16" />
+          <Skeleton className="h-9 w-full" />
         </div>
-      </header>
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-56" />
-          <Skeleton className="h-4 w-72" />
+        <div className="grid gap-2">
+          <Skeleton className="h-3.5 w-24" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-5 w-72" />
         </div>
-        <DashboardSkeleton />
-      </main>
-    </div>
+      </CardContent>
+      <div className="px-6">
+        <Skeleton className="h-9 w-20" />
+      </div>
+    </Card>
   );
 }

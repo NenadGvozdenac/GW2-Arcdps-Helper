@@ -10,6 +10,7 @@ import type { TranslationKey } from "../../i18n/i18n.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Skeleton } from "@/presentation/components/ui/skeleton";
 import ClearCard from "../components/ClearCard";
 import { DashboardSkeleton } from "../components/Skeletons";
 import LogTable from "../components/LogTable";
@@ -57,7 +58,13 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={t("dashboard.greeting", { name: accountLabel || t("dashboard.fallbackName") })}
+        title={
+          loading ? (
+            <Skeleton className="h-8 w-56" />
+          ) : (
+            t("dashboard.greeting", { name: accountLabel || t("dashboard.fallbackName") })
+          )
+        }
         description={t("dashboard.subtitle")}
       />
 

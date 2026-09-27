@@ -5,6 +5,9 @@ import type { RegisterInput, User } from "../domain/types/user.types";
 const GW2_ACCOUNT_RE = /^.{3,32}\.\d{4}$/;
 
 export const authService = {
+  /** True when a sign-in was saved on this device, i.e. restoreSession() has something to check. */
+  hasSavedSession: (): boolean => authRepository.hasToken(),
+
   restoreSession: (): Promise<User | null> => authRepository.me(),
 
   isValidGw2Account: (value: string) => GW2_ACCOUNT_RE.test(value.trim()),
