@@ -24,7 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/presentation/lib/utils";
 import ResultBadge from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
-import { Spinner } from "../components/Spinner";
+import { LogDetailSkeleton } from "../components/Skeletons";
 import { describeError } from "../utils/describeError";
 import { professionColor } from "../utils/professionColors";
 
@@ -93,7 +93,7 @@ export default function LogDetailPage() {
   const { loading, log, backLink, totals, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
   const { t, fmt } = useI18n();
 
-  if (loading) return <Spinner />;
+  if (loading) return <LogDetailSkeleton />;
   if (!log || !totals) {
     return (
       <div className="flex flex-col items-start gap-4">

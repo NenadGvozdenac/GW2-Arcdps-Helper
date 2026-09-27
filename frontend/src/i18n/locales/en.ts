@@ -23,6 +23,8 @@ export const en = {
     upload: "Upload",
     logout: "Sign out",
     settings: "Settings",
+    menu: "Menu",
+    closeMenu: "Close menu",
     language: "Language",
   },
   auth: {

@@ -39,9 +39,9 @@ export default function LogTable({ logs, showGroup = false }: { logs: Log[]; sho
       <TableBody>
         {logs.map((l) => (
           <TableRow key={l.id} className={cn("cursor-pointer", isFresh(l) && "row-fresh")} onClick={() => openLog(l)}>
-            <TableCell>
-              <div className="flex items-center gap-2.5">
-                {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 rounded-md" loading="lazy" />}
+            <TableCell className="whitespace-normal">
+              <div className="flex min-w-40 items-center gap-2.5">
+                {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 shrink-0 rounded-md" loading="lazy" />}
                 <span className="font-medium">{l.bossName}</span>
               </div>
             </TableCell>

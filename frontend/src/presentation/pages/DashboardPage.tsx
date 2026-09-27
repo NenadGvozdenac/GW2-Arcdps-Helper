@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import ClearCard from "../components/ClearCard";
-import DashboardSkeleton from "../components/DashboardSkeleton";
+import { DashboardSkeleton } from "../components/Skeletons";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";

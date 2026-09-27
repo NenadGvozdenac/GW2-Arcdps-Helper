@@ -3,18 +3,11 @@ import { Link, NavLink, Outlet } from "react-router-dom";
 import { LogOutIcon, SettingsIcon, UploadIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
-import type { TranslationKey } from "../../i18n/i18n.types";
 import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
 import Brand from "./Brand";
-
-const NAV: { to: string; label: TranslationKey; end?: boolean }[] = [
-  { to: "/", label: "nav.overview", end: true },
-  { to: "/raids", label: "nav.raids" },
-  { to: "/fractals", label: "nav.fractals" },
-  { to: "/strikes", label: "nav.strikes" },
-  { to: "/logs", label: "nav.allLogs" },
-];
+import MobileMenu from "./MobileMenu";
+import { NAV } from "./navigation";
 
 /** App shell for signed-in pages; renders `children` when given (the "/" route), otherwise the nested route. */
 export default function Layout({ children }: { children?: ReactNode }) {
@@ -24,11 +17,11 @@ export default function Layout({ children }: { children?: ReactNode }) {
   return (
     <div className="flex min-h-svh flex-col">
       <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
+        <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
           <Link to="/">
             <Brand />
           </Link>
-          <nav className="order-3 -mx-1 flex w-full gap-1 overflow-x-auto md:order-none md:w-auto md:flex-1">
+          <nav className="hidden flex-1 gap-1 md:flex">
             {NAV.map((n) => (
               <NavLink
                 key={n.to}
@@ -45,7 +38,7 @@ export default function Layout({ children }: { children?: ReactNode }) {
               </NavLink>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto hidden items-center gap-2 md:flex">
             <Button asChild size="sm">
               <Link to="/upload">
                 <UploadIcon /> {t("nav.upload")}
@@ -67,6 +60,9 @@ export default function Layout({ children }: { children?: ReactNode }) {
             <Button variant="ghost" size="icon" className="size-8" onClick={() => logout()} title={t("nav.logout")}>
               <LogOutIcon />
             </Button>
+          </div>
+          <div className="ml-auto md:hidden">
+            <MobileMenu />
           </div>
         </div>
       </header>

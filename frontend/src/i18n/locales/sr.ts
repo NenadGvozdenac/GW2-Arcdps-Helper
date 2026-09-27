@@ -24,6 +24,8 @@ export const sr: Messages = {
     upload: "Upload",
     logout: "Odjava",
     settings: "Podešavanja",
+    menu: "Meni",
+    closeMenu: "Zatvori meni",
     language: "Jezik",
   },
   auth: {

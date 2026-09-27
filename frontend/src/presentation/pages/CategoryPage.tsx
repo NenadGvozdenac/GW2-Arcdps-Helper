@@ -16,7 +16,7 @@ import BossRow from "../components/BossRow";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
-import { Spinner } from "../components/Spinner";
+import { CategoryGroupsSkeleton, LogTableSkeleton, StatCardsSkeleton } from "../components/Skeletons";
 
 type PageCategory = Exclude<Category, "other">;
 
@@ -104,23 +104,32 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
             <Button variant={c.showPrevious ? "secondary" : "outline"} onClick={c.togglePrevious}>
               <HistoryIcon /> {t(c.previousLabel)}
             </Button>
-            <ToggleGroup type="single" variant="outline" value={c.mode} onValueChange={(v) => v && c.setMode(v as CmMode)}>
-            {MODES.map((m) => (
-              <ToggleGroupItem key={m.value} value={m.value} className="px-4">
-                {t(m.label)}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={c.mode}
+              onValueChange={(v) => v && c.setMode(v as CmMode)}
+            >
+              {MODES.map((m) => (
+                <ToggleGroupItem key={m.value} value={m.value} className="px-4">
+                  {t(m.label)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
           </div>
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t("categories.bossesKilled")} value={`${summary.killed}/${summary.total}`} />
-        <StatCard label={t(c.clearedLabel)} value={`${summary.clearedSinceReset}/${summary.total}`} />
-        <StatCard label={t("categories.kills")} value={summary.kills} tone="success" />
-        <StatCard label={t("categories.wipes")} value={summary.wipes} tone="fail" />
-      </div>
+      {c.loading ? (
+        <StatCardsSkeleton />
+      ) : (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard label={t("categories.bossesKilled")} value={`${summary.killed}/${summary.total}`} />
+          <StatCard label={t(c.clearedLabel)} value={`${summary.clearedSinceReset}/${summary.total}`} />
+          <StatCard label={t("categories.kills")} value={summary.kills} tone="success" />
+          <StatCard label={t("categories.wipes")} value={summary.wipes} tone="fail" />
+        </div>
+      )}
 
       {c.showPrevious && (
         <Card>
@@ -139,14 +148,14 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
               <XIcon /> {t("categories.hidePrevious")}
             </Button>
           </CardHeader>
-          <CardContent>{c.loading ? <Spinner /> : <LogTable logs={previous.logs} showGroup />}</CardContent>
+          <CardContent>{c.loading ? <LogTableSkeleton /> : <LogTable logs={previous.logs} showGroup />}</CardContent>
         </Card>
       )}
 
       {c.loading ? (
-        <Spinner />
+        <CategoryGroupsSkeleton category={category} />
       ) : (
-        <div className="grid items-start gap-4 xl:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {c.groups.map(({ group, bosses }) => (
             <Card key={group.id} className="gap-0 overflow-hidden py-0">
               <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
