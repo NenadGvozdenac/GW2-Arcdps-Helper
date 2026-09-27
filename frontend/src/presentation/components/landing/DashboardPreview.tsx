@@ -68,7 +68,7 @@ export default function DashboardPreview() {
 
   return (
     <div className="relative" aria-hidden="true">
-      <div className="landing-border landing-float rounded-2xl bg-card/80 p-4 shadow-2xl shadow-black/40 backdrop-blur sm:p-5">
+      <div className="landing-border landing-float rounded-2xl bg-card/95 p-4 shadow-2xl shadow-black/40 sm:p-5">
         <div className="mb-4 flex items-center gap-2">
           <span className="size-2.5 rounded-full bg-destructive/70" />
           <span className="size-2.5 rounded-full bg-warning/70" />
@@ -122,7 +122,7 @@ export default function DashboardPreview() {
       </div>
 
       {/* Floating squad DPS card. */}
-      <div className="landing-border landing-float-delayed absolute -bottom-28 -left-4 hidden w-60 rounded-xl bg-card/95 p-3 shadow-xl shadow-black/40 backdrop-blur md:block lg:-left-12">
+      <div className="landing-border landing-float-delayed absolute -bottom-28 -left-4 hidden w-60 rounded-xl bg-card/95 p-3 shadow-xl shadow-black/40 md:block lg:-left-12">
         <p className="mb-2 flex items-center justify-between text-xs font-medium text-muted-foreground">
           Ura · CM <span className="font-mono">DPS</span>
         </p>

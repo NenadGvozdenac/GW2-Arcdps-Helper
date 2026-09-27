@@ -186,6 +186,16 @@ html {
   mask-composite: exclude;
 }
 
+/*
+ * Floating cards are moved as their own compositor layer (will-change + translate3d, no backdrop blur on them), so
+ * they are drawn once and slid smoothly. Otherwise they are re-drawn at fractional offsets every frame and their
+ * 1px gradient border (.landing-border) jumps between pixel rows.
+ */
+.landing-float,
+.landing-float-delayed {
+  will-change: transform;
+  backface-visibility: hidden;
+}
 .landing-float {
   animation: landing-float 7s ease-in-out infinite;
 }
@@ -215,7 +225,8 @@ html {
 }
 
 @keyframes landing-float {
-  50% { transform: translateY(-10px); }
+  from, to { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
 }
 @keyframes landing-breathe {
   from { opacity: 0.7; transform: scale(1); }

@@ -9,7 +9,7 @@ DB_NAME := gw2arcdpshelper
 .PHONY: help up down restart build rebuild logs ps clean db-up db-shell \
         migrate migrate-status migration migrate-local migrate-prod \
         uploader-install uploader-dev uploader-prod uploader-build uploader-dist \
-        addon-build addon-zig
+        addon-build addon-zig release-uploader release-addon
 
 help:
 	@echo GW2 ArcDPS Helper make targets:
@@ -39,6 +39,9 @@ help:
 	@echo   Nexus addon - in-game uploader
 	@echo     make addon-build       Build nexus-addon with CMake + Visual Studio - nexus-addon/build/Release
 	@echo     make addon-zig         Build nexus-addon with zig, no Visual Studio needed - nexus-addon/build
+	@echo   Releases - tag + push, GitHub Actions builds and publishes
+	@echo     make release-uploader  Release the desktop uploader - next patch version, or v=1.2.0
+	@echo     make release-addon     Release the Nexus addon - next patch version, or v=1.2.0
 
 # ---------- containers ----------
 
@@ -131,3 +134,13 @@ addon-zig:
 		-Wno-nontrivial-memcall -Wno-nullability-completeness -isystem $(ADDON)/third_party -I$(ADDON)/src $(ADDON_SOURCES) -lwinhttp -lcrypt32 -lshell32 -lole32 \
 		-o $(ADDON)/build/gw2-arcdps-helper.dll
 	@echo Built $(ADDON)/build/gw2-arcdps-helper.dll - copy it to "<Guild Wars 2>/addons"
+
+# ---------- releases ----------
+
+# Tag + push; the workflows build and publish the GitHub Release. Checks first that everything is committed and pushed.
+# Without v= the patch number is increased (e.g. 1.0.0 -> 1.0.1).
+release-uploader:
+	node scripts/release.mjs uploader $(v)
+
+release-addon:
+	node scripts/release.mjs addon $(v)

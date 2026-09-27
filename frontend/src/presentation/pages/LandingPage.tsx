@@ -299,14 +299,8 @@ export default function LandingPage() {
 
       {/* ---------- Hero ---------- */}
       <section className="relative">
-        {/*
-          Clipped to the hero: nothing animated may reach under the translucent sticky header, whose backdrop blur
-          otherwise shows the moving glow as a flickering purple band along its bottom edge.
-        */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_80px)]">
-          <div className="landing-grid absolute inset-0" />
-          <div className="landing-glow absolute inset-x-0 -top-24 h-[36rem]" />
-        </div>
+        {/* No glow here: under the translucent sticky header it showed up as a flickering purple band. */}
+        <div className="landing-grid pointer-events-none absolute inset-0" />
         <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-4 pt-16 pb-24 lg:grid-cols-[1.05fr_1fr] lg:pt-24 lg:pb-32">
           <div>
             <Reveal>

@@ -111,20 +111,25 @@ page asks the GitHub API for the newest release of each tag, so no redeploy is n
 | Nexus addon | `vX.Y.Z` (no prefix, see below) | `build-nexus-addon.yml` | `gw2-arcdps-helper.dll` |
 
 1. Commit and push your changes to `main`. The tag builds the commit it points to.
-2. Pick a version higher than the last one. List the existing ones with `git tag -l "uploader-v*"` or
-   `git tag -l "v*"`.
-3. Create the tag and push it. In PowerShell, run each command on its own line (Windows PowerShell has no `&&`):
+2. Release:
 
-   ```powershell
-   git tag uploader-v0.2.0
-   git push origin uploader-v0.2.0
-
-   git tag v0.2.0
-   git push origin v0.2.0
+   ```sh
+   make release-uploader          # next patch version, e.g. uploader-v1.0.1 -> uploader-v1.0.2
+   make release-addon             # next patch version, e.g. v1.0.0 -> v1.0.1
+   make release-addon v=1.1.0     # or a version of your choice (must be newer than the latest one)
    ```
 
-4. Follow the build under **Actions** on GitHub. After a few minutes the release appears under **Releases**, and the
+   `scripts/release.mjs` first checks that there are no uncommitted changes and that `main` matches GitHub. It then
+   creates the tag, pushes it, and prints the Actions and release links. It works from PowerShell, cmd.exe and bash.
+
+   **Or from GitHub, without a terminal:** go to **Actions** → **Build uploader** (or **Build Nexus addon**) →
+   **Run workflow** on `main`, tick **release**, and optionally enter a version. That run uses the same script to
+   create the tag, then builds and publishes the release itself. A tag pushed by Actions doesn't start another run.
+3. Follow the build under **Actions** on GitHub. After a few minutes the release appears under **Releases**, and the
    website links point to it.
+
+Without make, you can tag by hand. In PowerShell, run each command on its own line (Windows PowerShell has no `&&`):
+`git tag uploader-v1.2.0`, then `git push origin uploader-v1.2.0` (or `v1.2.0` for the addon).
 
 Notes:
 

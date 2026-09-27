@@ -2,8 +2,13 @@ name: Build Nexus addon
 
 # Builds the in-game Nexus addon (gw2-arcdps-helper.dll) with MSVC.
 # - Push to main that touches nexus-addon/ (or a manual run): the DLL is attached to the run as an artifact.
-# - Push a tag like `v0.2.0`: the DLL is published as a GitHub Release. Nexus (UP_GitHub) only understands plain
-#   vX.Y.Z tags, which is why the addon doesn't use an "addon-" prefix like the uploader does.
+# - Release, either way:
+#   - Actions → Build Nexus addon → Run workflow with "release" ticked (version optional, empty = next patch), or
+#   - push a tag like `v0.2.0` (`make release-addon` does that).
+#   The DLL gets that version and is published as a GitHub Release; Nexus then updates installed copies.
+#   Both use scripts/release.mjs to pick the version and create the tag.
+# Nexus (UP_GitHub) only understands plain vX.Y.Z tags, which is why the addon doesn't use an "addon-" prefix like the
+# uploader does.
 
 on:
   push:
@@ -13,6 +18,15 @@ on:
       - "nexus-addon/**"
       - ".github/workflows/build-nexus-addon.yml"
   workflow_dispatch:
+    inputs:
+      release:
+        description: "Publish a release (creates the vX.Y.Z tag)"
+        type: boolean
+        default: false
+      version:
+        description: "Version X.Y.Z (empty = next patch version)"
+        type: string
+        required: false
 
 concurrency:
   group: build-nexus-addon-${{ github.ref }}
@@ -26,16 +40,37 @@ jobs:
       contents: write
     defaults:
       run:
+        shell: bash
         working-directory: nexus-addon
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create the release tag
+        id: tag
+        if: github.event_name == 'workflow_dispatch' && inputs.release
+        working-directory: .
+        env:
+          VERSION: ${{ inputs.version }}
+        run: node scripts/release.mjs addon "$VERSION"
+
+      - name: Resolve the release (tag push or "release" run)
+        id: release
+        env:
+          CREATED_TAG: ${{ steps.tag.outputs.tag }}
+        run: |
+          TAG=""
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then TAG="$GITHUB_REF_NAME"; fi
+          if [[ -n "$CREATED_TAG" ]]; then TAG="$CREATED_TAG"; fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Release: ${TAG:-none (artifact only)}"
+
       - name: Configure
-        shell: bash
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
           # v0.2.0 -> 0.2.0 (the addon version in Nexus); other builds are 0.0.0 and never auto-update.
           VERSION=0.0.0
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then VERSION="${GITHUB_REF_NAME#v}"; fi
+          if [[ -n "$TAG" ]]; then VERSION="${TAG#v}"; fi
           cmake -S . -B build -A x64 -DADDON_VERSION="$VERSION"
 
       - name: Build
@@ -48,9 +83,10 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.release.outputs.tag != ''
         uses: softprops/action-gh-release@v2
         with:
-          name: Nexus addon ${{ github.ref_name }}
+          tag_name: ${{ steps.release.outputs.tag }}
+          name: Nexus addon ${{ steps.release.outputs.tag }}
           files: nexus-addon/build/Release/gw2-arcdps-helper.dll
           generate_release_notes: true
