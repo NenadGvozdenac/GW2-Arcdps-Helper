@@ -14,6 +14,7 @@ add_library(gw2-arcdps-helper SHARED
   src/entry.cpp
   src/account.cpp
   src/api.cpp
+  src/desktopUploader.cpp
   src/http.cpp
   src/settings.cpp
   src/ui.cpp

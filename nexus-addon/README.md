@@ -30,6 +30,7 @@ src/
 │                 -> POST /api/logs (with the session id while recording); history in uploads.json
 ├── account.cpp   sign-in and sessions on their own thread; re-checks the active session every minute
 ├── watcher.cpp   ReadDirectoryChangesW on the log folder (recursive: ArcDPS uses one folder per boss)
+├── desktopUploader.cpp  notices when the desktop uploader is running too (process list, every 5 s)
 ├── updater.cpp   self-update: newest addon-vX.Y.Z GitHub Release -> Nexus RequestUpdate (skipped for local 0.0.0 builds)
 ├── api.cpp       dps.report + GW2 ArcDPS Helper clients (the same endpoints the desktop uploader uses)
 ├── http.cpp      blocking WinHTTP requests; CancelAll() aborts them on unload so threads join quickly
@@ -44,7 +45,9 @@ Network and file I/O never run on the render thread. Worker threads stop on unlo
 Files are stored in `<GW2>\addons\GW2ArcDPSHelper\`: `settings.json`, where the sign-in token is encrypted with
 Windows DPAPI, and `uploads.json`, which keeps the last 50 finished uploads.
 
-> Do not run the addon and the desktop uploader at the same time, or every log is uploaded twice.
+> Do not run the addon and the desktop uploader at the same time, or every log is uploaded twice. The addon checks
+> the process list every 5 seconds. While the desktop uploader runs and auto-upload is on, a red warning appears in
+> its window and options, and an alert pops up once. Its options also carry this instruction permanently.
 
 ## Build
 

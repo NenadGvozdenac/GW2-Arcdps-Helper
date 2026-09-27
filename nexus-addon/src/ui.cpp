@@ -7,6 +7,7 @@
 #include "imgui/imgui_internal.h"
 
 #include "account.h"
+#include "desktopUploader.h"
 #include "globals.h"
 #include "settings.h"
 #include "uploads.h"
@@ -45,6 +46,22 @@ namespace
 	void Copy(char* dest, size_t size, const std::string& value)
 	{
 		strncpy_s(dest, size, value.c_str(), _TRUNCATE);
+	}
+
+	void TextWrappedColored(const ImVec4& color, const char* text)
+	{
+		ImGui::PushStyleColor(ImGuiCol_Text, color);
+		ImGui::TextWrapped("%s", text);
+		ImGui::PopStyleColor();
+	}
+
+	/** Both uploaders watching the same folder would upload every log twice. */
+	void RenderDesktopUploaderWarning(bool autoUpload)
+	{
+		if (!autoUpload || !DesktopUploader::IsRunning()) return;
+		TextWrappedColored(RED,
+			"The GW2 ArcDPS Helper desktop uploader is running. Close it (tray icon > Quit) or turn off "
+			"\"Auto-upload new logs\" here - with both on, every log is uploaded twice.");
 	}
 
 	const char* StageText(const Upload& u)
@@ -202,6 +219,7 @@ namespace UI
 			AccountState acc = Account::Get();
 			Settings s = Config::Get();
 
+			RenderDesktopUploaderWarning(s.autoUpload);
 			RenderRecording(acc);
 			if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
 
@@ -266,6 +284,9 @@ namespace UI
 
 		ImGui::Separator();
 		ImGui::TextUnformatted("Uploads");
+		TextWrappedColored(GREY,
+			"Use either this addon or the GW2 ArcDPS Helper desktop uploader, not both: with both running, every log is "
+			"uploaded twice. Quit the desktop uploader (tray icon > Quit) while you play with the addon.");
 
 		bool autoUpload = s.autoUpload, showAlerts = s.showAlerts;
 		if (ImGui::Checkbox("Auto-upload new logs", &autoUpload))
@@ -273,6 +294,7 @@ namespace UI
 			Config::Update([&](Settings& c) { c.autoUpload = autoUpload; });
 			ApplyWatching();
 		}
+		RenderDesktopUploaderWarning(autoUpload);
 		if (ImGui::Checkbox("Show an alert when a log is uploaded", &showAlerts))
 		{
 			Config::Update([&](Settings& c) { c.showAlerts = showAlerts; });

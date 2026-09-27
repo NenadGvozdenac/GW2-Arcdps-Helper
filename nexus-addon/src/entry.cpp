@@ -9,6 +9,7 @@
 #include "imgui/imgui.h"
 
 #include "account.h"
+#include "desktopUploader.h"
 #include "globals.h"
 #include "http.h"
 #include "resource.h"
@@ -104,6 +105,7 @@ namespace
 		Account::Start();
 		UI::ApplyWatching();
 		Updater::Start(AddonDef.Version);
+		DesktopUploader::Start();
 
 		api->GUI_Register(RT_Render, Render);
 		api->GUI_Register(RT_OptionsRender, UI::RenderOptions);
@@ -131,6 +133,7 @@ namespace
 		// Abort running requests so the worker threads can be joined right away.
 		Http::CancelAll();
 		Updater::Stop();
+		DesktopUploader::Stop();
 		Watcher::Stop();
 		Account::Stop();
 		Uploads::Stop();
