@@ -20,10 +20,12 @@ While watching, closing the window keeps the app running in the tray.
 ## Updates
 
 The installed app updates itself (`src/main/services/updateService.ts`, packaged builds only). About 10 seconds after
-start, and then every 6 hours, it asks the GitHub API for the newest `uploader-vX.Y.Z` release that has a
-`latest.yml`. If that release is newer, it points electron-updater at it, which downloads the setup exe in the
-background and checks its sha512. A bar at the top then offers **Restart and update**; otherwise the update is
-installed silently when the app quits. The portable exe can't update itself, so it only shows a download link.
+start, and then every 6 hours, it reads the newest `uploader-vX.Y.Z` tag from the repository's git refs
+(`…/info/refs`, the endpoint `git fetch` uses). It avoids the REST API on purpose: that allows only 60 requests/hour
+per IP, shared with Nexus' update checks and the website. If the tag is newer, the app points electron-updater at
+that release, which reads its `latest.yml`, downloads the setup exe in the background and checks its sha512. A bar at
+the top then offers **Restart and update**; otherwise the update is installed silently when the app quits. The
+portable exe can't update itself, so it only shows a link to the release page.
 
 GitHub's "latest release" can't be used, because the Nexus addon (`vX.Y.Z` tags) is released from the same
 repository. Artifact names have no spaces, because GitHub turns spaces into dots and `latest.yml` must name the

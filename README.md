@@ -148,8 +148,11 @@ Notes:
     reloads the addon. Nexus only understands tags like `v1.2.3`, which is why addon tags have no prefix. It skips
     `uploader-v*` and the old `addon-v0.1.0` / `addon-v0.1.1` releases. Those two can't update themselves, so
     players on them install `v0.1.2` or newer once by hand. Local builds (`0.0.0`) never auto-update.
-  - **Uploader (installer version):** updates itself. Shortly after start, and then every 6 hours, it looks up the
-    newest `uploader-v*` release and downloads it in the background with electron-updater, which checks the file's
+    Nexus asks the GitHub REST API, which allows 60 requests per hour per IP, shared with every other GitHub-hosted
+    addon. If the Nexus log shows "API rate limit exceeded", the check succeeds again after the limit resets.
+  - **Uploader (installer version):** updates itself. Shortly after start, and then every 6 hours, it reads the newest
+    `uploader-v*` tag from the repository's git refs, which are not subject to the GitHub API rate limit. It then
+    downloads that release in the background with electron-updater, which checks the file's
     sha512 against `latest.yml`. A bar offers "Restart and update", and otherwise the update is installed when the
     app quits. The workflow must publish `latest.yml` with the exe, and file names have no spaces because GitHub
     turns spaces into dots. Releases up to `uploader-v0.1.0` can't do this, so install the first version with it by

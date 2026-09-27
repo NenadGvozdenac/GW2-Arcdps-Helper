@@ -1,7 +1,8 @@
 import { app } from "electron";
 import { autoUpdater } from "electron-updater";
 import {
-  RELEASES_API_URL,
+  GIT_REFS_URL,
+  RELEASE_PAGE_URL,
   RELEASES_DOWNLOAD_URL,
   UPDATE_CHECK_INTERVAL_MS,
   UPDATE_FIRST_CHECK_MS,
@@ -12,22 +13,14 @@ import { logger } from "./logger";
 import { notifier } from "./notifier";
 import { stateStore } from "./stateStore";
 
-/** Subset of GET /repos/{owner}/{repo}/releases (newest first). */
-interface GithubRelease {
-  tag_name: string;
-  draft: boolean;
-  prerelease: boolean;
-  html_url: string;
-  assets: { name: string }[];
-}
-
 interface LatestRelease {
   version: string;
   tag: string;
   pageUrl: string;
 }
 
-const TAG = /^uploader-v(\d+\.\d+\.\d+)$/;
+/** refs/tags/uploader-vX.Y.Z in the git ref advertisement (peeled "^{}" entries don't match: no trailing \d). */
+const TAG_REF = /refs\/tags\/(uploader-v(\d+\.\d+\.\d+))(?![\d^])/g;
 
 /** The portable exe (electron-builder "portable" target) can't update itself. */
 const isPortable = () => !!process.env.PORTABLE_EXECUTABLE_FILE;
@@ -40,18 +33,20 @@ function compareVersions(a: string, b: string): number {
   return 0;
 }
 
-/** Newest published uploader release that electron-updater can install from (it needs the release's latest.yml). */
+/**
+ * Highest uploader-vX.Y.Z tag. A tag whose release is still building (no latest.yml yet) makes electron-updater fail;
+ * the next check picks it up.
+ */
 async function latestRelease(): Promise<LatestRelease | null> {
-  const res = await fetchWithTimeout(RELEASES_API_URL, { headers: { Accept: "application/vnd.github+json" } }, 30_000);
+  const res = await fetchWithTimeout(GIT_REFS_URL, {}, 30_000);
   if (!res.ok) throw new Error(`GitHub returned ${res.status}`);
-  const releases = (await res.json()) as GithubRelease[];
-  for (const r of releases) {
-    const version = TAG.exec(r.tag_name)?.[1];
-    if (!version || r.draft || r.prerelease) continue;
-    if (!isPortable() && !r.assets.some((a) => a.name === "latest.yml")) continue;
-    return { version, tag: r.tag_name, pageUrl: r.html_url };
+  let latest: LatestRelease | null = null;
+  for (const [, tag, version] of (await res.text()).matchAll(TAG_REF)) {
+    if (!latest || compareVersions(version, latest.version) > 0) {
+      latest = { version, tag, pageUrl: `${RELEASE_PAGE_URL}/${tag}` };
+    }
   }
-  return null;
+  return latest;
 }
 
 async function check(): Promise<void> {

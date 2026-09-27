@@ -262,7 +262,7 @@ export default function LandingPage() {
   return (
     <div className="landing relative min-h-svh overflow-x-clip">
       {/* ---------- Nav ---------- */}
-      <header className="sticky top-0 z-30 border-b border-transparent bg-background/60 backdrop-blur-lg supports-[backdrop-filter]:bg-background/40">
+      <header className="sticky top-0 z-30 border-b border-transparent bg-background/80 backdrop-blur-lg">
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
           <Link to="/">
             <Brand />
@@ -299,8 +299,14 @@ export default function LandingPage() {
 
       {/* ---------- Hero ---------- */}
       <section className="relative">
-        <div className="landing-grid pointer-events-none absolute inset-0 -top-16" />
-        <div className="landing-glow pointer-events-none absolute inset-x-0 -top-24 h-[36rem]" />
+        {/*
+          Clipped to the hero: nothing animated may reach under the translucent sticky header, whose backdrop blur
+          otherwise shows the moving glow as a flickering purple band along its bottom edge.
+        */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_80px)]">
+          <div className="landing-grid absolute inset-0" />
+          <div className="landing-glow absolute inset-x-0 -top-24 h-[36rem]" />
+        </div>
         <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-4 pt-16 pb-24 lg:grid-cols-[1.05fr_1fr] lg:pt-24 lg:pb-32">
           <div>
             <Reveal>

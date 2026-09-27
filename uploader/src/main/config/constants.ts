@@ -16,10 +16,12 @@ export const MAX_UPLOADS_KEPT = 200;
 
 /**
  * Updates: releases are tagged uploader-vX.Y.Z (the Nexus addon shares the repository with plain vX.Y.Z tags, so
- * GitHub's "latest release" can't be used). The newest one is looked up here and handed to electron-updater.
+ * GitHub's "latest release" can't be used). The newest tag is read from the repository's git refs — the endpoint
+ * `git fetch` uses — rather than the REST API, whose 60 requests/hour per IP are shared with Nexus' update checks.
  */
-export const RELEASES_API_URL = "https://api.github.com/repos/NenadGvozdenac/GW2-Arcdps-Helper/releases?per_page=30";
+export const GIT_REFS_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper.git/info/refs?service=git-upload-pack";
 export const RELEASES_DOWNLOAD_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper/releases/download";
+export const RELEASE_PAGE_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper/releases/tag";
 export const UPDATE_FIRST_CHECK_MS = 10_000;
 export const UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60_000;
 
