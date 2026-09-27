@@ -13,7 +13,7 @@ and sends every new log to dps.report and to GW2 ArcDPS Helper automatically —
 │       ├── app.ts           Express app (default export = Vercel entry point)
 │       ├── server.ts        app.listen() for Docker / local development
 │       ├── config/          env, constants
-│       ├── db/              pg pool, SQL migrations and the migrate script
+│       ├── db/              Drizzle schema + client, generated migrations and the migrate script
 │       ├── types/           all TypeScript types
 │       ├── data/            boss catalogue (wings, fractals, strikes)
 │       ├── validation/      zod schemas + validate helper
@@ -80,7 +80,7 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 | `make clean` | Stop containers **and delete the database volume** |
 | `make db-up` | Start only Postgres (for `npm run dev` outside Docker) |
 | `make db-shell` | Open `psql` in the db container |
-| `make migration name=add_notes` | Create `backend/src/db/migrations/NNN_add_notes.sql` |
+| `make migration name=add_notes` | Generate a migration from changes in `backend/src/db/schema.ts` |
 | `make migrate` | Rebuild the backend image and apply pending migrations |
 | `make migrate-status` | List applied migrations |
 | `make migrate-local` | Apply migrations to the local database (`backend/.env.development`) |
@@ -90,8 +90,9 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 | `make uploader-prod` | Run the uploader against production (URLs in `uploader/.env.production`) |
 | `make uploader-build` / `uploader-dist` | Build the uploader / build the Windows installer + portable exe |
 
-Migrations are plain, forward-only SQL files applied in name order; each runs once inside a transaction
-and is recorded in the `schema_migrations` table. The backend container also applies them on startup.
+The backend uses Drizzle ORM: tables live in `backend/src/db/schema.ts`, and drizzle-kit generates the migrations
+from it. Applied migrations are recorded in `drizzle.__drizzle_migrations`. The backend container also applies them
+on startup.
 
 ## Vercel
 

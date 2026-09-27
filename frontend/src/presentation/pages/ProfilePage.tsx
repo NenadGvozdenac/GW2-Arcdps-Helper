@@ -14,20 +14,18 @@ import { describeError } from "../utils/describeError";
 
 function useProfileController() {
   const { user, updateProfile } = useAuth();
-  const [displayName, setDisplayName] = useState("");
   const [gw2Account, setGw2Account] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
   useEffect(() => {
-    setDisplayName(user?.displayName ?? "");
     setGw2Account(user?.gw2Account ?? "");
   }, [user]);
 
   async function save() {
     setError(null);
     try {
-      await updateProfile({ displayName, gw2Account });
+      await updateProfile({ gw2Account });
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -35,7 +33,7 @@ function useProfileController() {
     }
   }
 
-  return { email: user?.email ?? "", displayName, setDisplayName, gw2Account, setGw2Account, saved, error, save };
+  return { email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
 }
 
 export default function ProfilePage() {
@@ -59,16 +57,13 @@ export default function ProfilePage() {
               <Input id="email" value={c.email} disabled />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="displayName">{t("profile.displayName")}</Label>
-              <Input id="displayName" value={c.displayName} onChange={(e) => c.setDisplayName(e.target.value)} required />
-            </div>
-            <div className="grid gap-2">
               <Label htmlFor="gw2Account">{t("profile.gw2Account")}</Label>
               <Input
                 id="gw2Account"
                 value={c.gw2Account}
                 onChange={(e) => c.setGw2Account(e.target.value)}
                 placeholder="Name.1234"
+                required
               />
               <p className="text-sm text-muted-foreground">{t("profile.gw2AccountHint")}</p>
             </div>

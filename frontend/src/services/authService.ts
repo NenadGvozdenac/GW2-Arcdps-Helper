@@ -10,12 +10,9 @@ export const authService = {
   isValidGw2Account: (value: string) => GW2_ACCOUNT_RE.test(value.trim()),
 
   validateRegistration(input: RegisterInput): void {
-    if (!input.displayName.trim()) throw new ValidationError("validation.displayNameRequired");
+    if (!authService.isValidGw2Account(input.gw2Account)) throw new ValidationError("validation.invalidGw2Account");
     if (input.password.length < 6) throw new ValidationError("validation.passwordTooShort");
     if (input.password !== input.confirmPassword) throw new ValidationError("validation.passwordsDontMatch");
-    if (input.gw2Account.trim() && !authService.isValidGw2Account(input.gw2Account)) {
-      throw new ValidationError("validation.invalidGw2Account");
-    }
   },
 
   async register(input: RegisterInput): Promise<User> {
@@ -23,7 +20,6 @@ export const authService = {
     return authRepository.register({
       email: input.email.trim(),
       password: input.password,
-      displayName: input.displayName.trim(),
       gw2Account: input.gw2Account.trim(),
     });
   },

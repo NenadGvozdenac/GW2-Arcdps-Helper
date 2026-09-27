@@ -26,7 +26,7 @@ help:
 	@echo     make db-shell        Open psql in the db container
 	@echo     make migrate         Rebuild the backend image and apply pending migrations
 	@echo     make migrate-status  List applied migrations
-	@echo     make migration name=add_something   Create the next numbered .sql migration
+	@echo     make migration name=add_something   Generate a migration from changes in backend/src/db/schema.ts
 	@echo     make migrate-local   Apply migrations to the local database - backend/.env.development
 	@echo     make migrate-prod    Apply migrations to the production database - backend/.env.production
 	@echo   Desktop uploader
@@ -79,7 +79,7 @@ migrate:
 	$(COMPOSE) run --rm backend npx tsx src/db/migrate.ts
 
 migrate-status:
-	$(COMPOSE) exec db psql -U $(DB_USER) -d $(DB_NAME) -c "SELECT name, applied_at FROM schema_migrations ORDER BY name"
+	$(COMPOSE) exec db psql -U $(DB_USER) -d $(DB_NAME) -c "SELECT id, hash, to_timestamp(created_at / 1000) AS created FROM drizzle.__drizzle_migrations ORDER BY id"
 
 migration:
 	npm --prefix backend run migration:new -- $(name)

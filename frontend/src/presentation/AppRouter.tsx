@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
-import { RequireAuth, RequireGuest } from "./components/RouteGuards";
+import { HomeRoute, RequireAuth, RequireGuest } from "./components/RouteGuards";
+import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -17,9 +18,21 @@ export default function AppRouter() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
       </Route>
+      <Route
+        index
+        element={
+          <HomeRoute
+            guest={<LandingPage />}
+            signedIn={
+              <Layout>
+                <DashboardPage />
+              </Layout>
+            }
+          />
+        }
+      />
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
-          <Route index element={<DashboardPage />} />
           <Route path="upload" element={<UploadPage />} />
           <Route path="raids" element={<CategoryPage key="raid" category="raid" />} />
           <Route path="fractals" element={<CategoryPage key="fractal" category="fractal" />} />

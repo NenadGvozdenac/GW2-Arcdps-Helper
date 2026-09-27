@@ -3,7 +3,6 @@
 export interface BackendUser {
   id: string;
   email: string;
-  displayName: string;
   gw2Account: string;
 }
 

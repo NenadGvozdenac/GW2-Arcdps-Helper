@@ -1,5 +1,6 @@
+import type { ReactNode } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
-import { LogOutIcon, UploadIcon } from "lucide-react";
+import { LogOutIcon, SettingsIcon, UploadIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import type { TranslationKey } from "../../i18n/i18n.types";
@@ -15,8 +16,9 @@ const NAV: { to: string; label: TranslationKey; end?: boolean }[] = [
   { to: "/logs", label: "nav.allLogs" },
 ];
 
-export default function Layout() {
-  const { user, displayName, logout } = useAuth();
+/** App shell for signed-in pages; renders `children` when given (the "/" route), otherwise the nested route. */
+export default function Layout({ children }: { children?: ReactNode }) {
+  const { user, accountLabel, logout } = useAuth();
   const { t } = useI18n();
 
   return (
@@ -49,10 +51,18 @@ export default function Layout() {
                 <UploadIcon /> {t("nav.upload")}
               </Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="max-w-40">
-              <Link to="/profile" title={user?.email ?? ""}>
-                <span className="truncate">{displayName}</span>
-              </Link>
+            <span className="max-w-40 truncate px-2 text-sm font-medium" title={user?.email ?? ""}>
+              {accountLabel}
+            </span>
+            <Button asChild variant="ghost" size="icon" className="size-8">
+              <NavLink
+                to="/profile"
+                title={t("nav.settings")}
+                aria-label={t("nav.settings")}
+                className={({ isActive }) => cn(isActive && "bg-accent text-accent-foreground")}
+              >
+                <SettingsIcon />
+              </NavLink>
             </Button>
             <Button variant="ghost" size="icon" className="size-8" onClick={() => logout()} title={t("nav.logout")}>
               <LogOutIcon />
@@ -61,7 +71,7 @@ export default function Layout() {
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
-        <Outlet />
+        {children ?? <Outlet />}
       </main>
     </div>
   );

@@ -11,13 +11,14 @@
     "build": "tsc && node -e \"require('fs').cpSync('src/db/migrations','dist/db/migrations',{recursive:true})\"",
     "start": "node dist/server.js",
     "migrate": "tsx --env-file=.env.development src/db/migrate.ts",
-    "migration:new": "node scripts/newMigration.mjs",
+    "migration:new": "drizzle-kit generate --name",
     "migrate:production": "tsx --env-file=.env.production src/db/migrate.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
+    "drizzle-orm": "^0.45.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.0",
@@ -30,6 +31,7 @@
     "@types/node": "^22.10.0",
     "@types/pg": "^8.11.10",
     "@vercel/node": "^5.0.0",
+    "drizzle-kit": "^0.31.11",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   }

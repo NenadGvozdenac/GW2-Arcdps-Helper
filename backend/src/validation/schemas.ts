@@ -1,16 +1,16 @@
 import { z } from "zod";
 import { MAX_URLS_PER_CALL } from "../config/constants";
 
+/** The GW2 account (Name.1234) is the user's identity — required. */
 const gw2Account = z
-  .string()
+  .string({ error: "GW2 account is required." })
   .trim()
-  .refine((v) => v === "" || /^.{3,32}\.\d{4}$/.test(v), "GW2 account must look like Name.1234");
+  .regex(/^.{3,32}\.\d{4}$/, "GW2 account must look like Name.1234");
 
 export const registerSchema = z.object({
   email: z.email("Invalid email address.").trim().max(254),
   password: z.string().min(6, "Password must be at least 6 characters.").max(200),
-  displayName: z.string().trim().min(1, "Display name is required.").max(40),
-  gw2Account: gw2Account.default(""),
+  gw2Account,
 });
 
 export const loginSchema = z.object({
@@ -19,8 +19,7 @@ export const loginSchema = z.object({
 });
 
 export const profileUpdateSchema = z.object({
-  displayName: z.string().trim().min(1, "Display name is required.").max(40).optional(),
-  gw2Account: gw2Account.optional(),
+  gw2Account,
 });
 
 export const submitLogsSchema = z.object({

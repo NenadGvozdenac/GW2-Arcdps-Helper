@@ -53,5 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside <AuthProvider>");
-  return { ...ctx, displayName: ctx.user?.displayName || ctx.user?.email || "" };
+  // Users are shown by their GW2 account; accounts created before it was required fall back to the email.
+  return { ...ctx, accountLabel: ctx.user?.gw2Account || ctx.user?.email || "" };
 }

@@ -11,7 +11,7 @@ import { Label } from "@/presentation/components/ui/label";
 import AuthShell from "../components/AuthShell";
 import { describeError } from "../utils/describeError";
 
-const EMPTY: RegisterInput = { displayName: "", gw2Account: "", email: "", password: "", confirmPassword: "" };
+const EMPTY: RegisterInput = { gw2Account: "", email: "", password: "", confirmPassword: "" };
 
 function useRegisterController() {
   const { register } = useAuth();
@@ -59,25 +59,17 @@ export default function RegisterPage() {
       }
     >
       <div className="grid gap-2">
-        <Label htmlFor="displayName">{t("auth.displayName")}</Label>
-        <Input
-          id="displayName"
-          value={form.displayName}
-          onChange={(e) => setField("displayName", e.target.value)}
-          required
-          maxLength={40}
-        />
-      </div>
-      <div className="grid gap-2">
         <Label htmlFor="gw2Account">
           {t("auth.gw2Account")}
-          <span className="font-normal text-muted-foreground">{t("auth.gw2AccountOptional")}</span>
+          <span className="font-normal text-muted-foreground">{t("auth.gw2AccountExample")}</span>
         </Label>
         <Input
           id="gw2Account"
           value={form.gw2Account}
           onChange={(e) => setField("gw2Account", e.target.value)}
           placeholder="Name.1234"
+          autoComplete="username"
+          required
         />
       </div>
       <div className="grid gap-2">

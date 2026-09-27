@@ -24,14 +24,14 @@ const SECTIONS: { category: Exclude<Category, "other">; label: TranslationKey; t
 ];
 
 function useDashboardController() {
-  const { displayName } = useAuth();
+  const { accountLabel } = useAuth();
   const { logs, loading, error } = useLogs();
 
   return useMemo(() => {
     const weekly = statsService.lastWeeklyReset();
     const kills = logs.filter((l) => l.success).length;
     return {
-      displayName,
+      accountLabel,
       loading,
       error,
       totals: {
@@ -47,17 +47,17 @@ function useDashboardController() {
       })),
       today: statsService.logsBetween(logs, statsService.lastDailyReset()),
     };
-  }, [logs, loading, error, displayName]);
+  }, [logs, loading, error, accountLabel]);
 }
 
 export default function DashboardPage() {
-  const { displayName, loading, error, totals, clearCards, today } = useDashboardController();
+  const { accountLabel, loading, error, totals, clearCards, today } = useDashboardController();
   const { t } = useI18n();
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title={t("dashboard.greeting", { name: displayName || t("dashboard.fallbackName") })}
+        title={t("dashboard.greeting", { name: accountLabel || t("dashboard.fallbackName") })}
         description={t("dashboard.subtitle")}
       />
 

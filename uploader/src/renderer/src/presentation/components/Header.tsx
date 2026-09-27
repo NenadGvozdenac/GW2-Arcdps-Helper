@@ -30,7 +30,7 @@ export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (t
         </nav>
         <div className="flex items-center gap-2">
           <span className="max-w-40 truncate px-2 text-sm font-medium" title={user?.email}>
-            {user?.displayName}
+            {user?.gw2Account || user?.email}
           </span>
           <Button
             variant="ghost"

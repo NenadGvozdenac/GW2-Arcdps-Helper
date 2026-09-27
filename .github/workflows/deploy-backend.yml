@@ -59,7 +59,7 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npm run build
-      # Runs only pending migrations (tracked in schema_migrations); a no-op when there are none.
+      # Runs only pending Drizzle migrations (tracked in drizzle.__drizzle_migrations); a no-op when there are none.
       - name: Migrate
         run: node dist/db/migrate.js
         env:

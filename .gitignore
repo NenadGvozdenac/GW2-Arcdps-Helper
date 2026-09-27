@@ -19,3 +19,6 @@ out/
 
 # Claude Code MCP servers are configured per user (~/.claude.json), not in the repo
 .mcp.json
+
+# Playwright MCP screenshots and snapshots
+.playwright-mcp/

@@ -125,3 +125,118 @@ html {
     scrollbar-color: color-mix(in oklch, var(--muted-foreground) 35%, transparent) transparent;
   }
 }
+
+/* ---------- Landing page ---------- */
+.landing {
+  --brand: oklch(0.7 0.2 340);
+  --brand-2: oklch(0.68 0.2 295);
+  --brand-3: oklch(0.82 0.15 75);
+}
+
+/* Faint grid that fades out towards the edges. */
+.landing-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
+}
+
+.landing-glow {
+  background:
+    radial-gradient(40% 50% at 30% 20%, color-mix(in oklch, var(--brand) 35%, transparent), transparent 70%),
+    radial-gradient(35% 45% at 75% 30%, color-mix(in oklch, var(--brand-2) 30%, transparent), transparent 70%);
+  filter: blur(40px);
+  animation: landing-breathe 9s ease-in-out infinite alternate;
+}
+
+.landing-gradient-text {
+  background: linear-gradient(100deg, var(--brand), var(--brand-2) 45%, var(--brand-3) 90%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: landing-shimmer 8s linear infinite;
+}
+
+/* Card with a gradient hairline border. In a layer so utilities like `absolute` still win. */
+@layer components {
+  .landing-border {
+    position: relative;
+    isolation: isolate;
+  }
+}
+.landing-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  padding: 1px;
+  border-radius: inherit;
+  background: linear-gradient(
+    140deg,
+    color-mix(in oklch, var(--brand) 60%, transparent),
+    transparent 40%,
+    transparent 60%,
+    color-mix(in oklch, var(--brand-2) 55%, transparent)
+  );
+  mask: linear-gradient(black 0 0) content-box, linear-gradient(black 0 0);
+  mask-composite: exclude;
+}
+
+.landing-float {
+  animation: landing-float 7s ease-in-out infinite;
+}
+.landing-float-delayed {
+  animation: landing-float 7s ease-in-out -3.5s infinite;
+}
+
+/* Dashes travelling along the "how it works" pipeline. */
+.landing-flow {
+  background-image: linear-gradient(90deg, var(--brand) 50%, transparent 50%);
+  background-size: 14px 2px;
+  animation: landing-flow 1.2s linear infinite;
+}
+
+/* Scroll reveal (see useReveal in LandingPage.tsx). */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes landing-float {
+  50% { transform: translateY(-10px); }
+}
+@keyframes landing-breathe {
+  from { opacity: 0.7; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.08); }
+}
+@keyframes landing-shimmer {
+  to { background-position: 200% center; }
+}
+@keyframes landing-flow {
+  to { background-position: 14px 0; }
+}
+@keyframes landing-bar {
+  from { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before {
+    animation: none !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

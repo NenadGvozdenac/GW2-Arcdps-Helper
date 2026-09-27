@@ -12,7 +12,6 @@ export interface AuthResponse {
 export interface RegisterInput {
   email: string;
   password: string;
-  displayName: string;
   gw2Account: string;
 }
 

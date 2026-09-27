@@ -13,3 +13,7 @@ export const FRESH_HIGHLIGHT_MS = 8_000;
 
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
+
+export const SOURCE_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";
+/** Built by .github/workflows/build-uploader.yml for every uploader-v* tag. */
+export const UPLOADER_DOWNLOAD_URL = `${SOURCE_URL}/releases/latest`;

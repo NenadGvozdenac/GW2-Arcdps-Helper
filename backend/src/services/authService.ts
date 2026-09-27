@@ -14,7 +14,6 @@ export const authService = {
     const user = await userRepository.create({
       email: input.email,
       passwordHash,
-      displayName: input.displayName,
       gw2Account: input.gw2Account,
     });
     if (!user) throw emailTaken();
@@ -23,7 +22,7 @@ export const authService = {
 
   async login(email: string, password: string): Promise<AuthResponse> {
     const row = await userRepository.findRowByEmail(email);
-    const ok = await bcrypt.compare(password, row?.password_hash ?? DUMMY_HASH);
+    const ok = await bcrypt.compare(password, row?.passwordHash ?? DUMMY_HASH);
     if (!row || !ok) throw invalidCredentials();
     const user = (await userRepository.findById(row.id))!;
     return { token: tokenService.sign(user.id), user };

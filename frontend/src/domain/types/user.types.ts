@@ -1,7 +1,6 @@
 export interface User {
   id: string;
   email: string;
-  displayName: string;
   gw2Account: string;
 }
 
@@ -11,7 +10,6 @@ export interface AuthResponse {
 }
 
 export interface RegisterInput {
-  displayName: string;
   gw2Account: string;
   email: string;
   password: string;
@@ -19,6 +17,5 @@ export interface RegisterInput {
 }
 
 export interface ProfileUpdate {
-  displayName: string;
   gw2Account: string;
 }

@@ -55,7 +55,7 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">{t("settings.title")}</h1>
         {c.user && (
           <p className="text-sm text-muted-foreground">
-            {t("settings.account", { name: c.user.displayName, email: c.user.email })}
+            {t("settings.account", { name: c.user.gw2Account || c.user.email, email: c.user.email })}
           </p>
         )}
         <p className="flex items-center gap-2 text-sm text-muted-foreground">

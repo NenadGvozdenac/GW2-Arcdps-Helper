@@ -3,7 +3,7 @@ import { http } from "./httpClient";
 import { tokenStorage } from "./tokenStorage";
 
 export const authRepository = {
-  async register(body: { email: string; password: string; displayName: string; gw2Account: string }): Promise<User> {
+  async register(body: { email: string; password: string; gw2Account: string }): Promise<User> {
     const res = await http.post<AuthResponse>("/auth/register", body);
     tokenStorage.set(res.token);
     return res.user;

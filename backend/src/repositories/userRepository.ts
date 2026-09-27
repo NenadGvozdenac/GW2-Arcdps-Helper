@@ -1,47 +1,33 @@
-import { getPool } from "../db/pool";
+import { eq, sql } from "drizzle-orm";
+import { getDb } from "../db/pool";
+import { users } from "../db/schema";
 import type { NewUser, ProfileUpdate, User, UserRow } from "../types/user.types";
 
-const toUser = (r: UserRow): User => ({
-  id: r.id,
-  email: r.email,
-  displayName: r.display_name,
-  gw2Account: r.gw2_account,
-  createdAt: r.created_at,
-});
+const toUser = ({ passwordHash: _, ...user }: UserRow): User => user;
+
+// Matches the case-insensitive unique index users_email_lower_idx.
+const emailEquals = (email: string) => eq(sql`lower(${users.email})`, email.toLowerCase());
 
 export const userRepository = {
   async findById(id: string): Promise<User | null> {
-    const { rows } = await getPool().query<UserRow>("SELECT * FROM users WHERE id = $1", [id]);
-    return rows[0] ? toUser(rows[0]) : null;
+    const [row] = await getDb().select().from(users).where(eq(users.id, id)).limit(1);
+    return row ? toUser(row) : null;
   },
 
   /** Returns the raw row (incl. password hash) — only for credential checks. */
   async findRowByEmail(email: string): Promise<UserRow | null> {
-    const { rows } = await getPool().query<UserRow>("SELECT * FROM users WHERE lower(email) = lower($1)", [email]);
-    return rows[0] ?? null;
+    const [row] = await getDb().select().from(users).where(emailEquals(email)).limit(1);
+    return row ?? null;
   },
 
   /** Returns null if the email is already taken. */
   async create(user: NewUser): Promise<User | null> {
-    const { rows } = await getPool().query<UserRow>(
-      `INSERT INTO users (email, password_hash, display_name, gw2_account)
-       VALUES ($1, $2, $3, $4)
-       ON CONFLICT DO NOTHING
-       RETURNING *`,
-      [user.email, user.passwordHash, user.displayName, user.gw2Account],
-    );
-    return rows[0] ? toUser(rows[0]) : null;
+    const [row] = await getDb().insert(users).values(user).onConflictDoNothing().returning();
+    return row ? toUser(row) : null;
   },
 
   async update(id: string, patch: ProfileUpdate): Promise<User | null> {
-    const { rows } = await getPool().query<UserRow>(
-      `UPDATE users
-         SET display_name = COALESCE($2, display_name),
-             gw2_account  = COALESCE($3, gw2_account)
-       WHERE id = $1
-       RETURNING *`,
-      [id, patch.displayName ?? null, patch.gw2Account ?? null],
-    );
-    return rows[0] ? toUser(rows[0]) : null;
+    const [row] = await getDb().update(users).set(patch).where(eq(users.id, id)).returning();
+    return row ? toUser(row) : null;
   },
 };
