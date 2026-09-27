@@ -11,20 +11,22 @@ import UploadTable from "../components/UploadTable";
 import WatchPanel from "../components/WatchPanel";
 
 function useUploadsPageController() {
-  const { uploads } = useAppState();
+  const { uploads: all } = useAppState();
+  // Logs that could not be uploaded are not shown at all.
+  const uploads = useMemo(() => all.filter((u) => u.stage !== "failed"), [all]);
   const stats = useMemo(() => {
-    const today = new Date().toDateString();
+    const done = uploads.filter((u) => u.stage === "done");
     return {
-      today: uploads.filter((u) => u.stage === "done" && new Date(u.detectedAt).toDateString() === today).length,
-      failed: uploads.filter((u) => u.stage === "failed").length,
-      inProgress: uploads.filter((u) => u.stage === "queued" || u.stage === "uploading" || u.stage === "syncing").length,
+      uploaded: done.length,
+      kills: done.filter((u) => u.success === true).length,
+      wipes: done.filter((u) => u.success === false).length,
     };
   }, [uploads]);
 
   return {
     uploads,
     stats,
-    hasFinished: uploads.some((u) => u.stage === "done" || u.stage === "failed"),
+    hasFinished: uploads.some((u) => u.stage === "done"),
     clearFinished: () => uploaderBridge.clearFinished(),
   };
 }
@@ -47,9 +49,9 @@ export default function UploadsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="grid grid-cols-3 gap-4">
-        <Stat label={t("uploads.todayUploaded")} value={c.stats.today} className="text-success" />
-        <Stat label={t("uploads.inProgress")} value={c.stats.inProgress} />
-        <Stat label={t("uploads.failed")} value={c.stats.failed} className="text-destructive" />
+        <Stat label={t("uploads.uploaded")} value={c.stats.uploaded} />
+        <Stat label={t("uploads.kills")} value={c.stats.kills} className="text-success" />
+        <Stat label={t("uploads.wipes")} value={c.stats.wipes} className="text-destructive" />
       </div>
 
       <WatchPanel />

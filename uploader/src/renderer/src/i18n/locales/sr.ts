@@ -72,9 +72,9 @@ export const sr: Messages = {
     openDpsReport: "dps.report",
     openWeb: "Sajt",
     retry: "Pokušaj ponovo",
-    todayUploaded: "Uploadovano danas",
-    failed: "Neuspešno",
-    inProgress: "U toku",
+    uploaded: "Uploadovani logovi",
+    kills: "Killovi",
+    wipes: "Wipeovi",
   },
   stage: {
     queued: "Čeka",

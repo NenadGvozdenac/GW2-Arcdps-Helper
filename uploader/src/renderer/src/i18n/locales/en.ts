@@ -72,9 +72,9 @@ export const en = {
     openDpsReport: "dps.report",
     openWeb: "Web",
     retry: "Retry",
-    todayUploaded: "Uploaded today",
-    failed: "Failed",
-    inProgress: "In progress",
+    uploaded: "Uploaded logs",
+    kills: "Kills",
+    wipes: "Wipes",
   },
   stage: {
     queued: "Waiting",
