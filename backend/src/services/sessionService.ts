@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { SESSION_TTL_MS, SHARE_TOKEN_BYTES } from "../config/constants";
-import { sessionRepository, type SessionLogStat } from "../repositories/sessionRepository";
+import { sessionRepository, type SessionWithStats } from "../repositories/sessionRepository";
 import type { Log } from "../types/log.types";
 import type {
   LogSpan,
@@ -24,11 +24,11 @@ export function logSpan(logs: Pick<Log, "encounterTime" | "durationMs">[]): LogS
   return { start: new Date(start), end: new Date(end), durationMs: end - start };
 }
 
-/** Totals of one session's logs (oldest first) for the sessions list. */
-function summarize(session: Session, logs: SessionLogStat[]): SessionListItem {
-  const kills = logs.filter((l) => l.success).length;
-  const groupIds = [...new Set(logs.flatMap((l) => (l.groupId ? [l.groupId] : [])))];
-  return { session, logCount: logs.length, kills, wipes: logs.length - kills, groupIds, span: logSpan(logs) };
+/** Shapes a session and its log totals for the sessions list. */
+function toListItem({ logCount, kills, groupIds, spanStart, spanEnd, ...session }: SessionWithStats): SessionListItem {
+  const span =
+    spanStart && spanEnd ? { start: spanStart, end: spanEnd, durationMs: spanEnd.getTime() - spanStart.getTime() } : null;
+  return { session, logCount, kills, wipes: logCount - kills, groupIds, span };
 }
 
 const newExpiry = () => new Date(Date.now() + SESSION_TTL_MS);
@@ -65,17 +65,13 @@ export const sessionService = {
     return sessionRepository.listByOwner(ownerId);
   },
 
-  /** One page of the sessions list (display order), each with the totals of its logs. */
+  /**
+   * One page of the sessions list (display order), each with the totals of its logs. Doesn't expire overdue sessions
+   * itself: GET /sessions does that, and the website loads it first and polls it.
+   */
   async page(ownerId: string, page: number, pageSize: number): Promise<SessionPage> {
-    await expireOverdue(ownerId);
     const { rows, total } = await sessionRepository.page(ownerId, page, pageSize);
-    const stats = await sessionRepository.logStatsOf(
-      ownerId,
-      rows.map((s) => s.id),
-    );
-    const bySession = new Map<string, SessionLogStat[]>();
-    for (const l of stats) if (l.sessionId) bySession.set(l.sessionId, [...(bySession.get(l.sessionId) ?? []), l]);
-    return { sessions: rows.map((s) => summarize(s, bySession.get(s.id) ?? [])), total };
+    return { sessions: rows.map(toListItem), total };
   },
 
   async getActive(ownerId: string): Promise<Session | null> {

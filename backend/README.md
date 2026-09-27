@@ -106,7 +106,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
 | PATCH | `/sessions/:id` | ✓ | `{ name?, pinned? }` | `{ session }` — rename / pin |
 | POST | `/sessions/bulk-delete` | ✓ | `{ ids }` | `{ deleted }` — their logs are kept |
-| GET | `/sessions/page?page=&pageSize=` | ✓ | – | `{ sessions: { session, logCount, kills, wipes, groupIds, span }[], total, page, pageSize }` — one page in display order (pinned first), 10 per page by default |
+| GET | `/sessions/page?page=&pageSize=` | ✓ | – | `{ sessions: { session, logCount, kills, wipes, groupIds, span }[], total, page, pageSize }` — one page in display order (pinned first), 10 per page by default; one database query. Doesn't auto-end expired sessions (`GET /sessions` does) |
 | POST | `/sessions/:id/move` | ✓ | `{ overId }` | `204` — drag & drop: the session takes `overId`'s place (both pinned or both not) |
 | POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |

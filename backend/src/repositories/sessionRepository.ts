@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, isNull, lt, min } from "drizzle-orm";
+import { and, asc, count, desc, eq, getTableColumns, inArray, isNull, lt, min, sql } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs, sessions } from "../db/schema";
 import type { Log } from "../types/log.types";
@@ -8,8 +8,35 @@ const ownedBy = (ownerId: string) => eq(sessions.ownerId, ownerId);
 /** Pinned first, then the manual (drag & drop) order, newest first as tie-breaker. */
 const displayOrder = [desc(sessions.pinned), asc(sessions.sortOrder), desc(sessions.startedAt), desc(sessions.id)];
 
-/** The columns of a log that a session's summary needs. */
-export type SessionLogStat = Pick<Log, "sessionId" | "groupId" | "success" | "encounterTime" | "durationMs">;
+/** A session plus what its logs add up to, as the sessions list needs it. */
+export type SessionWithStats = Session & {
+  logCount: number;
+  kills: number;
+  /** Wings / fractals / strikes, in the order they were first played. */
+  groupIds: string[];
+  /** Start of the first fight / end of the last one; null without logs. */
+  spanStart: Date | null;
+  spanEnd: Date | null;
+};
+
+// Correlated subqueries over the session's logs (logs_session_idx); only run for the rows of one page.
+const sessionLogs = sql`FROM logs WHERE logs.session_id = ${sessions.id} AND logs.owner_id = ${sessions.ownerId}`;
+const withStats = {
+  ...getTableColumns(sessions),
+  logCount: sql<number>`(SELECT count(*) ${sessionLogs})`.mapWith(Number),
+  kills: sql<number>`(SELECT count(*) FILTER (WHERE logs.success) ${sessionLogs})`.mapWith(Number),
+  groupIds: sql<string[]>`(
+    SELECT coalesce(array_agg(g.group_id ORDER BY g.first_at), '{}')
+    FROM (SELECT logs.group_id, min(logs.encounter_time) AS first_at ${sessionLogs} AND logs.group_id IS NOT NULL
+          GROUP BY logs.group_id) AS g
+  )`,
+  spanStart: sql<Date | null>`(SELECT min(logs.encounter_time) ${sessionLogs})`.mapWith(sessions.startedAt),
+  spanEnd: sql<Date | null>`(
+    SELECT max(logs.encounter_time + logs.duration_ms * interval '1 millisecond') ${sessionLogs}
+  )`.mapWith(sessions.startedAt),
+  /** All of the owner's sessions (the window runs before LIMIT). */
+  total: sql<number>`count(*) OVER ()`.mapWith(Number),
+};
 
 export const sessionRepository = {
   /** In display order. */
@@ -21,35 +48,22 @@ export const sessionRepository = {
       .orderBy(...displayOrder);
   },
 
-  /** One page of the owner's sessions in display order, plus how many there are in total. */
-  async page(ownerId: string, page: number, pageSize: number): Promise<{ rows: Session[]; total: number }> {
-    const [rows, [{ total }]] = await Promise.all([
-      getDb()
-        .select()
-        .from(sessions)
-        .where(ownedBy(ownerId))
-        .orderBy(...displayOrder)
-        .limit(pageSize)
-        .offset((page - 1) * pageSize),
-      getDb().select({ total: count() }).from(sessions).where(ownedBy(ownerId)),
-    ]);
-    return { rows, total };
-  },
-
-  /** Just enough of these sessions' logs to summarize them (no players), oldest first. */
-  logStatsOf(ownerId: string, sessionIds: string[]): Promise<SessionLogStat[]> {
-    if (!sessionIds.length) return Promise.resolve([]);
-    return getDb()
-      .select({
-        sessionId: logs.sessionId,
-        groupId: logs.groupId,
-        success: logs.success,
-        encounterTime: logs.encounterTime,
-        durationMs: logs.durationMs,
-      })
-      .from(logs)
-      .where(and(eq(logs.ownerId, ownerId), inArray(logs.sessionId, sessionIds)))
-      .orderBy(asc(logs.encounterTime));
+  /**
+   * One page of the owner's sessions in display order with their log totals, plus how many sessions there are —
+   * in a single query (one round trip to the database).
+   */
+  async page(ownerId: string, page: number, pageSize: number): Promise<{ rows: SessionWithStats[]; total: number }> {
+    const rows = await getDb()
+      .select(withStats)
+      .from(sessions)
+      .where(ownedBy(ownerId))
+      .orderBy(...displayOrder)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+    if (rows.length) return { rows: rows.map(({ total: _total, ...row }) => row), total: rows[0].total };
+    // Past the last page there is no row to carry the total.
+    const [{ total }] = page > 1 ? await getDb().select({ total: count() }).from(sessions).where(ownedBy(ownerId)) : [{ total: 0 }];
+    return { rows: [], total };
   },
 
   /** The most recently started session. */

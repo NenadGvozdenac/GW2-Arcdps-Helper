@@ -43,6 +43,18 @@ export const sessionService = {
   /** Only sessions that ended by themselves after 6 hours can be resumed. */
   canResume: (session: Session) => session.endReason === "expired",
 
+  /**
+   * The same page as GET /sessions/page, computed from what the website already has loaded (sessions in display
+   * order + all logs) — shown right away while the server's page is on its way.
+   */
+  localPage(sessions: Session[], logs: Log[], page: number, pageSize: number): SessionPage {
+    const onPage = sessionService.views(sessions.slice((page - 1) * pageSize, page * pageSize), logs);
+    return {
+      sessions: onPage.map(({ logs: sessionLogs, ...view }) => ({ ...view, logCount: sessionLogs.length })),
+      total: sessions.length,
+    };
+  },
+
   /** Combines sessions with the user's logs (which carry their sessionId). Newest session first. */
   views(sessions: Session[], logs: Log[]): SessionView[] {
     const bySession = new Map<string, Log[]>();

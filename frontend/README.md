@@ -78,8 +78,9 @@ never call `fetch` or `localStorage` directly.
   refresh are briefly highlighted. "All logs" doesn't use that list: it asks the server for one page (20) at a time,
   searched and filtered there (`GET /logs/search`).
 - **Sessions:** `SessionsController` loads the user's sessions and their actions (rename, pin, share, resume, move,
-  delete), polling like the logs. The "Sessions" page asks the server for one page (10) at a time, with each session's
-  kills / wipes / duration already added up (`GET /sessions/page`).
+  delete), polling like the logs. The "Sessions" page is drawn right away from the sessions and logs already loaded,
+  then replaced by the server's page (10 at a time, each session's kills / wipes / duration added up —
+  `GET /sessions/page`).
 - **Stats:** raid/fractal/strike pages derive everything client-side with `statsService` (kills, wipes, best time,
   cleared since the weekly reset — Monday 07:30 UTC — or the daily reset for fractals).
 - **Errors:** services throw `ValidationError` (translation key) or `ApiError` (backend `code`);

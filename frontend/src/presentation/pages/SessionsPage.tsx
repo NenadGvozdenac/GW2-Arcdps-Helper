@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   DndContext,
@@ -59,39 +59,44 @@ import { failBadge, successBadge } from "../components/ResultBadge";
 import { describeError } from "../utils/describeError";
 
 /**
- * Fetches one page of the sessions list at a time (the server adds up each session's logs). Re-fetches when the page
- * changes, or when the shared session list / logs change (polling, pin, rename, delete, move).
+ * One page of the sessions list. It is drawn right away from the sessions and logs the website already has, then
+ * replaced by the server's page (GET /sessions/page) when that arrives. Re-fetched when the page changes, or when the
+ * shared session list / logs change (polling, pin, rename, delete, move).
  */
 function useSessionPage(page: number) {
   const { sessions } = useSessions();
   const { logs } = useLogs();
-  const [result, setResult] = useState<SessionPage>({ sessions: [], total: 0 });
-  const [loaded, setLoaded] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [fetched, setFetched] = useState<{ key: string; page: SessionPage } | null>(null);
   const [error, setError] = useState<unknown>(null);
   const [version, setVersion] = useState(0);
   const latest = useRef(0);
 
+  const local = useMemo(() => sessionService.localPage(sessions, logs, page, SESSIONS_PAGE_SIZE), [sessions, logs, page]);
   const signature =
     sessions.map((s) => `${s.id}:${s.pinned}:${s.name}:${s.endedAt?.getTime()}:${s.shareToken}`).join("|") +
     `#${logs.length}`;
+  const key = `${page}#${version}#${signature}`;
 
   useEffect(() => {
     const request = ++latest.current;
-    setLoading(true);
     sessionService
       .page(page, SESSIONS_PAGE_SIZE)
       .then((next) => {
         if (request !== latest.current) return;
-        setResult(next);
-        setLoaded(true);
+        setFetched({ key, page: next });
         setError(null);
       })
-      .catch((err) => request === latest.current && setError(err))
-      .finally(() => request === latest.current && setLoading(false));
-  }, [page, signature, version]);
+      .catch((err) => request === latest.current && setError(err));
+  }, [page, key]);
 
-  return { ...result, setResult, reload: () => setVersion((v) => v + 1), loaded, loading, error };
+  const shown = fetched?.key === key ? fetched.page : local;
+  return {
+    ...shown,
+    /** Changes what is shown right away (drag & drop), until the next load. */
+    update: (change: (current: SessionPage) => SessionPage) => setFetched({ key, page: change(shown) }),
+    reload: () => setVersion((v) => v + 1),
+    error,
+  };
 }
 
 function useSessionsController() {
@@ -107,8 +112,8 @@ function useSessionsController() {
   const lastPage = Math.max(1, Math.ceil(result.total / SESSIONS_PAGE_SIZE));
   // Deleting can leave you past the last page — step back to it.
   useEffect(() => {
-    if (!result.loading && page > lastPage) setPage(lastPage);
-  }, [result.loading, page, lastPage]);
+    if (page > lastPage) setPage(lastPage);
+  }, [page, lastPage]);
 
   async function run(action: () => Promise<void>) {
     setError(null);
@@ -124,7 +129,7 @@ function useSessionsController() {
     const from = result.sessions.findIndex((v) => v.session.id === activeId);
     const to = result.sessions.findIndex((v) => v.session.id === overId);
     if (from < 0 || to < 0 || from === to) return;
-    result.setResult((prev) => ({ ...prev, sessions: arrayMove(prev.sessions, from, to) }));
+    result.update((current) => ({ ...current, sessions: arrayMove(current.sessions, from, to) }));
     void run(async () => {
       try {
         await moveSession(activeId, overId);
@@ -154,13 +159,12 @@ function useSessionsController() {
   }
 
   return {
-    empty: result.loaded && result.total === 0,
+    empty: result.total === 0,
     pinned,
     others,
     anyPinned: sessions.some((s) => s.pinned),
     total: result.total,
     page,
-    loading: result.loading,
     setPage: (p: number) => {
       setPage(p);
       window.scrollTo({ top: 0, behavior: "instant" });
@@ -261,7 +265,7 @@ export default function SessionsPage() {
           <CardContent className="py-6 text-center text-sm text-muted-foreground">{t("sessions.empty")}</CardContent>
         </Card>
       ) : (
-        <div className={cn("flex flex-col gap-6 transition-opacity", c.loading && "opacity-60")} aria-busy={c.loading}>
+        <div className="flex flex-col gap-6">
           {c.pinned.length > 0 && <SessionSection title={t("sessions.pinned")} views={c.pinned} c={c} />}
           {c.others.length > 0 && (
             <SessionSection title={c.anyPinned ? t("sessions.others") : null} views={c.others} c={c} />
