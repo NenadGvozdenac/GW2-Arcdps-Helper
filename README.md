@@ -152,20 +152,35 @@ npm --prefix frontend run dev            # http://localhost:5173, /api is proxie
 
 ## Vercel
 
-### Automatic web deploy (GitHub Actions)
+### Automatic deploys (GitHub Actions)
 
-`.github/workflows/deploy-web.yml` deploys the web app to Vercel production on every push to `main` that changes
-`frontend/` (or manually via *Run workflow*). It typechecks and builds first, then runs
-`vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod` from the repo root.
+Both Vercel projects are deployed by GitHub Actions on every push to `main` (or manually via *Run workflow*);
+Vercel's own Git deployments are turned off in `frontend/vercel.json` and `backend/vercel.json`
+(`git.deploymentEnabled: false`), so nothing deploys twice.
+
+| Workflow | Runs when | Steps |
+|---|---|---|
+| `.github/workflows/deploy-web.yml` | `frontend/` changes | typecheck & build → `vercel pull` / `build --prod` / `deploy --prebuilt --prod` |
+| `.github/workflows/deploy-backend.yml` | `backend/` changes | typecheck & build → **apply DB migrations** → `vercel pull` / `build --prod` / `deploy --prebuilt --prod` |
+
+Migrations run before the new backend goes live, so write them backwards-compatible (add columns/tables; drop
+things in a later release).
 
 One-time setup:
-1. Create the web project on Vercel with **Root Directory = `frontend`** and set `VITE_API_URL` in its
-   Environment Variables (Production).
+1. Create both projects on Vercel (Root Directory `frontend` / `backend`) and set their Environment Variables
+   (see *Projects* below).
 2. Create a token at https://vercel.com/account/tokens.
-3. Run `npx vercel link` in the repo root and read `orgId` / `projectId` from `.vercel/project.json`.
-4. Add repository secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_WEB_PROJECT_ID`.
-Vercel's own Git deployments are turned off for the web project (`git.deploymentEnabled: false` in
-`frontend/vercel.json`), so connecting the repo doesn't deploy twice.
+3. Find the IDs: `orgId` in `.vercel/project.json` after `npx vercel link` in the repo root, and each project's ID
+   under *Project Settings → General → Project ID*.
+4. Add repository secrets (*Settings → Secrets and variables → Actions*):
+
+| Secret | Value |
+|---|---|
+| `VERCEL_TOKEN` | the token from step 2 |
+| `VERCEL_ORG_ID` | `orgId` from step 3 |
+| `VERCEL_WEB_PROJECT_ID` | Project ID of the web project |
+| `VERCEL_BACKEND_PROJECT_ID` | Project ID of the backend project |
+| `PRODUCTION_DATABASE_URL` | the production `DATABASE_URL` (used only for migrations) |
 
 ### Projects
 
@@ -174,9 +189,9 @@ Two Vercel projects from the same repository:
 **Backend** (Root Directory: `backend`)
 1. Create a Postgres database (Neon / Vercel Postgres / Supabase) and copy its connection string with `sslmode=require`.
 2. Environment variables: `DATABASE_URL`, `JWT_SECRET` (at least 32 characters), `CORS_ORIGIN` (the frontend URL).
-3. Copy `backend/.env.production.example` to `backend/.env.production`, fill in the same values and run
-   `make migrate-prod` once (and after every new migration).
-4. Deploy — Vercel detects Express from `src/app.ts` (zero-config; no `api/` folder or `vercel.json` needed).
+3. Migrations run automatically in `deploy-backend.yml`. To run them by hand, fill `backend/.env.production`
+   (copy `.env.production.example`) and run `make migrate-prod`.
+4. Deploy — push to `main`; Vercel detects Express from `src/app.ts` (zero-config, no `api/` folder).
 
 **Frontend** (Root Directory: `frontend`)
 1. Set `VITE_API_URL=https://<backend-project>.vercel.app/api` in the Vercel project's Environment Variables

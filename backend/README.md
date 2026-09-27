@@ -140,8 +140,8 @@ npm run migrate                              # local
 npm run migrate:production                   # production (needs .env.production)
 ```
 
-The Docker image runs pending migrations on start. On Vercel, run `migrate:production` yourself after deploying a
-new migration (`make migrate-prod` from the repo root).
+The Docker image runs pending migrations on start. For Vercel, `.github/workflows/deploy-backend.yml` applies them
+(with the `PRODUCTION_DATABASE_URL` secret) right before each deploy; `make migrate-prod` does the same by hand.
 
 ## Security notes
 
@@ -154,4 +154,6 @@ new migration (`make migrate-prod` from the repo root).
 
 - **Docker:** `Dockerfile` (multi-stage, runs as `node`, migrates then starts). Used by `docker-compose.yml`.
 - **Vercel:** separate project with Root Directory `backend`. Vercel detects the Express app from `src/app.ts`;
-  set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` in the project. See the root README for the full setup.
+  set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` in the project. Pushes to `main` that touch `backend/` are
+  deployed by `.github/workflows/deploy-backend.yml` (build → migrate → deploy); Vercel's own Git deployments are
+  disabled in `vercel.json`. See the root README for the one-time setup.

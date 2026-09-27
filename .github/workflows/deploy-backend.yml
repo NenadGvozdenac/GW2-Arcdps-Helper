@@ -1,0 +1,90 @@
+name: Deploy backend to Vercel
+
+# Production deploy of the API (backend/) on every push to main that touches it:
+# typecheck & build -> apply database migrations -> deploy.
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   VERCEL_TOKEN               - https://vercel.com/account/tokens
+#   VERCEL_ORG_ID              - "orgId" from .vercel/project.json (same as for the web app)
+#   VERCEL_BACKEND_PROJECT_ID  - Project ID of the backend project (Root Directory = backend)
+#   PRODUCTION_DATABASE_URL    - same value as DATABASE_URL in the backend's Vercel Environment Variables
+# The runtime variables (DATABASE_URL, JWT_SECRET, CORS_ORIGIN) come from the Vercel project settings.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/deploy-backend.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-backend-production
+  cancel-in-progress: false # never interrupt a running migration
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+
+jobs:
+  check:
+    name: Typecheck & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  migrate:
+    name: Apply database migrations
+    needs: check
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      # Runs only pending migrations (tracked in schema_migrations); a no-op when there are none.
+      - name: Migrate
+        run: node dist/db/migrate.js
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+  deploy:
+    name: Deploy to Vercel (production)
+    needs: migrate
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      # Run from the repo root: the project's Root Directory (backend) comes from its Vercel settings.
+      - name: Pull Vercel project settings and environment variables
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy
+        id: deploy
+        run: echo "url=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})" >> "$GITHUB_OUTPUT"
