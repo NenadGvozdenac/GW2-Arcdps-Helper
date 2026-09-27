@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlertCircleIcon, ArrowLeftIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
@@ -32,6 +32,7 @@ const CATEGORY_PATH: Record<Category, string> = {
 
 function useLogDetailController(id: string | undefined) {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { logs, remove: removeLog, setLogShared } = useLogs();
   const [deleting, setDeleting] = useState(false);
@@ -46,6 +47,8 @@ function useLogDetailController(id: string | undefined) {
         label: group ? `${group.short} — ${group.name}` : null,
       }
     : { to: "/logs", label: null };
+  // Opened from somewhere in the app (a session, the dashboard, ...) → go back there; a direct visit falls back to the boss.
+  const canGoBack = location.key !== "default";
 
   async function remove() {
     if (!log) return;
@@ -64,6 +67,8 @@ function useLogDetailController(id: string | undefined) {
   return {
     log,
     backLink,
+    canGoBack,
+    goBack: () => navigate(-1),
     setShared: (shared: boolean) => (log ? setLogShared(log.id, shared) : Promise.resolve()),
     deleting,
     error,
@@ -74,7 +79,7 @@ function useLogDetailController(id: string | undefined) {
 
 export default function LogDetailPage() {
   const { id } = useParams();
-  const { log, backLink, setShared, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
+  const { log, backLink, canGoBack, goBack, setShared, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
   const { t } = useI18n();
 
   if (!log) {
@@ -92,11 +97,17 @@ export default function LogDetailPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Button asChild variant="ghost" size="sm" className="self-start">
-        <Link to={backLink.to}>
-          <ArrowLeftIcon /> {backLink.label ?? t("logDetail.allLogs")}
-        </Link>
-      </Button>
+      {canGoBack ? (
+        <Button variant="ghost" size="sm" className="self-start" onClick={goBack}>
+          <ArrowLeftIcon /> {t("logDetail.back")}
+        </Button>
+      ) : (
+        <Button asChild variant="ghost" size="sm" className="self-start">
+          <Link to={backLink.to}>
+            <ArrowLeftIcon /> {backLink.label ?? t("logDetail.allLogs")}
+          </Link>
+        </Button>
+      )}
 
       <LogView
         log={log}
