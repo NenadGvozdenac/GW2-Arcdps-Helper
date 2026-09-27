@@ -1,4 +1,5 @@
 import { releaseRepository, type GithubRelease } from "../repositories/releaseRepository";
+import { downloadsStorage } from "../storage/downloadsStorage";
 import type { Download, Downloads } from "../domain/types/release.types";
 
 /** uploader-vX.Y.Z */
@@ -21,11 +22,16 @@ function latest(releases: GithubRelease[], tag: RegExp, asset: RegExp): Download
 }
 
 export const downloadService = {
+  /** Cached for DOWNLOADS_CACHE_MS; a failed lookup is not cached (the links fall back to the Releases page). */
   async latest(): Promise<Downloads> {
+    const cached = downloadsStorage.get();
+    if (cached) return cached;
     const releases = await releaseRepository.list();
-    return {
+    const downloads = {
       uploader: latest(releases, UPLOADER_TAG, /-Setup-.*\.exe$/i),
       addon: latest(releases, ADDON_TAG, /\.dll$/i),
     };
+    if (releases.length) downloadsStorage.set(downloads);
+    return downloads;
   },
 };

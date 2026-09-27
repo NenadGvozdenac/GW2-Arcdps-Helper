@@ -1,4 +1,5 @@
 #include "resource.h"
 
-IDR_ICON       RCDATA "../resources/icon.png"
-IDR_ICON_HOVER RCDATA "../resources/icon_hover.png"
+// Nexus' Textures_GetOrCreateFromResource looks the image up with FindResource(module, id, "PNG").
+IDR_ICON       PNG "../resources/icon.png"
+IDR_ICON_HOVER PNG "../resources/icon_hover.png"

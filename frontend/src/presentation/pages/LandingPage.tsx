@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
   BellIcon,
+  CheckIcon,
   ChevronDownIcon,
   ClipboardPasteIcon,
   CloudUploadIcon,
@@ -14,10 +15,13 @@ import {
   KeyRoundIcon,
   LayersIcon,
   LayoutDashboardIcon,
+  MonitorIcon,
   RadioIcon,
+  RefreshCwIcon,
   SparklesIcon,
   SwordsIcon,
   TimerIcon,
+  TriangleAlertIcon,
   TrophyIcon,
   UsersIcon,
   type LucideIcon,
@@ -59,6 +63,56 @@ const UPLOADER_POINTS: { icon: LucideIcon; text: TranslationKey }[] = [
   { icon: KeyRoundIcon, text: "landing.uploader.point2" },
   { icon: BellIcon, text: "landing.uploader.point3" },
   { icon: RadioIcon, text: "landing.uploader.point4" },
+];
+
+interface InstallGuide {
+  id: "uploader" | "addon";
+  icon: LucideIcon;
+  title: TranslationKey;
+  kind: TranslationKey;
+  body: TranslationKey;
+  does: TranslationKey[];
+  steps: TranslationKey[];
+  updates: TranslationKey;
+  download: TranslationKey;
+}
+
+const INSTALL_GUIDES: InstallGuide[] = [
+  {
+    id: "uploader",
+    icon: MonitorIcon,
+    title: "landing.install.uploader.title",
+    kind: "landing.install.uploader.kind",
+    body: "landing.install.uploader.body",
+    does: ["landing.install.uploader.does1", "landing.install.uploader.does2", "landing.install.uploader.does3"],
+    steps: [
+      "landing.install.uploader.step1",
+      "landing.install.uploader.step2",
+      "landing.install.uploader.step3",
+      "landing.install.uploader.step4",
+      "landing.install.uploader.step5",
+    ],
+    updates: "landing.install.uploader.updates",
+    download: "landing.install.uploader.download",
+  },
+  {
+    id: "addon",
+    icon: Gamepad2Icon,
+    title: "landing.install.addon.title",
+    kind: "landing.install.addon.kind",
+    body: "landing.install.addon.body",
+    does: ["landing.install.addon.does1", "landing.install.addon.does2", "landing.install.addon.does3"],
+    steps: [
+      "landing.install.addon.step1",
+      "landing.install.addon.step2",
+      "landing.install.addon.step3",
+      "landing.install.addon.step4",
+      "landing.install.addon.step5",
+      "landing.install.addon.step6",
+    ],
+    updates: "landing.install.addon.updates",
+    download: "landing.install.addon.download",
+  },
 ];
 
 const FAQ: { q: TranslationKey; a: TranslationKey }[] = [
@@ -127,6 +181,72 @@ function SectionHeading({ eyebrow, title, subtitle }: { eyebrow: string; title: 
   );
 }
 
+/** One download: what it is, what it does, numbered install steps, how it updates and the download button. */
+function InstallGuideCard({ guide, url, version }: { guide: InstallGuide; url: string; version: string | null }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex h-full flex-col rounded-2xl border bg-card/60 p-6">
+      <div className="flex items-start gap-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[var(--brand)]/10 text-[var(--brand)]">
+          <guide.icon className="size-5" />
+        </span>
+        <div className="min-w-0">
+          <h3 className="text-lg font-semibold">{t(guide.title)}</h3>
+          <p className="text-xs text-muted-foreground">
+            {t(guide.kind)}
+            {version && ` · ${t("landing.install.version", { version })}`}
+          </p>
+        </div>
+      </div>
+      <p className="mt-4 text-sm text-muted-foreground text-pretty">{t(guide.body)}</p>
+
+      <h4 className="mt-6 mb-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {t("landing.install.whatItDoes")}
+      </h4>
+      <ul className="space-y-2.5">
+        {guide.does.map((key) => (
+          <li key={key} className="flex items-start gap-2.5 text-sm text-pretty">
+            <CheckIcon className="mt-0.5 size-4 shrink-0 text-[var(--brand)]" />
+            {t(key)}
+          </li>
+        ))}
+      </ul>
+
+      <h4 className="mt-6 mb-3 text-xs font-semibold tracking-wider text-muted-foreground uppercase">
+        {t("landing.install.howToInstall")}
+      </h4>
+      <ol className="space-y-3">
+        {guide.steps.map((key, i) => (
+          <li key={key} className="flex items-start gap-3 text-sm text-pretty">
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-foreground text-[11px] font-bold text-background">
+              {i + 1}
+            </span>
+            <span className="pt-0.5">{t(key)}</span>
+          </li>
+        ))}
+      </ol>
+
+      <p className="mt-6 flex items-start gap-2.5 text-sm text-muted-foreground text-pretty">
+        <RefreshCwIcon className="mt-0.5 size-4 shrink-0" />
+        <span>
+          <span className="font-medium text-foreground">{t("landing.install.updates")}:</span> {t(guide.updates)}
+        </span>
+      </p>
+
+      <div className="mt-auto flex flex-wrap items-center gap-4 pt-6">
+        <Button asChild>
+          <a href={url}>
+            <DownloadIcon /> {t(guide.download)}
+          </a>
+        </Button>
+        <a href={RELEASES_URL} target="_blank" rel="noreferrer" className="text-xs text-muted-foreground hover:text-foreground">
+          {t("landing.install.allVersions")}
+        </a>
+      </div>
+    </div>
+  );
+}
+
 function GithubMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
@@ -153,6 +273,7 @@ export default function LandingPage() {
                 ["#how", "landing.nav.howItWorks"],
                 ["#features", "landing.nav.features"],
                 ["#uploader", "landing.nav.uploader"],
+                ["#downloads", "landing.nav.downloads"],
               ] as const
             ).map(([href, label]) => (
               <a
@@ -317,20 +438,42 @@ export default function LandingPage() {
                 {t("landing.uploader.downloadHint")}
               </span>
             </div>
-            <div className="mt-6 rounded-xl border bg-card/60 p-4">
-              <div className="flex flex-wrap items-center gap-4">
-                <Button asChild variant="outline">
-                  <a href={addonUrl}>
-                    <Gamepad2Icon /> {t("landing.uploader.downloadAddon")}
-                  </a>
-                </Button>
-                {addonVersion && <span className="text-xs text-muted-foreground">v{addonVersion}</span>}
-              </div>
-              <p className="mt-3 text-xs text-muted-foreground text-pretty">{t("landing.uploader.addonHint")}</p>
-            </div>
+            <p className="mt-6 text-sm text-muted-foreground">
+              {t("landing.uploader.addonTeaser")}{" "}
+              <a href="#downloads" className="inline-flex items-center gap-1 font-medium text-foreground hover:text-[var(--brand)]">
+                <Gamepad2Icon className="size-4" /> {t("landing.uploader.addonLink")}
+              </a>
+            </p>
           </Reveal>
           <Reveal delay={150}>
             <UploaderPreview />
+          </Reveal>
+        </div>
+      </section>
+
+      {/* ---------- Downloads: what each one does and how to install it ---------- */}
+      <section id="downloads" className="scroll-mt-20 py-24">
+        <div className="mx-auto max-w-6xl px-4">
+          <SectionHeading
+            eyebrow={t("landing.install.eyebrow")}
+            title={t("landing.install.title")}
+            subtitle={t("landing.install.subtitle")}
+          />
+          <div className="grid gap-6 lg:grid-cols-2">
+            {INSTALL_GUIDES.map((g, i) => {
+              const download = g.id === "uploader" ? { url: uploaderUrl, version: uploaderVersion } : { url: addonUrl, version: addonVersion };
+              return (
+                <Reveal key={g.id} delay={i * 120} className="h-full">
+                  <InstallGuideCard guide={g} url={download.url} version={download.version} />
+                </Reveal>
+              );
+            })}
+          </div>
+          <Reveal className="mt-6">
+            <p className="flex items-start gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-pretty">
+              <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-destructive" />
+              {t("landing.install.oneOrOther")}
+            </p>
           </Reveal>
         </div>
       </section>

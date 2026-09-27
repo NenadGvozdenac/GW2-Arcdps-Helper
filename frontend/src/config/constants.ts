@@ -21,6 +21,12 @@ export const FRESH_HIGHLIGHT_MS = 8_000;
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
 export const LOGS_PAGE_SIZE_STORAGE_KEY = "gw2arcdpshelper.logsPageSize";
+export const DOWNLOADS_STORAGE_KEY = "gw2arcdpshelper.downloads";
+/**
+ * How long the latest download links are reused before GitHub is asked again. The public GitHub API allows 60
+ * requests per hour per IP, shared with Nexus' update check on the same PC.
+ */
+export const DOWNLOADS_CACHE_MS = 30 * 60_000;
 
 /** ArcDPS log files accepted by the file picker (same list as LOG_FILE_EXTENSIONS in the backend). */
 export const LOG_FILE_EXTENSIONS = [".zevtc", ".evtc", ".zip"];
