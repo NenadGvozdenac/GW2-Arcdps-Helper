@@ -70,6 +70,18 @@ npm run dist        # production Windows installer + portable exe in dist/
 npm run dist:dir    # unpacked production app in dist/win-unpacked (quick check)
 ```
 
+## Automatic builds (GitHub Actions)
+
+`.github/workflows/build-uploader.yml` builds the production installer and portable exe on a Windows runner:
+
+- every push to `main` that touches `uploader/` (or *Actions → Build uploader → Run workflow*): the `.exe` files
+  are attached to the run as the `gw2-arcdps-helper-uploader` artifact;
+- a tag `uploader-vX.Y.Z` (`git tag uploader-v0.2.0 && git push origin uploader-v0.2.0`): the app is built as
+  version `X.Y.Z` and published as a GitHub Release with both `.exe` files.
+
+The workflow writes `.env.production` itself. Override the URLs with the repository variables `UPLOADER_API_URL`
+and `UPLOADER_WEB_URL` (Settings → Secrets and variables → Actions → Variables).
+
 Set `GW2_UPLOADER_USER_DATA=<folder>` to use a specific profile folder (e.g. for tests).
 
 > Running from a terminal inside Claude Code / some tools sets `ELECTRON_RUN_AS_NODE=1`, which makes

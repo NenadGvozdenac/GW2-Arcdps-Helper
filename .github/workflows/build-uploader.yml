@@ -1,0 +1,72 @@
+name: Build uploader
+
+# Builds the desktop uploader (Windows installer + portable exe).
+# - Push to main that touches uploader/ (or a manual run): the .exe files are attached to the run as an artifact.
+# - Push a tag like `uploader-v0.2.0`: the app gets that version and the .exe files are published as a GitHub Release.
+# Production URLs are baked in at build time. Optional repository variables (Settings -> Secrets and variables ->
+# Actions -> Variables) UPLOADER_API_URL and UPLOADER_WEB_URL override the defaults below.
+
+on:
+  push:
+    branches: [main]
+    # Path filters are not evaluated for tag pushes, so every uploader-v* tag builds.
+    tags: ["uploader-v*"]
+    paths:
+      - "uploader/**"
+      - ".github/workflows/build-uploader.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: build-uploader-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build Windows exe
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+        working-directory: uploader
+    env:
+      # No code-signing certificate: don't let electron-builder look for one.
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: uploader/package-lock.json
+      - run: npm ci
+
+      - name: Write production URLs (.env.production is not in git)
+        run: |
+          cat > .env.production <<EOF
+          MAIN_VITE_API_URL=${{ vars.UPLOADER_API_URL || 'https://gw2-arcdps-helper-api.vercel.app/api' }}
+          MAIN_VITE_WEB_URL=${{ vars.UPLOADER_WEB_URL || 'https://gw2-arcdps-helper.vercel.app' }}
+          EOF
+          cat .env.production
+
+      - name: Take the version from the tag
+        if: startsWith(github.ref, 'refs/tags/uploader-v')
+        run: npm version "${GITHUB_REF_NAME#uploader-v}" --no-git-tag-version --allow-same-version
+
+      - name: Typecheck, build and package
+        run: npm run build && npx electron-builder --win --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gw2-arcdps-helper-uploader
+          path: uploader/dist/*.exe
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/uploader-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Uploader ${{ github.ref_name }}
+          files: uploader/dist/*.exe
+          generate_release_notes: true
