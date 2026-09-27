@@ -11,10 +11,10 @@ import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import ClearCard from "../components/ClearCard";
+import DashboardSkeleton from "../components/DashboardSkeleton";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
-import { Spinner } from "../components/Spinner";
 import { describeError } from "../utils/describeError";
 
 const SECTIONS: { category: Exclude<Category, "other">; label: TranslationKey; to: string }[] = [
@@ -68,33 +68,47 @@ export default function DashboardPage() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t("dashboard.totalLogs")} value={totals.logs} />
-        <StatCard label={t("dashboard.kills")} value={totals.kills} tone="success" />
-        <StatCard label={t("dashboard.wipes")} value={totals.wipes} tone="fail" />
-        <StatCard label={t("dashboard.logsThisWeek")} value={totals.thisWeek} />
-      </div>
-
-      <div className="flex flex-col gap-4">
-        {clearCards.map((c) => (
-          <ClearCard key={c.category} label={t(c.label)} to={c.to} resetLabel={t(c.resetLabel)} progress={c.progress} />
-        ))}
-      </div>
-
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="space-y-1.5">
-            <CardTitle>{t("dashboard.todayLogs")}</CardTitle>
-            <CardDescription>{t("dashboard.todayLogsHint", { count: today.length })}</CardDescription>
+      {loading ? (
+        <DashboardSkeleton />
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <StatCard label={t("dashboard.totalLogs")} value={totals.logs} />
+            <StatCard label={t("dashboard.kills")} value={totals.kills} tone="success" />
+            <StatCard label={t("dashboard.wipes")} value={totals.wipes} tone="fail" />
+            <StatCard label={t("dashboard.logsThisWeek")} value={totals.thisWeek} />
           </div>
-          <Button asChild variant="ghost" size="sm">
-            <Link to="/logs">
-              {t("dashboard.allLogsLink")} <ArrowRightIcon />
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent>{loading ? <Spinner /> : <LogTable logs={today} showGroup />}</CardContent>
-      </Card>
+
+          <div className="flex flex-col gap-4">
+            {clearCards.map((c) => (
+              <ClearCard
+                key={c.category}
+                label={t(c.label)}
+                to={c.to}
+                resetLabel={t(c.resetLabel)}
+                progress={c.progress}
+              />
+            ))}
+          </div>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div className="space-y-1.5">
+                <CardTitle>{t("dashboard.todayLogs")}</CardTitle>
+                <CardDescription>{t("dashboard.todayLogsHint", { count: today.length })}</CardDescription>
+              </div>
+              <Button asChild variant="ghost" size="sm">
+                <Link to="/logs">
+                  {t("dashboard.allLogsLink")} <ArrowRightIcon />
+                </Link>
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <LogTable logs={today} showGroup />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }
