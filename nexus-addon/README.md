@@ -16,8 +16,7 @@ the game.
 - **Options** (Nexus → Addons → GW2 ArcDPS Helper): sign in, the ArcDPS log folder and alerts. The addon always
   talks to the production API.
 - **dps.report user token**: stored on the account, not in the addon. Set it on the website (Profile). The addon
-  reads it from `/auth/me` before each upload. A token saved locally by an older version is moved to the account
-  once (if the account has none) and then removed from `settings.json`.
+  reads it from `/auth/me` before each upload.
 - **Keybinds** (Nexus → Keybinds): toggle the window, and toggle recording (unbound by default).
 
 Without signing in the addon still uploads to dps.report ("dps.report only" in the list). Recording needs an

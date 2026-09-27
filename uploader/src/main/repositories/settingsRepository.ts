@@ -20,10 +20,7 @@ function defaults(): Settings {
   };
 }
 
-/** Older versions also stored the dps.report token here; it now lives on the account (website). */
-type StoredSettings = Partial<Settings> & { dpsReportToken?: string };
-
-const store = createJsonStore<StoredSettings>("settings.json", () => ({}));
+const store = createJsonStore<Partial<Settings>>("settings.json", () => ({}));
 
 export const settingsRepository = {
   /** Stored values merged over defaults, so newly added settings always have a value. */
@@ -36,14 +33,5 @@ export const settingsRepository = {
   },
   save(settings: Settings): void {
     store.write(settings);
-  },
-
-  /** A dps.report token saved by an older version ("" if none), for the one-time move to the account. */
-  legacyDpsReportToken(): string {
-    return store.read().dpsReportToken?.trim() ?? "";
-  },
-  /** Rewrites settings.json with the known keys only, which drops the legacy token. */
-  clearLegacyDpsReportToken(): void {
-    store.write(settingsRepository.load());
   },
 };

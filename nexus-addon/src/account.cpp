@@ -89,32 +89,6 @@ namespace
 		});
 	}
 
-	/**
-	 * Older versions kept the dps.report token in settings.json; it now lives on the account. Moves it there once
-	 * (unless the account already has one) and removes the local copy.
-	 */
-	void MigrateLegacyDpsReportToken(const std::string& jwt, const Api::User& user)
-	{
-		std::string legacy = Config::LegacyDpsReportToken();
-		if (legacy.empty()) return;
-		if (user.dpsReportToken.empty())
-		{
-			Api::User updated;
-			Api::Error err;
-			if (Api::SetDpsReportToken(jwt, legacy, updated, err))
-			{
-				ApplyUser(updated);
-				LogInfo("Moved the dps.report token to the account");
-			}
-			else if (err.status != 400) // offline: try again next time; 400 = not a valid token, drop it
-			{
-				LogWarn("Could not move the dps.report token: " + err.message);
-				return;
-			}
-		}
-		Config::ClearLegacyDpsReportToken();
-	}
-
 	/** Picks up a session that is still running on the server (e.g. after restarting the game). */
 	void RefreshSession()
 	{
@@ -152,7 +126,6 @@ namespace
 			if (Api::Me(cfg.token, user, err))
 			{
 				ApplyUser(user);
-				MigrateLegacyDpsReportToken(cfg.token, user);
 			}
 			else if (err.code == "UNAUTHORIZED")
 			{
@@ -234,7 +207,6 @@ namespace Account
 				s.message.clear();
 			});
 			LogInfo("Signed in as " + user.email);
-			MigrateLegacyDpsReportToken(token, user);
 			RefreshSession();
 		});
 	}

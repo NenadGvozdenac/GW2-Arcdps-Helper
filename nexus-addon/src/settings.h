@@ -22,12 +22,4 @@ namespace Config
 	void Load(const std::wstring& addonDir);
 	Settings Get();
 	/** Applies a change and saves to disk. */
-	void Update(const std::function<void(Settings&)>& change);
-
-	/**
-	 * Older versions kept the dps.report token in settings.json; it now lives on the account (website).
-	 * Returns it ("" if none) for the one-time move; Clear drops it from settings.json.
-	 */
-	std::string LegacyDpsReportToken();
-	void ClearLegacyDpsReportToken();
-}
+	void Update(const std::function<void(Settings&)>& change);}

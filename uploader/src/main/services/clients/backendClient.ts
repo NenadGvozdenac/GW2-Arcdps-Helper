@@ -32,12 +32,6 @@ export const backendClient = {
     return (await request<{ user: BackendUser }>(apiUrl, "/auth/me", { token })).user;
   },
 
-  /** Only used to move a token saved by an older version to the account; it is edited on the website. */
-  async setDpsReportToken(apiUrl: string, token: string, dpsReportToken: string): Promise<BackendUser> {
-    const body = JSON.stringify({ token: dpsReportToken });
-    return (await request<{ user: BackendUser }>(apiUrl, "/profile/dps-report-token", { method: "PUT", token, body })).user;
-  },
-
   /** Imports dps.report links; with a sessionId the logs are attached to that session. */
   async submitLogs(apiUrl: string, token: string, urls: string[], sessionId: string | null = null): Promise<BackendSubmitResult[]> {
     const body = await request<{ results: BackendSubmitResult[] }>(apiUrl, "/logs", {

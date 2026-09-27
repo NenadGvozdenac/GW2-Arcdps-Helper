@@ -146,14 +146,6 @@ namespace Api
 		return true;
 	}
 
-	bool SetDpsReportToken(const std::string& token, const std::string& dpsReportToken, User& user, Error& err)
-	{
-		json body = { { "token", dpsReportToken } }, out;
-		if (!Backend("PUT", "/profile/dps-report-token", token, &body, out, err)) return false;
-		user = ToUser(out.value("user", json::object()));
-		return true;
-	}
-
 	bool SubmitLog(const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& result, Error& err)
 	{
 		json body = { { "urls", json::array({ permalink }) }, { "sessionId", sessionId.empty() ? json(nullptr) : json(sessionId) } }, out;

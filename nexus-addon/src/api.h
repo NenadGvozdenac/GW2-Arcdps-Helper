@@ -51,9 +51,6 @@ namespace Api
 
 	bool Login(const std::string& email, const std::string& password, std::string& token, User& user, Error& err);
 	bool Me(const std::string& token, User& user, Error& err);
-	/** Only moves a token saved by an older version to the account; it is edited on the website. */
-	bool SetDpsReportToken(const std::string& token, const std::string& dpsReportToken, User& user, Error& err);
-
 	/** Imports one dps.report link; with a sessionId the log is attached to that session. */
 	bool SubmitLog(const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& out, Error& err);
 
