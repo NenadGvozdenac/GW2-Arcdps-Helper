@@ -14,6 +14,7 @@
 #include "resource.h"
 #include "settings.h"
 #include "ui.h"
+#include "updater.h"
 #include "uploads.h"
 #include "util.h"
 #include "watcher.h"
@@ -78,6 +79,10 @@ namespace
 		}
 		for (const auto& a : alerts) APIDefs->GUI_SendAlert(a.c_str());
 
+		// Nexus downloads the newer DLL and swaps it in.
+		std::string updateUrl = Updater::TakeUpdateUrl();
+		if (!updateUrl.empty()) APIDefs->RequestUpdate(AddonDef.Signature, updateUrl.c_str());
+
 		bool wasShown = UI::ShowWindow;
 		UI::RenderWindow();
 		if (wasShown != UI::ShowWindow) Config::Update([](Settings& s) { s.showWindow = UI::ShowWindow; });
@@ -98,6 +103,7 @@ namespace
 		Uploads::Start(dir);
 		Account::Start();
 		UI::ApplyWatching();
+		Updater::Start(AddonDef.Version);
 
 		api->GUI_Register(RT_Render, Render);
 		api->GUI_Register(RT_OptionsRender, UI::RenderOptions);
@@ -124,6 +130,7 @@ namespace
 
 		// Abort running requests so the worker threads can be joined right away.
 		Http::CancelAll();
+		Updater::Stop();
 		Watcher::Stop();
 		Account::Stop();
 		Uploads::Stop();
@@ -166,7 +173,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.Load = AddonLoad;
 	AddonDef.Unload = AddonUnload;
 	AddonDef.Flags = AF_None;
-	AddonDef.Provider = UP_None;
-	AddonDef.UpdateLink = nullptr;
+	AddonDef.Provider = UP_Self; // see updater.cpp
+	AddonDef.UpdateLink = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper/releases";
 	return &AddonDef;
 }

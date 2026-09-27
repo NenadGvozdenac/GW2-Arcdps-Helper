@@ -30,6 +30,7 @@ src/
 │                 -> POST /api/logs (with the session id while recording); history in uploads.json
 ├── account.cpp   sign-in and sessions on their own thread; re-checks the active session every minute
 ├── watcher.cpp   ReadDirectoryChangesW on the log folder (recursive: ArcDPS uses one folder per boss)
+├── updater.cpp   self-update: newest addon-vX.Y.Z GitHub Release -> Nexus RequestUpdate (skipped for local 0.0.0 builds)
 ├── api.cpp       dps.report + GW2 ArcDPS Helper clients (the same endpoints the desktop uploader uses)
 ├── http.cpp      blocking WinHTTP requests; CancelAll() aborts them on unload so threads join quickly
 ├── settings.cpp  settings.json
@@ -63,3 +64,6 @@ To publish a new version, see [Releasing a new version](../README.md#releasing-a
 1. Install [Nexus](https://raidcore.gg/Nexus) (and ArcDPS, which writes the logs).
 2. Copy `gw2-arcdps-helper.dll` to `<Guild Wars 2>\addons\`.
 3. In game, open Nexus → Addons, enable **GW2 ArcDPS Helper**, and sign in under its options.
+
+After that, the addon updates itself. Each time it loads, it checks GitHub for a newer `addon-v*` release, and Nexus
+downloads the new DLL. The check and its result appear in the Nexus log.

@@ -142,8 +142,11 @@ Notes:
   ```
 
   A release is only created when the build succeeds, so there is nothing else to clean up.
-- **Updating is manual for players.** The uploader is updated by installing the new setup exe over the old one. The
-  addon is updated by disabling it in Nexus, replacing the DLL in `<Guild Wars 2>\addons`, and enabling it again.
+- **How players get the update:**
+  - **Nexus addon:** updates itself. When it loads, it checks for the newest `addon-v*` release and, if it is newer,
+    Nexus downloads the DLL. Only releases from `addon-v0.1.1` onwards do this; players on `addon-v0.1.0` install
+    the next version once by hand.
+  - **Uploader:** manual. Players install the new setup exe over the old one.
 
 ## Vercel
 
