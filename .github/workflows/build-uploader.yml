@@ -111,3 +111,20 @@ jobs:
             uploader/dist/*.blockmap
             uploader/dist/latest.yml
           generate_release_notes: true
+
+      # The website's download button links here: a fixed URL that always serves the newest installer, so it works
+      # without asking the GitHub API (rate-limited per visitor) which release is the newest.
+      - name: Update the stable download (release uploader-latest)
+        if: steps.release.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          mkdir -p stable
+          cp dist/GW2-ArcDPS-Helper-Uploader-Setup-*.exe stable/GW2-ArcDPS-Helper-Uploader-Setup.exe
+          cp dist/GW2-ArcDPS-Helper-Uploader-Portable-*.exe stable/GW2-ArcDPS-Helper-Uploader-Portable.exe
+          NOTES="Always the newest desktop uploader (currently $TAG). Versioned releases are tagged uploader-vX.Y.Z."
+          gh release view uploader-latest > /dev/null 2>&1 ||
+            gh release create uploader-latest --title "Uploader - latest download" --notes "$NOTES" --latest=false
+          gh release upload uploader-latest stable/* --clobber
+          gh release edit uploader-latest --notes "$NOTES" --latest=false

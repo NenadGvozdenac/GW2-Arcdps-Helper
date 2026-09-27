@@ -46,4 +46,10 @@ export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app
 export const SOURCE_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";
 /** Uploader (uploader-v* tags) and Nexus addon (v* tags) builds, see .github/workflows. */
 export const RELEASES_URL = `${SOURCE_URL}/releases`;
+/**
+ * Fixed download links: every release also refreshes the "uploader-latest" / "addon-latest" release with stable file
+ * names (see .github/workflows), so the buttons work without the GitHub API.
+ */
+export const UPLOADER_DOWNLOAD_URL = `${RELEASES_URL}/download/uploader-latest/GW2-ArcDPS-Helper-Uploader-Setup.exe`;
+export const ADDON_DOWNLOAD_URL = `${RELEASES_URL}/download/addon-latest/gw2-arcdps-helper.dll`;
 export const GITHUB_RELEASES_API_URL = "https://api.github.com/repos/NenadGvozdenac/GW2-Arcdps-Helper/releases?per_page=30";

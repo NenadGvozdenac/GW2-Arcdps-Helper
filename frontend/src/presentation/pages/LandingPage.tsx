@@ -26,7 +26,7 @@ import {
   UsersIcon,
   type LucideIcon,
 } from "lucide-react";
-import { RELEASES_URL, SOURCE_URL } from "../../config/constants";
+import { ADDON_DOWNLOAD_URL, RELEASES_URL, SOURCE_URL, UPLOADER_DOWNLOAD_URL } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { ENCOUNTERS } from "../../domain/data/encounters";
 import { downloadService } from "../../services/downloadService";
@@ -123,7 +123,8 @@ const FAQ: { q: TranslationKey; a: TranslationKey }[] = [
 ];
 
 function useLandingController() {
-  // Links fall back to the Releases page until GitHub answers (or when nothing is released yet).
+  // The links are fixed (always the newest file). GitHub's API only adds the version number next to them, when it
+  // answers (it is rate-limited per visitor).
   const [downloads, setDownloads] = useState<Downloads>({ uploader: null, addon: null });
   useEffect(() => {
     let cancelled = false;
@@ -134,9 +135,9 @@ function useLandingController() {
   }, []);
 
   return {
-    uploaderUrl: downloads.uploader?.url ?? RELEASES_URL,
+    uploaderUrl: UPLOADER_DOWNLOAD_URL,
     uploaderVersion: downloads.uploader?.version ?? null,
-    addonUrl: downloads.addon?.url ?? RELEASES_URL,
+    addonUrl: ADDON_DOWNLOAD_URL,
     addonVersion: downloads.addon?.version ?? null,
     stats: [
       { value: encounterService.groupsFor("raid").length, label: "landing.hero.stat1" as TranslationKey },

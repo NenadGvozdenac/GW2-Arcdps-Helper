@@ -133,6 +133,10 @@ Without make, you can tag by hand. In PowerShell, run each command on its own li
 
 Notes:
 
+- **Stable download links:** each release also refreshes the `uploader-latest` and `addon-latest` releases.
+  Their files have fixed names (`GW2-ArcDPS-Helper-Uploader-Setup.exe`, `gw2-arcdps-helper.dll`), and the website's
+  download buttons link to them, so the buttons work without the GitHub API. These tags aren't `vX.Y.Z`, so Nexus,
+  the uploader's updater and `scripts/release.mjs` all ignore them.
 - **You don't edit version numbers by hand.** The uploader's `package.json` version and the addon version shown in
   Nexus are set from the tag at build time. Local builds of the addon report `0.0.0`.
 - **A push to `main` without a tag** still builds both, but only as run artifacts (**Actions** → the run →

@@ -90,3 +90,17 @@ jobs:
           name: Nexus addon ${{ steps.release.outputs.tag }}
           files: nexus-addon/build/Release/gw2-arcdps-helper.dll
           generate_release_notes: true
+
+      # The website's download button links here: a fixed URL that always serves the newest DLL, so it works without
+      # asking the GitHub API (rate-limited per visitor). Not a vX.Y.Z tag, so Nexus' updater ignores this release.
+      - name: Update the stable download (release addon-latest)
+        if: steps.release.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          NOTES="Always the newest Nexus addon (currently $TAG). Versioned releases are tagged vX.Y.Z."
+          gh release view addon-latest > /dev/null 2>&1 ||
+            gh release create addon-latest --title "Nexus addon - latest download" --notes "$NOTES" --latest=false
+          gh release upload addon-latest build/Release/gw2-arcdps-helper.dll --clobber
+          gh release edit addon-latest --notes "$NOTES" --latest=false
