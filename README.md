@@ -60,23 +60,6 @@ Add a component with `npx shadcn@latest add <name>` inside `frontend/` (see `com
   translates the code (`errors.*` keys).
 - Boss, wing and fractal names are proper nouns from the game and are not translated.
 
-## API
-
-| Method | Path | Description |
-|---|---|---|
-| GET | `/api/health` | health check |
-| POST | `/api/auth/register` | `{email, password, displayName, gw2Account?}` → `{token, user}` |
-| POST | `/api/auth/login` | `{email, password}` → `{token, user}` |
-| GET | `/api/auth/me` | current user |
-| PATCH | `/api/profile` | `{displayName?, gw2Account?}` |
-| GET | `/api/logs` | all of the user's logs |
-| POST | `/api/logs` | `{urls: string[]}` (max 10) → result per link (incl. the stored log and its wing/fractal group) |
-| GET | `/api/logs/:id` | a single log |
-| DELETE | `/api/logs/:id` | delete a log |
-
-Authentication: `Authorization: Bearer <token>` (JWT, valid for 30 days).
-Errors: `{ "error": "<English message>", "code": "<ERROR_CODE>" }`.
-
 ## Auto-refresh
 
 The web app re-fetches the log list every 30 seconds while the tab is visible, and immediately when you
@@ -110,77 +93,7 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 Migrations are plain, forward-only SQL files applied in name order; each runs once inside a transaction
 and is recorded in the `schema_migrations` table. The backend container also applies them on startup.
 
-## Docker (everything local)
-
-```sh
-docker compose up -d --build
-```
-
-- App: http://localhost:8080 (nginx serves the frontend and proxies `/api` to the backend)
-- API directly: http://localhost:3000/api
-- Postgres: `localhost:5432` (gw2 / gw2, database `gw2arcdpshelper`)
-
-The backend container applies migrations on startup and reads `backend/.env.development` (with `DATABASE_URL`
-pointed at the `db` service); the frontend image is built with `build:local`, so it calls `/api` through nginx.
-
-## Environment files
-
-| File | Used by | In git |
-|---|---|---|
-| `backend/.env.development` | `npm run dev`, `npm run migrate`, Docker Compose | yes — dev-only values |
-| `backend/.env.production` | `npm run migrate:production` / `make migrate-prod` | **no** (git-, docker- and vercel-ignored) |
-| `backend/.env.production.example` | template for the file above | yes — placeholders only |
-| `frontend/.env.development` | `npm run dev`, `npm run build:local` (Docker) — `VITE_API_URL` empty = `/api` | yes |
-| `frontend/.env.production` | `npm run build` on your machine — production API URL | **no** (template: `.env.production.example`) |
-| `uploader/.env.development` | uploader dev builds | yes |
-| `uploader/.env.production` | uploader production builds / installer | **no** (template: `.env.production.example`) |
-
-On Vercel the backend reads its variables from **Project Settings → Environment Variables**, not from files.
-Every `.env.production` is git-ignored (root `.gitignore`); copy the matching `.env.production.example` to create it.
-Never put a real production secret into a committed file.
-
-## Local development without Docker for the code
-
-```sh
-docker compose up -d db                  # database only
-npm --prefix backend install
-npm --prefix backend run migrate
-npm --prefix backend run dev             # http://localhost:3000/api (tsx watch)
-npm --prefix frontend install
-npm --prefix frontend run dev            # http://localhost:5173, /api is proxied to :3000
-```
-
 ## Vercel
-
-### Automatic deploys (GitHub Actions)
-
-Both Vercel projects are deployed by GitHub Actions on every push to `main` (or manually via *Run workflow*);
-Vercel's own Git deployments are turned off in `frontend/vercel.json` and `backend/vercel.json`
-(`git.deploymentEnabled: false`), so nothing deploys twice.
-
-| Workflow | Runs when | Steps |
-|---|---|---|
-| `.github/workflows/deploy-web.yml` | `frontend/` changes | typecheck & build → `vercel pull` / `build --prod` / `deploy --prebuilt --prod` |
-| `.github/workflows/deploy-backend.yml` | `backend/` changes | typecheck & build → **apply DB migrations** → `vercel pull` / `build --prod` / `deploy --prebuilt --prod` |
-
-Migrations run before the new backend goes live, so write them backwards-compatible (add columns/tables; drop
-things in a later release).
-
-One-time setup:
-1. Create both projects on Vercel (Root Directory `frontend` / `backend`) and set their Environment Variables
-   (see *Projects* below).
-2. Create a token at https://vercel.com/account/tokens.
-3. Find the IDs: `orgId` in `.vercel/project.json` after `npx vercel link` in the repo root, and each project's ID
-   under *Project Settings → General → Project ID*.
-4. Add repository secrets (*Settings → Secrets and variables → Actions*):
-
-| Secret | Value |
-|---|---|
-| `VERCEL_TOKEN` | the token from step 2 |
-| `VERCEL_ORG_ID` | `orgId` from step 3 |
-| `VERCEL_WEB_PROJECT_ID` | Project ID of the web project |
-| `VERCEL_BACKEND_PROJECT_ID` | Project ID of the backend project |
-| `PRODUCTION_DATABASE_URL` | the production `DATABASE_URL` (used only for migrations) |
 
 ### Projects
 
@@ -196,4 +109,4 @@ Two Vercel projects from the same repository:
 **Frontend** (Root Directory: `frontend`)
 1. Set `VITE_API_URL=https://<backend-project>.vercel.app/api` in the Vercel project's Environment Variables
    (`frontend/.env.production` is git-ignored, so Vercel never sees it).
-2. Deploy — push to `main` (GitHub Actions workflow above); `vercel.json` configures the Vite build and the SPA rewrite.
+2. Deploy — push to `main`; `vercel.json` configures the Vite build and the SPA rewrite.
