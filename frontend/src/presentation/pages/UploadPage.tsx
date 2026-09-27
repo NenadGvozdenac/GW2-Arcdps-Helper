@@ -12,7 +12,12 @@ export default function UploadPage() {
         description={
           <>
             {t("upload.pageIntroBefore")}{" "}
-            <a href="https://dps.report" target="_blank" rel="noreferrer" className="font-medium text-foreground underline underline-offset-4">
+            <a
+              href="https://dps.report"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
               dps.report
             </a>{" "}
             {t("upload.pageIntroAfter")}

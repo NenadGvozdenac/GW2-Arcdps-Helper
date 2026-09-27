@@ -16,7 +16,7 @@ import BossRow from "../components/BossRow";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
-import { CategoryGroupsSkeleton, LogTableSkeleton, StatCardsSkeleton } from "../components/Skeletons";
+import { PageSpinner } from "../components/Spinner";
 
 type PageCategory = Exclude<Category, "other">;
 
@@ -94,6 +94,8 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
   const { t, fmt } = useI18n();
   const { summary, previous } = c;
 
+  if (c.loading) return <PageSpinner />;
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -120,16 +122,12 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
         }
       />
 
-      {c.loading ? (
-        <StatCardsSkeleton />
-      ) : (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard label={t("categories.bossesKilled")} value={`${summary.killed}/${summary.total}`} />
-          <StatCard label={t(c.clearedLabel)} value={`${summary.clearedSinceReset}/${summary.total}`} />
-          <StatCard label={t("categories.kills")} value={summary.kills} tone="success" />
-          <StatCard label={t("categories.wipes")} value={summary.wipes} tone="fail" />
-        </div>
-      )}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label={t("categories.bossesKilled")} value={`${summary.killed}/${summary.total}`} />
+        <StatCard label={t(c.clearedLabel)} value={`${summary.clearedSinceReset}/${summary.total}`} />
+        <StatCard label={t("categories.kills")} value={summary.kills} tone="success" />
+        <StatCard label={t("categories.wipes")} value={summary.wipes} tone="fail" />
+      </div>
 
       {c.showPrevious && (
         <Card>
@@ -148,36 +146,34 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
               <XIcon /> {t("categories.hidePrevious")}
             </Button>
           </CardHeader>
-          <CardContent>{c.loading ? <LogTableSkeleton /> : <LogTable logs={previous.logs} showGroup />}</CardContent>
+          <CardContent>
+            <LogTable logs={previous.logs} showGroup />
+          </CardContent>
         </Card>
       )}
 
-      {c.loading ? (
-        <CategoryGroupsSkeleton category={category} />
-      ) : (
-        <div className="flex flex-col gap-4">
-          {c.groups.map(({ group, bosses }) => (
-            <Card key={group.id} className="gap-0 overflow-hidden py-0">
-              <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
-                <Badge variant="secondary" className="font-mono">
-                  {group.short}
-                </Badge>
-                <CardTitle>{group.name}</CardTitle>
-              </CardHeader>
-              <ul>
-                {bosses.map((b) => (
-                  <BossRow
-                    key={b.encounter.key}
-                    {...b}
-                    open={c.selectedBoss === b.encounter.key}
-                    onToggle={() => c.toggleBoss(b.encounter.key)}
-                  />
-                ))}
-              </ul>
-            </Card>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-col gap-4">
+        {c.groups.map(({ group, bosses }) => (
+          <Card key={group.id} className="gap-0 overflow-hidden py-0">
+            <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
+              <Badge variant="secondary" className="font-mono">
+                {group.short}
+              </Badge>
+              <CardTitle>{group.name}</CardTitle>
+            </CardHeader>
+            <ul>
+              {bosses.map((b) => (
+                <BossRow
+                  key={b.encounter.key}
+                  {...b}
+                  open={c.selectedBoss === b.encounter.key}
+                  onToggle={() => c.toggleBoss(b.encounter.key)}
+                />
+              ))}
+            </ul>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

@@ -57,7 +57,14 @@ export default function LoginPage() {
     >
       <div className="grid gap-2">
         <Label htmlFor="email">{t("auth.email")}</Label>
-        <Input id="email" type="email" autoComplete="email" value={c.email} onChange={(e) => c.setEmail(e.target.value)} required />
+        <Input
+          id="email"
+          type="email"
+          autoComplete="email"
+          value={c.email}
+          onChange={(e) => c.setEmail(e.target.value)}
+          required
+        />
       </div>
       <div className="grid gap-2">
         <Label htmlFor="password">{t("auth.password")}</Label>

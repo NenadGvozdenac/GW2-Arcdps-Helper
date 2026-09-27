@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
-import { HomeRoute, RequireAuth, RequireGuest } from "./components/RouteGuards";
+import { HomeRoute, PublicRoute, RequireAuth, RequireGuest } from "./components/RouteGuards";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -13,7 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DiscordGuidePage from "./pages/DiscordGuidePage";
 import SessionDetailPage from "./pages/SessionDetailPage";
 import SessionsPage from "./pages/SessionsPage";
-import SessionsGuidePage from "./pages/SessionsGuidePage";
+import SessionsGuidePage, { GuestGuideShell } from "./pages/SessionsGuidePage";
 
 export default function AppRouter() {
   return (
@@ -36,7 +36,23 @@ export default function AppRouter() {
         }
       />
       {/* Public: opened from the desktop uploader, also when not signed in on the website. */}
-      <Route path="guide/sessions" element={<SessionsGuidePage />} />
+      <Route
+        path="guide/sessions"
+        element={
+          <PublicRoute
+            signedIn={
+              <Layout>
+                <SessionsGuidePage />
+              </Layout>
+            }
+            guest={
+              <GuestGuideShell>
+                <SessionsGuidePage />
+              </GuestGuideShell>
+            }
+          />
+        }
+      />
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
           <Route path="upload" element={<UploadPage />} />

@@ -22,7 +22,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/pre
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
-import { SessionDetailSkeleton } from "../components/Skeletons";
+import { PageSpinner } from "../components/Spinner";
 import StatCard from "../components/StatCard";
 import { describeError } from "../utils/describeError";
 
@@ -72,7 +72,7 @@ export default function SessionDetailPage() {
   const c = useSessionDetailController(id);
   const { t, fmt } = useI18n();
 
-  if (c.loading) return <SessionDetailSkeleton />;
+  if (c.loading) return <PageSpinner />;
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="self-start">

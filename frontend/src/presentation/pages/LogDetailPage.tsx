@@ -24,7 +24,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/presentation/lib/utils";
 import ResultBadge from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
-import { LogDetailSkeleton } from "../components/Skeletons";
+import { PageSpinner } from "../components/Spinner";
 import { describeError } from "../utils/describeError";
 import { professionColor } from "../utils/professionColors";
 
@@ -93,7 +93,7 @@ export default function LogDetailPage() {
   const { loading, log, backLink, totals, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
   const { t, fmt } = useI18n();
 
-  if (loading) return <LogDetailSkeleton />;
+  if (loading) return <PageSpinner />;
   if (!log || !totals) {
     return (
       <div className="flex flex-col items-start gap-4">
@@ -189,11 +189,16 @@ export default function LogDetailPage() {
             </TableHeader>
             <TableBody>
               {log.players.map((p, i) => (
-                <TableRow key={p.account + p.name} className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}>
+                <TableRow
+                  key={p.account + p.name}
+                  className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
+                >
                   <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                   <TableCell className="font-medium">
                     <span className="inline-flex items-center gap-1.5">
-                      {p.commander && <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />}
+                      {p.commander && (
+                        <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />
+                      )}
                       {p.name}
                     </span>
                   </TableCell>
@@ -208,14 +213,19 @@ export default function LogDetailPage() {
                     <div className="relative ml-auto h-6 min-w-32 overflow-hidden rounded bg-muted">
                       <div
                         className="absolute inset-y-0 left-0 opacity-40"
-                        style={{ width: `${(p.dps / totals.topDps) * 100}%`, background: professionColor(p.profession) }}
+                        style={{
+                          width: `${(p.dps / totals.topDps) * 100}%`,
+                          background: professionColor(p.profession),
+                        }}
                       />
                       <span className="relative px-2 font-mono text-xs leading-6 font-semibold tabular-nums">
                         {fmt.number(p.dps)}
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-right font-mono text-muted-foreground tabular-nums">{fmt.number(p.totalDps)}</TableCell>
+                  <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
+                    {fmt.number(p.totalDps)}
+                  </TableCell>
                   <TableCell className="text-right">{p.downs || ""}</TableCell>
                   <TableCell className="text-right">{p.deaths || ""}</TableCell>
                 </TableRow>

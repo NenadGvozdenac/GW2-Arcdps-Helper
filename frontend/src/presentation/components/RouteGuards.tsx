@@ -3,7 +3,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../../controllers/AuthController";
 
 /**
- * While a saved sign-in is being restored the page is rendered anyway: it shows its own skeleton
+ * While a saved sign-in is being restored the page is rendered anyway: it shows a spinner
  * (LogsController reports loading until the user is known), so every page has exactly one loading state.
  */
 export function RequireAuth() {
@@ -16,6 +16,12 @@ export function RequireAuth() {
 
 /** "/" shows the landing page to guests and `signedIn` to signed-in users (also while their session is restored). */
 export function HomeRoute({ guest, signedIn }: { guest: ReactNode; signedIn: ReactNode }) {
+  const { user, loading } = useAuth();
+  return <>{user || loading ? signedIn : guest}</>;
+}
+
+/** A page anyone may open: inside the app layout for signed-in users (also while restoring), `guest` otherwise. */
+export function PublicRoute({ signedIn, guest }: { signedIn: ReactNode; guest: ReactNode }) {
   const { user, loading } = useAuth();
   return <>{user || loading ? signedIn : guest}</>;
 }

@@ -13,8 +13,7 @@ import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
-import { Skeleton } from "@/presentation/components/ui/skeleton";
-import { LogTableSkeleton } from "../components/Skeletons";
+import { PageSpinner } from "../components/Spinner";
 
 const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all" };
 
@@ -52,12 +51,11 @@ export default function AllLogsPage() {
   const c = useAllLogsController();
   const { t } = useI18n();
 
+  if (c.loading) return <PageSpinner />;
+
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("allLogs.title")}
-        description={c.loading ? <Skeleton className="h-4 w-24" /> : t("allLogs.count", { count: c.total })}
-      />
+      <PageHeader title={t("allLogs.title")} description={t("allLogs.count", { count: c.total })} />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
         <div className="relative">
@@ -69,7 +67,10 @@ export default function AllLogsPage() {
             onChange={(e) => c.updateFilter({ search: e.target.value })}
           />
         </div>
-        <Select value={c.filter.category} onValueChange={(v) => c.updateFilter({ category: v as LogFilter["category"] })}>
+        <Select
+          value={c.filter.category}
+          onValueChange={(v) => c.updateFilter({ category: v as LogFilter["category"] })}
+        >
           <SelectTrigger className="w-full">
             <SelectValue />
           </SelectTrigger>
@@ -108,7 +109,7 @@ export default function AllLogsPage() {
 
       <Card>
         <CardContent>
-          {c.loading ? <LogTableSkeleton rows={10} /> : <LogTable logs={c.visible} showGroup />}
+          <LogTable logs={c.visible} showGroup />
           {c.remaining > 0 && (
             <div className="mt-4 flex justify-center">
               <Button variant="outline" onClick={c.loadMore}>

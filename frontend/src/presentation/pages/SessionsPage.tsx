@@ -8,7 +8,7 @@ import type { SessionView } from "../../domain/types/session.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Card, CardContent } from "@/presentation/components/ui/card";
 import PageHeader from "../components/PageHeader";
-import { SessionListSkeleton } from "../components/Skeletons";
+import { PageSpinner } from "../components/Spinner";
 import { failBadge, successBadge } from "../components/ResultBadge";
 
 function useSessionsController() {
@@ -20,6 +20,8 @@ function useSessionsController() {
 export default function SessionsPage() {
   const c = useSessionsController();
   const { t } = useI18n();
+
+  if (c.loading) return <PageSpinner />;
 
   return (
     <div className="flex flex-col gap-6">
@@ -37,9 +39,7 @@ export default function SessionsPage() {
           </>
         }
       />
-      {c.loading ? (
-        <SessionListSkeleton />
-      ) : c.views.length ? (
+      {c.views.length ? (
         <div className="flex flex-col gap-4">
           {c.views.map((v) => (
             <SessionCard key={v.session.id} view={v} />

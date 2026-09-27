@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 interface Props {
-  /** Text, or a placeholder (e.g. a Skeleton) while it isn't known yet. */
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;

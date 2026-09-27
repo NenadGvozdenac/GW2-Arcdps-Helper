@@ -102,6 +102,8 @@
 /* Thin, theme-coloured scrollbars. */
 html {
   scroll-behavior: smooth;
+  /* Always reserve the scrollbar's space, so centred content doesn't shift when a page becomes scrollable. */
+  scrollbar-gutter: stable;
 }
 ::-webkit-scrollbar {
   width: 10px;

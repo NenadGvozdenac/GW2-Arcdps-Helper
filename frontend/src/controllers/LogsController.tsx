@@ -108,7 +108,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id, refresh]);
 
-  // Pages show their skeleton until both the user and their logs are known.
+  // Pages show a spinner until both the user and their logs are known.
   const value = useMemo(
     () => ({
       logs,

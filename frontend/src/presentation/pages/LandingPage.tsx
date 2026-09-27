@@ -173,7 +173,8 @@ export default function LandingPage() {
             </Reveal>
             <Reveal delay={80}>
               <h1 className="text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl">
-                {t("landing.hero.titleBefore")} <span className="landing-gradient-text">{t("landing.hero.titleHighlight")}</span>
+                {t("landing.hero.titleBefore")}{" "}
+                <span className="landing-gradient-text">{t("landing.hero.titleHighlight")}</span>
               </h1>
             </Reveal>
             <Reveal delay={160}>
@@ -210,7 +211,11 @@ export default function LandingPage() {
       {/* ---------- How it works ---------- */}
       <section id="how" className="relative scroll-mt-20 border-t bg-card/20 py-24">
         <div className="mx-auto max-w-6xl px-4">
-          <SectionHeading eyebrow={t("landing.how.eyebrow")} title={t("landing.how.title")} subtitle={t("landing.how.subtitle")} />
+          <SectionHeading
+            eyebrow={t("landing.how.eyebrow")}
+            title={t("landing.how.title")}
+            subtitle={t("landing.how.subtitle")}
+          />
           <ol className="relative grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {/* Animated connector behind the step icons (desktop). */}
             <div className="landing-flow pointer-events-none absolute top-7 right-[12.5%] left-[12.5%] hidden h-0.5 opacity-60 lg:block" />
@@ -258,8 +263,12 @@ export default function LandingPage() {
         <div className="landing-glow pointer-events-none absolute -right-40 top-10 h-96 w-[40rem] opacity-60" />
         <div className="relative mx-auto grid max-w-6xl grid-cols-1 items-center gap-14 px-4 lg:grid-cols-2">
           <Reveal>
-            <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-[var(--brand)] uppercase">{t("landing.uploader.eyebrow")}</p>
-            <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{t("landing.uploader.title")}</h2>
+            <p className="mb-3 text-xs font-semibold tracking-[0.2em] text-[var(--brand)] uppercase">
+              {t("landing.uploader.eyebrow")}
+            </p>
+            <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+              {t("landing.uploader.title")}
+            </h2>
             <p className="mt-4 text-muted-foreground text-pretty">{t("landing.uploader.body")}</p>
             <ul className="mt-8 space-y-3">
               {UPLOADER_POINTS.map((p) => (
@@ -314,7 +323,9 @@ export default function LandingPage() {
           <div className="landing-border relative overflow-hidden rounded-3xl bg-card px-6 py-16 text-center sm:px-12">
             <div className="landing-glow pointer-events-none absolute inset-0 opacity-70" />
             <div className="relative">
-              <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">{t("landing.cta.title")}</h2>
+              <h2 className="text-3xl font-semibold tracking-tight text-balance sm:text-4xl">
+                {t("landing.cta.title")}
+              </h2>
               <p className="mx-auto mt-4 max-w-xl text-muted-foreground text-pretty">{t("landing.cta.body")}</p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Button asChild size="lg">
@@ -335,7 +346,12 @@ export default function LandingPage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl">{t("landing.footer.disclaimer")}</p>
-          <a href={SOURCE_URL} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 hover:text-foreground">
+          <a
+            href={SOURCE_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 hover:text-foreground"
+          >
             <GithubMark className="size-4" /> {t("landing.footer.source")}
           </a>
         </div>
