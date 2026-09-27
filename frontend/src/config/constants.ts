@@ -31,6 +31,6 @@ export const PARALLEL_FILE_UPLOADS = 2;
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 
 export const SOURCE_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";
-/** Uploader (uploader-v* tags) and Nexus addon (addon-v* tags) builds, see .github/workflows. */
+/** Uploader (uploader-v* tags) and Nexus addon (v* tags) builds, see .github/workflows. */
 export const RELEASES_URL = `${SOURCE_URL}/releases`;
 export const GITHUB_RELEASES_API_URL = "https://api.github.com/repos/NenadGvozdenac/GW2-Arcdps-Helper/releases?per_page=30";

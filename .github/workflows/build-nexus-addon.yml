@@ -2,12 +2,13 @@ name: Build Nexus addon
 
 # Builds the in-game Nexus addon (gw2-arcdps-helper.dll) with MSVC.
 # - Push to main that touches nexus-addon/ (or a manual run): the DLL is attached to the run as an artifact.
-# - Push a tag like `addon-v0.2.0`: the DLL is published as a GitHub Release.
+# - Push a tag like `v0.2.0`: the DLL is published as a GitHub Release. Nexus (UP_GitHub) only understands plain
+#   vX.Y.Z tags, which is why the addon doesn't use an "addon-" prefix like the uploader does.
 
 on:
   push:
     branches: [main]
-    tags: ["addon-v*"]
+    tags: ["v*"]
     paths:
       - "nexus-addon/**"
       - ".github/workflows/build-nexus-addon.yml"
@@ -32,9 +33,9 @@ jobs:
       - name: Configure
         shell: bash
         run: |
-          # addon-v0.2.0 -> 0.2.0 (shown as the addon version in Nexus); other builds are 0.0.0.
+          # v0.2.0 -> 0.2.0 (the addon version in Nexus); other builds are 0.0.0 and never auto-update.
           VERSION=0.0.0
-          if [[ "$GITHUB_REF" == refs/tags/addon-v* ]]; then VERSION="${GITHUB_REF_NAME#addon-v}"; fi
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then VERSION="${GITHUB_REF_NAME#v}"; fi
           cmake -S . -B build -A x64 -DADDON_VERSION="$VERSION"
 
       - name: Build
@@ -47,7 +48,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/addon-v')
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           name: Nexus addon ${{ github.ref_name }}

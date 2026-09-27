@@ -31,7 +31,6 @@ src/
 ├── account.cpp   sign-in and sessions on their own thread; re-checks the active session every minute
 ├── watcher.cpp   ReadDirectoryChangesW on the log folder (recursive: ArcDPS uses one folder per boss)
 ├── desktopUploader.cpp  notices when the desktop uploader is running too (process list, every 5 s)
-├── updater.cpp   self-update: newest addon-vX.Y.Z GitHub Release -> Nexus RequestUpdate (skipped for local 0.0.0 builds)
 ├── api.cpp       dps.report + GW2 ArcDPS Helper clients (the same endpoints the desktop uploader uses)
 ├── http.cpp      blocking WinHTTP requests; CancelAll() aborts them on unload so threads join quickly
 ├── settings.cpp  settings.json
@@ -57,7 +56,7 @@ Pick one of these:
 |---|---|---|
 | `make addon-build` | Visual Studio 2022 (C++ workload) + CMake | `nexus-addon/build/Release/gw2-arcdps-helper.dll` |
 | `make addon-zig` | [zig](https://ziglang.org) (`winget install zig.zig`), nothing else | `nexus-addon/build/gw2-arcdps-helper.dll` |
-| GitHub Actions *Build Nexus addon* | nothing | DLL as a run artifact; tag `addon-vX.Y.Z` publishes a Release |
+| GitHub Actions *Build Nexus addon* | nothing | DLL as a run artifact; tag `vX.Y.Z` publishes a Release |
 
 The official build is the MSVC one. The zig build is handy when Visual Studio is not installed.
 To publish a new version, see [Releasing a new version](../README.md#releasing-a-new-version).
@@ -68,5 +67,7 @@ To publish a new version, see [Releasing a new version](../README.md#releasing-a
 2. Copy `gw2-arcdps-helper.dll` to `<Guild Wars 2>\addons\`.
 3. In game, open Nexus → Addons, enable **GW2 ArcDPS Helper**, and sign in under its options.
 
-After that, the addon updates itself. Each time it loads, it checks GitHub for a newer `addon-v*` release, and Nexus
-downloads the new DLL. The check and its result appear in the Nexus log.
+After that, Nexus keeps it up to date. The addon declares the update provider GitHub, so Nexus checks this
+repository's `vX.Y.Z` releases when the addon loads and then every 30 minutes. In the default "Automatic" update mode
+(Nexus → Addons → the addon's settings), Nexus downloads the new DLL and reloads it. Releases before `v0.1.2`
+(tagged `addon-v…`) can't update themselves, so install `v0.1.2` once by hand.

@@ -15,12 +15,11 @@
 #include "resource.h"
 #include "settings.h"
 #include "ui.h"
-#include "updater.h"
 #include "uploads.h"
 #include "util.h"
 #include "watcher.h"
 
-// Release builds get the version from the addon-vX.Y.Z tag (CMake -DADDON_VERSION=X.Y.Z); local builds are 0.0.0.
+// Release builds get the version from the vX.Y.Z tag (CMake -DADDON_VERSION=X.Y.Z); local builds are 0.0.0.
 #ifndef ADDON_VERSION_MAJOR
 #define ADDON_VERSION_MAJOR 0
 #define ADDON_VERSION_MINOR 0
@@ -80,10 +79,6 @@ namespace
 		}
 		for (const auto& a : alerts) APIDefs->GUI_SendAlert(a.c_str());
 
-		// Nexus downloads the newer DLL and swaps it in.
-		std::string updateUrl = Updater::TakeUpdateUrl();
-		if (!updateUrl.empty()) APIDefs->RequestUpdate(AddonDef.Signature, updateUrl.c_str());
-
 		bool wasShown = UI::ShowWindow;
 		UI::RenderWindow();
 		if (wasShown != UI::ShowWindow) Config::Update([](Settings& s) { s.showWindow = UI::ShowWindow; });
@@ -104,7 +99,6 @@ namespace
 		Uploads::Start(dir);
 		Account::Start();
 		UI::ApplyWatching();
-		Updater::Start(AddonDef.Version);
 		DesktopUploader::Start();
 
 		api->GUI_Register(RT_Render, Render);
@@ -132,7 +126,6 @@ namespace
 
 		// Abort running requests so the worker threads can be joined right away.
 		Http::CancelAll();
-		Updater::Stop();
 		DesktopUploader::Stop();
 		Watcher::Stop();
 		Account::Stop();
@@ -176,7 +169,11 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.Load = AddonLoad;
 	AddonDef.Unload = AddonUnload;
 	AddonDef.Flags = AF_None;
-	AddonDef.Provider = UP_Self; // see updater.cpp
-	AddonDef.UpdateLink = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper/releases";
+	// Nexus checks the repository's GitHub Releases (on load, then every 30 minutes) and installs the newest DLL.
+	// It only understands tags like v1.2.3, so addon releases are tagged vX.Y.Z; uploader-v* tags are ignored.
+	// Local builds (0.0.0) opt out, or Nexus would replace them with the latest release right away.
+	bool localBuild = ADDON_VERSION_MAJOR == 0 && ADDON_VERSION_MINOR == 0 && ADDON_VERSION_PATCH == 0;
+	AddonDef.Provider = localBuild ? UP_None : UP_GitHub;
+	AddonDef.UpdateLink = localBuild ? nullptr : "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";
 	return &AddonDef;
 }

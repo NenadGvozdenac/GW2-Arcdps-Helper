@@ -108,19 +108,19 @@ page asks the GitHub API for the newest release of each tag, so no redeploy is n
 | What | Tag | Workflow | Release files |
 |---|---|---|---|
 | Desktop uploader | `uploader-vX.Y.Z` | `build-uploader.yml` | installer (`…-Setup-X.Y.Z.exe`) + portable exe |
-| Nexus addon | `addon-vX.Y.Z` | `build-nexus-addon.yml` | `gw2-arcdps-helper.dll` |
+| Nexus addon | `vX.Y.Z` (no prefix, see below) | `build-nexus-addon.yml` | `gw2-arcdps-helper.dll` |
 
 1. Commit and push your changes to `main`. The tag builds the commit it points to.
 2. Pick a version higher than the last one. List the existing ones with `git tag -l "uploader-v*"` or
-   `git tag -l "addon-v*"`.
+   `git tag -l "v*"`.
 3. Create the tag and push it. In PowerShell, run each command on its own line (Windows PowerShell has no `&&`):
 
    ```powershell
    git tag uploader-v0.2.0
    git push origin uploader-v0.2.0
 
-   git tag addon-v0.2.0
-   git push origin addon-v0.2.0
+   git tag v0.2.0
+   git push origin v0.2.0
    ```
 
 4. Follow the build under **Actions** on GitHub. After a few minutes the release appears under **Releases**, and the
@@ -135,17 +135,19 @@ Notes:
 - **If a tagged build fails,** fix it, push the fix, then move the tag to the new commit:
 
   ```powershell
-  git tag -d addon-v0.2.0
-  git push origin :refs/tags/addon-v0.2.0
-  git tag addon-v0.2.0
-  git push origin addon-v0.2.0
+  git tag -d v0.2.0
+  git push origin :refs/tags/v0.2.0
+  git tag v0.2.0
+  git push origin v0.2.0
   ```
 
   A release is only created when the build succeeds, so there is nothing else to clean up.
 - **How players get the update:**
-  - **Nexus addon:** updates itself. When it loads, it checks for the newest `addon-v*` release and, if it is newer,
-    Nexus downloads the DLL. Only releases from `addon-v0.1.1` onwards do this; players on `addon-v0.1.0` install
-    the next version once by hand.
+  - **Nexus addon:** Nexus updates it (update provider GitHub). It checks this repository's releases when the addon
+    loads and then every 30 minutes. With the default update mode ("Automatic"), it downloads the newest DLL and
+    reloads the addon. Nexus only understands tags like `v1.2.3`, which is why addon tags have no prefix. It skips
+    `uploader-v*` and the old `addon-v0.1.0` / `addon-v0.1.1` releases. Those two can't update themselves, so
+    players on them install `v0.1.2` or newer once by hand. Local builds (`0.0.0`) never auto-update.
   - **Uploader:** manual. Players install the new setup exe over the old one.
 
 ## Vercel
