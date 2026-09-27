@@ -1,5 +1,6 @@
-import { LOG_FILE_EXTENSIONS, MAX_URLS_PER_CALL } from "../config/constants";
+import { LOG_FILE_EXTENSIONS, LOGS_PAGE_SIZE, LOGS_PAGE_SIZE_OPTIONS, MAX_URLS_PER_CALL } from "../config/constants";
 import { logRepository } from "../repositories/logRepository";
+import { logsPageSizeStorage } from "../repositories/logsPageSizeStorage";
 import type { Log, LogFilter, LogPage } from "../domain/types/log.types";
 import type { SubmitResult, UploadSummary } from "../domain/types/upload.types";
 
@@ -11,6 +12,13 @@ export const logService = {
   search: (filter: LogFilter, page: number, pageSize: number): Promise<LogPage> =>
     logRepository.search(filter, page, pageSize),
   searchIds: (filter: LogFilter): Promise<string[]> => logRepository.searchIds(filter),
+
+  /** Logs per page on "All logs" the user picked last time (the default if none, or no longer offered). */
+  savedPageSize(): number {
+    const stored = logsPageSizeStorage.get();
+    return stored && LOGS_PAGE_SIZE_OPTIONS.includes(stored) ? stored : LOGS_PAGE_SIZE;
+  },
+  savePageSize: (size: number) => logsPageSizeStorage.set(size),
 
   /** Pulls every dps.report link out of arbitrary pasted text. */
   extractLinks(text: string): string[] {

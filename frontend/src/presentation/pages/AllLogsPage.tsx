@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertCircleIcon, CheckIcon, ListChecksIcon, Loader2Icon, SearchIcon, Trash2Icon } from "lucide-react";
-import { LOGS_PAGE_SIZE, SEARCH_DEBOUNCE_MS } from "../../config/constants";
+import { LOGS_PAGE_SIZE_OPTIONS, SEARCH_DEBOUNCE_MS } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
@@ -32,7 +32,7 @@ import { describeError } from "../utils/describeError";
 const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all" };
 
 /** Fetches one page at a time from the server; re-fetches when the filter or page changes, or logs come and go. */
-function useLogPage(filter: LogFilter, page: number) {
+function useLogPage(filter: LogFilter, page: number, pageSize: number) {
   const { logs } = useLogs();
   const [result, setResult] = useState<LogPage>({ logs: [], total: 0 });
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ function useLogPage(filter: LogFilter, page: number) {
     const request = ++latest.current;
     setLoading(true);
     logService
-      .search({ ...filter, search }, page, LOGS_PAGE_SIZE)
+      .search({ ...filter, search }, page, pageSize)
       .then((next) => {
         if (request !== latest.current) return;
         setResult(next);
@@ -61,7 +61,7 @@ function useLogPage(filter: LogFilter, page: number) {
       .catch((err) => request === latest.current && setError(err))
       .finally(() => request === latest.current && setLoading(false));
     // filter.search is left out on purpose: it reaches the server through the debounced `search`.
-  }, [filter.category, filter.groupId, filter.result, search, page, logCount]);
+  }, [filter.category, filter.groupId, filter.result, search, page, pageSize, logCount]);
 
   return { ...result, loading, error };
 }
@@ -70,14 +70,15 @@ function useAllLogsController() {
   const { removeMany } = useLogs();
   const [filter, setFilter] = useState<LogFilter>(INITIAL_FILTER);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(logService.savedPageSize);
   const [organizing, setOrganizing] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [selectingAll, setSelectingAll] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const result = useLogPage(filter, page);
-  const lastPage = Math.max(1, Math.ceil(result.total / LOGS_PAGE_SIZE));
+  const result = useLogPage(filter, page, pageSize);
+  const lastPage = Math.max(1, Math.ceil(result.total / pageSize));
   // Deleting can leave you past the last page — step back to it.
   useEffect(() => {
     if (!result.loading && page > lastPage) setPage(lastPage);
@@ -142,6 +143,13 @@ function useAllLogsController() {
     groupOptions,
     total: result.total,
     page,
+    pageSize,
+    /** Keeps the first log you were looking at on screen. */
+    changePageSize: (size: number) => {
+      setPage(Math.floor(((page - 1) * pageSize) / size) + 1);
+      setPageSize(size);
+      logService.savePageSize(size);
+    },
     visible: result.logs,
     loading: result.loading,
     setPage: (p: number) => {
@@ -285,7 +293,13 @@ export default function AllLogsPage() {
             selection={c.organizing ? { selected: c.selected, onToggle: c.toggle } : undefined}
           />
           <div className="mt-4">
-            <Pagination page={c.page} pageSize={LOGS_PAGE_SIZE} total={c.total} onPageChange={c.setPage} />
+            <Pagination
+              page={c.page}
+              pageSize={c.pageSize}
+              total={c.total}
+              onPageChange={c.setPage}
+              pageSizes={{ options: LOGS_PAGE_SIZE_OPTIONS, onChange: c.changePageSize }}
+            />
           </div>
         </CardContent>
       </Card>

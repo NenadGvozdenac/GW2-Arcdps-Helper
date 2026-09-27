@@ -20,6 +20,8 @@ export const sr: Messages = {
     range: "{from}–{to} od {total}",
     previous: "Prethodna stranica",
     next: "Sledeća stranica",
+    pageSize: "Po strani",
+    perPage: "{count} po strani",
   },
   nav: {
     overview: "Pregled",

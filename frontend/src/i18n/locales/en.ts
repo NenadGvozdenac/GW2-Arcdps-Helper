@@ -19,6 +19,8 @@ export const en = {
     range: "{from}–{to} of {total}",
     previous: "Previous page",
     next: "Next page",
+    pageSize: "Per page",
+    perPage: "{count} per page",
   },
   nav: {
     overview: "Overview",

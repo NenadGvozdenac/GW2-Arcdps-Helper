@@ -4,8 +4,10 @@ export const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/
 /** Must match MAX_URLS_PER_CALL in backend/src/config/constants.ts */
 export const MAX_URLS_PER_CALL = 10;
 
-/** Logs per page on "All logs" (fetched from the server one page at a time). */
+/** Logs per page on "All logs" by default (fetched from the server one page at a time). */
 export const LOGS_PAGE_SIZE = 20;
+/** Page sizes to choose from on "All logs" (the backend allows at most 100). */
+export const LOGS_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 /** Pause in typing before the log search is sent to the server. */
 export const SEARCH_DEBOUNCE_MS = 300;
 /** Sessions per page on "Sessions". */
@@ -18,6 +20,7 @@ export const FRESH_HIGHLIGHT_MS = 8_000;
 
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
+export const LOGS_PAGE_SIZE_STORAGE_KEY = "gw2arcdpshelper.logsPageSize";
 
 /** ArcDPS log files accepted by the file picker (same list as LOG_FILE_EXTENSIONS in the backend). */
 export const LOG_FILE_EXTENSIONS = [".zevtc", ".evtc", ".zip"];
