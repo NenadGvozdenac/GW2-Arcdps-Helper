@@ -24,4 +24,11 @@ export const userService = {
   },
 
   testDiscordWebhook: (url: string) => discordService.sendTest(url),
+
+  /** Saves (or with null, removes) the dps.report user token used for this user's uploads. */
+  async setDpsReportToken(id: string, token: string | null): Promise<User> {
+    const user = await userRepository.update(id, { dpsReportToken: token });
+    if (!user) throw userNotFound();
+    return user;
+  },
 };

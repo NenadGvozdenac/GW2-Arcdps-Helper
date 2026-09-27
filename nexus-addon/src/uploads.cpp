@@ -165,7 +165,8 @@ namespace
 	bool UploadToDpsReport(uint64_t id, const std::wstring& path)
 	{
 		Modify(id, [](Upload& u) { u.stage = Stage::Uploading; u.error.clear(); });
-		std::string userToken = Config::Get().dpsReportToken;
+		// Stored on the account (website); read fresh for every log.
+		std::string userToken = Account::CurrentDpsReportToken();
 
 		for (int attempt = 1;; attempt++)
 		{

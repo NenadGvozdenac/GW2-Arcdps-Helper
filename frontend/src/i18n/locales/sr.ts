@@ -132,7 +132,7 @@ export const sr: Messages = {
       body:
         "Mala Windows aplikacija koja stoji u system trayu. Izabereš ArcDPS folder, prijaviš se, i svaki novi log ide na dps.report i na tvoj nalog dok ti igraš dalje.",
       point1: "Prati ArcDPS folder i sam šalje nove logove",
-      point2: "Opcioni dps.report token, da logovi završe i na tvom dps.report nalogu",
+      point2: "Koristi dps.report token sa tvog profila, da logovi završe i na tvom dps.report nalogu",
       point3: "Desktop obaveštenje za svaki poslat log (može da se isključi)",
       point4: "Počinje da prati čim se pokrene i tiho stoji u trayu",
       download: "Preuzmi za Windows",
@@ -441,6 +441,21 @@ export const sr: Messages = {
     language: "Jezik",
     languageHint: "Jezik sajta. Čuva se u ovom browseru.",
   },
+  dpsReportToken: {
+    title: "dps.report user token",
+    description:
+      "Sa tokenom svaki log koji pošalješ — na ovom sajtu, desktop uploaderom ili Nexus addonom — završi i na tvom dps.report nalogu. Čuva se samo ovde; uploader i addon ga čitaju sa tvog naloga.",
+    set: "Podešen",
+    notSet: "Nije podešen",
+    label: "Token",
+    show: "Prikaži token",
+    hide: "Sakrij token",
+    howTo: "Otvori ovu stranicu u browseru u kom koristiš dps.report i kopiraj vrednost „userToken“:",
+    save: "Sačuvaj",
+    remove: "Ukloni",
+    saved: "Sačuvano",
+    removed: "Uklonjeno",
+  },
   discord: {
     title: "Discord obaveštenja",
     description: "Svaki novi log se šalje u Discord kanal — i sa ovog sajta i iz desktop uploadera.",
@@ -489,6 +504,7 @@ export const sr: Messages = {
     passwordsDontMatch: "Lozinke se ne poklapaju.",
     invalidGw2Account: "GW2 nalog treba da bude u formatu Ime.1234",
     invalidDiscordWebhook: "Ovo nije URL Discord webhooka (https://discord.com/api/webhooks/…).",
+    invalidDpsReportToken: "Ovo nije dps.report user token (samo slova i cifre).",
   },
   errors: {
     VALIDATION_ERROR: "Neki od unetih podataka nisu ispravni.",

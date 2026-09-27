@@ -17,4 +17,4 @@ export interface ProfileUpdate {
 }
 
 /** Columns a signed-in user may change. */
-export type UserPatch = Partial<Pick<UserRow, "gw2Account" | "discordWebhookUrl">>;
+export type UserPatch = Partial<Pick<UserRow, "gw2Account" | "discordWebhookUrl" | "dpsReportToken">>;

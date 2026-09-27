@@ -11,11 +11,16 @@ async function getJson<T>(path: string): Promise<T> {
 
 export const logUrl = (permalink: string) => `${DPS_REPORT_BASE_URL}/${permalink}`;
 
-/** Uploads an ArcDPS log file to dps.report (parsed with Elite Insights) and returns its permalink URL. */
-export async function uploadLogFile(content: Buffer, fileName: string): Promise<string> {
+/**
+ * Uploads an ArcDPS log file to dps.report (parsed with Elite Insights) and returns its permalink URL.
+ * With the user's dps.report token the log also lands in their dps.report account.
+ */
+export async function uploadLogFile(content: Buffer, fileName: string, userToken: string | null = null): Promise<string> {
   const form = new FormData();
   form.append("file", new Blob([new Uint8Array(content)]), fileName);
-  const res = await fetch(`${DPS_REPORT_BASE_URL}/uploadContent?json=1&generator=ei`, {
+  const params = new URLSearchParams({ json: "1", generator: "ei" });
+  if (userToken) params.set("userToken", userToken);
+  const res = await fetch(`${DPS_REPORT_BASE_URL}/uploadContent?${params}`, {
     method: "POST",
     body: form,
     signal: AbortSignal.timeout(DPS_REPORT_UPLOAD_TIMEOUT_MS),

@@ -50,6 +50,13 @@
       "when": 1790508848129,
       "tag": "0006_session_order",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790541073156,
+      "tag": "0007_add_dps_report_token",
+      "breakpoints": true
     }
   ]
 }

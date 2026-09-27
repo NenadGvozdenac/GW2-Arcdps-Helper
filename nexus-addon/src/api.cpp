@@ -72,7 +72,7 @@ namespace
 
 	Api::User ToUser(const json& j)
 	{
-		return { Str(j, "email"), Str(j, "gw2Account") };
+		return { Str(j, "email"), Str(j, "gw2Account"), Str(j, "dpsReportToken") };
 	}
 }
 
@@ -142,6 +142,14 @@ namespace Api
 	{
 		json out;
 		if (!Backend("GET", "/auth/me", token, nullptr, out, err)) return false;
+		user = ToUser(out.value("user", json::object()));
+		return true;
+	}
+
+	bool SetDpsReportToken(const std::string& token, const std::string& dpsReportToken, User& user, Error& err)
+	{
+		json body = { { "token", dpsReportToken } }, out;
+		if (!Backend("PUT", "/profile/dps-report-token", token, &body, out, err)) return false;
 		user = ToUser(out.value("user", json::object()));
 		return true;
 	}

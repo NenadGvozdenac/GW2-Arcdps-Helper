@@ -6,7 +6,6 @@
 struct Settings
 {
 	std::string logFolder;
-	std::string dpsReportToken;
 	bool autoUpload = true;  // pick up every new log from the ArcDPS folder
 	bool showAlerts = true;  // Nexus alert when a log was uploaded / failed
 	bool showWindow = true;
@@ -24,4 +23,11 @@ namespace Config
 	Settings Get();
 	/** Applies a change and saves to disk. */
 	void Update(const std::function<void(Settings&)>& change);
+
+	/**
+	 * Older versions kept the dps.report token in settings.json; it now lives on the account (website).
+	 * Returns it ("" if none) for the one-time move; Clear drops it from settings.json.
+	 */
+	std::string LegacyDpsReportToken();
+	void ClearLegacyDpsReportToken();
 }

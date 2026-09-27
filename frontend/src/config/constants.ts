@@ -33,6 +33,11 @@ export const LOG_FILE_EXTENSIONS = [".zevtc", ".evtc", ".zip"];
 /** Log files sent to the backend at the same time (each one is uploaded to dps.report there). */
 export const PARALLEL_FILE_UPLOADS = 2;
 
+/** Same pattern as DPS_REPORT_TOKEN_RE in backend/src/config/constants.ts. */
+export const DPS_REPORT_TOKEN_RE = /^[A-Za-z0-9]{8,64}$/;
+/** Shows the dps.report user token of the browser's dps.report session (as JSON). */
+export const DPS_REPORT_TOKEN_URL = "https://dps.report/getUserToken";
+
 /** Same pattern as DISCORD_WEBHOOK_RE in backend/src/config/constants.ts. */
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 

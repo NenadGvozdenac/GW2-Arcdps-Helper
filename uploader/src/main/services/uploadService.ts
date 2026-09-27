@@ -42,7 +42,8 @@ const isRetryable = (err: unknown) =>
 
 async function uploadToDpsReport(entry: UploadEntry): Promise<void> {
   stateStore.updateUpload(entry.id, { stage: "uploading", errorCode: null, errorDetail: null });
-  const { dpsReportToken } = stateStore.getSettings();
+  // Stored on the account (website); read fresh for every log.
+  const dpsReportToken = await authService.currentDpsReportToken();
 
   for (let attempt = 1; ; attempt++) {
     try {

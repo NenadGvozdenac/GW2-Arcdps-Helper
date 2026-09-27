@@ -14,12 +14,12 @@ namespace
 	std::mutex g_mutex;
 	Settings g_settings;
 	std::wstring g_path;
+	std::string g_legacyDpsReportToken; // kept on disk until it has been moved to the account
 
 	void SaveLocked()
 	{
 		json j = {
 			{ "logFolder", g_settings.logFolder },
-			{ "dpsReportToken", g_settings.dpsReportToken },
 			{ "autoUpload", g_settings.autoUpload },
 			{ "showAlerts", g_settings.showAlerts },
 			{ "showWindow", g_settings.showWindow },
@@ -27,6 +27,7 @@ namespace
 			{ "gw2Account", g_settings.gw2Account },
 			{ "token", Util::Protect(g_settings.token) },
 		};
+		if (!g_legacyDpsReportToken.empty()) j["dpsReportToken"] = g_legacyDpsReportToken;
 		if (!Util::WriteFileAtomic(g_path, j.dump(2))) LogWarn("Could not save settings.json");
 	}
 }
@@ -49,7 +50,7 @@ namespace Config
 			if (j.is_object())
 			{
 				s.logFolder = j.value("logFolder", s.logFolder);
-				s.dpsReportToken = j.value("dpsReportToken", "");
+				g_legacyDpsReportToken = j.value("dpsReportToken", "");
 				s.autoUpload = j.value("autoUpload", true);
 				s.showAlerts = j.value("showAlerts", true);
 				s.showWindow = j.value("showWindow", true);
@@ -73,6 +74,19 @@ namespace Config
 	{
 		std::lock_guard lock(g_mutex);
 		change(g_settings);
+		SaveLocked();
+	}
+
+	std::string LegacyDpsReportToken()
+	{
+		std::lock_guard lock(g_mutex);
+		return g_legacyDpsReportToken;
+	}
+
+	void ClearLegacyDpsReportToken()
+	{
+		std::lock_guard lock(g_mutex);
+		g_legacyDpsReportToken.clear();
 		SaveLocked();
 	}
 }

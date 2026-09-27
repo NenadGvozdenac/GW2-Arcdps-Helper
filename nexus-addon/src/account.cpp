@@ -72,9 +72,47 @@ namespace
 		Set([&](AccountState& s) {
 			s.signedIn = false;
 			s.gw2Account.clear();
+			s.dpsReportToken.clear();
 			s.message = message;
 			ClearSession(s);
 		});
+	}
+
+	/** Keeps the latest user from the backend (e.g. a dps.report token changed on the website). */
+	void ApplyUser(const Api::User& user)
+	{
+		Config::Update([&](Settings& s) { s.email = user.email; s.gw2Account = user.gw2Account; });
+		Set([&](AccountState& s) {
+			s.email = user.email;
+			s.gw2Account = user.gw2Account;
+			s.dpsReportToken = user.dpsReportToken;
+		});
+	}
+
+	/**
+	 * Older versions kept the dps.report token in settings.json; it now lives on the account. Moves it there once
+	 * (unless the account already has one) and removes the local copy.
+	 */
+	void MigrateLegacyDpsReportToken(const std::string& jwt, const Api::User& user)
+	{
+		std::string legacy = Config::LegacyDpsReportToken();
+		if (legacy.empty()) return;
+		if (user.dpsReportToken.empty())
+		{
+			Api::User updated;
+			Api::Error err;
+			if (Api::SetDpsReportToken(jwt, legacy, updated, err))
+			{
+				ApplyUser(updated);
+				LogInfo("Moved the dps.report token to the account");
+			}
+			else if (err.status != 400) // offline: try again next time; 400 = not a valid token, drop it
+			{
+				LogWarn("Could not move the dps.report token: " + err.message);
+				return;
+			}
+		}
+		Config::ClearLegacyDpsReportToken();
 	}
 
 	/** Picks up a session that is still running on the server (e.g. after restarting the game). */
@@ -113,8 +151,8 @@ namespace
 			Api::Error err;
 			if (Api::Me(cfg.token, user, err))
 			{
-				Config::Update([&](Settings& s) { s.email = user.email; s.gw2Account = user.gw2Account; });
-				Set([&](AccountState& s) { s.email = user.email; s.gw2Account = user.gw2Account; });
+				ApplyUser(user);
+				MigrateLegacyDpsReportToken(cfg.token, user);
 			}
 			else if (err.code == "UNAUTHORIZED")
 			{
@@ -189,14 +227,14 @@ namespace Account
 				Set([&](AccountState& s) { s.message = err.message.empty() ? "Sign-in failed." : err.message; });
 				return;
 			}
-			Config::Update([&](Settings& s) { s.token = token; s.email = user.email; s.gw2Account = user.gw2Account; });
+			Config::Update([&](Settings& s) { s.token = token; });
+			ApplyUser(user);
 			Set([&](AccountState& s) {
 				s.signedIn = true;
-				s.email = user.email;
-				s.gw2Account = user.gw2Account;
 				s.message.clear();
 			});
 			LogInfo("Signed in as " + user.email);
+			MigrateLegacyDpsReportToken(token, user);
 			RefreshSession();
 		});
 	}
@@ -275,5 +313,17 @@ namespace Account
 	void HandleUnauthorized()
 	{
 		SignOutLocal("Your sign-in expired. Sign in again.");
+	}
+
+	std::string CurrentDpsReportToken()
+	{
+		std::string jwt = Config::Get().token;
+		if (jwt.empty()) return {};
+		Api::User user;
+		Api::Error err;
+		if (Api::Me(jwt, user, err)) ApplyUser(user);
+		else LogWarn("Could not refresh the dps.report token, using the last known one: " + err.message);
+		std::lock_guard lock(g_mutex);
+		return g_state.signedIn ? g_state.dpsReportToken : std::string();
 	}
 }

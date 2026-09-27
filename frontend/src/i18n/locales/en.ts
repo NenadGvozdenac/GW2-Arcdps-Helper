@@ -131,7 +131,7 @@ export const en = {
       body:
         "A small Windows app that sits in your system tray. Pick your ArcDPS log folder, sign in, and every new log goes to dps.report and to your account while you keep playing.",
       point1: "Watches the ArcDPS folder and uploads new logs automatically",
-      point2: "Optional dps.report user token, so logs also land in your dps.report account",
+      point2: "Uses the dps.report token from your profile, so logs also land in your dps.report account",
       point3: "Desktop notifications for every uploaded log (can be turned off)",
       point4: "Starts watching on launch and lives quietly in the tray",
       download: "Download for Windows",
@@ -440,6 +440,21 @@ export const en = {
     language: "Language",
     languageHint: "Language of the website. Saved in this browser.",
   },
+  dpsReportToken: {
+    title: "dps.report user token",
+    description:
+      "With your token, every log you upload — on this site, with the desktop uploader or with the Nexus addon — also lands in your own dps.report account. It is stored only here; the uploader and the addon read it from your account.",
+    set: "Set",
+    notSet: "Not set",
+    label: "Token",
+    show: "Show token",
+    hide: "Hide token",
+    howTo: "Open this page in the browser you use for dps.report and copy the value of “userToken”:",
+    save: "Save",
+    remove: "Remove",
+    saved: "Saved",
+    removed: "Removed",
+  },
   discord: {
     title: "Discord notifications",
     description: "Post every new log to a Discord channel — from this site and from the desktop uploader.",
@@ -488,6 +503,7 @@ export const en = {
     passwordsDontMatch: "Passwords don't match.",
     invalidGw2Account: "GW2 account must look like Name.1234",
     invalidDiscordWebhook: "That is not a Discord webhook URL (https://discord.com/api/webhooks/…).",
+    invalidDpsReportToken: "That is not a dps.report user token (letters and digits only).",
   },
   errors: {
     VALIDATION_ERROR: "Some of the entered data is invalid.",

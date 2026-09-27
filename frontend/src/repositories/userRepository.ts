@@ -12,4 +12,9 @@ export const userRepository = {
   },
 
   testDiscordWebhook: (url: string) => http.post<void>("/profile/discord-webhook/test", { url }),
+
+  /** null removes the token. */
+  async setDpsReportToken(token: string | null): Promise<User> {
+    return (await http.put<{ user: User }>("/profile/dps-report-token", { token })).user;
+  },
 };

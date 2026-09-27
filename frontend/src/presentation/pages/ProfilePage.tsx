@@ -17,6 +17,7 @@ import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
+import DpsReportTokenCard from "../components/DpsReportTokenCard";
 import PageHeader from "../components/PageHeader";
 import { describeError } from "../utils/describeError";
 
@@ -113,6 +114,7 @@ export default function ProfilePage() {
           </Select>
         </CardContent>
       </Card>
+      <DpsReportTokenCard />
       <DiscordWebhookCard />
     </div>
   );

@@ -21,6 +21,8 @@ export const PARALLEL_FETCHES = 4;
  * Only real Discord webhook URLs are accepted — the server posts to this URL, so anything else would let users
  * make it call arbitrary addresses.
  */
+/** dps.report user tokens are short alphanumeric strings (e.g. 32 characters). Same pattern in the frontend. */
+export const DPS_REPORT_TOKEN_RE = /^[A-Za-z0-9]{8,64}$/;
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 export const DISCORD_TIMEOUT_MS = 5_000;
 /** Discord allows at most 10 embeds per message. */

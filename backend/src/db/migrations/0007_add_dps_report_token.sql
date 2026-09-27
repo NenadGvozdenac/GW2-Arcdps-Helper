@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "dps_report_token" text;

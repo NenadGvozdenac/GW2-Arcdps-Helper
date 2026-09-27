@@ -27,7 +27,6 @@ namespace
 	char g_sessionName[128] = "";
 	char g_email[256] = "";
 	char g_password[256] = "";
-	char g_dpsToken[128] = "";
 	char g_logFolder[520] = "";
 	bool g_optionsInit = false;
 
@@ -281,7 +280,6 @@ namespace UI
 		if (!g_optionsInit)
 		{
 			Copy(g_email, sizeof(g_email), s.email);
-			Copy(g_dpsToken, sizeof(g_dpsToken), s.dpsReportToken);
 			Copy(g_logFolder, sizeof(g_logFolder), s.logFolder);
 			g_optionsInit = true;
 		}
@@ -345,8 +343,15 @@ namespace UI
 		}
 		if (!Util::DirectoryExists(g_logFolder)) ImGui::TextColored(RED, "This folder does not exist.");
 
-		ImGui::SetNextItemWidth(260);
-		ImGui::InputText("dps.report user token (optional)", g_dpsToken, sizeof(g_dpsToken), ImGuiInputTextFlags_Password);
-		if (ImGui::IsItemDeactivatedAfterEdit()) Config::Update([](Settings& c) { c.dpsReportToken = g_dpsToken; });
+		// The dps.report token is stored on the account and edited on the website; the addon only reads it.
+		ImGui::TextUnformatted("dps.report user token:");
+		ImGui::SameLine();
+		if (!acc.signedIn) ImGui::TextColored(GREY, "sign in to use the one from your account");
+		else if (!acc.dpsReportToken.empty()) ImGui::TextColored(GREEN, "set on your account");
+		else ImGui::TextColored(GREY, "not set (anonymous uploads)");
+		TextWrappedColored(GREY,
+			"With it, your uploads also appear in your dps.report account. Set or change it on the website "
+			"(Profile) - the website, the desktop uploader and this addon all use it.");
+		if (ImGui::SmallButton("Open profile on the website")) Util::OpenUrl(std::string(WEB_URL) + "/profile");
 	}
 }

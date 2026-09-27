@@ -4,6 +4,8 @@ export interface BackendUser {
   id: string;
   email: string;
   gw2Account: string;
+  /** dps.report user token, set on the website (Profile); null = anonymous uploads. */
+  dpsReportToken: string | null;
 }
 
 /** A group of logs recorded together (see backend sessions). endedAt is null while it is active. */

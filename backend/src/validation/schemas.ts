@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   DISCORD_WEBHOOK_RE,
+  DPS_REPORT_TOKEN_RE,
   LOGS_PAGE_SIZE,
   LOGS_PAGE_SIZE_MAX,
   MAX_URLS_PER_CALL,
@@ -39,6 +40,17 @@ const discordWebhookUrl = z
 export const discordWebhookSchema = z.object({ url: discordWebhookUrl.nullable() });
 
 export const discordWebhookTestSchema = z.object({ url: discordWebhookUrl });
+
+/** dps.report user token (from dps.report/getUserToken); null or "" removes it. */
+export const dpsReportTokenSchema = z.object({
+  token: z
+    .string()
+    .trim()
+    .regex(DPS_REPORT_TOKEN_RE, "Not a dps.report user token (letters and digits only).")
+    .or(z.literal(""))
+    .nullable()
+    .transform((v) => v || null),
+});
 
 export const submitLogsSchema = z.object({
   urls: z

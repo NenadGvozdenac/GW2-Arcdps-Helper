@@ -13,8 +13,11 @@ the game.
   - **Auto-upload new logs** turns the folder watcher on or off. Recording turns it on.
   - The list shows the recent logs. Click a boss to open the dps.report link, right-click to copy it, and use
     **Retry** on failed uploads. If a log already reached dps.report, Retry repeats only the GW2 ArcDPS Helper step.
-- **Options** (Nexus → Addons → GW2 ArcDPS Helper): sign in, the ArcDPS log folder, the dps.report user token and
-  alerts. The addon always talks to the production API.
+- **Options** (Nexus → Addons → GW2 ArcDPS Helper): sign in, the ArcDPS log folder and alerts. The addon always
+  talks to the production API.
+- **dps.report user token**: stored on the account, not in the addon. Set it on the website (Profile). The addon
+  reads it from `/auth/me` before each upload. A token saved locally by an older version is moved to the account
+  once (if the account has none) and then removed from `settings.json`.
 - **Keybinds** (Nexus → Keybinds): toggle the window, and toggle recording (unbound by default).
 
 Without signing in the addon still uploads to dps.report ("dps.report only" in the list). Recording needs an

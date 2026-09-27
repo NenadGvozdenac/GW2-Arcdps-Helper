@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
-import { discordWebhookSchema, discordWebhookTestSchema, profileUpdateSchema } from "../validation/schemas";
+import { discordWebhookSchema, discordWebhookTestSchema, dpsReportTokenSchema, profileUpdateSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 export const profileController = {
@@ -13,6 +13,12 @@ export const profileController = {
   async setDiscordWebhook(req: Request, res: Response<unknown, AuthLocals>) {
     const { url } = validate(discordWebhookSchema, req.body);
     res.json({ user: await userService.setDiscordWebhook(res.locals.userId, url) });
+  },
+
+  /** The desktop uploader and the Nexus addon read it back from GET /auth/me. */
+  async setDpsReportToken(req: Request, res: Response<unknown, AuthLocals>) {
+    const { token } = validate(dpsReportTokenSchema, req.body);
+    res.json({ user: await userService.setDpsReportToken(res.locals.userId, token) });
   },
 
   /** Sends a test message to the given URL, so it can be checked before saving. */

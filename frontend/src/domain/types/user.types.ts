@@ -4,6 +4,8 @@ export interface User {
   gw2Account: string;
   /** Discord webhook new logs are posted to; null = not connected. */
   discordWebhookUrl: string | null;
+  /** dps.report user token for this account's uploads (website, desktop uploader, Nexus addon); null = not set. */
+  dpsReportToken: string | null;
 }
 
 export interface AuthResponse {

@@ -4,8 +4,6 @@ export type Language = "en" | "sr";
 export interface Settings {
   /** ArcDPS log folder (arcdps.cbtlogs); watched recursively. */
   logFolder: string;
-  /** Optional dps.report user token so uploads also show up in your dps.report account. */
-  dpsReportToken: string;
   /** Start watching the log folder as soon as the app starts (when signed in). */
   watchOnStartup: boolean;
   language: Language;

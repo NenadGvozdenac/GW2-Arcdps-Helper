@@ -14,14 +14,16 @@ function defaults(): Settings {
   const locale = app.getLocale().toLowerCase().split("-")[0];
   return {
     logFolder: defaultLogFolder(),
-    dpsReportToken: "",
     watchOnStartup: true,
     language: ["sr", "sh", "hr", "bs", "me"].includes(locale) ? "sr" : "en",
     desktopNotifications: true,
   };
 }
 
-const store = createJsonStore<Partial<Settings>>("settings.json", () => ({}));
+/** Older versions also stored the dps.report token here; it now lives on the account (website). */
+type StoredSettings = Partial<Settings> & { dpsReportToken?: string };
+
+const store = createJsonStore<StoredSettings>("settings.json", () => ({}));
 
 export const settingsRepository = {
   /** Stored values merged over defaults, so newly added settings always have a value. */
@@ -29,10 +31,19 @@ export const settingsRepository = {
     const stored = store.read();
     const merged = { ...defaults(), ...stored };
     // Only known keys, so settings removed in newer versions (e.g. apiUrl) disappear.
-    const { logFolder, dpsReportToken, watchOnStartup, language, desktopNotifications } = merged;
-    return { logFolder, dpsReportToken, watchOnStartup, language, desktopNotifications };
+    const { logFolder, watchOnStartup, language, desktopNotifications } = merged;
+    return { logFolder, watchOnStartup, language, desktopNotifications };
   },
   save(settings: Settings): void {
     store.write(settings);
+  },
+
+  /** A dps.report token saved by an older version ("" if none), for the one-time move to the account. */
+  legacyDpsReportToken(): string {
+    return store.read().dpsReportToken?.trim() ?? "";
+  },
+  /** Rewrites settings.json with the known keys only, which drops the legacy token. */
+  clearLegacyDpsReportToken(): void {
+    store.write(settingsRepository.load());
   },
 };

@@ -1,5 +1,7 @@
 import { environment } from "../config/environment";
 import { credentialsRepository } from "../repositories/credentialsRepository";
+import { settingsRepository } from "../repositories/settingsRepository";
+import type { BackendUser } from "../../shared/backend.types";
 import type { LoginRequest } from "../../shared/app.types";
 import type { Credentials } from "../types/storage.types";
 import { AppError } from "../utils/appError";
@@ -19,6 +21,33 @@ function signOut() {
   for (const l of signOutListeners) l();
 }
 
+/** Keeps the latest user from the backend (e.g. a dps.report token changed on the website). */
+function applyUser(user: BackendUser): void {
+  if (!credentials) return;
+  credentials = { ...credentials, user };
+  credentialsRepository.save(credentials);
+  stateStore.setUser(user);
+}
+
+/**
+ * Older versions kept the dps.report token in the app's settings; it now lives on the account. Moves it there once
+ * (unless the account already has one) and removes the local copy.
+ */
+async function migrateLegacyDpsReportToken(): Promise<void> {
+  const legacy = settingsRepository.legacyDpsReportToken();
+  if (!legacy || !credentials) return;
+  if (!credentials.user.dpsReportToken) {
+    try {
+      applyUser(await backendClient.setDpsReportToken(credentials.apiUrl, credentials.token, legacy));
+      logger.info("Moved the dps.report token to the account");
+    } catch (err) {
+      // Offline: try again next time. Rejected by the server (not a valid token): drop it.
+      if (!(err instanceof AppError && err.status === 400)) return logger.warn("Could not move the dps.report token", err);
+    }
+  }
+  settingsRepository.clearLegacyDpsReportToken();
+}
+
 export const authService = {
   /** Restores the saved sign-in and re-validates it in the background. */
   restore(): void {
@@ -35,10 +64,9 @@ export const authService = {
       .me(apiUrl, token)
       .then((user) => {
         if (!credentials) return;
-        credentials = { ...credentials, user };
-        credentialsRepository.save(credentials);
-        stateStore.setUser(user);
+        applyUser(user);
         for (const l of signInListeners) l();
+        return migrateLegacyDpsReportToken();
       })
       .catch((err) => {
         // Offline is fine (uploads will retry); an invalid/expired token is not.
@@ -57,6 +85,21 @@ export const authService = {
     stateStore.setUser(user);
     logger.info("Signed in", user.email);
     for (const l of signInListeners) l();
+    void migrateLegacyDpsReportToken();
+  },
+
+  /**
+   * The dps.report token to upload with, read fresh from the account so a change on the website applies right away.
+   * Offline, the last known one is used; "" when signed out or not set (anonymous upload).
+   */
+  async currentDpsReportToken(): Promise<string> {
+    if (!credentials) return "";
+    try {
+      applyUser(await backendClient.me(credentials.apiUrl, credentials.token));
+    } catch (err) {
+      logger.warn("Could not refresh the dps.report token, using the last known one", err);
+    }
+    return credentials?.user.dpsReportToken ?? "";
   },
 
   logout: signOut,

@@ -29,6 +29,11 @@ export const users = pgTable(
     gw2Account: text("gw2_account").notNull().default(""),
     /** Discord webhook that gets a message for every newly imported log; null = not connected. */
     discordWebhookUrl: text("discord_webhook_url"),
+    /**
+     * dps.report user token: uploads made for this user (website, desktop uploader, Nexus addon) land in their
+     * dps.report account. null = anonymous uploads.
+     */
+    dpsReportToken: text("dps_report_token"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],

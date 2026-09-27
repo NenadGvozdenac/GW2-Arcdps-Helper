@@ -21,6 +21,7 @@ export function createRouter(): Router {
   router.patch("/profile", requireAuth, profileController.update);
   router.put("/profile/discord-webhook", requireAuth, profileController.setDiscordWebhook);
   router.post("/profile/discord-webhook/test", requireAuth, profileController.testDiscordWebhook);
+  router.put("/profile/dps-report-token", requireAuth, profileController.setDpsReportToken);
 
   router.get("/logs", requireAuth, logController.list);
   router.get("/logs/search", requireAuth, logController.search);

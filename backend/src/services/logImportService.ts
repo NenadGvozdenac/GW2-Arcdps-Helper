@@ -51,10 +51,15 @@ export async function importLog(ownerId: string, url: string, sessionId: string 
 }
 
 /** Uploads a log file to dps.report on the user's behalf, then imports the resulting link. */
-export async function importLogFile(ownerId: string, content: Buffer, fileName: string): Promise<SubmitResult> {
+export async function importLogFile(
+  ownerId: string,
+  content: Buffer,
+  fileName: string,
+  dpsReportToken: string | null = null,
+): Promise<SubmitResult> {
   let url: string;
   try {
-    url = await uploadLogFile(content, fileName);
+    url = await uploadLogFile(content, fileName, dpsReportToken);
   } catch (err) {
     console.warn("dps.report upload failed", fileName, err);
     const message = err instanceof Error ? err.message : String(err);

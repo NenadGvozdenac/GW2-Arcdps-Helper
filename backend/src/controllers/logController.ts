@@ -64,7 +64,8 @@ export const logController = {
   async upload(req: Request, res: Response<unknown, AuthLocals>) {
     if (!req.file) throw invalidLogFile();
     const fileName = req.file.originalname;
-    const result = await importLogFile(res.locals.userId, req.file.buffer, fileName);
+    const { dpsReportToken } = await userService.get(res.locals.userId);
+    const result = await importLogFile(res.locals.userId, req.file.buffer, fileName, dpsReportToken);
     await notifyDiscord(res.locals.userId, [result]);
     const body: UploadLogFileResponse = { fileName, result };
     res.json(body);

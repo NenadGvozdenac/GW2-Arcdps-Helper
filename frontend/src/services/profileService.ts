@@ -1,7 +1,7 @@
 import { userRepository } from "../repositories/userRepository";
 import { ValidationError } from "../domain/types/validation.types";
 import type { ProfileUpdate, User } from "../domain/types/user.types";
-import { DISCORD_WEBHOOK_RE } from "../config/constants";
+import { DISCORD_WEBHOOK_RE, DPS_REPORT_TOKEN_RE } from "../config/constants";
 import { authService } from "./authService";
 
 export const profileService = {
@@ -26,6 +26,13 @@ export const profileService = {
     const trimmed = url.trim();
     if (!profileService.isValidDiscordWebhook(trimmed)) throw new ValidationError("validation.invalidDiscordWebhook");
     return userRepository.testDiscordWebhook(trimmed);
+  },
+
+  /** Saves the dps.report user token, or removes it when `token` is empty. */
+  setDpsReportToken(token: string): Promise<User> {
+    const trimmed = token.trim();
+    if (trimmed && !DPS_REPORT_TOKEN_RE.test(trimmed)) throw new ValidationError("validation.invalidDpsReportToken");
+    return userRepository.setDpsReportToken(trimmed || null);
   },
 
   isOwnAccount: (user: User | null, account: string) =>
