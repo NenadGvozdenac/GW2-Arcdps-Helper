@@ -116,6 +116,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/shared/logs/:token` | – | – | `{ log, owner }` — public, read-only |
 | GET | `/shared/sessions/:token` | – | – | `{ session, owner, logs }` — public, read-only |
 | DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
+| POST | `/logs/bulk-delete` | ✓ | `{ ids }` | `{ deleted }` |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
 | POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |

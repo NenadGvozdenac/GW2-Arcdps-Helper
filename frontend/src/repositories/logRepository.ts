@@ -37,4 +37,7 @@ export const logRepository = {
   },
 
   delete: (id: string) => http.delete(`/logs/${encodeURIComponent(id)}`),
+
+  /** Deletes several logs at once. */
+  deleteMany: (ids: string[]) => http.post<{ deleted: number }>("/logs/bulk-delete", { ids }),
 };

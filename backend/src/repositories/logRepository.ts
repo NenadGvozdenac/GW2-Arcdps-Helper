@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
 import type { Log, LogSummary } from "../types/log.types";
@@ -59,6 +59,16 @@ export const logRepository = {
   async findByShareToken(shareToken: string): Promise<Log | null> {
     const [row] = await getDb().select().from(logs).where(eq(logs.shareToken, shareToken)).limit(1);
     return row ?? null;
+  },
+
+  /** Deletes several of the owner's logs; returns how many were deleted (other users' ids are ignored). */
+  async deleteMany(ownerId: string, ids: string[]): Promise<number> {
+    if (!ids.length) return 0;
+    const deleted = await getDb()
+      .delete(logs)
+      .where(and(ownedBy(ownerId), inArray(logs.id, ids)))
+      .returning({ id: logs.id });
+    return deleted.length;
   },
 
   async delete(ownerId: string, id: string): Promise<boolean> {

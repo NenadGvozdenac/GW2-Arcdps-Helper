@@ -7,7 +7,7 @@ import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
 import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../types/submit.types";
 import { invalidLogFile } from "../utils/httpError";
-import { idParamSchema, shareTokenParamSchema, submitLogsSchema } from "../validation/schemas";
+import { deleteLogsSchema, idParamSchema, shareTokenParamSchema, submitLogsSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 /**
@@ -68,6 +68,12 @@ export const logController = {
   async shared(req: Request, res: Response) {
     const { token } = validate(shareTokenParamSchema, req.params);
     res.json(await logService.getShared(token));
+  },
+
+  /** Bulk delete: `{ ids }`. */
+  async removeMany(req: Request, res: Response<unknown, AuthLocals>) {
+    const { ids } = validate(deleteLogsSchema, req.body);
+    res.json({ deleted: await logService.deleteMany(res.locals.userId, ids) });
   },
 
   async remove(req: Request, res: Response<unknown, AuthLocals>) {

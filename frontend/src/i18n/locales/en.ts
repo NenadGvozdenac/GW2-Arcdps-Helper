@@ -13,7 +13,12 @@ export const en = {
     cancel: "Cancel",
     close: "Close",
     delete: "Delete",
-    loadMore: "Load more ({count})",
+  },
+  pagination: {
+    label: "Pages",
+    range: "{from}–{to} of {total}",
+    previous: "Previous page",
+    next: "Next page",
   },
   nav: {
     overview: "Overview",
@@ -240,6 +245,10 @@ export const en = {
     resultAll: "Kills + wipes",
     resultKill: "Kills only",
     resultWipe: "Wipes only",
+    selectAll: "Select all ({count})",
+    organizeHint: "Tick logs (or click a row) to delete them.",
+    deleteSelected: "Delete selected ({count})",
+    confirmDeleteMany: "Delete {count} logs?",
   },
   share: {
     title: "Share",
@@ -273,7 +282,7 @@ export const en = {
     dragHandle: "Drag to reorder",
     organize: "Organize",
     done: "Done",
-    selectAll: "Select all",
+    selectAll: "Select all ({count})",
     organizeHint: "Drag the handles to reorder, tick sessions to delete them.",
     deleteSelected: "Delete selected ({count})",
     confirmDeleteMany: "Delete {count} sessions?",

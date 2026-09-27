@@ -17,6 +17,8 @@ interface LogsContextValue {
   freshIds: ReadonlySet<string>;
   refresh: () => Promise<void>;
   remove: (id: string) => Promise<void>;
+  /** Deletes several logs at once. */
+  removeMany: (ids: string[]) => Promise<void>;
   /** Deletes a session; its logs stay. */
   removeSession: (id: string) => Promise<void>;
   /** Deletes several sessions at once; their logs stay. */
@@ -79,6 +81,13 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     await logService.delete(id);
     knownIds.current?.delete(id);
     setLogs((prev) => prev.filter((l) => l.id !== id));
+  }, []);
+
+  const removeMany = useCallback(async (ids: string[]) => {
+    await logService.deleteMany(ids);
+    const gone = new Set(ids);
+    for (const id of ids) knownIds.current?.delete(id);
+    setLogs((prev) => prev.filter((l) => !gone.has(l.id)));
   }, []);
 
   const removeSession = useCallback(async (id: string) => {
@@ -165,6 +174,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       freshIds,
       refresh,
       remove,
+      removeMany,
       removeSession,
       removeSessions,
       resumeSession,
@@ -182,6 +192,7 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       freshIds,
       refresh,
       remove,
+      removeMany,
       removeSession,
       removeSessions,
       resumeSession,

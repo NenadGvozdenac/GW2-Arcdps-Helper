@@ -5,6 +5,7 @@ import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
 import type { Log } from "../../domain/types/log.types";
 import { Button } from "@/presentation/components/ui/button";
+import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { cn } from "@/presentation/lib/utils";
 import ResultBadge from "./ResultBadge";
@@ -25,9 +26,11 @@ interface Props {
   showGroup?: boolean;
   /** Rows open the log on dps.report instead of the (sign-in only) log page — for shared sessions. */
   openOnDpsReport?: boolean;
+  /** Selection mode (organizing): a checkbox per row, and clicking a row toggles it instead of opening the log. */
+  selection?: { selected: ReadonlySet<string>; onToggle: (id: string) => void };
 }
 
-export default function LogTable({ logs, showGroup = false, openOnDpsReport = false }: Props) {
+export default function LogTable({ logs, showGroup = false, openOnDpsReport = false, selection }: Props) {
   const { openLog, groupLabel, isFresh } = useLogTableController();
   const { t, fmt } = useI18n();
   if (!logs.length) return <p className="py-8 text-center text-sm text-muted-foreground">{t("common.noLogs")}</p>;
@@ -36,6 +39,7 @@ export default function LogTable({ logs, showGroup = false, openOnDpsReport = fa
     <Table>
       <TableHeader>
         <TableRow>
+          {selection && <TableHead className="w-8" />}
           <TableHead>{t("logTable.boss")}</TableHead>
           {showGroup && <TableHead className="hidden sm:table-cell">{t("logTable.group")}</TableHead>}
           <TableHead>{t("logTable.result")}</TableHead>
@@ -48,9 +52,23 @@ export default function LogTable({ logs, showGroup = false, openOnDpsReport = fa
         {logs.map((l) => (
           <TableRow
             key={l.id}
-            className={cn("cursor-pointer", isFresh(l) && "row-fresh")}
-            onClick={() => openLog(l, openOnDpsReport)}
+            className={cn(
+              "cursor-pointer",
+              isFresh(l) && "row-fresh",
+              selection?.selected.has(l.id) && "bg-accent/40 hover:bg-accent/50",
+            )}
+            onClick={() => (selection ? selection.onToggle(l.id) : openLog(l, openOnDpsReport))}
+            data-state={selection?.selected.has(l.id) ? "selected" : undefined}
           >
+            {selection && (
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <Checkbox
+                  checked={selection.selected.has(l.id)}
+                  onCheckedChange={() => selection.onToggle(l.id)}
+                  aria-label={l.bossName}
+                />
+              </TableCell>
+            )}
             <TableCell className="whitespace-normal">
               <div className="flex min-w-40 items-center gap-2.5">
                 {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 shrink-0 rounded-md" loading="lazy" />}

@@ -25,6 +25,7 @@ export function createRouter(): Router {
   router.get("/logs", requireAuth, logController.list);
   router.post("/logs", requireAuth, logController.submit);
   router.post("/logs/upload", requireAuth, logFileUpload, logController.upload);
+  router.post("/logs/bulk-delete", requireAuth, logController.removeMany);
   router.get("/logs/:id", requireAuth, logController.get);
   router.delete("/logs/:id", requireAuth, logController.remove);
   router.post("/logs/:id/share", requireAuth, logController.share);

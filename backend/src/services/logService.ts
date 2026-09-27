@@ -40,6 +40,9 @@ export const logService = {
     return { log: toSharedLog(log), owner: owner.gw2Account };
   },
 
+  /** Deletes several logs at once; returns how many were deleted. */
+  deleteMany: (ownerId: string, ids: string[]) => logRepository.deleteMany(ownerId, [...new Set(ids)]),
+
   async delete(ownerId: string, id: string): Promise<void> {
     if (!(await logRepository.delete(ownerId, id))) throw logNotFound();
   },

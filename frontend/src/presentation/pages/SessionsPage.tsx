@@ -30,6 +30,7 @@ import {
   TimerIcon,
   Trash2Icon,
 } from "lucide-react";
+import { SESSIONS_PAGE_SIZE } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { sessionService } from "../../services/sessionService";
@@ -52,6 +53,7 @@ import { Card, CardContent } from "@/presentation/components/ui/card";
 import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { cn } from "@/presentation/lib/utils";
 import PageHeader from "../components/PageHeader";
+import Pagination from "../components/Pagination";
 import { failBadge, successBadge } from "../components/ResultBadge";
 import { describeError } from "../utils/describeError";
 
@@ -61,9 +63,15 @@ function useSessionsController() {
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const [page, setPage] = useState(1);
   const views = useMemo(() => sessionService.views(sessions, logs), [sessions, logs]);
   const pinned = views.filter((v) => v.session.pinned);
   const others = views.filter((v) => !v.session.pinned);
+  // Pinned sessions come first, so a page can hold some of each. Clamped when deleting shrinks the list.
+  const currentPage = Math.min(page, Math.max(1, Math.ceil(views.length / SESSIONS_PAGE_SIZE)));
+  const onPage = new Set(
+    views.slice((currentPage - 1) * SESSIONS_PAGE_SIZE, currentPage * SESSIONS_PAGE_SIZE).map((v) => v.session.id),
+  );
 
   async function run(action: () => Promise<void>) {
     setError(null);
@@ -74,14 +82,17 @@ function useSessionsController() {
     }
   }
 
-  /** Moves a session within its own list (pinned or not) and saves the whole order. */
-  function move(list: SessionView[], activeId: string, overId: string) {
-    const from = list.findIndex((v) => v.session.id === activeId);
-    const to = list.findIndex((v) => v.session.id === overId);
+  /** Moves a session within its own group (pinned or not, across all pages) and saves the whole order. */
+  function move(activeId: string, overId: string) {
+    const group = pinned.some((v) => v.session.id === activeId) ? pinned : others;
+    const from = group.findIndex((v) => v.session.id === activeId);
+    const to = group.findIndex((v) => v.session.id === overId);
     if (from < 0 || to < 0 || from === to) return;
-    const moved = arrayMove(list, from, to).map((v) => v.session.id);
+    const moved = arrayMove(group, from, to).map((v) => v.session.id);
     const ids =
-      list === pinned ? [...moved, ...others.map((v) => v.session.id)] : [...pinned.map((v) => v.session.id), ...moved];
+      group === pinned
+        ? [...moved, ...others.map((v) => v.session.id)]
+        : [...pinned.map((v) => v.session.id), ...moved];
     void run(() => reorderSessions(ids));
   }
 
@@ -105,8 +116,15 @@ function useSessionsController() {
 
   return {
     empty: views.length === 0,
-    pinned,
-    others,
+    pinned: pinned.filter((v) => onPage.has(v.session.id)),
+    others: others.filter((v) => onPage.has(v.session.id)),
+    anyPinned: pinned.length > 0,
+    total: views.length,
+    page: currentPage,
+    setPage: (p: number) => {
+      setPage(p);
+      window.scrollTo({ top: 0, behavior: "instant" });
+    },
     error,
     organizing,
     selected,
@@ -184,7 +202,7 @@ export default function SessionsPage() {
         <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 px-4 py-2.5 text-sm">
           <label className="flex cursor-pointer items-center gap-2 font-medium">
             <Checkbox checked={c.allSelected} onCheckedChange={c.toggleAll} />
-            {t("sessions.selectAll")}
+            {t("sessions.selectAll", { count: c.total })}
           </label>
           <span className="text-muted-foreground">{t("sessions.organizeHint")}</span>
         </div>
@@ -205,8 +223,9 @@ export default function SessionsPage() {
         <>
           {c.pinned.length > 0 && <SessionSection title={t("sessions.pinned")} views={c.pinned} c={c} />}
           {c.others.length > 0 && (
-            <SessionSection title={c.pinned.length ? t("sessions.others") : null} views={c.others} c={c} />
+            <SessionSection title={c.anyPinned ? t("sessions.others") : null} views={c.others} c={c} />
           )}
+          <Pagination page={c.page} pageSize={SESSIONS_PAGE_SIZE} total={c.total} onPageChange={c.setPage} />
         </>
       )}
     </div>
@@ -222,7 +241,7 @@ function SessionSection({ title, views, c }: { title: string | null; views: Sess
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
   const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (over) c.move(views, String(active.id), String(over.id));
+    if (over) c.move(String(active.id), String(over.id));
   };
 
   const cards = (

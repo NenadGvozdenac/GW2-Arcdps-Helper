@@ -53,6 +53,7 @@ export const logService = {
   },
 
   delete: (id: string) => logRepository.delete(id),
+  deleteMany: (ids: string[]) => logRepository.deleteMany(ids),
   share: (id: string) => logRepository.share(id),
   unshare: (id: string) => logRepository.unshare(id),
   getShared: (token: string) => logRepository.getShared(token),

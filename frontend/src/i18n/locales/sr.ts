@@ -14,7 +14,12 @@ export const sr: Messages = {
     cancel: "Otkaži",
     close: "Zatvori",
     delete: "Obriši",
-    loadMore: "Učitaj još ({count})",
+  },
+  pagination: {
+    label: "Stranice",
+    range: "{from}–{to} od {total}",
+    previous: "Prethodna stranica",
+    next: "Sledeća stranica",
   },
   nav: {
     overview: "Pregled",
@@ -241,6 +246,10 @@ export const sr: Messages = {
     resultAll: "Kill + Wipe",
     resultKill: "Samo killovi",
     resultWipe: "Samo wipeovi",
+    selectAll: "Izaberi sve ({count})",
+    organizeHint: "Označi logove (ili klikni na red) da ih obrišeš.",
+    deleteSelected: "Obriši izabrane ({count})",
+    confirmDeleteMany: "Obrisati logove ({count})?",
   },
   share: {
     title: "Podeli",
@@ -274,7 +283,7 @@ export const sr: Messages = {
     dragHandle: "Prevuci za promenu redosleda",
     organize: "Uredi",
     done: "Gotovo",
-    selectAll: "Izaberi sve",
+    selectAll: "Izaberi sve ({count})",
     organizeHint: "Prevuci ručice da promeniš redosled, označi sesije da ih obrišeš.",
     deleteSelected: "Obriši izabrane ({count})",
     confirmDeleteMany: "Obrisati sesije ({count})?",

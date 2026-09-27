@@ -4,7 +4,10 @@ export const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/
 /** Must match MAX_URLS_PER_CALL in backend/src/config/constants.ts */
 export const MAX_URLS_PER_CALL = 10;
 
-export const LOGS_PAGE_SIZE = 50;
+/** Logs per page on "All logs". */
+export const LOGS_PAGE_SIZE = 20;
+/** Sessions per page on "Sessions". */
+export const SESSIONS_PAGE_SIZE = 10;
 
 /** How often the log list is re-fetched while the tab is visible. */
 export const POLL_INTERVAL_MS = 30_000;
