@@ -8,7 +8,8 @@ DB_NAME := gw2arcdpshelper
 .DEFAULT_GOAL := help
 .PHONY: help up down restart build rebuild logs ps clean db-up db-shell \
         migrate migrate-status migration migrate-local migrate-prod \
-        uploader-install uploader-dev uploader-prod uploader-build uploader-dist
+        uploader-install uploader-dev uploader-prod uploader-build uploader-dist \
+        addon-build addon-zig
 
 help:
 	@echo GW2 ArcDPS Helper make targets:
@@ -35,6 +36,9 @@ help:
 	@echo     make uploader-prod     Run the uploader against production - URLs in uploader/.env.production
 	@echo     make uploader-build    Typecheck and build the uploader for production
 	@echo     make uploader-dist     Build the production Windows installer and portable exe - uploader/dist
+	@echo   Nexus addon - in-game uploader
+	@echo     make addon-build       Build nexus-addon with CMake + Visual Studio - nexus-addon/build/Release
+	@echo     make addon-zig         Build nexus-addon with zig, no Visual Studio needed - nexus-addon/build
 
 # ---------- containers ----------
 
@@ -106,3 +110,21 @@ uploader-build:
 
 uploader-dist:
 	npm --prefix uploader run dist
+
+# ---------- nexus addon ----------
+
+# addon-zig needs zig (https://ziglang.org, e.g. `winget install zig.zig`); override the path with `make addon-zig ZIG=...`.
+ZIG ?= zig
+ADDON := nexus-addon
+ADDON_SOURCES := $(wildcard $(ADDON)/src/*.cpp) $(ADDON)/src/resources.rc \
+                 $(addprefix $(ADDON)/third_party/imgui/,imgui.cpp imgui_draw.cpp imgui_tables.cpp imgui_widgets.cpp)
+
+addon-build:
+	cmake -S $(ADDON) -B $(ADDON)/build -A x64
+	cmake --build $(ADDON)/build --config Release
+
+addon-zig:
+	node -e "require('fs').mkdirSync('$(ADDON)/build', { recursive: true })"
+	$(ZIG) c++ -target x86_64-windows-gnu -shared -std=c++17 -O2 -s -DWIN32_LEAN_AND_MEAN -DNOMINMAX -DUNICODE -D_UNICODE \
+		-Wno-nontrivial-memcall -Wno-nullability-completeness -isystem $(ADDON)/third_party -I$(ADDON)/src $(ADDON_SOURCES) -lwinhttp -lcrypt32 -lshell32 -lole32 \
+		-o $(ADDON)/build/gw2-arcdps-helper.dll

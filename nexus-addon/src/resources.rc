@@ -1,0 +1,4 @@
+#include "resource.h"
+
+IDR_ICON       RCDATA "../resources/icon.png"
+IDR_ICON_HOVER RCDATA "../resources/icon_hover.png"

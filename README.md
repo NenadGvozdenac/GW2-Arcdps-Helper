@@ -3,7 +3,8 @@
 A personal Guild Wars 2 log tracker (ArcDPS → dps.report). Paste dps.report links; the backend fetches the
 Elite Insights JSON, identifies the boss (raid wing / fractal CM / strike) and stores a summary in Postgres.
 The frontend is available in English and Serbian. The desktop uploader (`uploader/`) watches the ArcDPS folder
-and sends every new log to dps.report and to GW2 ArcDPS Helper automatically — see [uploader/README.md](uploader/README.md).
+and sends every new log to dps.report and to GW2 ArcDPS Helper automatically — see [uploader/README.md](uploader/README.md). The same uploader, with
+session recording, also runs inside the game as a Nexus addon — see [nexus-addon/README.md](nexus-addon/README.md).
 
 ```
 .
@@ -25,6 +26,7 @@ and sends every new log to dps.report and to GW2 ArcDPS Helper automatically —
 │       ├── repositories/    SQL queries
 │       └── utils/
 ├── uploader/                Electron desktop app: ArcDPS folder → dps.report → GW2 ArcDPS Helper (POST /api/logs)
+├── nexus-addon/             in-game Nexus addon (C++ DLL): the same upload pipeline + session recording
 └── frontend/                React + Vite + TypeScript
     └── src/
         ├── config/          constants (API URL, storage keys)

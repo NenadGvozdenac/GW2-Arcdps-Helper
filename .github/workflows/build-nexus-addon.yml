@@ -1,0 +1,50 @@
+name: Build Nexus addon
+
+# Builds the in-game Nexus addon (gw2-arcdps-helper.dll) with MSVC.
+# - Push to main that touches nexus-addon/ (or a manual run): the DLL is attached to the run as an artifact.
+# - Push a tag like `addon-v0.2.0`: the DLL is published as a GitHub Release.
+
+on:
+  push:
+    branches: [main]
+    tags: ["addon-v*"]
+    paths:
+      - "nexus-addon/**"
+      - ".github/workflows/build-nexus-addon.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: build-nexus-addon-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build DLL
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: nexus-addon
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: gw2-arcdps-helper-nexus
+          path: nexus-addon/build/Release/gw2-arcdps-helper.dll
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/addon-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Nexus addon ${{ github.ref_name }}
+          files: nexus-addon/build/Release/gw2-arcdps-helper.dll
+          generate_release_notes: true

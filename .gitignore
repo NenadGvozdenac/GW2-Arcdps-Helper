@@ -22,3 +22,6 @@ out/
 
 # Playwright MCP screenshots and snapshots
 .playwright-mcp/
+
+# Editor settings are per machine (e.g. IntelliSense paths to the local zig install)
+.vscode/

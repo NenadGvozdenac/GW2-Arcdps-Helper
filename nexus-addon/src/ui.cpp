@@ -1,0 +1,318 @@
+#include "ui.h"
+
+#include <cstring>
+#include <string>
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_internal.h"
+
+#include "account.h"
+#include "globals.h"
+#include "settings.h"
+#include "uploads.h"
+#include "util.h"
+#include "watcher.h"
+
+namespace
+{
+	const ImVec4 RED(0.93f, 0.33f, 0.31f, 1.0f);
+	const ImVec4 GREEN(0.40f, 0.80f, 0.45f, 1.0f);
+	const ImVec4 YELLOW(0.95f, 0.78f, 0.30f, 1.0f);
+	const ImVec4 GREY(0.60f, 0.60f, 0.60f, 1.0f);
+
+	std::string g_watchedFolder; // folder the watcher runs on, empty when stopped
+
+	// Text field buffers (ImGui 1.80 has no std::string InputText)
+	char g_sessionName[128] = "";
+	char g_email[256] = "";
+	char g_password[256] = "";
+	char g_dpsToken[128] = "";
+	char g_logFolder[520] = "";
+	char g_apiUrl[256] = "";
+	bool g_optionsInit = false;
+
+	void BeginDisabled(bool disabled)
+	{
+		ImGui::PushItemFlag(ImGuiItemFlags_Disabled, disabled);
+		ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * (disabled ? 0.5f : 1.0f));
+	}
+
+	void EndDisabled()
+	{
+		ImGui::PopStyleVar();
+		ImGui::PopItemFlag();
+	}
+
+	void Copy(char* dest, size_t size, const std::string& value)
+	{
+		strncpy_s(dest, size, value.c_str(), _TRUNCATE);
+	}
+
+	const char* StageText(const Upload& u)
+	{
+		switch (u.stage)
+		{
+			case Stage::Queued: return "Queued";
+			case Stage::Waiting: return "Waiting for ArcDPS";
+			case Stage::Uploading: return "Uploading";
+			case Stage::Syncing: return "Saving";
+			case Stage::Done: return u.synced ? "Done" : "dps.report only";
+			case Stage::Failed: return "Failed";
+		}
+		return "";
+	}
+
+	void RenderRecording(const AccountState& acc)
+	{
+		if (!acc.signedIn)
+		{
+			ImGui::TextColored(GREY, "Not signed in - logs go to dps.report only.");
+			ImGui::TextColored(GREY, "Sign in under Nexus > Addons > %s options to record sessions.", ADDON_NAME);
+			return;
+		}
+
+		if (acc.recording)
+		{
+			int64_t elapsed = acc.sessionStartMs ? Util::NowMs() - acc.sessionStartMs : 0;
+			// Blinking dot while recording
+			bool on = (Util::NowMs() / 600) % 2 == 0;
+			ImGui::TextColored(on ? RED : ImVec4(RED.x, RED.y, RED.z, 0.35f), "REC");
+			ImGui::SameLine();
+			ImGui::Text("%s  %s", acc.sessionName.empty() ? "Session" : acc.sessionName.c_str(), Util::FormatDuration(elapsed).c_str());
+
+			BeginDisabled(acc.ending);
+			if (ImGui::Button(acc.ending ? "Finishing uploads..." : "Stop recording", ImVec2(-1, 0))) Account::StopRecording();
+			EndDisabled();
+		}
+		else
+		{
+			ImGui::SetNextItemWidth(-110);
+			ImGui::InputTextWithHint("##session", "Session name (optional)", g_sessionName, sizeof(g_sessionName));
+			ImGui::SameLine();
+			BeginDisabled(acc.busy);
+			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.15f, 0.15f, 1.0f));
+			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.22f, 0.22f, 1.0f));
+			if (ImGui::Button("Record", ImVec2(-1, 0)))
+			{
+				// Recording implies picking up new logs.
+				Config::Update([](Settings& s) { s.autoUpload = true; });
+				UI::ApplyWatching();
+				Account::StartRecording(g_sessionName);
+				g_sessionName[0] = '\0';
+			}
+			ImGui::PopStyleColor(2);
+			EndDisabled();
+		}
+	}
+
+	void RenderUploads()
+	{
+		std::vector<Upload> uploads = Uploads::Snapshot();
+		if (uploads.empty())
+		{
+			ImGui::TextColored(GREY, "No logs yet. Kill something!");
+			return;
+		}
+
+		ImGuiTableFlags flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_BordersInnerH;
+		if (!ImGui::BeginTable("uploads", 4, flags, ImVec2(0, ImGui::GetContentRegionAvail().y - ImGui::GetFrameHeightWithSpacing()))) return;
+
+		ImGui::TableSetupScrollFreeze(0, 1);
+		ImGui::TableSetupColumn("Boss", ImGuiTableColumnFlags_WidthStretch);
+		ImGui::TableSetupColumn("Result");
+		ImGui::TableSetupColumn("Time");
+		ImGui::TableSetupColumn("Status");
+		ImGui::TableHeadersRow();
+
+		for (const Upload& u : uploads)
+		{
+			ImGui::PushID((int)u.id);
+			ImGui::TableNextRow();
+
+			ImGui::TableSetColumnIndex(0);
+			std::string name = u.boss.empty() ? u.fileName : u.boss;
+			if (u.isCM) name += " (CM)";
+			if (!u.permalink.empty())
+			{
+				if (ImGui::Selectable(name.c_str(), false)) Util::OpenUrl(u.permalink);
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s\nClick: open  |  Right-click: copy link", u.permalink.c_str());
+				if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+				{
+					Util::CopyToClipboard(u.permalink);
+					Alert("Link copied");
+				}
+			}
+			else
+			{
+				ImGui::TextUnformatted(name.c_str());
+			}
+
+			ImGui::TableSetColumnIndex(1);
+			if (u.success) ImGui::TextColored(*u.success ? GREEN : RED, *u.success ? "Kill" : "Wipe");
+			else ImGui::TextColored(GREY, "-");
+
+			ImGui::TableSetColumnIndex(2);
+			if (u.durationMs > 0) ImGui::TextUnformatted(Util::FormatDuration(u.durationMs).c_str());
+			else ImGui::TextColored(GREY, "-");
+
+			ImGui::TableSetColumnIndex(3);
+			if (u.stage == Stage::Failed)
+			{
+				ImGui::TextColored(RED, "Failed");
+				if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", u.error.c_str());
+				ImGui::SameLine();
+				if (ImGui::SmallButton("Retry")) Uploads::Retry(u.id);
+			}
+			else
+			{
+				ImGui::TextColored(u.stage == Stage::Done ? (u.synced ? GREEN : GREY) : YELLOW, "%s", StageText(u));
+			}
+			ImGui::PopID();
+		}
+		ImGui::EndTable();
+
+		if (ImGui::SmallButton("Clear finished")) Uploads::ClearFinished();
+	}
+}
+
+namespace UI
+{
+	bool ShowWindow = true;
+
+	void ApplyWatching()
+	{
+		Settings s = Config::Get();
+		bool want = s.autoUpload && Util::DirectoryExists(s.logFolder);
+		if (want && Watcher::IsRunning() && g_watchedFolder == s.logFolder) return;
+
+		Watcher::Stop();
+		g_watchedFolder.clear();
+		if (want && Watcher::Start(s.logFolder, [](const std::wstring& path) { Uploads::Enqueue(path); }))
+		{
+			g_watchedFolder = s.logFolder;
+		}
+	}
+
+	void RenderWindow()
+	{
+		if (!ShowWindow) return;
+
+		ImGui::SetNextWindowSize(ImVec2(460, 360), ImGuiCond_FirstUseEver);
+		if (ImGui::Begin(ADDON_NAME, &ShowWindow, ImGuiWindowFlags_NoCollapse))
+		{
+			AccountState acc = Account::Get();
+			Settings s = Config::Get();
+
+			RenderRecording(acc);
+			if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
+
+			ImGui::Separator();
+
+			bool autoUpload = s.autoUpload;
+			if (ImGui::Checkbox("Auto-upload new logs", &autoUpload))
+			{
+				Config::Update([&](Settings& c) { c.autoUpload = autoUpload; });
+				ApplyWatching();
+			}
+			ImGui::SameLine();
+			if (!autoUpload) ImGui::TextColored(GREY, "(paused)");
+			else if (Watcher::IsRunning()) ImGui::TextColored(GREEN, "(watching)");
+			else ImGui::TextColored(RED, "(ArcDPS log folder not found - see options)");
+
+			size_t pending = Uploads::PendingCount();
+			if (pending)
+			{
+				ImGui::SameLine();
+				ImGui::TextColored(YELLOW, "%zu in queue", pending);
+			}
+
+			RenderUploads();
+		}
+		ImGui::End();
+	}
+
+	void RenderOptions()
+	{
+		Settings s = Config::Get();
+		AccountState acc = Account::Get();
+		if (!g_optionsInit)
+		{
+			Copy(g_email, sizeof(g_email), s.email);
+			Copy(g_dpsToken, sizeof(g_dpsToken), s.dpsReportToken);
+			Copy(g_logFolder, sizeof(g_logFolder), s.logFolder);
+			Copy(g_apiUrl, sizeof(g_apiUrl), s.apiUrl);
+			g_optionsInit = true;
+		}
+
+		ImGui::TextUnformatted("GW2 ArcDPS Helper account");
+		if (acc.signedIn)
+		{
+			ImGui::Text("Signed in as %s%s%s", acc.email.c_str(), acc.gw2Account.empty() ? "" : " - ", acc.gw2Account.c_str());
+			if (ImGui::Button("Sign out")) Account::Logout();
+		}
+		else
+		{
+			ImGui::SetNextItemWidth(260);
+			ImGui::InputText("Email", g_email, sizeof(g_email));
+			ImGui::SetNextItemWidth(260);
+			bool submit = ImGui::InputText("Password", g_password, sizeof(g_password), ImGuiInputTextFlags_Password | ImGuiInputTextFlags_EnterReturnsTrue);
+			BeginDisabled(acc.busy);
+			if ((ImGui::Button(acc.busy ? "Signing in..." : "Sign in") || submit) && !acc.busy && g_email[0] && g_password[0])
+			{
+				Account::Login(g_email, g_password);
+				SecureZeroMemory(g_password, sizeof(g_password));
+			}
+			EndDisabled();
+		}
+		if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
+
+		ImGui::Separator();
+		ImGui::TextUnformatted("Uploads");
+
+		bool autoUpload = s.autoUpload, showAlerts = s.showAlerts;
+		if (ImGui::Checkbox("Auto-upload new logs", &autoUpload))
+		{
+			Config::Update([&](Settings& c) { c.autoUpload = autoUpload; });
+			ApplyWatching();
+		}
+		if (ImGui::Checkbox("Show an alert when a log is uploaded", &showAlerts))
+		{
+			Config::Update([&](Settings& c) { c.showAlerts = showAlerts; });
+		}
+
+		ImGui::SetNextItemWidth(420);
+		ImGui::InputText("ArcDPS log folder", g_logFolder, sizeof(g_logFolder));
+		if (ImGui::IsItemDeactivatedAfterEdit())
+		{
+			Config::Update([](Settings& c) { c.logFolder = g_logFolder; });
+			ApplyWatching();
+		}
+		ImGui::SameLine();
+		if (ImGui::SmallButton("Default"))
+		{
+			Copy(g_logFolder, sizeof(g_logFolder), Util::DefaultLogFolder());
+			Config::Update([](Settings& c) { c.logFolder = g_logFolder; });
+			ApplyWatching();
+		}
+		if (!Util::DirectoryExists(g_logFolder)) ImGui::TextColored(RED, "This folder does not exist.");
+
+		ImGui::SetNextItemWidth(260);
+		ImGui::InputText("dps.report user token (optional)", g_dpsToken, sizeof(g_dpsToken), ImGuiInputTextFlags_Password);
+		if (ImGui::IsItemDeactivatedAfterEdit()) Config::Update([](Settings& c) { c.dpsReportToken = g_dpsToken; });
+
+		if (ImGui::TreeNode("Advanced"))
+		{
+			ImGui::SetNextItemWidth(420);
+			ImGui::InputText("API URL", g_apiUrl, sizeof(g_apiUrl));
+			if (ImGui::IsItemDeactivatedAfterEdit())
+			{
+				std::string url = g_apiUrl[0] ? g_apiUrl : DEFAULT_API_URL;
+				// A token from another server is not valid here.
+				if (url != s.apiUrl) Account::Logout();
+				Config::Update([&](Settings& c) { c.apiUrl = url; });
+				Copy(g_apiUrl, sizeof(g_apiUrl), url);
+			}
+			ImGui::TreePop();
+		}
+	}
+}
