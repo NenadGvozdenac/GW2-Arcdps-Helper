@@ -4,7 +4,7 @@ import { logRepository } from "../repositories/logRepository";
 import type { Log, LogSummary } from "../types/log.types";
 import type { ImportedLog, SubmitResult } from "../types/submit.types";
 import { parsePermalink } from "../utils/permalink";
-import { fetchEliteInsightsJson, fetchUploadMetadata, logUrl } from "./clients/dpsReportClient";
+import { fetchEliteInsightsJson, fetchUploadMetadata, logUrl, uploadLogFile } from "./clients/dpsReportClient";
 import { parseFromEliteInsights, parseFromMetadata } from "./logParser";
 
 export async function fetchLogSummary(permalink: string): Promise<LogSummary> {
@@ -41,6 +41,19 @@ export async function importLog(ownerId: string, url: string): Promise<SubmitRes
     console.warn("Failed to import log", url, err);
     return { url, status: "error", code: "FETCH_FAILED", message: err instanceof Error ? err.message : String(err) };
   }
+}
+
+/** Uploads a log file to dps.report on the user's behalf, then imports the resulting link. */
+export async function importLogFile(ownerId: string, content: Buffer, fileName: string): Promise<SubmitResult> {
+  let url: string;
+  try {
+    url = await uploadLogFile(content, fileName);
+  } catch (err) {
+    console.warn("dps.report upload failed", fileName, err);
+    const message = err instanceof Error ? err.message : String(err);
+    return { url: fileName, status: "error", code: "DPS_REPORT_UPLOAD_FAILED", message };
+  }
+  return importLog(ownerId, url);
 }
 
 /** Imports links in small parallel batches to stay polite towards dps.report. */

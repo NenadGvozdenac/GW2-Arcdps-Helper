@@ -15,3 +15,6 @@ export interface NewUser {
 export interface ProfileUpdate {
   gw2Account: string;
 }
+
+/** Columns a signed-in user may change. */
+export type UserPatch = Partial<Pick<UserRow, "gw2Account" | "discordWebhookUrl">>;

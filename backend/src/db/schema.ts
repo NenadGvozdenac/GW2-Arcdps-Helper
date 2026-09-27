@@ -26,6 +26,8 @@ export const users = pgTable(
     email: text().notNull(),
     passwordHash: text("password_hash").notNull(),
     gw2Account: text("gw2_account").notNull().default(""),
+    /** Discord webhook that gets a message for every newly imported log; null = not connected. */
+    discordWebhookUrl: text("discord_webhook_url"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],

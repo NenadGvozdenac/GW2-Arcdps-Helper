@@ -10,6 +10,8 @@ interface AuthContextValue {
   register: (input: RegisterInput) => Promise<void>;
   logout: () => void;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
+  /** Saves the Discord webhook, or disconnects it when `url` is empty. */
+  setDiscordWebhook: (url: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -46,9 +48,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await profileService.save(data));
   }, []);
 
+  const setDiscordWebhook = useCallback(async (url: string) => {
+    setUser(await profileService.setDiscordWebhook(url));
+  }, []);
+
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, updateProfile }),
-    [user, loading, login, register, logout, updateProfile],
+    () => ({ user, loading, login, register, logout, updateProfile, setDiscordWebhook }),
+    [user, loading, login, register, logout, updateProfile, setDiscordWebhook],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

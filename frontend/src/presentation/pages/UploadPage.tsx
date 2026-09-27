@@ -1,5 +1,6 @@
 import { useI18n } from "../../controllers/I18nController";
 import PageHeader from "../components/PageHeader";
+import FileUploadBox from "../components/FileUploadBox";
 import UploadBox from "../components/UploadBox";
 
 export default function UploadPage() {
@@ -18,6 +19,7 @@ export default function UploadPage() {
           </>
         }
       />
+      <FileUploadBox />
       <UploadBox />
     </div>
   );

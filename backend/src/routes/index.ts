@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authController } from "../controllers/authController";
 import { logController } from "../controllers/logController";
 import { profileController } from "../controllers/profileController";
+import { logFileUpload } from "../middleware/logFileUpload";
 import { requireAuth } from "../middleware/requireAuth";
 
 // Express 5 forwards rejected promises from async handlers to the error handler.
@@ -17,9 +18,12 @@ export function createRouter(): Router {
   router.get("/auth/me", requireAuth, authController.me);
 
   router.patch("/profile", requireAuth, profileController.update);
+  router.put("/profile/discord-webhook", requireAuth, profileController.setDiscordWebhook);
+  router.post("/profile/discord-webhook/test", requireAuth, profileController.testDiscordWebhook);
 
   router.get("/logs", requireAuth, logController.list);
   router.post("/logs", requireAuth, logController.submit);
+  router.post("/logs/upload", requireAuth, logFileUpload, logController.upload);
   router.get("/logs/:id", requireAuth, logController.get);
   router.delete("/logs/:id", requireAuth, logController.remove);
 

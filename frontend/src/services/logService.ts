@@ -1,4 +1,4 @@
-import { MAX_URLS_PER_CALL } from "../config/constants";
+import { LOG_FILE_EXTENSIONS, MAX_URLS_PER_CALL } from "../config/constants";
 import { logRepository } from "../repositories/logRepository";
 import type { Log, LogFilter } from "../domain/types/log.types";
 import type { SubmitResult, UploadSummary } from "../domain/types/upload.types";
@@ -22,6 +22,13 @@ export const logService = {
     }
     return results;
   },
+
+  /** Keeps only ArcDPS log files (by extension). */
+  logFilesOnly: (files: Iterable<File>): File[] =>
+    [...files].filter((f) => LOG_FILE_EXTENSIONS.some((ext) => f.name.toLowerCase().endsWith(ext))),
+
+  /** Sends one log file to the backend, which uploads it to dps.report and imports it. */
+  uploadFile: (file: File): Promise<SubmitResult> => logRepository.uploadFile(file),
 
   summarize(results: SubmitResult[]): UploadSummary {
     return {

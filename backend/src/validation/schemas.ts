@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { MAX_URLS_PER_CALL } from "../config/constants";
+import { DISCORD_WEBHOOK_RE, MAX_URLS_PER_CALL } from "../config/constants";
 
 /** The GW2 account (Name.1234) is the user's identity — required. */
 const gw2Account = z
@@ -21,6 +21,16 @@ export const loginSchema = z.object({
 export const profileUpdateSchema = z.object({
   gw2Account,
 });
+
+const discordWebhookUrl = z
+  .string({ error: "Webhook URL is required." })
+  .trim()
+  .regex(DISCORD_WEBHOOK_RE, "Not a Discord webhook URL (https://discord.com/api/webhooks/…).");
+
+/** null disconnects the webhook. */
+export const discordWebhookSchema = z.object({ url: discordWebhookUrl.nullable() });
+
+export const discordWebhookTestSchema = z.object({ url: discordWebhookUrl });
 
 export const submitLogsSchema = z.object({
   urls: z

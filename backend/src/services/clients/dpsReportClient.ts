@@ -1,5 +1,5 @@
-import { DPS_REPORT_BASE_URL } from "../../config/constants";
-import type { EiJson, UploadMetadata } from "../../types/dpsreport.types";
+import { DPS_REPORT_BASE_URL, DPS_REPORT_UPLOAD_TIMEOUT_MS } from "../../config/constants";
+import type { DpsReportUploadResponse, EiJson, UploadMetadata } from "../../types/dpsreport.types";
 
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(`${DPS_REPORT_BASE_URL}${path}`, { headers: { Accept: "application/json" } });
@@ -10,6 +10,22 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export const logUrl = (permalink: string) => `${DPS_REPORT_BASE_URL}/${permalink}`;
+
+/** Uploads an ArcDPS log file to dps.report (parsed with Elite Insights) and returns its permalink URL. */
+export async function uploadLogFile(content: Buffer, fileName: string): Promise<string> {
+  const form = new FormData();
+  form.append("file", new Blob([new Uint8Array(content)]), fileName);
+  const res = await fetch(`${DPS_REPORT_BASE_URL}/uploadContent?json=1&generator=ei`, {
+    method: "POST",
+    body: form,
+    signal: AbortSignal.timeout(DPS_REPORT_UPLOAD_TIMEOUT_MS),
+  });
+  const body = (await res.json().catch(() => null)) as DpsReportUploadResponse | null;
+  if (!res.ok || !body?.permalink || body.error) {
+    throw new Error(body?.error || `dps.report returned ${res.status}`);
+  }
+  return body.permalink;
+}
 
 export const fetchUploadMetadata = (permalink: string) =>
   getJson<UploadMetadata>(`/getUploadMetadata?permalink=${encodeURIComponent(permalink)}`);

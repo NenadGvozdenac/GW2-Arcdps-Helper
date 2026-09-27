@@ -1,10 +1,24 @@
 import type { Request, Response } from "express";
-import { importLogs } from "../services/logImportService";
+import { discordService } from "../services/discordService";
+import { importLogFile, importLogs } from "../services/logImportService";
 import { logService } from "../services/logService";
+import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
-import type { SubmitLogsResponse } from "../types/submit.types";
+import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../types/submit.types";
+import { invalidLogFile } from "../utils/httpError";
 import { idParamSchema, submitLogsSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
+
+/**
+ * Posts newly added logs to the user's Discord webhook before responding (serverless functions may be frozen
+ * right after the response, so this can't run in the background).
+ */
+async function notifyDiscord(userId: string, results: SubmitResult[]) {
+  const added = results.flatMap((r) => (r.status === "ok" ? [r.log] : []));
+  if (!added.length) return;
+  const user = await userService.get(userId);
+  await discordService.notifyNewLogs(user.discordWebhookUrl, added);
+}
 
 export const logController = {
   async list(_req: Request, res: Response<unknown, AuthLocals>) {
@@ -19,7 +33,19 @@ export const logController = {
   /** Accepts dps.report links, fetches each log's Elite Insights JSON and stores a summary. */
   async submit(req: Request, res: Response<unknown, AuthLocals>) {
     const { urls } = validate(submitLogsSchema, req.body);
-    const body: SubmitLogsResponse = { results: await importLogs(res.locals.userId, urls) };
+    const results = await importLogs(res.locals.userId, urls);
+    await notifyDiscord(res.locals.userId, results);
+    const body: SubmitLogsResponse = { results };
+    res.json(body);
+  },
+
+  /** Accepts one ArcDPS log file (multipart field "file"), uploads it to dps.report and imports it. */
+  async upload(req: Request, res: Response<unknown, AuthLocals>) {
+    if (!req.file) throw invalidLogFile();
+    const fileName = req.file.originalname;
+    const result = await importLogFile(res.locals.userId, req.file.buffer, fileName);
+    await notifyDiscord(res.locals.userId, [result]);
+    const body: UploadLogFileResponse = { fileName, result };
     res.json(body);
   },
 

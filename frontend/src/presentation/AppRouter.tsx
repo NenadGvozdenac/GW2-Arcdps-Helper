@@ -10,6 +10,7 @@ import CategoryPage from "./pages/CategoryPage";
 import AllLogsPage from "./pages/AllLogsPage";
 import LogDetailPage from "./pages/LogDetailPage";
 import ProfilePage from "./pages/ProfilePage";
+import DiscordGuidePage from "./pages/DiscordGuidePage";
 
 export default function AppRouter() {
   return (
@@ -40,6 +41,7 @@ export default function AppRouter() {
           <Route path="logs" element={<AllLogsPage />} />
           <Route path="logs/:id" element={<LogDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="settings/discord" element={<DiscordGuidePage />} />
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -7,6 +7,9 @@ export type ErrorCode =
   | "EMAIL_TAKEN"
   | "USER_NOT_FOUND"
   | "LOG_NOT_FOUND"
+  | "DISCORD_WEBHOOK_FAILED"
+  | "INVALID_LOG_FILE"
+  | "FILE_TOO_LARGE"
   | "ROUTE_NOT_FOUND"
   | "INTERNAL_ERROR";
 

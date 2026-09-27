@@ -1,3 +1,9 @@
+/** Response of dps.report's /uploadContent?json=1 (only what we read). */
+export interface DpsReportUploadResponse {
+  permalink?: string;
+  error?: string | null;
+}
+
 /** Subset of the Elite Insights JSON returned by `https://dps.report/getJson`. */
 export interface EiJson {
   fightName: string;

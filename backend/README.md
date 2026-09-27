@@ -100,6 +100,9 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/auth/login` | – | `{ email, password }` | `{ token, user }` |
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
+| PUT | `/profile/discord-webhook` | ✓ | `{ url }` (Discord webhook URL, or `null` to disconnect) | `{ user }` |
+| POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
+| POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |
 | POST | `/logs` | ✓ | `{ urls: string[] }` (1–10) | `{ results: SubmitResult[] }` |
 | GET | `/logs/:id` | ✓ | – | `{ log }` |
@@ -123,6 +126,9 @@ Errors: `{ "error": "<English message>", "code": "<ERROR_CODE>" }`. Clients tran
 | `INVALID_CREDENTIALS` | 401 | Wrong email or password |
 | `EMAIL_TAKEN` | 409 | Registration with an existing email (case-insensitive) |
 | `USER_NOT_FOUND` / `LOG_NOT_FOUND` | 404 | Unknown id or not owned by the user |
+| `INVALID_LOG_FILE` | 400 | `/logs/upload` got no file or not a .zevtc/.evtc/.zip |
+| `FILE_TOO_LARGE` | 413 | Uploaded log file over the size limit |
+| `DISCORD_WEBHOOK_FAILED` | 502 | Discord rejected the test message (wrong or deleted webhook) |
 | `ROUTE_NOT_FOUND` | 404 | Unknown route |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged on the server) |
 

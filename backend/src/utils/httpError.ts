@@ -16,3 +16,8 @@ export const invalidCredentials = () => new HttpError(401, "INVALID_CREDENTIALS"
 export const emailTaken = () => new HttpError(409, "EMAIL_TAKEN", "An account with this email already exists.");
 export const userNotFound = () => new HttpError(404, "USER_NOT_FOUND", "User not found.");
 export const logNotFound = () => new HttpError(404, "LOG_NOT_FOUND", "Log not found.");
+export const invalidLogFile = () =>
+  new HttpError(400, "INVALID_LOG_FILE", "Send one ArcDPS log file (.zevtc, .evtc or .zip) in the \"file\" field.");
+export const fileTooLarge = () => new HttpError(413, "FILE_TOO_LARGE", "The log file is too large.");
+export const discordWebhookFailed = () =>
+  new HttpError(502, "DISCORD_WEBHOOK_FAILED", "Discord did not accept the message. Check the webhook URL.");

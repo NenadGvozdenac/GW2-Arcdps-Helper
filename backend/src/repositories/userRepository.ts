@@ -1,7 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { users } from "../db/schema";
-import type { NewUser, ProfileUpdate, User, UserRow } from "../types/user.types";
+import type { NewUser, User, UserPatch, UserRow } from "../types/user.types";
 
 const toUser = ({ passwordHash: _, ...user }: UserRow): User => user;
 
@@ -26,7 +26,7 @@ export const userRepository = {
     return row ? toUser(row) : null;
   },
 
-  async update(id: string, patch: ProfileUpdate): Promise<User | null> {
+  async update(id: string, patch: UserPatch): Promise<User | null> {
     const [row] = await getDb().update(users).set(patch).where(eq(users.id, id)).returning();
     return row ? toUser(row) : null;
   },

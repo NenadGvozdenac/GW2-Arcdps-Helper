@@ -1,12 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
 import type { ErrorResponse } from "../types/error.types";
-import { HttpError } from "../utils/httpError";
+import { MulterError } from "multer";
+import { fileTooLarge, HttpError, invalidLogFile } from "../utils/httpError";
 
 export function notFoundHandler(_req: Request, res: Response<ErrorResponse>) {
   res.status(404).json({ error: "Route not found.", code: "ROUTE_NOT_FOUND" });
 }
 
 export function errorHandler(err: unknown, _req: Request, res: Response<ErrorResponse>, _next: NextFunction) {
+  if (err instanceof MulterError) err = err.code === "LIMIT_FILE_SIZE" ? fileTooLarge() : invalidLogFile();
   if (err instanceof HttpError) {
     res.status(err.status).json({ error: err.message, code: err.code });
     return;

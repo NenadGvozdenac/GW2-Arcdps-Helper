@@ -1,8 +1,8 @@
 import type { EncounterGroup } from "./encounter.types";
 import type { Log } from "./log.types";
 
-/** Why a single link could not be imported. */
-export type SubmitErrorCode = "INVALID_LINK" | "FETCH_FAILED";
+/** Why a single link or uploaded file could not be imported. */
+export type SubmitErrorCode = "INVALID_LINK" | "FETCH_FAILED" | "DPS_REPORT_UPLOAD_FAILED";
 
 /** The stored log plus the wing/fractal/strike it belongs to (null if unrecognised). */
 export interface ImportedLog {
@@ -20,4 +20,10 @@ export type SubmitResult =
 
 export interface SubmitLogsResponse {
   results: SubmitResult[];
+}
+
+/** POST /logs/upload: the imported log, or why the file could not be uploaded / imported. */
+export interface UploadLogFileResponse {
+  fileName: string;
+  result: SubmitResult;
 }
