@@ -16,7 +16,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "types": [],
-    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./src/renderer/src/*"
