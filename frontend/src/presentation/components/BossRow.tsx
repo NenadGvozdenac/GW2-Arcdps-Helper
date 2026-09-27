@@ -8,6 +8,13 @@ import { cn } from "@/presentation/lib/utils";
 import LogTable from "./LogTable";
 import { cmBadge } from "./ResultBadge";
 
+/** Kills first, then wipes; newest first within each. */
+function killsFirst(logs: Log[]) {
+  return [...logs].sort(
+    (a, b) => Number(b.success) - Number(a.success) || b.encounterTime.getTime() - a.encounterTime.getTime(),
+  );
+}
+
 interface Props {
   encounter: Encounter;
   logs: Log[];
@@ -68,7 +75,7 @@ export default function BossRow({ encounter, logs, stats, clearedSinceReset, ope
       </button>
       {open && (
         <div className="border-t bg-muted/30 px-2 pb-2">
-          <LogTable logs={logs} />
+          <LogTable logs={killsFirst(logs)} />
         </div>
       )}
     </li>

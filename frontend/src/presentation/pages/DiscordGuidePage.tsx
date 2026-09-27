@@ -23,7 +23,7 @@ export default function DiscordGuidePage() {
   const { t } = useI18n();
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex w-full flex-col gap-6">
       {user && (
         <Button asChild variant="ghost" size="sm" className="self-start">
           <Link to="/profile">
