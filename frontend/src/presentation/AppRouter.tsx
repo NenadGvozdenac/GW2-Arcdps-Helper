@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import DiscordGuidePage from "./pages/DiscordGuidePage";
 import SessionDetailPage from "./pages/SessionDetailPage";
 import SessionsPage from "./pages/SessionsPage";
+import SessionsGuidePage from "./pages/SessionsGuidePage";
 
 export default function AppRouter() {
   return (
@@ -34,6 +35,8 @@ export default function AppRouter() {
           />
         }
       />
+      {/* Public: opened from the desktop uploader, also when not signed in on the website. */}
+      <Route path="guide/sessions" element={<SessionsGuidePage />} />
       <Route element={<RequireAuth />}>
         <Route element={<Layout />}>
           <Route path="upload" element={<UploadPage />} />

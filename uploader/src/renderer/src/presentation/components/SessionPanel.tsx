@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { AlertCircleIcon, FlagIcon, HistoryIcon, Loader2Icon, PlayIcon, RotateCcwIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  CircleHelpIcon,
+  FlagIcon,
+  HistoryIcon,
+  Loader2Icon,
+  PlayIcon,
+  RotateCcwIcon,
+} from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
@@ -8,14 +16,7 @@ import type { UploadEntry } from "../../../../shared/upload.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/presentation/components/ui/card";
+import { Card, CardContent } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { describeError } from "../utils/describeError";
 
@@ -31,7 +32,7 @@ function sessionSpan(uploads: UploadEntry[]): number | null {
 }
 
 function useSessionPanelController() {
-  const { session, uploads, user } = useAppState();
+  const { session, uploads, user, environment } = useAppState();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<IpcError | null>(null);
@@ -68,65 +69,84 @@ function useSessionPanelController() {
         return res;
       }),
     end: () => run(() => uploaderBridge.endSession()),
+    openGuide: () => uploaderBridge.openExternal(`${environment.webUrl}/guide/sessions`),
     resume: () => run(() => uploaderBridge.resumeSession()),
   };
 }
 
+/** "?" that opens the website's explanation of sessions. */
+function HelpButton({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-7 shrink-0 text-muted-foreground"
+      onClick={onClick}
+      title={label}
+      aria-label={label}
+    >
+      <CircleHelpIcon />
+    </Button>
+  );
+}
+
+/** Compact one-row card: start a session, or see the running one and end it. */
 export default function SessionPanel() {
   const c = useSessionPanelController();
   const { t, fmt } = useI18n();
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-wrap items-center gap-2">
-          <CardTitle className="text-lg">
-            {c.active ? c.active.name || t("session.unnamed") : t("session.title")}
-          </CardTitle>
-          {c.active && (
-            <Badge variant="outline" className="border-success/40 bg-success/10 text-success">
-              {t("session.active")}
-            </Badge>
-          )}
-        </div>
-        <CardDescription>
-          {c.active
-            ? t("session.activeHint", { time: fmt.time(c.active.startedAt), expires: fmt.time(c.active.expiresAt) })
-            : t("session.hint")}
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="flex flex-col gap-3">
+    <Card className="gap-3 py-4">
+      <CardContent className="flex flex-col gap-3 px-5">
         {c.active ? (
-          <dl className="grid grid-cols-3 gap-4 text-sm">
-            <div>
-              <dt className="text-muted-foreground">{t("session.logs")}</dt>
-              <dd className="text-xl font-semibold tabular-nums">{c.logs}</dd>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-semibold">{c.active.name || t("session.unnamed")}</span>
+              <Badge variant="outline" className="border-success/40 bg-success/10 text-success">
+                {t("session.active")}
+              </Badge>
+              <HelpButton onClick={c.openGuide} label={t("session.howTo")} />
             </div>
-            <div>
-              <dt className="text-muted-foreground">{t("session.duration")}</dt>
-              <dd className="font-mono text-xl font-semibold tabular-nums">
+            <span
+              className="text-sm text-muted-foreground"
+              title={t("session.expiresAt", { time: fmt.time(c.active.expiresAt) })}
+            >
+              {t("session.since", { time: fmt.time(c.active.startedAt) })}
+            </span>
+            <span className="text-sm">
+              <span className="text-muted-foreground">{t("session.logs")}:</span>{" "}
+              <span className="font-semibold tabular-nums">{c.logs}</span>
+            </span>
+            <span className="text-sm">
+              <span className="text-muted-foreground">{t("session.duration")}:</span>{" "}
+              <span className="font-mono font-semibold tabular-nums">
                 {c.spanMs != null ? fmt.duration(c.spanMs) : "—"}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-muted-foreground">{t("session.pending")}</dt>
-              <dd className="text-xl font-semibold tabular-nums">{c.pending}</dd>
-            </div>
-          </dl>
-        ) : (
-          <>
-            {c.resumable && (
-              <Alert>
-                <HistoryIcon />
-                <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-                  <span>{t("session.expired", { name: c.resumable.name || t("session.unnamed") })}</span>
-                  <Button size="sm" variant="outline" onClick={c.resume} disabled={c.busy}>
-                    <RotateCcwIcon /> {t("session.resume")}
-                  </Button>
-                </AlertDescription>
-              </Alert>
+              </span>
+            </span>
+            {c.pending > 0 && (
+              <span className="text-sm">
+                <span className="text-muted-foreground">{t("session.pending")}:</span>{" "}
+                <span className="font-semibold tabular-nums">{c.pending}</span>
+              </span>
             )}
+            <div className="ml-auto flex items-center gap-2">
+              {c.ending && (
+                <span className="text-sm text-muted-foreground">
+                  {c.pending ? t("session.waiting", { count: c.pending }) : t("session.ending")}
+                </span>
+              )}
+              <Button size="sm" variant="outline" onClick={c.end} disabled={c.busy || c.ending}>
+                {c.ending ? <Loader2Icon className="animate-spin" /> : <FlagIcon />}
+                {t("session.end")}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 font-semibold" title={t("session.hint")}>
+              {t("session.title")}
+            </span>
+            <HelpButton onClick={c.openGuide} label={t("session.howTo")} />
             <Input
               value={c.name}
               onChange={(e) => c.setName(e.target.value)}
@@ -134,8 +154,24 @@ export default function SessionPanel() {
               maxLength={80}
               disabled={!c.signedIn || c.busy}
               onKeyDown={(e) => e.key === "Enter" && c.start()}
+              className="h-8"
             />
-          </>
+            <Button size="sm" onClick={c.start} disabled={!c.signedIn || c.busy} className="shrink-0">
+              {c.busy ? <Loader2Icon className="animate-spin" /> : <PlayIcon />}
+              {t("session.start")}
+            </Button>
+          </div>
+        )}
+        {!c.active && c.resumable && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border bg-muted/40 px-3 py-2 text-sm">
+            <span className="inline-flex items-center gap-2 text-muted-foreground">
+              <HistoryIcon className="size-4" />
+              {t("session.expired", { name: c.resumable.name || t("session.unnamed") })}
+            </span>
+            <Button size="sm" variant="outline" onClick={c.resume} disabled={c.busy}>
+              <RotateCcwIcon /> {t("session.resume")}
+            </Button>
+          </div>
         )}
         {c.error && (
           <Alert variant="destructive">
@@ -144,27 +180,6 @@ export default function SessionPanel() {
           </Alert>
         )}
       </CardContent>
-
-      <CardFooter className="gap-3">
-        {c.active ? (
-          <>
-            <Button variant="outline" onClick={c.end} disabled={c.busy || c.ending}>
-              {c.ending ? <Loader2Icon className="animate-spin" /> : <FlagIcon />}
-              {t("session.end")}
-            </Button>
-            {c.ending && (
-              <span className="text-sm text-muted-foreground">
-                {c.pending ? t("session.waiting", { count: c.pending }) : t("session.ending")}
-              </span>
-            )}
-          </>
-        ) : (
-          <Button onClick={c.start} disabled={!c.signedIn || c.busy}>
-            {c.busy ? <Loader2Icon className="animate-spin" /> : <PlayIcon />}
-            {t("session.start")}
-          </Button>
-        )}
-      </CardFooter>
     </Card>
   );
 }

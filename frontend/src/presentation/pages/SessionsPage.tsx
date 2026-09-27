@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRightIcon, TimerIcon } from "lucide-react";
+import { ChevronRightIcon, CircleHelpIcon, TimerIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { sessionService } from "../../services/sessionService";
@@ -23,7 +23,20 @@ export default function SessionsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("sessions.title")} description={t("sessions.subtitle")} />
+      <PageHeader
+        title={t("sessions.title")}
+        description={
+          <>
+            {t("sessions.subtitle")}{" "}
+            <Link
+              to="/guide/sessions"
+              className="inline-flex items-center gap-1 text-foreground underline-offset-4 hover:underline"
+            >
+              <CircleHelpIcon className="size-3.5" /> {t("sessions.howTo")}
+            </Link>
+          </>
+        }
+      />
       {c.loading ? (
         <SessionListSkeleton />
       ) : c.views.length ? (

@@ -99,6 +99,25 @@
   animation: fresh-row 8s ease-out;
 }
 
+/*
+ * Skeleton pulse that animates the background colour instead of opacity (Tailwind's animate-pulse). Animating the
+ * opacity of dozens of elements puts each on its own GPU layer, and some Firefox/GPU setups briefly draw coloured
+ * fringes around their rounded edges while those layers are composited.
+ */
+@keyframes skeleton-pulse {
+  50% {
+    background-color: color-mix(in oklch, var(--accent) 50%, var(--card));
+  }
+}
+.skeleton-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse {
+    animation: none;
+  }
+}
+
 /* Thin, theme-coloured scrollbars. */
 html {
   scroll-behavior: smooth;

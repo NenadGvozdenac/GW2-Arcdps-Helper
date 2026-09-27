@@ -46,14 +46,14 @@ export default function UploadsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <WatchPanel />
-      <SessionPanel />
-
       <div className="grid grid-cols-3 gap-4">
         <Stat label={t("uploads.todayUploaded")} value={c.stats.today} className="text-success" />
         <Stat label={t("uploads.inProgress")} value={c.stats.inProgress} />
         <Stat label={t("uploads.failed")} value={c.stats.failed} className="text-destructive" />
       </div>
+
+      <WatchPanel />
+      <SessionPanel />
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">

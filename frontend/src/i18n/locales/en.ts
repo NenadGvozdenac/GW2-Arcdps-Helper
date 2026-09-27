@@ -259,12 +259,52 @@ export const en = {
     confirmDelete: "Delete this session?",
     deleteHint: "The logs are kept — they just no longer belong to a session.",
     partOf: "Part of session",
+    howTo: "How do sessions work?",
     activeHint: "This session is running. If it isn't ended in the uploader, it ends automatically at {time}.",
     expired: "Ended automatically",
     expiredHint: "Not ended within 6 hours, so it was ended automatically.",
     expiredTitle: "Ended automatically after 6 hours",
     expiredBody: "This session wasn't ended within 6 hours, so it was ended at {time}. Still playing? Resume it — new logs from the uploader join it again.",
     resume: "Resume session",
+  },
+  sessionsGuide: {
+    back: "Back to sessions",
+    title: "How sessions work",
+    intro:
+      "A session groups the logs of one sitting — a W1–W8 full clear, a fractal run, a strike evening. On the website you see them together with how long it took, and Discord gets one summary instead of a message per boss.",
+    howTitle: "Using a session",
+    step1Title: "Start it in the desktop uploader",
+    step1Body:
+      "Before you play, open the uploader, give the session a name if you like (e.g. “Full clear W1–W8”) and click “Start session”. Keep watching the ArcDPS folder as usual.",
+    step2Title: "Play",
+    step2Body:
+      "Every log the uploader picks up while the session runs is uploaded as always and added to the session. The uploader shows how many logs it has and how long it has lasted so far.",
+    step3Title: "End it",
+    step3Body:
+      "Click “End session” when you're done. The uploader first waits until the session's last logs are uploaded, so none of them is missing.",
+    step4Title: "Look it up on the website",
+    step4Body:
+      "Open “Sessions” on the website: every session with its date, duration, kills, wipes and the wings / fractals played. Click one to see all of its logs in order.",
+    discordTitle: "One Discord message",
+    discordBody:
+      "With a Discord webhook connected, logs of a running session are not posted one by one. When it ends, one summary is posted: every boss with its result and a link, plus the duration and kills / wipes.",
+    durationTitle: "Duration",
+    durationBody:
+      "Measured from the start of the first fight to the end of the last one — waiting between bosses counts, the time before the first pull doesn't.",
+    endTitle: "Ending and deleting",
+    endBody:
+      "Starting a new session ends the previous one. Deleting a session on the website keeps its logs — they just no longer belong to a session.",
+    expiryTitle: "Sessions end by themselves after 6 hours",
+    expiryBody:
+      "If you forget to end a session, it is ended automatically 6 hours after it started (and its Discord summary is posted). The website marks it “Ended automatically”. Still playing? Resume it from the uploader or the website — it gets another 6 hours. Sessions you ended yourself can't be resumed.",
+    faqTitle: "Questions",
+    q1: "Do logs uploaded on the website go into a session?",
+    a1: "No — sessions are started and ended in the desktop uploader, and only logs it uploads while a session runs belong to it.",
+    q2: "I closed the uploader in the middle of a raid.",
+    a2: "The session keeps running on the server. Open the uploader again and it continues where it left off.",
+    q3: "What if I don't use Discord?",
+    a3: "Sessions work the same without it — you just get no summary message.",
+    openSessions: "Open my sessions",
   },
   logDetail: {
     notFound: "Log not found",
