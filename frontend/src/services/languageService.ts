@@ -1,4 +1,4 @@
-import { languageStorage } from "../repositories/languageStorage";
+import { languageStorage } from "../storage/languageStorage";
 import { detectLanguage, isLanguage } from "../i18n/translate";
 import type { Language } from "../i18n/i18n.types";
 

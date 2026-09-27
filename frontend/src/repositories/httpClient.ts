@@ -1,6 +1,6 @@
 import { API_BASE_URL } from "../config/constants";
 import { ApiError, type ApiErrorBody } from "../domain/types/api.types";
-import { tokenStorage } from "./tokenStorage";
+import { tokenStorage } from "../storage/tokenStorage";
 
 type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 

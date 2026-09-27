@@ -52,7 +52,8 @@ src/
 ├── domain/
 │   ├── types/         all TypeScript types (Log, User, API errors, …)
 │   └── data/          encounter catalogue (wings, fractal CMs, strikes)
-├── repositories/      the only layer that does I/O: HTTP client, API calls, localStorage
+├── repositories/      HTTP client and API calls
+├── storage/           what is kept in the browser (localStorage): JWT, language, logs per page
 ├── services/          business logic without React (auth, logs, stats, encounters, profile, language)
 ├── controllers/       app-wide React providers: I18nController, AuthController, LogsController, SessionsController
 ├── hooks/             reusable React hooks without state of their own (usePolling)
@@ -65,8 +66,8 @@ src/
     └── styles.css     Tailwind + theme tokens
 ```
 
-Dependency direction: `presentation → controllers → services → repositories → config`. Pages and components never
-call `fetch` or `localStorage` directly.
+Dependency direction: `presentation → controllers → services → repositories / storage → config`. Pages and components
+never call `fetch` or `localStorage` directly.
 
 ### Data flow
 

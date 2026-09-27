@@ -30,7 +30,8 @@ and sends every new log to dps.report and to GW2 ArcDPS Helper automatically —
         ├── config/          constants (API URL, storage keys)
         ├── i18n/            translations (locales/en.ts, locales/sr.ts) and the translate function
         ├── domain/          types/ + data/ (boss catalogue)
-        ├── repositories/    HTTP client, API calls, localStorage access
+        ├── repositories/    HTTP client, API calls
+        ├── storage/         localStorage access (JWT, language, logs per page)
         ├── services/        business logic — no React
         ├── controllers/     shared providers: I18nController, AuthController, LogsController, SessionsController
         └── presentation/    components, pages, router, styles; each page/component keeps its

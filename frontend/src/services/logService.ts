@@ -1,6 +1,6 @@
 import { LOG_FILE_EXTENSIONS, LOGS_PAGE_SIZE, LOGS_PAGE_SIZE_OPTIONS, MAX_URLS_PER_CALL } from "../config/constants";
 import { logRepository } from "../repositories/logRepository";
-import { logsPageSizeStorage } from "../repositories/logsPageSizeStorage";
+import { logsPageSizeStorage } from "../storage/logsPageSizeStorage";
 import type { Log, LogFilter, LogPage } from "../domain/types/log.types";
 import type { SubmitResult, UploadSummary } from "../domain/types/upload.types";
 

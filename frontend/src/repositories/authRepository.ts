@@ -1,6 +1,6 @@
 import type { AuthResponse, User } from "../domain/types/user.types";
 import { http } from "./httpClient";
-import { tokenStorage } from "./tokenStorage";
+import { tokenStorage } from "../storage/tokenStorage";
 
 export const authRepository = {
   async register(body: { email: string; password: string; gw2Account: string }): Promise<User> {
