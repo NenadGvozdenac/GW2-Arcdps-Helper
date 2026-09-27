@@ -32,6 +32,24 @@ function sessionLine(log: Log): string {
   return `${result} [${log.bossName}${modeLabel(log)}](${log.url}) · ${formatDuration(log.durationMs)}`;
 }
 
+/**
+ * Session body: kills grouped by content ("**W7 · The Key of Ahdashim**" followed by its logs, in GROUPS order),
+ * then every wipe under "**Failed logs**" with the boss health that was left.
+ */
+function sessionLines(logs: Log[]): string[] {
+  const sections: string[][] = [];
+  const kills = logs.filter((l) => l.success);
+  for (const group of GROUPS) {
+    const groupKills = kills.filter((l) => l.groupId === group.id);
+    if (groupKills.length) sections.push([`**${group.short} · ${group.name}**`, ...groupKills.map(sessionLine)]);
+  }
+  const other = kills.filter((l) => !GROUPS.some((g) => g.id === l.groupId));
+  if (other.length) sections.push(["**Other**", ...other.map(sessionLine)]);
+  const failed = logs.filter((l) => !l.success);
+  if (failed.length) sections.push(["**Failed logs**", ...failed.map(sessionLine)]);
+  return sections.flatMap((section, i) => (i ? ["", ...section] : section));
+}
+
 /** Joins lines up to Discord's description limit, ending with "… and N more" when they don't all fit. */
 function fitLines(lines: string[]): string {
   const out: string[] = [];
@@ -85,14 +103,14 @@ export const discordService = {
     }
   },
 
-  /** One message summarising a finished session: every log plus totals and how long it took. */
+  /** One message summarising a finished session: kills per group, failed logs, totals and how long it took. */
   async notifySession(webhookUrl: string | null, session: Session, logs: Log[], span: LogSpan): Promise<void> {
     if (!webhookUrl || !logs.length) return;
     const kills = logs.filter((l) => l.success).length;
     const groups = [...new Set(logs.map((l) => GROUPS.find((g) => g.id === l.groupId)?.short).filter(Boolean))];
     const embed: DiscordEmbed = {
       title: session.name || "Session",
-      description: fitLines(logs.map(sessionLine)),
+      description: fitLines(sessionLines(logs)),
       color: kills ? GREEN : RED,
       fields: [
         { name: "Duration", value: formatLongDuration(span.durationMs), inline: true },
