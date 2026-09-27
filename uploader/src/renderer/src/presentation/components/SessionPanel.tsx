@@ -120,7 +120,7 @@ export default function SessionPanel() {
             <span className="text-sm">
               <span className="text-muted-foreground">{t("session.duration")}:</span>{" "}
               <span className="font-mono font-semibold tabular-nums">
-                {c.spanMs != null ? fmt.duration(c.spanMs) : "—"}
+                {c.spanMs != null ? fmt.span(c.spanMs) : "—"}
               </span>
             </span>
             {c.pending > 0 && (
