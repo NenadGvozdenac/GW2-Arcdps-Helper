@@ -28,7 +28,6 @@ namespace
 	char g_password[256] = "";
 	char g_dpsToken[128] = "";
 	char g_logFolder[520] = "";
-	char g_apiUrl[256] = "";
 	bool g_optionsInit = false;
 
 	void BeginDisabled(bool disabled)
@@ -240,7 +239,6 @@ namespace UI
 			Copy(g_email, sizeof(g_email), s.email);
 			Copy(g_dpsToken, sizeof(g_dpsToken), s.dpsReportToken);
 			Copy(g_logFolder, sizeof(g_logFolder), s.logFolder);
-			Copy(g_apiUrl, sizeof(g_apiUrl), s.apiUrl);
 			g_optionsInit = true;
 		}
 
@@ -299,20 +297,5 @@ namespace UI
 		ImGui::SetNextItemWidth(260);
 		ImGui::InputText("dps.report user token (optional)", g_dpsToken, sizeof(g_dpsToken), ImGuiInputTextFlags_Password);
 		if (ImGui::IsItemDeactivatedAfterEdit()) Config::Update([](Settings& c) { c.dpsReportToken = g_dpsToken; });
-
-		if (ImGui::TreeNode("Advanced"))
-		{
-			ImGui::SetNextItemWidth(420);
-			ImGui::InputText("API URL", g_apiUrl, sizeof(g_apiUrl));
-			if (ImGui::IsItemDeactivatedAfterEdit())
-			{
-				std::string url = g_apiUrl[0] ? g_apiUrl : DEFAULT_API_URL;
-				// A token from another server is not valid here.
-				if (url != s.apiUrl) Account::Logout();
-				Config::Update([&](Settings& c) { c.apiUrl = url; });
-				Copy(g_apiUrl, sizeof(g_apiUrl), url);
-			}
-			ImGui::TreePop();
-		}
 	}
 }

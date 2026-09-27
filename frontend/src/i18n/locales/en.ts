@@ -276,6 +276,7 @@ export const en = {
     back: "All sessions",
     notFound: "Session not found",
     logsTitle: "Logs in this session",
+    otherGroup: "Other",
     durationHint: "From the start of the first fight to the end of the last one.",
     confirmDelete: "Delete this session?",
     deleteHint: "The logs are kept — they just no longer belong to a session.",

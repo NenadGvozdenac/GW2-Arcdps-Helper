@@ -154,7 +154,7 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.APIVersion = NEXUS_API_VERSION;
 	AddonDef.Name = ADDON_NAME;
 	AddonDef.Version = { 0, 1, 0, 0 };
-	AddonDef.Author = "Nenad Gvozdenac";
+	AddonDef.Author = "NenadG";
 	AddonDef.Description = "Uploads new ArcDPS logs to dps.report and GW2 ArcDPS Helper, and records sessions - right from the game.";
 	AddonDef.Load = AddonLoad;
 	AddonDef.Unload = AddonUnload;

@@ -48,13 +48,13 @@ namespace Api
 
 	bool UploadToDpsReport(const std::wstring& filePath, const std::string& userToken, DpsReportLog& out, Error& err);
 
-	bool Login(const std::string& apiUrl, const std::string& email, const std::string& password, std::string& token, User& user, Error& err);
-	bool Me(const std::string& apiUrl, const std::string& token, User& user, Error& err);
+	bool Login(const std::string& email, const std::string& password, std::string& token, User& user, Error& err);
+	bool Me(const std::string& token, User& user, Error& err);
 
 	/** Imports one dps.report link; with a sessionId the log is attached to that session. */
-	bool SubmitLog(const std::string& apiUrl, const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& out, Error& err);
+	bool SubmitLog(const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& out, Error& err);
 
-	bool GetActiveSession(const std::string& apiUrl, const std::string& token, std::optional<Session>& out, Error& err);
-	bool StartSession(const std::string& apiUrl, const std::string& token, const std::string& name, Session& out, Error& err);
-	bool EndSession(const std::string& apiUrl, const std::string& token, const std::string& id, Error& err);
+	bool GetActiveSession(const std::string& token, std::optional<Session>& out, Error& err);
+	bool StartSession(const std::string& token, const std::string& name, Session& out, Error& err);
+	bool EndSession(const std::string& token, const std::string& id, Error& err);
 }

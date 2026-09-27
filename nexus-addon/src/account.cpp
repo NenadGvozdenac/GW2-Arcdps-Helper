@@ -84,7 +84,7 @@ namespace
 		if (cfg.token.empty()) return;
 		std::optional<Api::Session> session;
 		Api::Error err;
-		if (Api::GetActiveSession(cfg.apiUrl, cfg.token, session, err)) ApplySession(session);
+		if (Api::GetActiveSession(cfg.token, session, err)) ApplySession(session);
 		else if (err.code == "UNAUTHORIZED") SignOutLocal("Your sign-in expired. Sign in again.");
 		else LogWarn("Could not load the active session: " + err.message);
 	}
@@ -111,7 +111,7 @@ namespace
 			if (cfg.token.empty()) return;
 			Api::User user;
 			Api::Error err;
-			if (Api::Me(cfg.apiUrl, cfg.token, user, err))
+			if (Api::Me(cfg.token, user, err))
 			{
 				Config::Update([&](Settings& s) { s.email = user.email; s.gw2Account = user.gw2Account; });
 				Set([&](AccountState& s) { s.email = user.email; s.gw2Account = user.gw2Account; });
@@ -184,7 +184,7 @@ namespace Account
 			std::string token;
 			Api::User user;
 			Api::Error err;
-			if (!Api::Login(Config::Get().apiUrl, email, password, token, user, err))
+			if (!Api::Login(email, password, token, user, err))
 			{
 				Set([&](AccountState& s) { s.message = err.message.empty() ? "Sign-in failed." : err.message; });
 				return;
@@ -215,7 +215,7 @@ namespace Account
 			if (cfg.token.empty()) return;
 			Api::Session session;
 			Api::Error err;
-			if (!Api::StartSession(cfg.apiUrl, cfg.token, name, session, err))
+			if (!Api::StartSession(cfg.token, name, session, err))
 			{
 				if (err.code == "UNAUTHORIZED") return SignOutLocal("Your sign-in expired. Sign in again.");
 				Set([&](AccountState& s) { s.message = "Could not start recording: " + err.message; });
@@ -245,7 +245,7 @@ namespace Account
 			}
 			Settings cfg = Config::Get();
 			Api::Error err;
-			if (Api::EndSession(cfg.apiUrl, cfg.token, id, err) || err.code == "SESSION_NOT_FOUND")
+			if (Api::EndSession(cfg.token, id, err) || err.code == "SESSION_NOT_FOUND")
 			{
 				Set(ClearSession);
 				LogInfo("Session ended: " + id);

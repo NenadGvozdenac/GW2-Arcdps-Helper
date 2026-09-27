@@ -7,7 +7,6 @@ struct Settings
 {
 	std::string logFolder;
 	std::string dpsReportToken;
-	std::string apiUrl;
 	bool autoUpload = true;  // pick up every new log from the ArcDPS folder
 	bool showAlerts = true;  // Nexus alert when a log was uploaded / failed
 	bool showWindow = true;

@@ -49,6 +49,14 @@ export interface SessionSummary {
   groups: EncounterGroup[];
 }
 
+/** A session's logs of one wing / fractal / strike; group is null for logs outside the catalogue. */
+export interface SessionGroupLogs {
+  group: EncounterGroup | null;
+  logs: Log[];
+  kills: number;
+  wipes: number;
+}
+
 /** A session on the sessions list with the totals of its logs, computed by the server (GET /sessions/page). */
 export interface SessionListItem {
   session: Session;

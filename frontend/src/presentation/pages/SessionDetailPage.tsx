@@ -21,7 +21,7 @@ import {
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import LogTable from "../components/LogTable";
+import GroupedLogTable from "../components/GroupedLogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
 import SessionTitle from "../components/SessionTitle";
 import ShareButton from "../components/ShareButton";
@@ -208,7 +208,7 @@ export default function SessionDetailPage() {
           <CardDescription>{t("sessions.durationHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <LogTable logs={logs} showGroup />
+          <GroupedLogTable logs={logs} />
         </CardContent>
       </Card>
     </div>

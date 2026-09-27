@@ -277,6 +277,7 @@ export const sr: Messages = {
     back: "Sve sesije",
     notFound: "Sesija nije pronađena",
     logsTitle: "Logovi u ovoj sesiji",
+    otherGroup: "Ostalo",
     durationHint: "Od početka prve borbe do kraja poslednje.",
     confirmDelete: "Obrisati ovu sesiju?",
     deleteHint: "Logovi ostaju — samo više ne pripadaju sesiji.",

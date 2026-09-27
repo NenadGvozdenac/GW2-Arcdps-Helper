@@ -20,7 +20,6 @@ namespace
 		json j = {
 			{ "logFolder", g_settings.logFolder },
 			{ "dpsReportToken", g_settings.dpsReportToken },
-			{ "apiUrl", g_settings.apiUrl },
 			{ "autoUpload", g_settings.autoUpload },
 			{ "showAlerts", g_settings.showAlerts },
 			{ "showWindow", g_settings.showWindow },
@@ -42,7 +41,6 @@ namespace Config
 
 		Settings s;
 		s.logFolder = Util::DefaultLogFolder();
-		s.apiUrl = DEFAULT_API_URL;
 
 		std::string text;
 		if (Util::ReadFile(g_path, text))
@@ -52,7 +50,6 @@ namespace Config
 			{
 				s.logFolder = j.value("logFolder", s.logFolder);
 				s.dpsReportToken = j.value("dpsReportToken", "");
-				s.apiUrl = j.value("apiUrl", s.apiUrl);
 				s.autoUpload = j.value("autoUpload", true);
 				s.showAlerts = j.value("showAlerts", true);
 				s.showWindow = j.value("showWindow", true);
@@ -63,7 +60,6 @@ namespace Config
 			}
 		}
 		if (s.logFolder.empty()) s.logFolder = Util::DefaultLogFolder();
-		if (s.apiUrl.empty()) s.apiUrl = DEFAULT_API_URL;
 		g_settings = s;
 	}
 

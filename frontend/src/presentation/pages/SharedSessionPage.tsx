@@ -6,7 +6,7 @@ import { sessionService } from "../../services/sessionService";
 import type { SharedSession } from "../../domain/types/session.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import LogTable from "../components/LogTable";
+import GroupedLogTable from "../components/GroupedLogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
@@ -102,7 +102,7 @@ export default function SharedSessionPage() {
           <CardDescription>{t("sessions.sharedLogsHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <LogTable logs={logs} showGroup openOnDpsReport />
+          <GroupedLogTable logs={logs} openOnDpsReport />
         </CardContent>
       </Card>
     </div>

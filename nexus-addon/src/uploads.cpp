@@ -206,9 +206,9 @@ namespace
 		Modify(id, [](Upload& u) { u.stage = Stage::Syncing; u.error.clear(); });
 		Api::SubmitResult result;
 		Api::Error err;
-		bool ok = Api::SubmitLog(s.apiUrl, s.token, permalink, sessionId, result, err);
+		bool ok = Api::SubmitLog(s.token, permalink, sessionId, result, err);
 		// The session was deleted on the website meanwhile: save the log without it.
-		if (!ok && err.code == "SESSION_NOT_FOUND") ok = Api::SubmitLog(s.apiUrl, s.token, permalink, "", result, err);
+		if (!ok && err.code == "SESSION_NOT_FOUND") ok = Api::SubmitLog(s.token, permalink, "", result, err);
 
 		if (!ok)
 		{

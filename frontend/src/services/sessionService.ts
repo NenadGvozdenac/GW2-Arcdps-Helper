@@ -4,6 +4,7 @@ import type { Log } from "../domain/types/log.types";
 import type {
   PracticeRun,
   Session,
+  SessionGroupLogs,
   SessionPage,
   SessionPatch,
   SessionSummary,
@@ -75,6 +76,25 @@ export const sessionService = {
       if (g && !groups.includes(g)) groups.push(g);
     }
     return { logs: sorted, span: span(sorted), kills, wipes: sorted.length - kills, groups };
+  },
+
+  /**
+   * Splits logs by wing / fractal / strike in catalogue order (W1, W2, …), logs outside the catalogue last. Each part
+   * keeps the given order (summarize() sorts oldest first).
+   */
+  byGroup(logs: Log[]): SessionGroupLogs[] {
+    const byId = new Map<string | null, Log[]>();
+    for (const l of logs) {
+      const id = encounterService.groupById(l.groupId)?.id ?? null;
+      byId.set(id, [...(byId.get(id) ?? []), l]);
+    }
+    const groups: (EncounterGroup | null)[] = encounterService.allGroups().filter((g) => byId.has(g.id));
+    if (byId.has(null)) groups.push(null);
+    return groups.map((group) => {
+      const groupLogs = byId.get(group?.id ?? null) ?? [];
+      const kills = groupLogs.filter((l) => l.success).length;
+      return { group, logs: groupLogs, kills, wipes: groupLogs.length - kills };
+    });
   },
 
   /**

@@ -9,6 +9,7 @@ using json = nlohmann::json;
 
 namespace
 {
+	constexpr const char* API_URL = "https://gw2-arcdps-helper-api.vercel.app/api";
 	constexpr const char* DPS_REPORT_UPLOAD_URL = "https://dps.report/uploadContent";
 	constexpr int DPS_REPORT_TIMEOUT_MS = 120000;
 	constexpr int BACKEND_TIMEOUT_MS = 60000;
@@ -32,18 +33,12 @@ namespace
 		return it->get<bool>();
 	}
 
-	std::string TrimSlash(std::string url)
-	{
-		while (!url.empty() && url.back() == '/') url.pop_back();
-		return url;
-	}
-
 	/** Backend call; fills err from the { error, code } body on failure. */
-	bool Backend(const std::string& apiUrl, const std::string& method, const std::string& path, const std::string& token, const json* body, json& out, Api::Error& err)
+	bool Backend(const std::string& method, const std::string& path, const std::string& token, const json* body, json& out, Api::Error& err)
 	{
 		Http::Request req;
 		req.method = method;
-		req.url = TrimSlash(apiUrl) + path;
+		req.url = std::string(API_URL) + path;
 		req.timeoutMs = BACKEND_TIMEOUT_MS;
 		req.headers.push_back({ "Accept", "application/json" });
 		if (!token.empty()) req.headers.push_back({ "Authorization", "Bearer " + token });
@@ -134,27 +129,27 @@ namespace Api
 		return true;
 	}
 
-	bool Login(const std::string& apiUrl, const std::string& email, const std::string& password, std::string& token, User& user, Error& err)
+	bool Login(const std::string& email, const std::string& password, std::string& token, User& user, Error& err)
 	{
 		json body = { { "email", email }, { "password", password } }, out;
-		if (!Backend(apiUrl, "POST", "/auth/login", "", &body, out, err)) return false;
+		if (!Backend("POST", "/auth/login", "", &body, out, err)) return false;
 		token = Str(out, "token");
 		user = ToUser(out.value("user", json::object()));
 		return !token.empty();
 	}
 
-	bool Me(const std::string& apiUrl, const std::string& token, User& user, Error& err)
+	bool Me(const std::string& token, User& user, Error& err)
 	{
 		json out;
-		if (!Backend(apiUrl, "GET", "/auth/me", token, nullptr, out, err)) return false;
+		if (!Backend("GET", "/auth/me", token, nullptr, out, err)) return false;
 		user = ToUser(out.value("user", json::object()));
 		return true;
 	}
 
-	bool SubmitLog(const std::string& apiUrl, const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& result, Error& err)
+	bool SubmitLog(const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& result, Error& err)
 	{
 		json body = { { "urls", json::array({ permalink }) }, { "sessionId", sessionId.empty() ? json(nullptr) : json(sessionId) } }, out;
-		if (!Backend(apiUrl, "POST", "/logs", token, &body, out, err)) return false;
+		if (!Backend("POST", "/logs", token, &body, out, err)) return false;
 
 		const json results = out.value("results", json::array());
 		if (results.empty() || !results[0].is_object())
@@ -178,26 +173,26 @@ namespace Api
 		return true;
 	}
 
-	bool GetActiveSession(const std::string& apiUrl, const std::string& token, std::optional<Session>& result, Error& err)
+	bool GetActiveSession(const std::string& token, std::optional<Session>& result, Error& err)
 	{
 		json out;
-		if (!Backend(apiUrl, "GET", "/sessions/active", token, nullptr, out, err)) return false;
+		if (!Backend("GET", "/sessions/active", token, nullptr, out, err)) return false;
 		auto it = out.find("session");
 		result = it != out.end() && it->is_object() ? std::optional(ToSession(*it)) : std::nullopt;
 		return true;
 	}
 
-	bool StartSession(const std::string& apiUrl, const std::string& token, const std::string& name, Session& result, Error& err)
+	bool StartSession(const std::string& token, const std::string& name, Session& result, Error& err)
 	{
 		json body = { { "name", name } }, out;
-		if (!Backend(apiUrl, "POST", "/sessions", token, &body, out, err)) return false;
+		if (!Backend("POST", "/sessions", token, &body, out, err)) return false;
 		result = ToSession(out.value("session", json::object()));
 		return true;
 	}
 
-	bool EndSession(const std::string& apiUrl, const std::string& token, const std::string& id, Error& err)
+	bool EndSession(const std::string& token, const std::string& id, Error& err)
 	{
 		json out;
-		return Backend(apiUrl, "POST", "/sessions/" + Util::UrlEncode(id) + "/end", token, nullptr, out, err);
+		return Backend("POST", "/sessions/" + Util::UrlEncode(id) + "/end", token, nullptr, out, err);
 	}
 }
