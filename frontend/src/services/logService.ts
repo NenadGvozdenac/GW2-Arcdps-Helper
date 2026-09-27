@@ -1,12 +1,16 @@
 import { LOG_FILE_EXTENSIONS, MAX_URLS_PER_CALL } from "../config/constants";
 import { logRepository } from "../repositories/logRepository";
-import type { Log, LogFilter } from "../domain/types/log.types";
+import type { Log, LogFilter, LogPage } from "../domain/types/log.types";
 import type { SubmitResult, UploadSummary } from "../domain/types/upload.types";
 
 const DPS_REPORT_LINK_RE = /https?:\/\/(?:[a-z0-9-]+\.)?dps\.report\/[A-Za-z0-9_-]+/gi;
 
 export const logService = {
   list: (): Promise<Log[]> => logRepository.list(),
+  /** One page of logs matching the filter; the server does the searching. */
+  search: (filter: LogFilter, page: number, pageSize: number): Promise<LogPage> =>
+    logRepository.search(filter, page, pageSize),
+  searchIds: (filter: LogFilter): Promise<string[]> => logRepository.searchIds(filter),
 
   /** Pulls every dps.report link out of arbitrary pasted text. */
   extractLinks(text: string): string[] {
@@ -36,20 +40,6 @@ export const logService = {
       duplicates: results.filter((r) => r.status === "duplicate").length,
       failed: results.filter((r) => r.status === "error").length,
     };
-  },
-
-  filter(logs: Log[], f: LogFilter): Log[] {
-    const q = f.search.trim().toLowerCase();
-    return logs.filter(
-      (l) =>
-        (f.category === "all" || l.category === f.category) &&
-        (f.groupId === "all" || l.groupId === f.groupId) &&
-        (f.result === "all" || (f.result === "kill") === l.success) &&
-        (!q ||
-          l.bossName.toLowerCase().includes(q) ||
-          l.accounts.some((a) => a.toLowerCase().includes(q)) ||
-          l.players.some((p) => p.name.toLowerCase().includes(q))),
-    );
   },
 
   delete: (id: string) => logRepository.delete(id),

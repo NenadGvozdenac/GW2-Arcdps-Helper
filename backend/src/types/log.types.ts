@@ -58,3 +58,18 @@ export interface SharedLogResponse {
   /** GW2 account of the player who shared it (empty if they haven't set one). */
   owner: string;
 }
+
+
+export interface LogFilter {
+  search: string;
+  category: Category | "all";
+  groupId: string | "all";
+  result: "all" | "kill" | "wipe";
+}
+
+/** One page of the owner's logs matching a filter, newest first. */
+export interface LogPage {
+  logs: Log[];
+  /** How many logs match the filter in total. */
+  total: number;
+}

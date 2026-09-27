@@ -7,7 +7,13 @@ import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
 import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../types/submit.types";
 import { invalidLogFile } from "../utils/httpError";
-import { deleteLogsSchema, idParamSchema, shareTokenParamSchema, submitLogsSchema } from "../validation/schemas";
+import {
+  deleteLogsSchema,
+  idParamSchema,
+  searchLogsSchema,
+  shareTokenParamSchema,
+  submitLogsSchema,
+} from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 /**
@@ -26,6 +32,16 @@ async function notifyDiscord(userId: string, results: SubmitResult[], sessionAct
 export const logController = {
   async list(_req: Request, res: Response<unknown, AuthLocals>) {
     res.json({ logs: await logService.list(res.locals.userId) });
+  },
+
+  /** GET /logs/search?search=&category=&groupId=&result=&page=&pageSize= — one page, or with idsOnly=true every id. */
+  async search(req: Request, res: Response<unknown, AuthLocals>) {
+    const { page, pageSize, idsOnly, ...filter } = validate(searchLogsSchema, req.query);
+    if (idsOnly) {
+      res.json({ ids: await logService.searchIds(res.locals.userId, filter) });
+      return;
+    }
+    res.json({ ...(await logService.search(res.locals.userId, filter, page, pageSize)), page, pageSize });
   },
 
   async get(req: Request, res: Response<unknown, AuthLocals>) {

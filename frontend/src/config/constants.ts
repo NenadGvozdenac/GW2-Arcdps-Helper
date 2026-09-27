@@ -4,8 +4,10 @@ export const API_BASE_URL = (import.meta.env.VITE_API_URL || "/api").replace(/\/
 /** Must match MAX_URLS_PER_CALL in backend/src/config/constants.ts */
 export const MAX_URLS_PER_CALL = 10;
 
-/** Logs per page on "All logs". */
+/** Logs per page on "All logs" (fetched from the server one page at a time). */
 export const LOGS_PAGE_SIZE = 20;
+/** Pause in typing before the log search is sent to the server. */
+export const SEARCH_DEBOUNCE_MS = 300;
 /** Sessions per page on "Sessions". */
 export const SESSIONS_PAGE_SIZE = 10;
 

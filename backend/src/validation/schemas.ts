@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { DISCORD_WEBHOOK_RE, MAX_URLS_PER_CALL, SESSION_NAME_MAX } from "../config/constants";
+import {
+  DISCORD_WEBHOOK_RE,
+  LOGS_PAGE_SIZE,
+  LOGS_PAGE_SIZE_MAX,
+  MAX_URLS_PER_CALL,
+  SESSION_NAME_MAX,
+} from "../config/constants";
 
 /** The GW2 account (Name.1234) is the user's identity — required. */
 const gw2Account = z
@@ -40,6 +46,21 @@ export const submitLogsSchema = z.object({
     .transform((urls) => [...new Set(urls)]),
   /** Attach the imported logs to this session (sent by the desktop uploader while a session runs). */
   sessionId: z.uuid("Invalid session ID.").nullish(),
+});
+
+/** Query of GET /logs/search: filters plus a 1-based page. */
+export const searchLogsSchema = z.object({
+  search: z.string().trim().max(100).default(""),
+  category: z.enum(["all", "raid", "fractal", "strike", "other"]).default("all"),
+  groupId: z.string().trim().max(40).default("all"),
+  result: z.enum(["all", "kill", "wipe"]).default("all"),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(LOGS_PAGE_SIZE_MAX).default(LOGS_PAGE_SIZE),
+  /** Only the ids of every matching log (no paging) — for "select all". */
+  idsOnly: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 export const startSessionSchema = z.object({

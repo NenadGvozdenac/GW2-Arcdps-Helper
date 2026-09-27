@@ -9,6 +9,9 @@ export const MAX_LOG_FILE_BYTES = 50 * 1024 * 1024;
 
 /** Kept small so one request fits comfortably in a Vercel function's time limit. */
 export const MAX_URLS_PER_CALL = 10;
+/** Logs per page of GET /logs/search. */
+export const LOGS_PAGE_SIZE = 20;
+export const LOGS_PAGE_SIZE_MAX = 100;
 export const PARALLEL_FETCHES = 4;
 
 /**

@@ -1,12 +1,12 @@
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AlertCircleIcon, CheckIcon, ListChecksIcon, Loader2Icon, SearchIcon, Trash2Icon } from "lucide-react";
-import { LOGS_PAGE_SIZE } from "../../config/constants";
+import { LOGS_PAGE_SIZE, SEARCH_DEBOUNCE_MS } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
 import { logService } from "../../services/logService";
 import { GROUPS } from "../../domain/data/encounters";
-import type { LogFilter } from "../../domain/types/log.types";
+import type { LogFilter, LogPage } from "../../domain/types/log.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { Card, CardContent } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import { cn } from "@/presentation/lib/utils";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
@@ -30,17 +31,58 @@ import { describeError } from "../utils/describeError";
 
 const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all" };
 
+/** Fetches one page at a time from the server; re-fetches when the filter or page changes, or logs come and go. */
+function useLogPage(filter: LogFilter, page: number) {
+  const { logs } = useLogs();
+  const [result, setResult] = useState<LogPage>({ logs: [], total: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
+  const [search, setSearch] = useState(filter.search);
+  const latest = useRef(0);
+
+  // Typing in the search box waits for a pause before asking the server.
+  useEffect(() => {
+    const timer = setTimeout(() => setSearch(filter.search), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [filter.search]);
+
+  // The shared list is polled, so a change in its size means logs were added or deleted.
+  const logCount = logs.length;
+  useEffect(() => {
+    const request = ++latest.current;
+    setLoading(true);
+    logService
+      .search({ ...filter, search }, page, LOGS_PAGE_SIZE)
+      .then((next) => {
+        if (request !== latest.current) return;
+        setResult(next);
+        setError(null);
+      })
+      .catch((err) => request === latest.current && setError(err))
+      .finally(() => request === latest.current && setLoading(false));
+    // filter.search is left out on purpose: it reaches the server through the debounced `search`.
+  }, [filter.category, filter.groupId, filter.result, search, page, logCount]);
+
+  return { ...result, loading, error };
+}
+
 function useAllLogsController() {
-  const { logs, removeMany } = useLogs();
+  const { removeMany } = useLogs();
   const [filter, setFilter] = useState<LogFilter>(INITIAL_FILTER);
   const [page, setPage] = useState(1);
   const [organizing, setOrganizing] = useState(false);
   const [selected, setSelected] = useState<ReadonlySet<string>>(new Set());
+  const [selectingAll, setSelectingAll] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const filtered = useMemo(() => logService.filter(logs, filter), [logs, filter]);
-  const currentPage = Math.min(page, Math.max(1, Math.ceil(filtered.length / LOGS_PAGE_SIZE)));
+  const result = useLogPage(filter, page);
+  const lastPage = Math.max(1, Math.ceil(result.total / LOGS_PAGE_SIZE));
+  // Deleting can leave you past the last page — step back to it.
+  useEffect(() => {
+    if (!result.loading && page > lastPage) setPage(lastPage);
+  }, [result.loading, page, lastPage]);
+
   const groupOptions = filter.category === "all" ? GROUPS : encounterService.groupsFor(filter.category);
 
   function updateFilter(patch: Partial<LogFilter>) {
@@ -64,6 +106,23 @@ function useAllLogsController() {
     });
   }
 
+  /** "Select all" covers every log matching the filters, also the ones on other pages. */
+  async function toggleAll() {
+    if (selected.size && selected.size === result.total) {
+      setSelected(new Set());
+      return;
+    }
+    setSelectingAll(true);
+    setError(null);
+    try {
+      setSelected(new Set(await logService.searchIds(filter)));
+    } catch (err) {
+      setError(err);
+    } finally {
+      setSelectingAll(false);
+    }
+  }
+
   async function deleteSelected() {
     setDeleting(true);
     setError(null);
@@ -81,10 +140,10 @@ function useAllLogsController() {
     filter,
     updateFilter,
     groupOptions,
-    total: filtered.length,
-    // Stays valid when deleting shrinks the list.
-    page: currentPage,
-    visible: filtered.slice((currentPage - 1) * LOGS_PAGE_SIZE, currentPage * LOGS_PAGE_SIZE),
+    total: result.total,
+    page,
+    visible: result.logs,
+    loading: result.loading,
     setPage: (p: number) => {
       setPage(p);
       window.scrollTo({ top: 0, behavior: "instant" });
@@ -92,13 +151,12 @@ function useAllLogsController() {
     organizing,
     selected,
     deleting,
-    error,
+    error: error ?? result.error,
     toggle,
     deleteSelected,
-    /** "Select all" covers every log matching the filters, also the ones not loaded into the table yet. */
-    allSelected: filtered.length > 0 && selected.size === filtered.length,
-    toggleAll: () =>
-      setSelected((prev) => (prev.size === filtered.length ? new Set() : new Set(filtered.map((l) => l.id)))),
+    allSelected: result.total > 0 && selected.size === result.total,
+    selectingAll,
+    toggleAll,
     startOrganizing: () => setOrganizing(true),
     stopOrganizing: () => {
       setOrganizing(false);
@@ -155,7 +213,7 @@ export default function AllLogsPage() {
       {c.organizing && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 px-4 py-2.5 text-sm">
           <label className="flex cursor-pointer items-center gap-2 font-medium">
-            <Checkbox checked={c.allSelected} onCheckedChange={c.toggleAll} />
+            <Checkbox checked={c.allSelected} onCheckedChange={c.toggleAll} disabled={c.selectingAll} />
             {t("allLogs.selectAll", { count: c.total })}
           </label>
           <span className="text-muted-foreground">{t("allLogs.organizeHint")}</span>
@@ -220,7 +278,7 @@ export default function AllLogsPage() {
       </div>
 
       <Card>
-        <CardContent>
+        <CardContent className={cn("transition-opacity", c.loading && "opacity-60")} aria-busy={c.loading}>
           <LogTable
             logs={c.visible}
             showGroup

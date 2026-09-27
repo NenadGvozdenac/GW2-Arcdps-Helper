@@ -60,3 +60,10 @@ export interface LogFilter {
   groupId: string | "all";
   result: ResultFilter;
 }
+
+/** One page of logs matching a filter (GET /logs/search), newest first. */
+export interface LogPage {
+  logs: Log[];
+  /** How many logs match the filter in total. */
+  total: number;
+}

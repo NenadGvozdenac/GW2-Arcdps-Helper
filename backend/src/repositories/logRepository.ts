@@ -1,13 +1,52 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, count, desc, eq, inArray, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
-import type { Log, LogSummary } from "../types/log.types";
+import type { Log, LogFilter, LogPage, LogSummary } from "../types/log.types";
 
 const ownedBy = (ownerId: string) => eq(logs.ownerId, ownerId);
+
+/** Same matching as the website's filter bar: boss name, or any account / character name containing the text. */
+function matching(ownerId: string, f: LogFilter): SQL | undefined {
+  const conditions: (SQL | undefined)[] = [ownedBy(ownerId)];
+  if (f.category !== "all") conditions.push(eq(logs.category, f.category));
+  if (f.groupId !== "all") conditions.push(eq(logs.groupId, f.groupId));
+  if (f.result !== "all") conditions.push(eq(logs.success, f.result === "kill"));
+  if (f.search) {
+    const pattern = `%${f.search.replace(/[\\%_]/g, "\\$&")}%`;
+    conditions.push(
+      or(
+        sql`${logs.bossName} ILIKE ${pattern}`,
+        sql`EXISTS (SELECT 1 FROM unnest(${logs.accounts}) AS a WHERE a ILIKE ${pattern})`,
+        sql`EXISTS (SELECT 1 FROM jsonb_array_elements(${logs.players}) AS p WHERE p->>'name' ILIKE ${pattern})`,
+      ),
+    );
+  }
+  return and(...conditions);
+}
 
 export const logRepository = {
   listByOwner(ownerId: string): Promise<Log[]> {
     return getDb().select().from(logs).where(ownedBy(ownerId)).orderBy(desc(logs.encounterTime));
+  },
+
+  async search(ownerId: string, filter: LogFilter, page: number, pageSize: number): Promise<LogPage> {
+    const where = matching(ownerId, filter);
+    const [rows, [{ total }]] = await Promise.all([
+      getDb()
+        .select()
+        .from(logs)
+        .where(where)
+        .orderBy(desc(logs.encounterTime), desc(logs.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize),
+      getDb().select({ total: count() }).from(logs).where(where),
+    ]);
+    return { logs: rows, total };
+  },
+
+  async searchIds(ownerId: string, filter: LogFilter): Promise<string[]> {
+    const rows = await getDb().select({ id: logs.id }).from(logs).where(matching(ownerId, filter));
+    return rows.map((r) => r.id);
   },
 
   async findById(ownerId: string, id: string): Promise<Log | null> {

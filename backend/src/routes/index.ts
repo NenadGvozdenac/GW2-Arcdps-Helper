@@ -23,6 +23,7 @@ export function createRouter(): Router {
   router.post("/profile/discord-webhook/test", requireAuth, profileController.testDiscordWebhook);
 
   router.get("/logs", requireAuth, logController.list);
+  router.get("/logs/search", requireAuth, logController.search);
   router.post("/logs", requireAuth, logController.submit);
   router.post("/logs/upload", requireAuth, logFileUpload, logController.upload);
   router.post("/logs/bulk-delete", requireAuth, logController.removeMany);
