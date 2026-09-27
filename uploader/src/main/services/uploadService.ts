@@ -32,6 +32,7 @@ function newEntry(filePath: string): UploadEntry {
     webLogId: null,
     encounterKey: null,
     groupName: null,
+    sessionId: stateStore.getSession().active?.id ?? null,
   };
 }
 
@@ -72,7 +73,13 @@ async function syncToWeb(id: string): Promise<void> {
   if (!credentials) throw new AppError("NOT_SIGNED_IN", "Sign in to save logs to GW2 ArcDPS Helper.");
 
   try {
-    const [result] = await backendClient.submitLogs(credentials.apiUrl, credentials.token, [entry.permalink!]);
+    const submit = (sessionId: string | null) =>
+      backendClient.submitLogs(credentials.apiUrl, credentials.token, [entry.permalink!], sessionId);
+    // If the session was deleted on the website meanwhile, save the log without it.
+    const [result] = await submit(entry.sessionId ?? null).catch((err) => {
+      if (err instanceof AppError && err.code === "SESSION_NOT_FOUND") return submit(null);
+      throw err;
+    });
     if (!result || result.status === "error") {
       throw new AppError("SYNC_FAILED", result?.message ?? "GW2 ArcDPS Helper did not accept the log.");
     }

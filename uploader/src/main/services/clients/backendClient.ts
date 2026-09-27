@@ -2,6 +2,7 @@ import { BACKEND_TIMEOUT_MS } from "../../config/constants";
 import type {
   AuthResponse,
   BackendErrorBody,
+  BackendSession,
   BackendSubmitResult,
   BackendUser,
 } from "../../../shared/backend.types";
@@ -31,12 +32,32 @@ export const backendClient = {
     return (await request<{ user: BackendUser }>(apiUrl, "/auth/me", { token })).user;
   },
 
-  async submitLogs(apiUrl: string, token: string, urls: string[]): Promise<BackendSubmitResult[]> {
+  /** Imports dps.report links; with a sessionId the logs are attached to that session. */
+  async submitLogs(apiUrl: string, token: string, urls: string[], sessionId: string | null = null): Promise<BackendSubmitResult[]> {
     const body = await request<{ results: BackendSubmitResult[] }>(apiUrl, "/logs", {
       method: "POST",
       token,
-      body: JSON.stringify({ urls }),
+      body: JSON.stringify({ urls, sessionId }),
     });
     return body.results;
+  },
+
+  /** The active session, and (when there is none) the last one if it expired and can be resumed. */
+  activeSession: (apiUrl: string, token: string) =>
+    request<{ session: BackendSession | null; resumable: BackendSession | null }>(apiUrl, "/sessions/active", { token }),
+
+  async resumeSession(apiUrl: string, token: string, id: string): Promise<BackendSession> {
+    const path = `/sessions/${encodeURIComponent(id)}/resume`;
+    return (await request<{ session: BackendSession }>(apiUrl, path, { method: "POST", token })).session;
+  },
+
+  async startSession(apiUrl: string, token: string, name: string): Promise<BackendSession> {
+    const body = JSON.stringify({ name });
+    return (await request<{ session: BackendSession }>(apiUrl, "/sessions", { method: "POST", token, body })).session;
+  },
+
+  async endSession(apiUrl: string, token: string, id: string): Promise<BackendSession> {
+    const path = `/sessions/${encodeURIComponent(id)}/end`;
+    return (await request<{ session: BackendSession }>(apiUrl, path, { method: "POST", token })).session;
   },
 };

@@ -166,3 +166,49 @@ export function ProfileFormSkeleton() {
     </Card>
   );
 }
+
+/** Sessions list: a few session cards. */
+export function SessionListSkeleton() {
+  return (
+    <div className="flex flex-col gap-4" aria-busy="true">
+      {range(3).map((i) => (
+        <Card key={i} className="gap-3 py-5">
+          <CardContent className="flex flex-col gap-3 px-5">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="ml-auto h-4 w-4" />
+            </div>
+            <Skeleton className="h-4 w-64" />
+            <div className="flex gap-2">
+              {range(4).map((j) => (
+                <Skeleton key={j} className="h-5 w-12 rounded-full" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+/** One session: back link, title, stat cards and the log table. */
+export function SessionDetailSkeleton() {
+  return (
+    <div className="flex flex-col gap-6" aria-busy="true">
+      <Skeleton className="h-8 w-32" />
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-80" />
+      </div>
+      <StatCardsSkeleton />
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-5 w-40" />
+        </CardHeader>
+        <CardContent>
+          <LogTableSkeleton rows={8} />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

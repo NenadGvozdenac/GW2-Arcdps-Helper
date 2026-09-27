@@ -20,6 +20,10 @@ const api: UploaderApi = {
   startWatching: () => ipcRenderer.invoke(IPC.startWatching),
   stopWatching: () => ipcRenderer.invoke(IPC.stopWatching),
 
+  startSession: (name) => ipcRenderer.invoke(IPC.startSession, name),
+  endSession: () => ipcRenderer.invoke(IPC.endSession),
+  resumeSession: () => ipcRenderer.invoke(IPC.resumeSession),
+
   uploadFiles: () => ipcRenderer.invoke(IPC.uploadFiles),
   retryUpload: (id) => ipcRenderer.invoke(IPC.retryUpload, id),
   clearFinished: () => ipcRenderer.invoke(IPC.clearFinished),

@@ -6,6 +6,18 @@ export interface BackendUser {
   gw2Account: string;
 }
 
+/** A group of logs recorded together (see backend sessions). endedAt is null while it is active. */
+export interface BackendSession {
+  id: string;
+  name: string;
+  startedAt: string;
+  endedAt: string | null;
+  /** "expired" when it was ended automatically after 6 hours (it can then be resumed). */
+  endReason: "manual" | "expired" | null;
+  /** When an active session is ended automatically. */
+  expiresAt: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: BackendUser;

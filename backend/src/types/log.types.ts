@@ -43,4 +43,6 @@ export interface Log extends LogSummary {
   id: string;
   ownerId: string;
   uploadedAt: Date;
+  /** Session the log was recorded in (desktop uploader), or null. */
+  sessionId: string | null;
 }

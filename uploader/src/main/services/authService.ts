@@ -9,6 +9,8 @@ import { stateStore } from "./stateStore";
 
 let credentials: Credentials | null = null;
 const signOutListeners = new Set<() => void>();
+/** Called once a sign-in is confirmed by the backend (restored on start-up or a fresh login). */
+const signInListeners = new Set<() => void>();
 
 function signOut() {
   credentials = null;
@@ -36,6 +38,7 @@ export const authService = {
         credentials = { ...credentials, user };
         credentialsRepository.save(credentials);
         stateStore.setUser(user);
+        for (const l of signInListeners) l();
       })
       .catch((err) => {
         // Offline is fine (uploads will retry); an invalid/expired token is not.
@@ -53,6 +56,7 @@ export const authService = {
     credentialsRepository.save(credentials);
     stateStore.setUser(user);
     logger.info("Signed in", user.email);
+    for (const l of signInListeners) l();
   },
 
   logout: signOut,
@@ -67,5 +71,9 @@ export const authService = {
 
   onSignOut(listener: () => void): void {
     signOutListeners.add(listener);
+  },
+
+  onSignIn(listener: () => void): void {
+    signInListeners.add(listener);
   },
 };

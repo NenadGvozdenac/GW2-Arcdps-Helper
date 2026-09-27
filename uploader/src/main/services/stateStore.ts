@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { environment } from "../config/environment";
 import { settingsRepository } from "../repositories/settingsRepository";
 import { uploadsRepository } from "../repositories/uploadsRepository";
-import type { AppState } from "../../shared/app.types";
+import type { AppState, SessionState } from "../../shared/app.types";
 import type { BackendUser } from "../../shared/backend.types";
 import type { Settings } from "../../shared/settings.types";
 import type { UploadEntry } from "../../shared/upload.types";
@@ -16,6 +16,7 @@ function createStateStore() {
   let settings = {} as Settings;
   let uploads: UploadEntry[] = [];
   let watch: WatchState = { watching: false, startedAt: null };
+  let session: SessionState = { active: null, ending: false, resumable: null };
 
   const listeners = new Set<Listener>();
   let saveUploadsTimer: NodeJS.Timeout | undefined;
@@ -26,6 +27,7 @@ function createStateStore() {
     settings,
     logFolderExists: !!settings.logFolder && existsSync(settings.logFolder),
     watch,
+    session,
     uploads,
   });
 
@@ -52,6 +54,7 @@ function createStateStore() {
     getSettings: () => settings,
     getUser: () => user,
     getWatch: () => watch,
+    getSession: () => session,
     getUpload: (id: string) => uploads.find((u) => u.id === id),
 
     subscribe(listener: Listener): () => void {
@@ -72,6 +75,11 @@ function createStateStore() {
 
     setWatch(next: WatchState) {
       watch = next;
+      emit();
+    },
+
+    setSession(next: SessionState) {
+      session = next;
       emit();
     },
 

@@ -11,6 +11,8 @@ import AllLogsPage from "./pages/AllLogsPage";
 import LogDetailPage from "./pages/LogDetailPage";
 import ProfilePage from "./pages/ProfilePage";
 import DiscordGuidePage from "./pages/DiscordGuidePage";
+import SessionDetailPage from "./pages/SessionDetailPage";
+import SessionsPage from "./pages/SessionsPage";
 
 export default function AppRouter() {
   return (
@@ -38,6 +40,8 @@ export default function AppRouter() {
           <Route path="raids" element={<CategoryPage key="raid" category="raid" />} />
           <Route path="fractals" element={<CategoryPage key="fractal" category="fractal" />} />
           <Route path="strikes" element={<CategoryPage key="strike" category="strike" />} />
+          <Route path="sessions" element={<SessionsPage />} />
+          <Route path="sessions/:id" element={<SessionDetailPage />} />
           <Route path="logs" element={<AllLogsPage />} />
           <Route path="logs/:id" element={<LogDetailPage />} />
           <Route path="profile" element={<ProfilePage />} />

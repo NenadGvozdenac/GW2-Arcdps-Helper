@@ -22,6 +22,9 @@ export interface UploadEntry {
   errorCode: UploadErrorCode | null;
   errorDetail: string | null;
 
+  /** Session that was active when the log was detected; the log is attached to it on the website. */
+  sessionId?: string | null;
+
   // Filled once dps.report accepts the file
   permalink: string | null;
   bossName: string | null;

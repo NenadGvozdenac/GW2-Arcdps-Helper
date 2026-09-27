@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { environment } from "./config/environment";
 import { registerIpc } from "./ipc/registerIpc";
 import { authService } from "./services/authService";
+import { sessionService } from "./services/sessionService";
 import { logger } from "./services/logger";
 import { stateStore } from "./services/stateStore";
 import { watchService } from "./services/watchService";
@@ -26,6 +27,12 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     app.setAppUserModelId("com.gw2arcdpshelper.uploader"); // required for Windows notifications
     stateStore.init();
+    // A session that is still running on the server (e.g. the app was restarted mid-raid) continues here.
+    authService.onSignIn(() => sessionService.startRefreshing());
+    authService.onSignOut(() => {
+      sessionService.stopRefreshing();
+      sessionService.clear();
+    });
     authService.restore();
     registerIpc(getMainWindow);
     createMainWindow();

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DISCORD_WEBHOOK_RE, MAX_URLS_PER_CALL } from "../config/constants";
+import { DISCORD_WEBHOOK_RE, MAX_URLS_PER_CALL, SESSION_NAME_MAX } from "../config/constants";
 
 /** The GW2 account (Name.1234) is the user's identity — required. */
 const gw2Account = z
@@ -38,6 +38,12 @@ export const submitLogsSchema = z.object({
     .min(1, "No links provided.")
     .max(MAX_URLS_PER_CALL, `At most ${MAX_URLS_PER_CALL} links per request.`)
     .transform((urls) => [...new Set(urls)]),
+  /** Attach the imported logs to this session (sent by the desktop uploader while a session runs). */
+  sessionId: z.uuid("Invalid session ID.").nullish(),
+});
+
+export const startSessionSchema = z.object({
+  name: z.string().trim().max(SESSION_NAME_MAX).default(""),
 });
 
 export const idParamSchema = z.object({

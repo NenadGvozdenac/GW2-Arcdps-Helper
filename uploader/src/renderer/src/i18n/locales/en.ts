@@ -40,6 +40,23 @@ export const en = {
     howItWorks:
       "New ArcDPS logs are uploaded to dps.report and saved to your GW2 ArcDPS Helper account automatically.",
   },
+  session: {
+    title: "Session",
+    unnamed: "Session",
+    active: "Active",
+    hint: "Raiding W1–W8 or running dailies? Start a session: its logs are grouped on the website and posted to Discord as one summary when you end it.",
+    activeHint: "Started at {time}. New logs belong to this session. Ends automatically at {expires} if you don't end it.",
+    expired: "“{name}” ended automatically after 6 hours.",
+    resume: "Resume",
+    namePlaceholder: "Name (optional), e.g. Full clear W1–W8",
+    start: "Start session",
+    end: "End session",
+    ending: "Ending…",
+    waiting: "Waiting for {count} uploads to finish…",
+    logs: "Logs",
+    duration: "Duration",
+    pending: "Uploading",
+  },
   uploads: {
     title: "Uploads",
     empty: "No uploads yet. Start watching or upload files manually.",
@@ -89,6 +106,7 @@ export const en = {
     DPS_REPORT_FAILED: "dps.report did not accept the log.",
     SYNC_FAILED: "Uploaded to dps.report, but GW2 ArcDPS Helper did not save it.",
     FILE_UNREADABLE: "The log file could not be read.",
+    SESSION_NOT_FOUND: "This session no longer exists (it was deleted on the website).",
     UNKNOWN: "Something went wrong.",
   },
 };

@@ -5,6 +5,7 @@ import type { Settings } from "../../shared/settings.types";
 import { mainT } from "../i18n/mainMessages";
 import { authService } from "../services/authService";
 import { isLogFile } from "../services/folderWatcher";
+import { sessionService } from "../services/sessionService";
 import { settingsService } from "../services/settingsService";
 import { stateStore } from "../services/stateStore";
 import { uploadService } from "../services/uploadService";
@@ -44,6 +45,10 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
 
   ipcMain.handle(IPC.startWatching, () => result(() => watchService.start()));
   ipcMain.handle(IPC.stopWatching, () => watchService.stop());
+
+  ipcMain.handle(IPC.startSession, (_e, name: string) => result(() => sessionService.start(String(name ?? ""))));
+  ipcMain.handle(IPC.endSession, () => result(() => sessionService.end()));
+  ipcMain.handle(IPC.resumeSession, () => result(() => sessionService.resume()));
 
   ipcMain.handle(IPC.uploadFiles, async () => {
     const win = getWindow();

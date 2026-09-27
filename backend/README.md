@@ -101,10 +101,16 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
 | PUT | `/profile/discord-webhook` | ✓ | `{ url }` (Discord webhook URL, or `null` to disconnect) | `{ user }` |
+| GET | `/sessions` | ✓ | – | `{ sessions }` (newest first; `endedAt` null = active). A session not ended within 6 h is ended automatically (`endReason: "expired"`) |
+| POST | `/sessions` | ✓ | `{ name? }` | `201 { session }` — ends a still-active session first |
+| GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
+| POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
+| POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
+| DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
 | POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |
-| POST | `/logs` | ✓ | `{ urls: string[] }` (1–10) | `{ results: SubmitResult[] }` |
+| POST | `/logs` | ✓ | `{ urls: string[] (1–10), sessionId? }` — logs of an active session are posted to Discord when it ends | `{ results: SubmitResult[] }` |
 | GET | `/logs/:id` | ✓ | – | `{ log }` |
 | DELETE | `/logs/:id` | ✓ | – | `204` |
 
@@ -125,7 +131,7 @@ Errors: `{ "error": "<English message>", "code": "<ERROR_CODE>" }`. Clients tran
 | `UNAUTHENTICATED` | 401 | Missing / invalid / expired token |
 | `INVALID_CREDENTIALS` | 401 | Wrong email or password |
 | `EMAIL_TAKEN` | 409 | Registration with an existing email (case-insensitive) |
-| `USER_NOT_FOUND` / `LOG_NOT_FOUND` | 404 | Unknown id or not owned by the user |
+| `USER_NOT_FOUND` / `LOG_NOT_FOUND` / `SESSION_NOT_FOUND` | 404 | Unknown id or not owned by the user |
 | `INVALID_LOG_FILE` | 400 | `/logs/upload` got no file or not a .zevtc/.evtc/.zip |
 | `FILE_TOO_LARGE` | 413 | Uploaded log file over the size limit |
 | `DISCORD_WEBHOOK_FAILED` | 502 | Discord rejected the test message (wrong or deleted webhook) |

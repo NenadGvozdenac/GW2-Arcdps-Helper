@@ -1,11 +1,15 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { FRESH_HIGHLIGHT_MS, POLL_INTERVAL_MS } from "../config/constants";
 import { logService } from "../services/logService";
+import { sessionService } from "../services/sessionService";
 import type { Log } from "../domain/types/log.types";
+import type { Session } from "../domain/types/session.types";
 import { useAuth } from "./AuthController";
 
 interface LogsContextValue {
   logs: Log[];
+  /** The user's sessions, newest first (loaded and refreshed together with the logs). */
+  sessions: Session[];
   loading: boolean;
   /** Raw error from the last load; the presentation layer turns it into a message. */
   error: unknown;
@@ -13,6 +17,10 @@ interface LogsContextValue {
   freshIds: ReadonlySet<string>;
   refresh: () => Promise<void>;
   remove: (id: string) => Promise<void>;
+  /** Deletes a session; its logs stay. */
+  removeSession: (id: string) => Promise<void>;
+  /** Re-opens a session that ended automatically; another active session is ended by the server. */
+  resumeSession: (id: string) => Promise<void>;
 }
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -27,6 +35,7 @@ const isTabVisible = () => document.visibilityState === "visible";
 export function LogsProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
   const [logs, setLogs] = useState<Log[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
   const [freshIds, setFreshIds] = useState<ReadonlySet<string>>(new Set());
@@ -43,10 +52,11 @@ export function LogsProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const next = await logService.list();
+      const [next, nextSessions] = await Promise.all([logService.list(), sessionService.list()]);
       if (knownIds.current) highlight(next.filter((l) => !knownIds.current!.has(l.id)).map((l) => l.id));
       knownIds.current = new Set(next.map((l) => l.id));
       setLogs(next);
+      setSessions(nextSessions);
       setError(null);
     } catch (err) {
       setError(err);
@@ -61,8 +71,21 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     setLogs((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
+  const removeSession = useCallback(async (id: string) => {
+    await sessionService.delete(id);
+    setSessions((prev) => prev.filter((s) => s.id !== id));
+    setLogs((prev) => prev.map((l) => (l.sessionId === id ? { ...l, sessionId: null } : l)));
+  }, []);
+
+  const resumeSession = useCallback(async (id: string) => {
+    await sessionService.resume(id);
+    // Re-fetch: resuming may also have ended another session on the server.
+    setSessions(await sessionService.list());
+  }, []);
+
   useEffect(() => {
     setLogs([]);
+    setSessions([]);
     setError(null);
     knownIds.current = null;
     if (!user) {
@@ -87,8 +110,18 @@ export function LogsProvider({ children }: { children: ReactNode }) {
 
   // Pages show their skeleton until both the user and their logs are known.
   const value = useMemo(
-    () => ({ logs, loading: authLoading || loading, error, freshIds, refresh, remove }),
-    [logs, authLoading, loading, error, freshIds, refresh, remove],
+    () => ({
+      logs,
+      sessions,
+      loading: authLoading || loading,
+      error,
+      freshIds,
+      refresh,
+      remove,
+      removeSession,
+      resumeSession,
+    }),
+    [logs, sessions, authLoading, loading, error, freshIds, refresh, remove, removeSession, resumeSession],
   );
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 }

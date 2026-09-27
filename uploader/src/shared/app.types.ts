@@ -1,8 +1,17 @@
-import type { BackendUser } from "./backend.types";
+import type { BackendSession, BackendUser } from "./backend.types";
 import type { AppEnvironment } from "./environment.types";
 import type { Settings } from "./settings.types";
 import type { UploadEntry } from "./upload.types";
 import type { WatchState } from "./watch.types";
+
+export interface SessionState {
+  /** The session new logs are attached to, or null. */
+  active: BackendSession | null;
+  /** True while waiting for the session's uploads to finish before ending it. */
+  ending: boolean;
+  /** The last session, when it ended automatically after 6 hours and can be resumed. */
+  resumable: BackendSession | null;
+}
 
 /** Everything the renderer needs to draw the UI; pushed on every change. */
 export interface AppState {
@@ -11,6 +20,7 @@ export interface AppState {
   settings: Settings;
   logFolderExists: boolean;
   watch: WatchState;
+  session: SessionState;
   uploads: UploadEntry[]; // newest first
 }
 
@@ -40,6 +50,13 @@ export interface UploaderApi {
 
   startWatching(): Promise<IpcResult>;
   stopWatching(): Promise<void>;
+
+  /** Starts a session (name is optional); logs detected from now on belong to it. */
+  startSession(name: string): Promise<IpcResult>;
+  /** Waits for the session's uploads, then ends it and posts one Discord summary. */
+  endSession(): Promise<IpcResult>;
+  /** Re-opens the last session if it ended automatically after 6 hours. */
+  resumeSession(): Promise<IpcResult>;
 
   uploadFiles(): Promise<void>;
   retryUpload(id: string): Promise<void>;

@@ -1,7 +1,8 @@
-import { DISCORD_MAX_EMBEDS, DISCORD_USERNAME } from "../config/constants";
+import { DISCORD_DESCRIPTION_LIMIT, DISCORD_MAX_EMBEDS, DISCORD_USERNAME } from "../config/constants";
 import { GROUPS } from "../data/encounters";
 import type { DiscordEmbed } from "../types/discord.types";
 import type { Log } from "../types/log.types";
+import type { LogSpan, Session } from "../types/session.types";
 import { discordWebhookFailed } from "../utils/httpError";
 import { postToWebhook } from "./clients/discordClient";
 
@@ -13,8 +14,39 @@ const formatDuration = (ms: number) => {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 };
 
+const modeLabel = (log: Log) => (log.isLegendaryCM ? " (LCM)" : log.isCM ? " (CM)" : "");
+
+/** "2h 05m" / "43m 10s" for session lengths. */
+const formatLongDuration = (ms: number) => {
+  const total = Math.round(ms / 1000);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m ${String(total % 60).padStart(2, "0")}s`;
+};
+
+/** One line per log: "✅ [Vale Guardian (CM)](link) · 3:12". */
+function sessionLine(log: Log): string {
+  const result = log.success
+    ? "✅"
+    : `❌${log.bossHealthLeft != null ? ` ${Math.round(log.bossHealthLeft * 10) / 10}%` : ""}`;
+  return `${result} [${log.bossName}${modeLabel(log)}](${log.url}) · ${formatDuration(log.durationMs)}`;
+}
+
+/** Joins lines up to Discord's description limit, ending with "… and N more" when they don't all fit. */
+function fitLines(lines: string[]): string {
+  const out: string[] = [];
+  let length = 0;
+  for (const [i, line] of lines.entries()) {
+    const more = `… and ${lines.length - i} more`;
+    if (length + line.length + 1 + more.length > DISCORD_DESCRIPTION_LIMIT) return [...out, more].join("\n");
+    out.push(line);
+    length += line.length + 1;
+  }
+  return out.join("\n");
+}
+
 function toEmbed(log: Log): DiscordEmbed {
-  const mode = log.isLegendaryCM ? " (LCM)" : log.isCM ? " (CM)" : "";
+  const mode = modeLabel(log);
   const result = log.success
     ? "✅ Kill"
     : `❌ Wipe${log.bossHealthLeft != null ? ` · ${Math.round(log.bossHealthLeft * 10) / 10}% left` : ""}`;
@@ -50,6 +82,33 @@ export const discordService = {
         console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
         return;
       }
+    }
+  },
+
+  /** One message summarising a finished session: every log plus totals and how long it took. */
+  async notifySession(webhookUrl: string | null, session: Session, logs: Log[], span: LogSpan): Promise<void> {
+    if (!webhookUrl || !logs.length) return;
+    const kills = logs.filter((l) => l.success).length;
+    const groups = [...new Set(logs.map((l) => GROUPS.find((g) => g.id === l.groupId)?.short).filter(Boolean))];
+    const embed: DiscordEmbed = {
+      title: session.name || "Session",
+      description: fitLines(logs.map(sessionLine)),
+      color: kills ? GREEN : RED,
+      fields: [
+        { name: "Duration", value: formatLongDuration(span.durationMs), inline: true },
+        { name: "Logs", value: String(logs.length), inline: true },
+        { name: "Kills / wipes", value: `${kills} / ${logs.length - kills}`, inline: true },
+        ...(groups.length ? [{ name: "Content", value: groups.join(" · ") }] : []),
+      ],
+      footer: {
+        text: session.endReason === "expired" ? "Session · ended automatically after 6 hours" : "Session",
+      },
+      timestamp: span.start.toISOString(),
+    };
+    try {
+      await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [embed] });
+    } catch (err) {
+      console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
     }
   },
 

@@ -6,6 +6,7 @@ import { uploaderBridge } from "../../repositories/uploaderBridge";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { cn } from "@/presentation/lib/utils";
+import SessionPanel from "../components/SessionPanel";
 import UploadTable from "../components/UploadTable";
 import WatchPanel from "../components/WatchPanel";
 
@@ -46,6 +47,7 @@ export default function UploadsPage() {
   return (
     <div className="flex flex-col gap-6">
       <WatchPanel />
+      <SessionPanel />
 
       <div className="grid grid-cols-3 gap-4">
         <Stat label={t("uploads.todayUploaded")} value={c.stats.today} className="text-success" />

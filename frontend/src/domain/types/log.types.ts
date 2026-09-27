@@ -38,6 +38,8 @@ export interface Log {
   eliteInsightsVersion: string | null;
   players: PlayerSummary[];
   accounts: string[];
+  /** Session the log was recorded in (desktop uploader), or null. */
+  sessionId: string | null;
 }
 
 export type CmMode = "all" | "normal" | "cm";

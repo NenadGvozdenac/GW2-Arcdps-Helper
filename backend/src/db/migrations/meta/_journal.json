@@ -15,6 +15,20 @@
       "when": 1790503296938,
       "tag": "0001_discord_webhook",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790504553964,
+      "tag": "0002_sessions",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790504918355,
+      "tag": "0003_session_expiry",
+      "breakpoints": true
     }
   ]
 }

@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authController } from "../controllers/authController";
 import { logController } from "../controllers/logController";
 import { profileController } from "../controllers/profileController";
+import { sessionController } from "../controllers/sessionController";
 import { logFileUpload } from "../middleware/logFileUpload";
 import { requireAuth } from "../middleware/requireAuth";
 
@@ -26,6 +27,13 @@ export function createRouter(): Router {
   router.post("/logs/upload", requireAuth, logFileUpload, logController.upload);
   router.get("/logs/:id", requireAuth, logController.get);
   router.delete("/logs/:id", requireAuth, logController.remove);
+
+  router.get("/sessions", requireAuth, sessionController.list);
+  router.post("/sessions", requireAuth, sessionController.start);
+  router.get("/sessions/active", requireAuth, sessionController.active);
+  router.post("/sessions/:id/end", requireAuth, sessionController.end);
+  router.post("/sessions/:id/resume", requireAuth, sessionController.resume);
+  router.delete("/sessions/:id", requireAuth, sessionController.remove);
 
   return router;
 }

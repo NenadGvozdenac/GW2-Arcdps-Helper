@@ -18,6 +18,7 @@ import {
 } from "drizzle-orm/pg-core";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
+import type { SessionEndReason } from "../types/session.types";
 
 export const users = pgTable(
   "users",
@@ -31,6 +32,29 @@ export const users = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
+);
+
+/** A group of logs recorded together (e.g. a raid night), started and ended from the desktop uploader. */
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    ownerId: uuid("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Optional label, e.g. "Full clear W1–W8"; empty = unnamed. */
+    name: text().notNull().default(""),
+    startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+    /** null while the session is active. */
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    /** "manual" (ended by the user) or "expired" (not ended within SESSION_TTL_MS); null while active. */
+    endReason: text("end_reason").$type<SessionEndReason>(),
+    /** An active session is ended automatically at this time; renewed when an expired session is resumed. */
+    expiresAt: timestamp("expires_at", { withTimezone: true })
+      .notNull()
+      .default(sql`now() + interval '6 hours'`),
+  },
+  (t) => [index("sessions_owner_started_idx").on(t.ownerId, t.startedAt.desc())],
 );
 
 export const logs = pgTable(
@@ -59,10 +83,13 @@ export const logs = pgTable(
     players: jsonb().$type<PlayerSummary[]>().notNull().default([]),
     accounts: text().array().notNull().default([]),
     uploadedAt: timestamp("uploaded_at", { withTimezone: true }).notNull().defaultNow(),
+    /** Session the log was recorded in; deleting the session keeps the log. */
+    sessionId: uuid("session_id").references(() => sessions.id, { onDelete: "set null" }),
   },
   (t) => [
     foreignKey({ name: "logs_owner_id_fkey", columns: [t.ownerId], foreignColumns: [users.id] }).onDelete("cascade"),
     unique("logs_owner_id_permalink_key").on(t.ownerId, t.permalink),
     index("logs_owner_time_idx").on(t.ownerId, t.encounterTime.desc()),
+    index("logs_session_idx").on(t.sessionId),
   ],
 );

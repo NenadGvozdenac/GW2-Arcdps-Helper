@@ -20,6 +20,12 @@ export const DISCORD_TIMEOUT_MS = 5_000;
 /** Discord allows at most 10 embeds per message. */
 export const DISCORD_MAX_EMBEDS = 10;
 export const DISCORD_USERNAME = "GW2 ArcDPS Helper";
+/** Discord's limit for an embed description; longer session summaries are cut with "… and N more". */
+export const DISCORD_DESCRIPTION_LIMIT = 4096;
+
+export const SESSION_NAME_MAX = 80;
+/** A session that isn't ended within this time is ended automatically (and can then be resumed). */
+export const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
 
 export const JWT_EXPIRES_IN = "30d";
 export const BCRYPT_ROUNDS = 10;

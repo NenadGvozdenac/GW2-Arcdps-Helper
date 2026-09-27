@@ -23,16 +23,23 @@ function toImported(log: Log): ImportedLog {
   };
 }
 
-export async function importLog(ownerId: string, url: string): Promise<SubmitResult> {
+export async function importLog(ownerId: string, url: string, sessionId: string | null = null): Promise<SubmitResult> {
   const permalink = parsePermalink(url);
   if (!permalink) return { url, status: "error", code: "INVALID_LINK", message: "Not a valid dps.report link." };
 
   const existing = await logRepository.findByPermalink(ownerId, permalink);
-  if (existing) return { url, status: "duplicate", ...toImported(existing) };
+  if (existing) {
+    // A log added earlier without a session still joins the session it is re-uploaded in.
+    if (sessionId && !existing.sessionId) {
+      await logRepository.attachToSession(ownerId, existing.id, sessionId);
+      existing.sessionId = sessionId;
+    }
+    return { url, status: "duplicate", ...toImported(existing) };
+  }
 
   try {
     const summary = await fetchLogSummary(permalink);
-    const id = await logRepository.create(ownerId, summary);
+    const id = await logRepository.create(ownerId, summary, sessionId);
     // A null id means the same link was stored concurrently — report it as a duplicate.
     const stored = await logRepository.findByPermalink(ownerId, permalink);
     if (!stored) throw new Error("Log was not stored.");
@@ -57,11 +64,11 @@ export async function importLogFile(ownerId: string, content: Buffer, fileName: 
 }
 
 /** Imports links in small parallel batches to stay polite towards dps.report. */
-export async function importLogs(ownerId: string, urls: string[]): Promise<SubmitResult[]> {
+export async function importLogs(ownerId: string, urls: string[], sessionId: string | null = null): Promise<SubmitResult[]> {
   const results: SubmitResult[] = [];
   for (let i = 0; i < urls.length; i += PARALLEL_FETCHES) {
     const chunk = urls.slice(i, i + PARALLEL_FETCHES);
-    results.push(...(await Promise.all(chunk.map((url) => importLog(ownerId, url)))));
+    results.push(...(await Promise.all(chunk.map((url) => importLog(ownerId, url, sessionId)))));
   }
   return results;
 }

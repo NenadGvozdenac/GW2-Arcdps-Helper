@@ -29,13 +29,21 @@ export const logRepository = {
   },
 
   /** Returns the new id, or null if this owner already has the permalink (e.g. concurrent submit). */
-  async create(ownerId: string, summary: LogSummary): Promise<string | null> {
+  async create(ownerId: string, summary: LogSummary, sessionId: string | null = null): Promise<string | null> {
     const [row] = await getDb()
       .insert(logs)
-      .values({ ...summary, ownerId })
+      .values({ ...summary, ownerId, sessionId })
       .onConflictDoNothing({ target: [logs.ownerId, logs.permalink] })
       .returning({ id: logs.id });
     return row?.id ?? null;
+  },
+
+  /** Puts an existing log into a session (e.g. a log first added on the website, then uploaded during a session). */
+  async attachToSession(ownerId: string, id: string, sessionId: string): Promise<void> {
+    await getDb()
+      .update(logs)
+      .set({ sessionId })
+      .where(and(ownedBy(ownerId), eq(logs.id, id)));
   },
 
   async delete(ownerId: string, id: string): Promise<boolean> {
