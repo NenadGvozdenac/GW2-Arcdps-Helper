@@ -92,9 +92,9 @@ export const sr: Messages = {
       subtitle: "Četiri koraka, a posle prvog podešavanja više ne moraš da misliš o njima.",
       step1Title: "Igraš sa ArcDPS-om",
       step1Body: "ArcDPS za svaki pokušaj na bossu, kill ili wipe, upisuje .zevtc log u svoj folder.",
-      step2Title: "Uploader ga preuzima",
+      step2Title: "Uploader ili addon ga preuzima",
       step2Body:
-        "Desktop uploader prati taj folder. Čim se pojavi novi log, šalje ga na dps.report — bez ijednog klika.",
+        "Desktop uploader (pored igre) ili Nexus addon (u samoj igri) prati taj folder. Čim se pojavi novi log, ide na dps.report — bez ijednog klika.",
       step3Title: "dps.report ga obrađuje",
       step3Body: "Elite Insights od sirovog loga pravi ceo izveštaj: boss, trajanje, rezultat, CM, DPS svakog igrača.",
       step4Title: "GW2 ArcDPS Helper ga razvrstava",
@@ -122,9 +122,16 @@ export const sr: Messages = {
       historyBody:
         "Pregled prikazuje današnje logove. Jednim klikom na stranici kategorije vidiš jučerašnje fraktale ili raidove i strikeove od prošle nedelje.",
       liveTitle: "Osvežavanje uživo",
-      liveBody: "Sajt se sam osvežava dok je otvoren — novi logovi iz uploadera se pojave i nakratko zasvetle.",
-      pasteTitle: "Nemaš uploader? Nalepi linkove",
-      pasteBody: "Već koristiš drugi uploader? Nalepi bilo koji tekst sa dps.report linkovima i svi se uvezu odjednom.",
+      liveBody: "Sajt se sam osvežava dok je otvoren — novi logovi iz uploadera ili addona se pojave i nakratko zasvetle.",
+      pasteTitle: "Nemaš uploader? Pošalji ručno",
+      pasteBody: "Prevuci starije log fajlove na stranicu Upload ili nalepi bilo koji tekst sa dps.report linkovima — svi se uvezu odjednom.",
+      sessionsTitle: "Sesije za raid večeri",
+      sessionsBody:
+        "Pokreni sesiju u uploaderu (ili pritisni Record u addonu) i svi logovi dok ne staneš idu u jednu sesiju — sa trajanjem, killovima, wipeovima i odigranim wingovima. Zaboraviš da je zaustaviš? Završi se sama posle 6 sati.",
+      discordTitle: "Discord obaveštenja",
+      discordBody: "Poveži webhook i tvoj kanal dobija svaki novi log — ili jedan sažetak po sesiji.",
+      shareTitle: "Podeli link",
+      shareBody: "Podeli jedan log ili celu sesiju. Svako sa linkom može da je vidi, bez naloga.",
     },
     uploader: {
       eyebrow: "Desktop uploader",
@@ -136,7 +143,7 @@ export const sr: Messages = {
       point3: "Desktop obaveštenje za svaki poslat log (može da se isključi)",
       point4: "Počinje da prati čim se pokrene i tiho stoji u trayu",
       download: "Preuzmi za Windows",
-      downloadHint: "Instaler i portable verzija · besplatno",
+      downloadHint: "Instaler i portable verzija · sam se ažurira · besplatno",
       addonTeaser: "Radije ostaješ u igri?",
       addonLink: "Koristi Nexus addon",
       windowTitle: "GW2 ArcDPS Helper",
@@ -173,18 +180,36 @@ export const sr: Messages = {
     faq: {
       title: "Pitanja",
       q1: "Da li je besplatno?",
-      a1: "Jeste. Napraviš nalog i koristiš sve — i sajt i uploader.",
-      q2: "Da li mi treba desktop uploader?",
-      a2: "Ne. To je najlakši način, ali dps.report linkove možeš i da nalepiš na stranici za upload.",
+      a1: "Jeste. Napraviš nalog i koristiš sve — sajt, desktop uploader i Nexus addon.",
+      q2: "Da li mi treba uploader ili addon?",
+      a2: "Ne. To su najlakši načini, ali log fajlove možeš i da pošalješ, ili dps.report linkove da nalepiš, na stranici Upload.",
       q3: "Šta se čuva o mojim logovima?",
       a3:
         "Sažetak svakog loga: boss, rezultat, trajanje, CM, vreme i imena, specijalizacije i DPS skvada. Ceo izveštaj ostaje na dps.report.",
       q4: "Da li je ovo zvaničan ArenaNet alat?",
       a4: "Nije. Ovo je projekat fanova i nije povezan sa ArenaNetom, NCSOFT-om, ArcDPS-om ni dps.reportom.",
+      q5: "Desktop uploader ili Nexus addon — šta da koristim?",
+      a5:
+        "Šalju logove na isti način. Desktop uploader radi pored igre i ništa ne dodaje u nju. Nexus addon radi u igri, sa svojim prozorom, i traži Nexus. Izaberi jedno — ako rade oba, svaki log se šalje dvaput.",
+      q6: "Šta je sesija?",
+      a6:
+        "Logovi jednog sedenja, npr. raid večeri. Pokreneš je sa Record (addon) ili Pokreni sesiju (uploader); logovi dok ne staneš pripadaju njoj. Ima svoju stranicu sa trajanjem, killovima i wipeovima, i jedan Discord sažetak. Zaboravljena sesija se sama završi posle 6 sati.",
+      q7: "Kako da logovi završe i na mom dps.report nalogu?",
+      a7:
+        "Dodaj svoj dps.report user token u Podešavanjima (nalaziš ga na dps.report/getUserToken). Sajt, desktop uploader i Nexus addon šalju logove sa njim.",
+      q8: "Mogu li da šaljem logove na Discord?",
+      a8:
+        "Možeš. Poveži Discord webhook u Podešavanjima i svaki novi log se objavi sa bossom, rezultatom, trajanjem i linkom. Logovi aktivne sesije se objave zajedno, kao jedan sažetak, kad se sesija završi.",
+      q9: "Koji bossovi se prepoznaju?",
+      a9:
+        "Svi raid wingovi (W1–W8), CM fraktali i strikeovi. Ostali logovi se takođe čuvaju, pod Ostalo, a sesija sa samo trening golemima dobija sažetak vežbanja.",
+      q10: "Da li se uploader i addon sami ažuriraju?",
+      a10:
+        "Da. Instalirani desktop uploader preuzima nove verzije u pozadini i instalira ih kad ga ponovo pokreneš (portable verzija umesto toga prikaže link). Addon ti ažurira Nexus.",
     },
     cta: {
       title: "Spreman za sledeći clear?",
-      body: "Napravi nalog, instaliraj uploader i tvoj sledeći kill će već biti na pregledu.",
+      body: "Napravi nalog, instaliraj uploader ili Nexus addon, i tvoj sledeći kill će već biti na pregledu.",
       primary: "Napravi besplatan nalog",
       secondary: "Već imam nalog",
     },

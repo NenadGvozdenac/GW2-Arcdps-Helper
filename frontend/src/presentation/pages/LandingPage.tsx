@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   ArrowRightIcon,
   BellIcon,
+  CalendarClockIcon,
   ChevronDownIcon,
   CircleDotIcon,
   ClipboardPasteIcon,
@@ -15,9 +16,11 @@ import {
   KeyRoundIcon,
   LayersIcon,
   LayoutDashboardIcon,
+  MessageSquareIcon,
   MousePointerClickIcon,
   RadioIcon,
   RefreshCwIcon,
+  Share2Icon,
   SparklesIcon,
   SwordsIcon,
   TimerIcon,
@@ -56,6 +59,9 @@ const FEATURES: { icon: LucideIcon; title: TranslationKey; body: TranslationKey;
   { icon: HistoryIcon, title: "landing.features.historyTitle", body: "landing.features.historyBody" },
   { icon: RadioIcon, title: "landing.features.liveTitle", body: "landing.features.liveBody", wide: true },
   { icon: ClipboardPasteIcon, title: "landing.features.pasteTitle", body: "landing.features.pasteBody", wide: true },
+  { icon: CalendarClockIcon, title: "landing.features.sessionsTitle", body: "landing.features.sessionsBody", wide: true },
+  { icon: MessageSquareIcon, title: "landing.features.discordTitle", body: "landing.features.discordBody" },
+  { icon: Share2Icon, title: "landing.features.shareTitle", body: "landing.features.shareBody" },
 ];
 
 const UPLOADER_POINTS: { icon: LucideIcon; text: TranslationKey }[] = [
@@ -75,6 +81,12 @@ const ADDON_POINTS: { icon: LucideIcon; text: TranslationKey }[] = [
 const FAQ: { q: TranslationKey; a: TranslationKey }[] = [
   { q: "landing.faq.q1", a: "landing.faq.a1" },
   { q: "landing.faq.q2", a: "landing.faq.a2" },
+  { q: "landing.faq.q5", a: "landing.faq.a5" },
+  { q: "landing.faq.q6", a: "landing.faq.a6" },
+  { q: "landing.faq.q7", a: "landing.faq.a7" },
+  { q: "landing.faq.q8", a: "landing.faq.a8" },
+  { q: "landing.faq.q9", a: "landing.faq.a9" },
+  { q: "landing.faq.q10", a: "landing.faq.a10" },
   { q: "landing.faq.q3", a: "landing.faq.a3" },
   { q: "landing.faq.q4", a: "landing.faq.a4" },
 ];

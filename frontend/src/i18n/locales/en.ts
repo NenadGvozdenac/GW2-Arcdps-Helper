@@ -91,9 +91,9 @@ export const en = {
       subtitle: "Four steps, and after the first setup you never have to think about them again.",
       step1Title: "Play with ArcDPS",
       step1Body: "ArcDPS writes a .zevtc log for every boss attempt, kill or wipe, into its log folder.",
-      step2Title: "The uploader picks it up",
+      step2Title: "Uploader or addon picks it up",
       step2Body:
-        "The desktop uploader watches that folder. As soon as a new log appears it uploads it to dps.report — no clicking.",
+        "The desktop uploader (next to the game) or the Nexus addon (inside it) watches that folder. As soon as a new log appears it goes to dps.report — no clicking.",
       step3Title: "dps.report parses it",
       step3Body: "Elite Insights turns the raw log into a full report: boss, duration, result, CM, every player's DPS.",
       step4Title: "GW2 ArcDPS Helper sorts it",
@@ -121,9 +121,16 @@ export const en = {
       historyBody:
         "The overview lists today's logs. One click on a category page shows yesterday's fractals or last week's raids and strikes.",
       liveTitle: "Live updates",
-      liveBody: "The site refreshes by itself while it's open — new logs from the uploader appear and are briefly highlighted.",
-      pasteTitle: "No uploader? Paste links",
-      pasteBody: "Already use another uploader? Paste any text with dps.report links and they are all imported at once.",
+      liveBody: "The site refreshes by itself while it's open — new logs from the uploader or the addon appear and are briefly highlighted.",
+      pasteTitle: "No uploader? Upload by hand",
+      pasteBody: "Drop older log files on the Upload page, or paste any text with dps.report links — they are all imported at once.",
+      sessionsTitle: "Sessions for raid nights",
+      sessionsBody:
+        "Start a session in the uploader (or press Record in the addon) and every log until you stop is grouped into one session — with its duration, kills, wipes and the wings played. Forget to stop? It ends by itself after 6 hours.",
+      discordTitle: "Discord notifications",
+      discordBody: "Connect a webhook and your channel gets every new log — or one summary per session.",
+      shareTitle: "Share a link",
+      shareBody: "Share a single log or a whole session. Anyone with the link can see it, no account needed.",
     },
     uploader: {
       eyebrow: "Desktop uploader",
@@ -135,7 +142,7 @@ export const en = {
       point3: "Desktop notifications for every uploaded log (can be turned off)",
       point4: "Starts watching on launch and lives quietly in the tray",
       download: "Download for Windows",
-      downloadHint: "Installer and portable version · free",
+      downloadHint: "Installer and portable version · updates itself · free",
       addonTeaser: "Prefer to stay in the game?",
       addonLink: "Use the Nexus addon instead",
       windowTitle: "GW2 ArcDPS Helper",
@@ -172,18 +179,36 @@ export const en = {
     faq: {
       title: "Questions",
       q1: "Is it free?",
-      a1: "Yes. Create an account and use everything — the website and the uploader.",
-      q2: "Do I need the desktop uploader?",
-      a2: "No. It's the most convenient way, but you can also paste dps.report links on the Upload page.",
+      a1: "Yes. Create an account and use everything — the website, the desktop uploader and the Nexus addon.",
+      q2: "Do I need the uploader or the addon?",
+      a2: "No. They are the most convenient way, but you can also upload log files or paste dps.report links on the Upload page.",
       q3: "What is stored about my logs?",
       a3:
         "A summary per log: boss, result, duration, CM, time and the squad's names, specialisations and DPS. The full report stays on dps.report.",
       q4: "Is this an official ArenaNet tool?",
       a4: "No. It's a fan-made project and is not affiliated with ArenaNet, NCSOFT, ArcDPS or dps.report.",
+      q5: "Desktop uploader or Nexus addon — which one should I use?",
+      a5:
+        "They upload the same way. The desktop uploader runs next to the game and needs nothing in it. The Nexus addon runs inside the game with its own window and needs Nexus. Pick one — with both running, every log is uploaded twice.",
+      q6: "What is a session?",
+      a6:
+        "The logs of one sitting, like a raid night. Start it with Record (addon) or Start session (uploader); logs until you stop belong to it. It gets its own page with duration, kills and wipes, and one Discord summary. A session you forget ends by itself after 6 hours.",
+      q7: "How do my logs end up in my own dps.report account?",
+      a7:
+        "Add your dps.report user token under Settings (you find it at dps.report/getUserToken). The website, the desktop uploader and the Nexus addon all upload with it.",
+      q8: "Can I send my logs to Discord?",
+      a8:
+        "Yes. Connect a Discord webhook under Settings and every new log is posted with the boss, result, duration and a link. Logs of a running session are posted together as one summary when it ends.",
+      q9: "Which bosses are recognised?",
+      a9:
+        "All raid wings (W1–W8), the CM fractals and the strikes. Other logs are still saved, under Other, and a session of only training golems gets a practice-run summary.",
+      q10: "Do the uploader and the addon update themselves?",
+      a10:
+        "Yes. The installed desktop uploader downloads new versions in the background and installs them when you restart it (the portable version shows a link instead). Nexus updates the addon for you.",
     },
     cta: {
       title: "Ready for your next clear?",
-      body: "Create an account, install the uploader and your next boss kill will already be on the dashboard.",
+      body: "Create an account, install the uploader or the Nexus addon, and your next boss kill will already be on the dashboard.",
       primary: "Create a free account",
       secondary: "I already have an account",
     },
