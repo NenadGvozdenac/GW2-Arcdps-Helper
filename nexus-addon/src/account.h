@@ -32,6 +32,8 @@ namespace Account
 
 	void StartRecording(const std::string& name);
 	void StopRecording();
+	/** Renames the session that is recording. */
+	void RenameSession(const std::string& name);
 
 	AccountState Get();
 	std::string ActiveSessionId();

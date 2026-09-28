@@ -55,6 +55,8 @@ export interface UploaderApi {
 
   /** Starts a session (name is optional); logs detected from now on belong to it. */
   startSession(name: string): Promise<IpcResult>;
+  /** Renames the active session. */
+  renameSession(name: string): Promise<IpcResult>;
   /** Waits for the session's uploads, then ends it and posts one Discord summary. */
   endSession(): Promise<IpcResult>;
   /** Re-opens the last session if it ended automatically after 6 hours. */

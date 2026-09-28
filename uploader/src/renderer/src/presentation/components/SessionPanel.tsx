@@ -1,12 +1,15 @@
 import { useMemo, useState } from "react";
 import {
   AlertCircleIcon,
+  CheckIcon,
   CircleHelpIcon,
   FlagIcon,
   HistoryIcon,
   Loader2Icon,
+  PencilIcon,
   PlayIcon,
   RotateCcwIcon,
+  XIcon,
 } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
@@ -35,6 +38,8 @@ function useSessionPanelController() {
   const { session, uploads, user, environment } = useAppState();
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  // null = not renaming; otherwise the name being typed.
+  const [draft, setDraft] = useState<string | null>(null);
   const [error, setError] = useState<IpcError | null>(null);
 
   const mine = useMemo(
@@ -66,6 +71,17 @@ function useSessionPanelController() {
       run(async () => {
         const res = await uploaderBridge.startSession(name);
         if (res.ok) setName("");
+        return res;
+      }),
+    draft,
+    setDraft,
+    startRename: () => setDraft(session.active?.name ?? ""),
+    cancelRename: () => setDraft(null),
+    saveRename: () =>
+      run(async () => {
+        if (draft === null) return { ok: true };
+        const res = await uploaderBridge.renameSession(draft);
+        if (res.ok) setDraft(null);
         return res;
       }),
     end: () => run(() => uploaderBridge.endSession()),
@@ -101,7 +117,59 @@ export default function SessionPanel() {
         {c.active ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate font-semibold">{c.active.name || t("session.unnamed")}</span>
+              {c.draft !== null ? (
+                <>
+                  <Input
+                    autoFocus
+                    value={c.draft}
+                    onChange={(e) => c.setDraft(e.target.value)}
+                    placeholder={t("session.namePlaceholder")}
+                    maxLength={80}
+                    disabled={c.busy}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") c.saveRename();
+                      if (e.key === "Escape") c.cancelRename();
+                    }}
+                    className="h-8 w-56"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0"
+                    onClick={c.saveRename}
+                    disabled={c.busy}
+                    title={t("common.save")}
+                    aria-label={t("common.save")}
+                  >
+                    {c.busy ? <Loader2Icon className="animate-spin" /> : <CheckIcon />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0 text-muted-foreground"
+                    onClick={c.cancelRename}
+                    disabled={c.busy}
+                    title={t("session.cancelRename")}
+                    aria-label={t("session.cancelRename")}
+                  >
+                    <XIcon />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <span className="truncate font-semibold">{c.active.name || t("session.unnamed")}</span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-7 shrink-0 text-muted-foreground"
+                    onClick={c.startRename}
+                    title={t("session.rename")}
+                    aria-label={t("session.rename")}
+                  >
+                    <PencilIcon />
+                  </Button>
+                </>
+              )}
               <Badge variant="outline" className="border-success/40 bg-success/10 text-success">
                 {t("session.active")}
               </Badge>

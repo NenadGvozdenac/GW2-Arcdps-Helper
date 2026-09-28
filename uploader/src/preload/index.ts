@@ -21,6 +21,7 @@ const api: UploaderApi = {
   stopWatching: () => ipcRenderer.invoke(IPC.stopWatching),
 
   startSession: (name) => ipcRenderer.invoke(IPC.startSession, name),
+  renameSession: (name) => ipcRenderer.invoke(IPC.renameSession, name),
   endSession: () => ipcRenderer.invoke(IPC.endSession),
   resumeSession: () => ipcRenderer.invoke(IPC.resumeSession),
 

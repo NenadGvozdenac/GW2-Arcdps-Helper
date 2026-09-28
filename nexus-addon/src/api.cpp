@@ -190,6 +190,14 @@ namespace Api
 		return true;
 	}
 
+	bool RenameSession(const std::string& token, const std::string& id, const std::string& name, Session& result, Error& err)
+	{
+		json body = { { "name", name } }, out;
+		if (!Backend("PATCH", "/sessions/" + Util::UrlEncode(id), token, &body, out, err)) return false;
+		result = ToSession(out.value("session", json::object()));
+		return true;
+	}
+
 	bool EndSession(const std::string& token, const std::string& id, Error& err)
 	{
 		json out;

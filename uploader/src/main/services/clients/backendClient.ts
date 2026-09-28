@@ -56,6 +56,12 @@ export const backendClient = {
     return (await request<{ session: BackendSession }>(apiUrl, "/sessions", { method: "POST", token, body })).session;
   },
 
+  async renameSession(apiUrl: string, token: string, id: string, name: string): Promise<BackendSession> {
+    const path = `/sessions/${encodeURIComponent(id)}`;
+    const body = JSON.stringify({ name });
+    return (await request<{ session: BackendSession }>(apiUrl, path, { method: "PATCH", token, body })).session;
+  },
+
   async endSession(apiUrl: string, token: string, id: string): Promise<BackendSession> {
     const path = `/sessions/${encodeURIComponent(id)}/end`;
     return (await request<{ session: BackendSession }>(apiUrl, path, { method: "POST", token })).session;

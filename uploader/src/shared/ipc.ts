@@ -9,6 +9,7 @@ export const IPC = {
   startWatching: "watch:start",
   stopWatching: "watch:stop",
   startSession: "session:start",
+  renameSession: "session:rename",
   endSession: "session:end",
   resumeSession: "session:resume",
   uploadFiles: "uploads:pick-files",

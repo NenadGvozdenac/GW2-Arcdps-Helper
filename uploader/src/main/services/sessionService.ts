@@ -73,6 +73,17 @@ export const sessionService = {
     logger.info("Session resumed", active.id);
   },
 
+  /** Renames the active session (an empty name falls back to "Session" in the UI). */
+  async rename(name: string): Promise<void> {
+    const { active } = stateStore.getSession();
+    if (!active) return;
+    const { apiUrl, token } = requireCredentials();
+    const renamed = await backendClient.renameSession(apiUrl, token, active.id, name.trim());
+    // Ending may have started meanwhile; keep that state and only take the new name.
+    const current = stateStore.getSession();
+    if (current.active?.id === renamed.id) stateStore.setSession({ ...current, active: { ...current.active, name: renamed.name } });
+  },
+
   /** Ends the session once its pending uploads are done, so the Discord summary contains all of them. */
   async end(): Promise<void> {
     const { active, ending } = stateStore.getSession();

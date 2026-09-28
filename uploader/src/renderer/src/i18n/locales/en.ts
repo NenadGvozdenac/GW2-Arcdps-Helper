@@ -58,6 +58,8 @@ export const en = {
     logs: "Logs",
     duration: "Duration",
     pending: "Uploading",
+    rename: "Rename session",
+    cancelRename: "Cancel",
   },
   uploads: {
     title: "Uploads",

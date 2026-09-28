@@ -25,6 +25,9 @@ namespace
 
 	// Text field buffers (ImGui 1.80 has no std::string InputText)
 	char g_sessionName[128] = "";
+	char g_renameBuffer[128] = "";
+	bool g_renaming = false;
+	bool g_focusRename = false; // focus the name field on the frame it opens
 	char g_email[256] = "";
 	char g_password[256] = "";
 	char g_logFolder[520] = "";
@@ -103,6 +106,59 @@ namespace
 		return "";
 	}
 
+	/** Small square button with a pencil drawn in it (the default ImGui font has no icon glyphs). */
+	bool PencilButton(const char* id)
+	{
+		float size = ImGui::GetFrameHeight();
+		ImVec2 p = ImGui::GetCursorScreenPos();
+		bool clicked = ImGui::InvisibleButton(id, ImVec2(size, size));
+		bool hovered = ImGui::IsItemHovered();
+
+		ImDrawList* draw = ImGui::GetWindowDrawList();
+		if (hovered) draw->AddRectFilled(p, ImVec2(p.x + size, p.y + size), ImGui::GetColorU32(ImGuiCol_ButtonHovered), ImGui::GetStyle().FrameRounding);
+		ImU32 color = ImGui::GetColorU32(hovered ? ImGuiCol_Text : ImGuiCol_TextDisabled);
+
+		// Diagonal pencil: body from top-right to bottom-left, ending in a tip.
+		float pad = size * 0.25f, w = size * 0.11f;
+		ImVec2 a(p.x + size - pad, p.y + pad);          // eraser end
+		ImVec2 b(p.x + pad + size * 0.16f, p.y + size - pad - size * 0.16f); // start of the tip
+		ImVec2 tip(p.x + pad, p.y + size - pad);
+		ImVec2 n(w, w); // normal to the 45-degree axis
+		draw->AddQuadFilled(ImVec2(a.x - n.x, a.y - n.y), ImVec2(a.x + n.x, a.y + n.y), ImVec2(b.x + n.x, b.y + n.y), ImVec2(b.x - n.x, b.y - n.y), color);
+		draw->AddTriangleFilled(ImVec2(b.x - n.x, b.y - n.y), ImVec2(b.x + n.x, b.y + n.y), tip, color);
+
+		if (hovered) ImGui::SetTooltip("Rename session");
+		return clicked;
+	}
+
+	void RenderRename(const AccountState& acc)
+	{
+		ImGui::SetNextItemWidth(-120);
+		if (g_focusRename)
+		{
+			ImGui::SetKeyboardFocusHere();
+			g_focusRename = false;
+		}
+		bool submit = ImGui::InputTextWithHint("##rename", "Session name", g_renameBuffer, sizeof(g_renameBuffer), ImGuiInputTextFlags_EnterReturnsTrue);
+		bool cancel = ImGui::IsItemDeactivated() && ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Escape)); // Escape deactivates the field first
+		ImGui::SameLine();
+		BeginDisabled(acc.busy);
+		submit |= ImGui::Button("Save");
+		EndDisabled();
+		ImGui::SameLine();
+		cancel |= ImGui::Button("Cancel", ImVec2(-1, 0));
+
+		if (submit && !acc.busy)
+		{
+			Account::RenameSession(g_renameBuffer);
+			g_renaming = false;
+		}
+		else if (cancel)
+		{
+			g_renaming = false;
+		}
+	}
+
 	void RenderRecording(const AccountState& acc)
 	{
 		if (!acc.signedIn)
@@ -112,14 +168,31 @@ namespace
 			return;
 		}
 
+		if (!acc.recording) g_renaming = false;
 		if (acc.recording)
 		{
 			int64_t elapsed = acc.sessionStartMs ? Util::NowMs() - acc.sessionStartMs : 0;
 			// Blinking dot while recording
 			bool on = (Util::NowMs() / 600) % 2 == 0;
+			ImGui::AlignTextToFramePadding(); // keeps the text in line with the pencil button
 			ImGui::TextColored(on ? RED : ImVec4(RED.x, RED.y, RED.z, 0.35f), "REC");
 			ImGui::SameLine();
-			ImGui::Text("%s  %s", acc.sessionName.empty() ? "Session" : acc.sessionName.c_str(), Util::FormatDuration(elapsed).c_str());
+			if (g_renaming)
+			{
+				ImGui::TextColored(GREY, "%s", Util::FormatDuration(elapsed).c_str());
+				RenderRename(acc);
+			}
+			else
+			{
+				ImGui::Text("%s  %s", acc.sessionName.empty() ? "Session" : acc.sessionName.c_str(), Util::FormatDuration(elapsed).c_str());
+				ImGui::SameLine();
+				if (PencilButton("##renameSession"))
+				{
+					Copy(g_renameBuffer, sizeof(g_renameBuffer), acc.sessionName);
+					g_renaming = true;
+					g_focusRename = true;
+				}
+			}
 
 			BeginDisabled(acc.ending);
 			if (ImGui::Button(acc.ending ? "Finishing uploads..." : "Stop recording", ImVec2(-1, 0))) Account::StopRecording();

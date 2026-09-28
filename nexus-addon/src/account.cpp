@@ -270,6 +270,29 @@ namespace Account
 		});
 	}
 
+	void RenameSession(const std::string& name)
+	{
+		std::string id;
+		{
+			std::lock_guard lock(g_mutex);
+			if (!g_state.recording) return;
+			g_state.message.clear();
+			id = g_state.sessionId;
+		}
+		Post([id, name] {
+			Settings cfg = Config::Get();
+			Api::Session session;
+			Api::Error err;
+			if (Api::RenameSession(cfg.token, id, name, session, err))
+			{
+				Set([&](AccountState& s) { if (s.sessionId == id) s.sessionName = session.name; });
+				return;
+			}
+			if (err.code == "UNAUTHORIZED") return SignOutLocal("Your sign-in expired. Sign in again.");
+			Set([&](AccountState& s) { s.message = "Could not rename the session: " + err.message; });
+		});
+	}
+
 	AccountState Get()
 	{
 		std::lock_guard lock(g_mutex);

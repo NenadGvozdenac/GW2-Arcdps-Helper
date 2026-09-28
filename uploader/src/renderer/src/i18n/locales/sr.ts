@@ -58,6 +58,8 @@ export const sr: Messages = {
     logs: "Logovi",
     duration: "Trajanje",
     pending: "U toku",
+    rename: "Preimenuj sesiju",
+    cancelRename: "Otkaži",
   },
   uploads: {
     title: "Uploadi",

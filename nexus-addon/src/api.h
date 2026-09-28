@@ -56,5 +56,6 @@ namespace Api
 
 	bool GetActiveSession(const std::string& token, std::optional<Session>& out, Error& err);
 	bool StartSession(const std::string& token, const std::string& name, Session& out, Error& err);
+	bool RenameSession(const std::string& token, const std::string& id, const std::string& name, Session& out, Error& err);
 	bool EndSession(const std::string& token, const std::string& id, Error& err);
 }

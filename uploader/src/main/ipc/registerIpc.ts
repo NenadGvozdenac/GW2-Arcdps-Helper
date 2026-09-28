@@ -48,6 +48,7 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
   ipcMain.handle(IPC.stopWatching, () => watchService.stop());
 
   ipcMain.handle(IPC.startSession, (_e, name: string) => result(() => sessionService.start(String(name ?? ""))));
+  ipcMain.handle(IPC.renameSession, (_e, name: string) => result(() => sessionService.rename(String(name ?? ""))));
   ipcMain.handle(IPC.endSession, () => result(() => sessionService.end()));
   ipcMain.handle(IPC.resumeSession, () => result(() => sessionService.resume()));
 
