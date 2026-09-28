@@ -172,7 +172,6 @@ namespace
 
 			ImGui::TableSetColumnIndex(0);
 			std::string name = u.boss.empty() ? u.fileName : u.boss;
-			if (u.isCM) name += " (CM)";
 			if (!u.permalink.empty())
 			{
 				if (ImGui::Selectable(name.c_str(), false)) Util::OpenUrl(u.permalink);

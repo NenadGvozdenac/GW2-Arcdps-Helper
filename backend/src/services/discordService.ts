@@ -14,7 +14,11 @@ const formatDuration = (ms: number) => {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 };
 
-const modeLabel = (log: Log) => (log.isLegendaryCM ? " (LCM)" : log.isCM ? " (CM)" : "");
+/** dps.report boss names already carry the mode ("Dhuum CM"), so only add it when missing. */
+const modeLabel = (log: Log) => {
+  const label = log.isLegendaryCM ? "LCM" : log.isCM ? "CM" : "";
+  return label && !log.bossName.split(/\s+/).includes(label) ? ` ${label}` : "";
+};
 
 /** "2h 05m" / "43m 10s" for session lengths. */
 const formatLongDuration = (ms: number) => {
@@ -24,7 +28,7 @@ const formatLongDuration = (ms: number) => {
   return h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}m ${String(total % 60).padStart(2, "0")}s`;
 };
 
-/** One line per log: "✅ [Vale Guardian (CM)](link) · 3:12". */
+/** One line per log: "✅ [Vale Guardian CM](link) · 3:12". */
 function sessionLine(log: Log): string {
   const result = log.success
     ? "✅"

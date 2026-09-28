@@ -126,7 +126,6 @@ namespace
 		Modify(id, [&](Upload& u) { u.stage = Stage::Failed; u.error = error; });
 		auto u = Find(id);
 		LogWarn("Upload failed: " + (u ? u->fileName : "") + ": " + error);
-		if (u && Config::Get().showAlerts) Alert("Log upload failed: " + (u->boss.empty() ? u->fileName : u->boss));
 	}
 
 	/** Waits until the file size stops changing (ArcDPS finished writing and compressing). */
@@ -257,7 +256,7 @@ namespace
 		if (auto u = Find(job.id); u && Config::Get().showAlerts)
 		{
 			std::string result = !u->success ? "" : *u->success ? " - Kill" : " - Wipe";
-			Alert((u->boss.empty() ? u->fileName : u->boss) + result + (u->isCM ? " (CM)" : "") + " uploaded");
+			Alert((u->boss.empty() ? u->fileName : u->boss) + result + " uploaded");
 		}
 	}
 
