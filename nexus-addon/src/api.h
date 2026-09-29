@@ -1,7 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <optional>
 #include <string>
+#include <vector>
 
 // Clients for dps.report and the GW2 ArcDPS Helper backend (same endpoints the desktop uploader uses).
 namespace Api
@@ -42,9 +44,30 @@ namespace Api
 	struct SubmitResult
 	{
 		std::string boss;
+		std::string category; // raid, fractal, strike, other
 		std::optional<bool> success;
 		bool isCM = false;
 		bool duplicate = false;
+	};
+
+	struct ClearBoss
+	{
+		std::string name;
+		bool cleared = false; // killed since the weekly reset
+	};
+
+	struct ClearGroup
+	{
+		std::string shortName; // W1, VoE, ...
+		std::string name;
+		std::vector<ClearBoss> bosses;
+	};
+
+	/** Raid bosses killed since the weekly reset (Monday 07:30 UTC), from every source (addon, uploader, website). */
+	struct WeeklyClears
+	{
+		int64_t nextResetMs = 0;
+		std::vector<ClearGroup> groups;
 	};
 
 	bool UploadToDpsReport(const std::wstring& filePath, const std::string& userToken, DpsReportLog& out, Error& err);
@@ -58,4 +81,6 @@ namespace Api
 	bool StartSession(const std::string& token, const std::string& name, Session& out, Error& err);
 	bool RenameSession(const std::string& token, const std::string& id, const std::string& name, Session& out, Error& err);
 	bool EndSession(const std::string& token, const std::string& id, Error& err);
+
+	bool GetWeeklyClears(const std::string& token, WeeklyClears& out, Error& err);
 }

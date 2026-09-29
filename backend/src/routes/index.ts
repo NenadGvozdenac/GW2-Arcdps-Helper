@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authController } from "../controllers/authController";
+import { clearsController } from "../controllers/clearsController";
 import { logController } from "../controllers/logController";
 import { profileController } from "../controllers/profileController";
 import { sessionController } from "../controllers/sessionController";
@@ -21,6 +22,9 @@ export function createRouter(): Router {
   router.post("/auth/forgot-password", authController.forgotPassword);
   router.post("/auth/reset-password", authController.resetPassword);
   router.get("/auth/me", requireAuth, authController.me);
+
+  // Raid bosses killed since the weekly reset (desktop uploader and Nexus addon).
+  router.get("/clears/weekly", requireAuth, clearsController.weekly);
 
   router.patch("/profile", requireAuth, profileController.update);
   router.put("/profile/discord-webhook", requireAuth, profileController.setDiscordWebhook);

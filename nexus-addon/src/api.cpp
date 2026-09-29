@@ -167,6 +167,7 @@ namespace Api
 		}
 		const json log = r.value("log", json::object());
 		result.boss = Str(log, "bossName");
+		result.category = Str(log, "category");
 		result.success = OptBool(log, "success");
 		result.isCM = OptBool(log, "isCM").value_or(false);
 		result.duplicate = status == "duplicate";
@@ -202,5 +203,24 @@ namespace Api
 	{
 		json out;
 		return Backend("POST", "/sessions/" + Util::UrlEncode(id) + "/end", token, nullptr, out, err);
+	}
+
+	bool GetWeeklyClears(const std::string& token, WeeklyClears& result, Error& err)
+	{
+		json out;
+		if (!Backend("GET", "/clears/weekly", token, nullptr, out, err)) return false;
+		result = {};
+		result.nextResetMs = Util::ParseIsoMs(Str(out, "nextResetAt"));
+		for (const json& g : out.value("groups", json::array()))
+		{
+			if (!g.is_object()) continue;
+			ClearGroup group{ Str(g, "short"), Str(g, "name"), {} };
+			for (const json& b : g.value("bosses", json::array()))
+			{
+				if (b.is_object()) group.bosses.push_back({ Str(b, "name"), OptBool(b, "cleared").value_or(false) });
+			}
+			result.groups.push_back(std::move(group));
+		}
+		return true;
 	}
 }

@@ -16,6 +16,8 @@ namespace
 {
 	/** The backend ends sessions after 6 hours, or one may be ended on the website: re-check regularly. */
 	constexpr int64_t REFRESH_MS = 60000;
+	/** The weekly clear also changes through the website and the desktop uploader, and at the weekly reset. */
+	constexpr int64_t CLEARS_REFRESH_MS = 5 * 60000;
 
 	std::mutex g_mutex;
 	std::condition_variable g_cv;
@@ -75,6 +77,8 @@ namespace
 			s.dpsReportToken.clear();
 			s.message = message;
 			ClearSession(s);
+			s.clearsLoaded = false;
+			s.clears = {};
 		});
 	}
 
@@ -99,6 +103,23 @@ namespace
 		if (Api::GetActiveSession(cfg.token, session, err)) ApplySession(session);
 		else if (err.code == "UNAUTHORIZED") SignOutLocal("Your sign-in expired. Sign in again.");
 		else LogWarn("Could not load the active session: " + err.message);
+	}
+
+	void LoadClears()
+	{
+		Settings cfg = Config::Get();
+		if (cfg.token.empty()) return;
+		Api::WeeklyClears clears;
+		Api::Error err;
+		if (Api::GetWeeklyClears(cfg.token, clears, err))
+		{
+			Set([&](AccountState& s) {
+				s.clears = std::move(clears);
+				s.clearsLoaded = true;
+			});
+		}
+		else if (err.code == "UNAUTHORIZED") SignOutLocal("Your sign-in expired. Sign in again.");
+		else LogWarn("Could not load the weekly clear: " + err.message);
 	}
 
 	void RunTask(const std::function<void()>& task)
@@ -134,6 +155,7 @@ namespace
 		});
 
 		int64_t nextRefresh = 0;
+		int64_t nextClears = 0;
 		for (;;)
 		{
 			std::function<void()> task;
@@ -156,6 +178,11 @@ namespace
 			{
 				RunTask(RefreshSession);
 				nextRefresh = Util::NowMs() + REFRESH_MS;
+				if (Util::NowMs() >= nextClears)
+				{
+					RunTask(LoadClears);
+					nextClears = Util::NowMs() + CLEARS_REFRESH_MS;
+				}
 			}
 		}
 	}
@@ -208,6 +235,7 @@ namespace Account
 			});
 			LogInfo("Signed in as " + user.email);
 			RefreshSession();
+			LoadClears();
 		});
 	}
 
@@ -291,6 +319,11 @@ namespace Account
 			if (err.code == "UNAUTHORIZED") return SignOutLocal("Your sign-in expired. Sign in again.");
 			Set([&](AccountState& s) { s.message = "Could not rename the session: " + err.message; });
 		});
+	}
+
+	void RefreshClears()
+	{
+		Post(LoadClears);
 	}
 
 	AccountState Get()

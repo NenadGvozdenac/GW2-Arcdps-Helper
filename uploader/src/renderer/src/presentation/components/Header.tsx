@@ -1,4 +1,4 @@
-import { LogOutIcon, SettingsIcon } from "lucide-react";
+import { CalendarCheckIcon, LogOutIcon, SettingsIcon } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
@@ -6,10 +6,11 @@ import { Button } from "@/presentation/components/ui/button";
 import { cn } from "@/presentation/lib/utils";
 import Brand from "./Brand";
 
-export type Tab = "uploads" | "settings";
+export type Tab = "uploads" | "clears" | "settings";
 
 export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => void }) {
-  const { user, watch } = useAppState();
+  const { user, watch, clears } = useAppState();
+  const bosses = clears?.groups.flatMap((g) => g.bosses) ?? [];
   const { t } = useI18n();
 
   const tabClass = (active: boolean) =>
@@ -26,6 +27,15 @@ export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (t
           <button className={tabClass(tab === "uploads")} onClick={() => onTabChange("uploads")}>
             <span className={cn("size-2 rounded-full", watch.watching ? "bg-success" : "bg-muted-foreground/40")} />
             {t("header.tabUploads")}
+          </button>
+          <button className={tabClass(tab === "clears")} onClick={() => onTabChange("clears")}>
+            <CalendarCheckIcon className="size-4" />
+            {t("header.tabClears")}
+            {clears && (
+              <span className="font-mono text-xs text-muted-foreground">
+                {bosses.filter((b) => b.cleared).length}/{bosses.length}
+              </span>
+            )}
           </button>
         </nav>
         <div className="flex items-center gap-2">

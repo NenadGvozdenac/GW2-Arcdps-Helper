@@ -5,6 +5,7 @@ import type {
   BackendSession,
   BackendSubmitResult,
   BackendUser,
+  WeeklyClears,
 } from "../../../shared/backend.types";
 import { AppError, fetchWithTimeout } from "../../utils/appError";
 
@@ -41,6 +42,8 @@ export const backendClient = {
     });
     return body.results;
   },
+
+  weeklyClears: (apiUrl: string, token: string) => request<WeeklyClears>(apiUrl, "/clears/weekly", { token }),
 
   /** The active session, and (when there is none) the last one if it expired and can be resumed. */
   activeSession: (apiUrl: string, token: string) =>

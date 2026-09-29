@@ -20,6 +20,19 @@ export interface BackendSession {
   expiresAt: string;
 }
 
+/** GET /clears/weekly: raid bosses killed since the weekly reset (Monday 07:30 UTC). */
+export interface WeeklyClears {
+  resetAt: string;
+  nextResetAt: string;
+  groups: {
+    id: string;
+    /** "W1", "VoE", … */
+    short: string;
+    name: string;
+    bosses: { key: string; name: string; cleared: boolean }[];
+  }[];
+}
+
 export interface AuthResponse {
   token: string;
   user: BackendUser;

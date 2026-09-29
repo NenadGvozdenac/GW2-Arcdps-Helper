@@ -3,7 +3,7 @@ import { environment } from "../config/environment";
 import { settingsRepository } from "../repositories/settingsRepository";
 import { uploadsRepository } from "../repositories/uploadsRepository";
 import type { AppState, SessionState } from "../../shared/app.types";
-import type { BackendUser } from "../../shared/backend.types";
+import type { BackendUser, WeeklyClears } from "../../shared/backend.types";
 import type { Settings } from "../../shared/settings.types";
 import type { UpdateState } from "../../shared/update.types";
 import type { UploadEntry } from "../../shared/upload.types";
@@ -18,6 +18,7 @@ function createStateStore() {
   let uploads: UploadEntry[] = [];
   let watch: WatchState = { watching: false, startedAt: null };
   let session: SessionState = { active: null, ending: false, resumable: null };
+  let clears: WeeklyClears | null = null;
   let update: UpdateState = { status: "idle", version: null, progress: null, downloadUrl: null };
 
   const listeners = new Set<Listener>();
@@ -30,6 +31,7 @@ function createStateStore() {
     logFolderExists: !!settings.logFolder && existsSync(settings.logFolder),
     watch,
     session,
+    clears,
     uploads,
     update,
   });
@@ -84,6 +86,11 @@ function createStateStore() {
 
     setSession(next: SessionState) {
       session = next;
+      emit();
+    },
+
+    setClears(next: WeeklyClears | null) {
+      clears = next;
       emit();
     },
 

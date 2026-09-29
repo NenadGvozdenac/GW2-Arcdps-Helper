@@ -229,6 +229,7 @@ namespace
 			if (result.success) u.success = result.success;
 			u.isCM = result.isCM;
 		});
+		if (result.success.value_or(false) && result.category == "raid") Account::RefreshClears();
 		return true;
 	}
 

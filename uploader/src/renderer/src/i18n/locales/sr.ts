@@ -12,6 +12,7 @@ export const sr: Messages = {
   },
   header: {
     tabUploads: "Uploadi",
+    tabClears: "Nedeljni clear",
     tabSettings: "Podešavanja",
     signOut: "Odjava",
     language: "Jezik",
@@ -95,6 +96,11 @@ export const sr: Messages = {
     desktopNotifications: "Prikaži notifikaciju za svaki uploadovan log",
     language: "Jezik",
     account: "Prijavljen kao {name} ({email})",
+  },
+  clears: {
+    title: "Nedeljni raid clear",
+    loading: "Učitavam…",
+    resets: "Reset {when} (ponedeljak 07:30 UTC). Računaju se killovi iz aplikacije, addona i sa sajta.",
   },
   update: {
     downloading: "Preuzima se verzija {version}… {progress}%",

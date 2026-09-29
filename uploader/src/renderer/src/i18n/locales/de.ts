@@ -12,6 +12,7 @@ export const de: Messages = {
   },
   header: {
     tabUploads: "Uploads",
+    tabClears: "Wochen-Clear",
     tabSettings: "Einstellungen",
     signOut: "Abmelden",
     language: "Sprache",
@@ -97,6 +98,11 @@ export const de: Messages = {
     desktopNotifications: "Für jedes hochgeladene Log eine Benachrichtigung zeigen",
     language: "Sprache",
     account: "Angemeldet als {name} ({email})",
+  },
+  clears: {
+    title: "Wöchentlicher Raid-Clear",
+    loading: "Wird geladen…",
+    resets: "Reset {when} (Montag 07:30 UTC). Kills aus dem Uploader, dem Addon und von der Website zählen alle.",
   },
   update: {
     downloading: "Version {version} wird heruntergeladen… {progress} %",

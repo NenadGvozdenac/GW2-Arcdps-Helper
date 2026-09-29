@@ -1,5 +1,6 @@
 #include "ui.h"
 
+#include <algorithm>
 #include <cstring>
 #include <string>
 
@@ -22,6 +23,7 @@ namespace
 	const ImVec4 GREY(0.60f, 0.60f, 0.60f, 1.0f);
 
 	std::string g_watchedFolder; // folder the watcher runs on, empty when stopped
+	bool g_showClears = false;   // the weekly raid clear window is open
 
 	// Text field buffers (ImGui 1.80 has no std::string InputText)
 	char g_sessionName[128] = "";
@@ -219,6 +221,94 @@ namespace
 		}
 	}
 
+	/** "3d 4h" / "5h 12m" until the next weekly reset. */
+	std::string FormatUntil(int64_t targetMs)
+	{
+		int64_t minutes = std::max<int64_t>(0, (targetMs - Util::NowMs()) / 60000);
+		int64_t days = minutes / 1440, hours = (minutes % 1440) / 60;
+		if (days > 0) return std::to_string(days) + "d " + std::to_string(hours) + "h";
+		return std::to_string(hours) + "h " + std::to_string(minutes % 60) + "m";
+	}
+
+	/** A circle in front of a boss name: filled green = killed since the reset, grey ring = not yet. */
+	void BossMark(bool cleared)
+	{
+		const float r = 4.5f, h = ImGui::GetTextLineHeight();
+		ImVec2 p = ImGui::GetCursorScreenPos();
+		ImVec2 c(p.x + r, p.y + h / 2);
+		ImDrawList* dl = ImGui::GetWindowDrawList();
+		if (cleared) dl->AddCircleFilled(c, r, ImGui::GetColorU32(GREEN));
+		else dl->AddCircle(c, r, ImGui::GetColorU32(GREY), 0, 1.5f);
+		ImGui::Dummy(ImVec2(2 * r, h));
+		ImGui::SameLine();
+	}
+
+	void CountClears(const Api::WeeklyClears& clears, int& cleared, int& total)
+	{
+		cleared = total = 0;
+		for (const auto& g : clears.groups)
+		{
+			for (const auto& b : g.bosses) cleared += b.cleared ? 1 : 0;
+			total += (int)g.bosses.size();
+		}
+	}
+
+	/** Main window: "Weekly clear 11/32" opens the weekly clear window. */
+	void RenderClearsButton(const AccountState& acc)
+	{
+		if (!acc.signedIn || !acc.clearsLoaded || acc.clears.groups.empty()) return;
+		int cleared, total;
+		CountClears(acc.clears, cleared, total);
+		std::string label = "Weekly clear  " + std::to_string(cleared) + "/" + std::to_string(total);
+		if (ImGui::Button(label.c_str())) g_showClears = !g_showClears;
+	}
+
+	/** Separate window with every raid wing and the bosses killed since the weekly reset; sized to its content. */
+	void RenderClearsWindow(const AccountState& acc)
+	{
+		if (!g_showClears) return;
+		if (!acc.signedIn || !acc.clearsLoaded)
+		{
+			g_showClears = false;
+			return;
+		}
+
+		if (ImGui::Begin("Weekly raid clear###GW2ArcDPSHelperClears", &g_showClears, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+		{
+			int cleared, total;
+			CountClears(acc.clears, cleared, total);
+			ImGui::Text("%d/%d bosses", cleared, total);
+			ImGui::SameLine();
+			ImGui::TextColored(GREY, "- resets in %s (Monday 07:30 UTC)", FormatUntil(acc.clears.nextResetMs).c_str());
+			ImGui::Spacing();
+
+			if (ImGui::BeginTable("clears", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_PadOuterX))
+			{
+				for (const auto& g : acc.clears.groups)
+				{
+					ImGui::TableNextColumn();
+					int done = 0;
+					for (const auto& b : g.bosses) done += b.cleared ? 1 : 0;
+					bool full = done == (int)g.bosses.size();
+
+					ImGui::TextColored(full ? GREEN : ImGui::GetStyleColorVec4(ImGuiCol_Text), "%s", g.shortName.c_str());
+					ImGui::SameLine();
+					ImGui::TextColored(GREY, "%s  %d/%d", g.name.c_str(), done, (int)g.bosses.size());
+					for (const auto& b : g.bosses)
+					{
+						BossMark(b.cleared);
+						if (b.cleared) ImGui::TextUnformatted(b.name.c_str());
+						else ImGui::TextColored(GREY, "%s", b.name.c_str());
+					}
+					ImGui::Spacing();
+				}
+				ImGui::EndTable();
+			}
+			TextWrappedColored(GREY, "Kills from this addon, the desktop uploader and the website all count.");
+		}
+		ImGui::End();
+	}
+
 	void RenderUploads()
 	{
 		std::vector<Upload> uploads = Uploads::Snapshot();
@@ -308,6 +398,7 @@ namespace UI
 
 	void RenderWindow()
 	{
+		RenderClearsWindow(Account::Get());
 		if (!ShowWindow) return;
 
 		ImGui::SetNextWindowSize(ImVec2(460, 360), ImGuiCond_FirstUseEver);
@@ -319,6 +410,7 @@ namespace UI
 			RenderDesktopUploaderWarning(s.autoUpload);
 			RenderRecording(acc);
 			if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
+			RenderClearsButton(acc);
 
 			ImGui::Separator();
 

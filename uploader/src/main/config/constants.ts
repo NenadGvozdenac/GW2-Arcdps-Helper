@@ -29,3 +29,5 @@ export const UPDATE_CHECK_INTERVAL_MS = 6 * 60 * 60_000;
 export const SESSION_DRAIN_POLL_MS = 1_000;
 /** How often the active session is re-checked (the backend ends sessions after 6 hours, or one may end on the website). */
 export const SESSION_REFRESH_MS = 60_000;
+/** How often the weekly raid clear is re-loaded (it is also re-loaded after every uploaded kill). */
+export const CLEARS_REFRESH_MS = 5 * 60_000;

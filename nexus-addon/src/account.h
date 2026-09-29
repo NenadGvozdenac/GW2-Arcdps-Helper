@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <string>
 
+#include "api.h"
+
 struct AccountState
 {
 	bool signedIn = false;
@@ -19,6 +21,10 @@ struct AccountState
 	std::string sessionId;
 	std::string sessionName;
 	int64_t sessionStartMs = 0;
+
+	// Weekly raid clear, refreshed every few minutes and after every uploaded raid kill.
+	bool clearsLoaded = false;
+	Api::WeeklyClears clears;
 };
 
 /** Sign-in and sessions. Requests run on the account thread; the UI only reads snapshots. */
@@ -43,6 +49,9 @@ namespace Account
 	 * Blocking (HTTP): call from worker threads. Offline, the last known one is used; "" when signed out or not set.
 	 */
 	std::string CurrentDpsReportToken();
+
+	/** Re-loads the weekly raid clear (call after a raid kill was saved). */
+	void RefreshClears();
 
 	/** The backend rejected the token (expired after 30 days, or signed out elsewhere). */
 	void HandleUnauthorized();

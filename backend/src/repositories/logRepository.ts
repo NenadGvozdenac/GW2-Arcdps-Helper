@@ -1,6 +1,7 @@
-import { and, count, desc, eq, inArray, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, gte, inArray, isNotNull, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
+import type { Category } from "../types/encounter.types";
 import type { Log, LogFilter, LogPage, LogSummary } from "../types/log.types";
 
 const ownedBy = (ownerId: string) => eq(logs.ownerId, ownerId);
@@ -25,6 +26,23 @@ function matching(ownerId: string, f: LogFilter): SQL | undefined {
 }
 
 export const logRepository = {
+  /** Distinct encounter keys of this category killed at or after `since` (for the weekly clear). */
+  async killedEncounterKeysSince(ownerId: string, category: Category, since: Date): Promise<string[]> {
+    const rows = await getDb()
+      .selectDistinct({ key: logs.encounterKey })
+      .from(logs)
+      .where(
+        and(
+          ownedBy(ownerId),
+          eq(logs.category, category),
+          eq(logs.success, true),
+          gte(logs.encounterTime, since),
+          isNotNull(logs.encounterKey),
+        ),
+      );
+    return rows.map((r) => r.key!);
+  },
+
   listByOwner(ownerId: string): Promise<Log[]> {
     return getDb().select().from(logs).where(ownedBy(ownerId)).orderBy(desc(logs.encounterTime));
   },

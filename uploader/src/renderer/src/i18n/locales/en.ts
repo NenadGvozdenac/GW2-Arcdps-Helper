@@ -11,6 +11,7 @@ export const en = {
   },
   header: {
     tabUploads: "Uploads",
+    tabClears: "Weekly clear",
     tabSettings: "Settings",
     signOut: "Sign out",
     language: "Language",
@@ -95,6 +96,11 @@ export const en = {
     desktopNotifications: "Show a notification for every uploaded log",
     language: "Language",
     account: "Signed in as {name} ({email})",
+  },
+  clears: {
+    title: "Weekly raid clear",
+    loading: "Loading…",
+    resets: "Resets {when} (Monday 07:30 UTC). Kills from the uploader, the addon and the website all count.",
   },
   update: {
     downloading: "Downloading version {version}… {progress}%",

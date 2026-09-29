@@ -4,6 +4,7 @@ import { DPS_REPORT_ATTEMPTS } from "../config/constants";
 import type { UploadEntry } from "../../shared/upload.types";
 import { AppError } from "../utils/appError";
 import { authService } from "./authService";
+import { clearsService } from "./clearsService";
 import { backendClient } from "./clients/backendClient";
 import { dpsReportClient } from "./clients/dpsReportClient";
 import { waitUntilWritten } from "./folderWatcher";
@@ -94,6 +95,8 @@ async function syncToWeb(id: string): Promise<void> {
       isCM: result.log.isCM,
       isLegendaryCM: result.log.isLegendaryCM,
     });
+    // A raid kill can complete a boss of the weekly clear.
+    if (result.log.success && result.log.category === "raid") void clearsService.refresh();
   } catch (err) {
     if (err instanceof AppError && err.status === 401) {
       authService.handleUnauthorized();
