@@ -133,6 +133,44 @@ namespace
 		return clicked;
 	}
 
+	bool HasClears(const AccountState& acc)
+	{
+		return acc.signedIn && acc.clearsLoaded && !acc.clears.groups.empty();
+	}
+
+	/** Room the weekly-clear icon takes at the end of the recording row (0 while it isn't shown). */
+	float ClearsIconRoom(const AccountState& acc)
+	{
+		return HasClears(acc) ? ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.x : 0.0f;
+	}
+
+	/** Square button with a calendar-and-check icon; opens / closes the weekly raid clear window. */
+	void ClearsIconButton(const AccountState& acc)
+	{
+		if (!HasClears(acc)) return;
+		ImGui::SameLine();
+		float size = ImGui::GetFrameHeight();
+		ImVec2 p = ImGui::GetCursorScreenPos();
+		if (ImGui::InvisibleButton("##weeklyClear", ImVec2(size, size))) g_showClears = !g_showClears;
+		bool hovered = ImGui::IsItemHovered();
+
+		ImDrawList* draw = ImGui::GetWindowDrawList();
+		ImGuiCol bg = g_showClears ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button;
+		draw->AddRectFilled(p, ImVec2(p.x + size, p.y + size), ImGui::GetColorU32(bg), ImGui::GetStyle().FrameRounding);
+
+		// Calendar page: outline, a filled top strip, and a check mark inside.
+		ImU32 color = ImGui::GetColorU32(ImGuiCol_Text);
+		float pad = size * 0.24f, t = 1.5f;
+		ImVec2 a(p.x + pad, p.y + pad + 1), b(p.x + size - pad, p.y + size - pad);
+		draw->AddRect(a, b, color, 2.0f, 0, t);
+		draw->AddRectFilled(a, ImVec2(b.x, a.y + (b.y - a.y) * 0.28f), color, 2.0f);
+		float w = b.x - a.x, h = b.y - a.y;
+		ImVec2 check[3] = { ImVec2(a.x + w * 0.25f, a.y + h * 0.62f), ImVec2(a.x + w * 0.44f, a.y + h * 0.80f), ImVec2(a.x + w * 0.76f, a.y + h * 0.45f) };
+		draw->AddPolyline(check, 3, ImGui::GetColorU32(GREEN), 0, 2.0f);
+
+		if (hovered) ImGui::SetTooltip("Weekly raid clear");
+	}
+
 	void RenderRename(const AccountState& acc)
 	{
 		ImGui::SetNextItemWidth(-120);
@@ -197,18 +235,20 @@ namespace
 			}
 
 			BeginDisabled(acc.ending);
-			if (ImGui::Button(acc.ending ? "Finishing uploads..." : "Stop recording", ImVec2(-1, 0))) Account::StopRecording();
+			if (ImGui::Button(acc.ending ? "Finishing uploads..." : "Stop recording", ImVec2(-ClearsIconRoom(acc), 0))) Account::StopRecording();
 			EndDisabled();
+			ClearsIconButton(acc);
 		}
 		else
 		{
-			ImGui::SetNextItemWidth(-110);
+			const float recordWidth = 100.0f;
+			ImGui::SetNextItemWidth(-(recordWidth + ImGui::GetStyle().ItemSpacing.x + ClearsIconRoom(acc)));
 			ImGui::InputTextWithHint("##session", "Session name (optional)", g_sessionName, sizeof(g_sessionName));
 			ImGui::SameLine();
 			BeginDisabled(acc.busy);
 			ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.15f, 0.15f, 1.0f));
 			ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.80f, 0.22f, 0.22f, 1.0f));
-			if (ImGui::Button("Record", ImVec2(-1, 0)))
+			if (ImGui::Button("Record", ImVec2(recordWidth, 0)))
 			{
 				// Recording implies picking up new logs.
 				Config::Update([](Settings& s) { s.autoUpload = true; });
@@ -218,6 +258,7 @@ namespace
 			}
 			ImGui::PopStyleColor(2);
 			EndDisabled();
+			ClearsIconButton(acc);
 		}
 	}
 
@@ -251,16 +292,6 @@ namespace
 			for (const auto& b : g.bosses) cleared += b.cleared ? 1 : 0;
 			total += (int)g.bosses.size();
 		}
-	}
-
-	/** Main window: "Weekly clear 11/32" opens the weekly clear window. */
-	void RenderClearsButton(const AccountState& acc)
-	{
-		if (!acc.signedIn || !acc.clearsLoaded || acc.clears.groups.empty()) return;
-		int cleared, total;
-		CountClears(acc.clears, cleared, total);
-		std::string label = "Weekly clear  " + std::to_string(cleared) + "/" + std::to_string(total);
-		if (ImGui::Button(label.c_str())) g_showClears = !g_showClears;
 	}
 
 	/** Widest line of any wing cell: its title ("W3  Stronghold of the Faithful  0/4") or a boss with its mark. */
@@ -427,7 +458,6 @@ namespace UI
 			RenderDesktopUploaderWarning(s.autoUpload);
 			RenderRecording(acc);
 			if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
-			RenderClearsButton(acc);
 
 			ImGui::Separator();
 
