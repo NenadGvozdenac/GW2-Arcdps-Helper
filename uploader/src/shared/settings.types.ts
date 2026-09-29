@@ -1,4 +1,6 @@
-export type Language = "en" | "sr";
+import type { Language } from "./languages";
+
+export type { Language } from "./languages";
 
 /** User-editable settings. Server URLs are not here — they come from the build environment. */
 export interface Settings {

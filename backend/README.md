@@ -66,6 +66,7 @@ src/
 ├── repositories/     Drizzle ORM queries — the only layer that touches the database
 ├── db/               schema.ts (tables), Drizzle client + pool, migration runner, generated migrations/
 ├── data/             encounter catalogue: raid wings, fractal CMs, strikes
+├── i18n/             email texts per language (languages.ts lists them; en.ts is the source of keys)
 ├── types/            all TypeScript types (no types are declared in logic files)
 └── utils/            HttpError helpers, permalink / date parsing
 ```

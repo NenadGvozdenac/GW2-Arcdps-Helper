@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
 import {
   DISCORD_WEBHOOK_RE,
   DPS_REPORT_TOKEN_RE,
@@ -17,7 +18,8 @@ const gw2Account = z
   .regex(/^.{3,32}\.\d{4}$/, "GW2 account must look like Name.1234");
 
 /** Language of the emails we send (the website's current language). */
-const emailLanguage = z.enum(["en", "sr"]).default("en");
+// Unknown or missing (older clients) → English rather than a validation error.
+const emailLanguage = z.enum(LANGUAGES).catch(DEFAULT_LANGUAGE);
 
 const password = z.string().min(6, "Password must be at least 6 characters.").max(200);
 

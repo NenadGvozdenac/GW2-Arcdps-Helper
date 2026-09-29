@@ -1,3 +1,4 @@
+import type { Language } from "../i18n/languages";
 import type { User } from "./user.types";
 
 export interface TokenPayload {
@@ -14,7 +15,8 @@ export interface EmailTokenPayload {
   pwd?: string;
 }
 
-export type EmailLanguage = "en" | "sr";
+/** Language of the emails we send; the list lives in src/i18n/languages.ts. */
+export type EmailLanguage = Language;
 
 export interface RegisterResponse {
   email: string;

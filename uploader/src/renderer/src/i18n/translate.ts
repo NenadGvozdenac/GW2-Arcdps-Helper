@@ -1,14 +1,12 @@
+import { de } from "./locales/de";
 import { en } from "./locales/en";
 import { sr } from "./locales/sr";
-import type { Language } from "../../../shared/settings.types";
+import { LANGUAGES, type Language } from "../../../shared/languages";
 import type { Messages, TranslateParams, TranslationKey } from "./i18n.types";
 
-export const LANGUAGES: { code: Language; label: string; locale: string }[] = [
-  { code: "en", label: "English", locale: "en-GB" },
-  { code: "sr", label: "Srpski", locale: "sr-Latn-RS" },
-];
+export { LANGUAGES } from "../../../shared/languages";
 
-const MESSAGES: Record<Language, Messages> = { en, sr };
+const MESSAGES: Record<Language, Messages> = { en, sr, de };
 
 export const localeFor = (lang: Language) => LANGUAGES.find((l) => l.code === lang)?.locale ?? "en-GB";
 

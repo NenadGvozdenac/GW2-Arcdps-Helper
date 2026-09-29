@@ -1,5 +1,5 @@
 import { useI18n } from "../../controllers/I18nController";
-import type { Language } from "../../../../shared/settings.types";
+import type { Language } from "../../../../shared/languages";
 import { cn } from "@/presentation/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import LanguageFlag from "./LanguageFlag";

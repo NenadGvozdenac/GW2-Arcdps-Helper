@@ -1,6 +1,7 @@
 import { app } from "electron";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { DEFAULT_LANGUAGE, isLanguage } from "../../shared/languages";
 import type { Settings } from "../../shared/settings.types";
 import { createJsonStore } from "./jsonStore";
 
@@ -14,7 +15,7 @@ function defaults(): Settings {
   return {
     logFolder: defaultLogFolder(),
     watchOnStartup: true,
-    language: "en",
+    language: DEFAULT_LANGUAGE,
     desktopNotifications: true,
   };
 }
@@ -28,7 +29,8 @@ export const settingsRepository = {
     const merged = { ...defaults(), ...stored };
     // Only known keys, so settings removed in newer versions (e.g. apiUrl) disappear.
     const { logFolder, watchOnStartup, language, desktopNotifications } = merged;
-    return { logFolder, watchOnStartup, language, desktopNotifications };
+    // A language removed in a later version falls back to the default.
+    return { logFolder, watchOnStartup, language: isLanguage(language) ? language : DEFAULT_LANGUAGE, desktopNotifications };
   },
   save(settings: Settings): void {
     store.write(settings);

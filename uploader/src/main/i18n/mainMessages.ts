@@ -1,47 +1,11 @@
-import type { Language } from "../../shared/settings.types";
+import type { Language } from "../../shared/languages";
+import { de } from "./locales/de";
+import { en, type MainMessages } from "./locales/en";
+import { sr } from "./locales/sr";
 
-// The few strings shown by the main process (tray menu, notifications, dialogs).
-// Everything inside the window is translated in the renderer (src/renderer/src/i18n).
-const en = {
-  appName: "GW2 ArcDPS Helper Uploader",
-  trayShow: "Open GW2 ArcDPS Helper Uploader",
-  trayStartWatching: "Start watching",
-  trayStopWatching: "Stop watching",
-  trayQuit: "Quit",
-  statusWatching: "Watching for new logs",
-  statusIdle: "Not watching",
-  stillRunning: "Still running in the tray and uploading new logs.",
-  kill: "Kill",
-  wipe: "Wipe",
-  syncedToWeb: "Uploaded to dps.report and saved to GW2 ArcDPS Helper.",
-  uploadFailed: "Log upload failed",
-  chooseFolderTitle: "Choose your ArcDPS log folder (arcdps.cbtlogs)",
-  chooseFilesTitle: "Choose ArcDPS logs to upload",
-  logFilesFilter: "ArcDPS logs",
-  updateReadyTitle: "Version {version} is ready",
-  updateReadyBody: "It is installed when you restart the app (or use “Restart and update”).",
-};
+export type { MainMessages } from "./locales/en";
 
-const sr: typeof en = {
-  appName: "GW2 ArcDPS Helper Uploader",
-  trayShow: "Otvori GW2 ArcDPS Helper Uploader",
-  trayStartWatching: "Pokreni praćenje",
-  trayStopWatching: "Zaustavi praćenje",
-  trayQuit: "Izađi",
-  statusWatching: "Prati nove logove",
-  statusIdle: "Praćenje je zaustavljeno",
-  stillRunning: "Aplikacija i dalje radi u tray-u i uploaduje nove logove.",
-  kill: "Kill",
-  wipe: "Wipe",
-  syncedToWeb: "Uploadovano na dps.report i sačuvano na GW2 ArcDPS Helper.",
-  uploadFailed: "Upload loga nije uspeo",
-  chooseFolderTitle: "Izaberi ArcDPS folder sa logovima (arcdps.cbtlogs)",
-  chooseFilesTitle: "Izaberi ArcDPS logove za upload",
-  logFilesFilter: "ArcDPS logovi",
-  updateReadyTitle: "Verzija {version} je spremna",
-  updateReadyBody: "Instalira se kad ponovo pokreneš aplikaciju (ili klikni „Restartuj i ažuriraj“).",
-};
+const MESSAGES: Record<Language, MainMessages> = { en, sr, de };
 
-export type MainMessages = typeof en;
-
-export const mainT = (lang: Language): MainMessages => (lang === "sr" ? sr : en);
+/** Main-process strings (tray, notifications, dialogs) in `lang`, English for anything unknown. */
+export const mainT = (lang: Language): MainMessages => MESSAGES[lang] ?? en;

@@ -1,6 +1,6 @@
 import type { en } from "./locales/en";
 
-export type Language = "en" | "sr";
+export type { Language } from "./languages";
 
 type DeepStrings<T> = { [K in keyof T]: T[K] extends string ? string : DeepStrings<T[K]> };
 

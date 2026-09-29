@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, type JSX } from "react";
 import type { Language } from "../../i18n/i18n.types";
 import { cn } from "@/presentation/lib/utils";
 
@@ -24,6 +24,16 @@ function UnitedKingdom() {
   );
 }
 
+function Germany() {
+  return (
+    <>
+      <path d="M0 0h60v10H0z" fill="#000" />
+      <path d="M0 10h60v10H0z" fill="#DD0000" />
+      <path d="M0 20h60v10H0z" fill="#FFCE00" />
+    </>
+  );
+}
+
 function Serbia() {
   return (
     <>
@@ -34,15 +44,18 @@ function Serbia() {
   );
 }
 
+const FLAGS: Record<Language, () => JSX.Element> = { en: UnitedKingdom, sr: Serbia, de: Germany };
+
 /** Inline SVG flags: Windows doesn't render flag emoji (it shows the letters "GB" / "RS"). */
 export default function LanguageFlag({ lang, className }: { lang: Language; className?: string }) {
+  const Flag = FLAGS[lang];
   return (
     <svg
       viewBox="0 0 60 30"
       aria-hidden="true"
       className={cn("h-3 w-6 shrink-0 rounded-[2px] ring-1 ring-border", className)}
     >
-      {lang === "sr" ? <Serbia /> : <UnitedKingdom />}
+      <Flag />
     </svg>
   );
 }
