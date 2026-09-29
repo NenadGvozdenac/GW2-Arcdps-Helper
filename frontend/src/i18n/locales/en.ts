@@ -44,7 +44,6 @@ export const en = {
     password: "Password",
     confirmPassword: "Confirm password",
     gw2Account: "GW2 account",
-    gw2AccountExample: "(e.g. NenadG.4682)",
     signIn: "Sign in",
     signingIn: "Signing in…",
     createAccount: "Create account",

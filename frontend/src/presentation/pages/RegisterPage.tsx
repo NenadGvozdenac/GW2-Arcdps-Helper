@@ -85,15 +85,12 @@ export default function RegisterPage() {
       }
     >
       <div className="grid gap-2">
-        <Label htmlFor="gw2Account">
-          {t("auth.gw2Account")}
-          <span className="font-normal text-muted-foreground">{t("auth.gw2AccountExample")}</span>
-        </Label>
+        <Label htmlFor="gw2Account">{t("auth.gw2Account")}</Label>
         <Input
           id="gw2Account"
           value={form.gw2Account}
           onChange={(e) => setField("gw2Account", e.target.value)}
-          placeholder="Name.1234"
+          placeholder="User.1234"
           autoComplete="username"
           required
         />

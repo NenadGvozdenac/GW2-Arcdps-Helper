@@ -45,7 +45,6 @@ export const sr: Messages = {
     password: "Lozinka",
     confirmPassword: "Potvrdi lozinku",
     gw2Account: "GW2 nalog",
-    gw2AccountExample: "(npr. NenadG.4682)",
     signIn: "Prijavi se",
     signingIn: "Prijavljujem…",
     createAccount: "Napravi nalog",
