@@ -347,8 +347,9 @@ export const en = {
   },
   sessions: {
     title: "Sessions",
-    subtitle: "Raid nights and other sittings recorded as a session in the desktop uploader.",
-    empty: "No sessions yet. Start one in the desktop uploader (Uploads → Session) before you play.",
+    subtitle: "Raid nights and other sittings recorded as a session in the desktop uploader or the Nexus addon.",
+    empty:
+      "No sessions yet. Before you play, start one in the desktop uploader (Uploads → Session) or press Record in the Nexus addon.",
     unnamed: "Session",
     active: "Active",
     logsCount: "{count} log|{count} logs",
@@ -395,11 +396,13 @@ export const en = {
     sharedLogsHint: "Click a log to open it on dps.report.",
     sharedNotFound: "This link doesn't work",
     sharedNotFoundHint: "The session was deleted or its owner stopped sharing it.",
-    activeHint: "This session is running. If it isn't ended in the uploader, it ends automatically at {time}.",
+    activeHint:
+      "This session is running. If it isn't ended in the uploader or the addon, it ends automatically at {time}.",
     expired: "Ended automatically",
     expiredHint: "Not ended within 6 hours, so it was ended automatically.",
     expiredTitle: "Ended automatically after 6 hours",
-    expiredBody: "This session wasn't ended within 6 hours, so it was ended at {time}. Still playing? Resume it — new logs from the uploader join it again.",
+    expiredBody:
+      "This session wasn't ended within 6 hours, so it was ended at {time}. Still playing? Resume it — new logs from the uploader or the addon join it again.",
     resume: "Resume session",
   },
   sessionsGuide: {
@@ -408,15 +411,15 @@ export const en = {
     intro:
       "A session groups the logs of one sitting — a W1–W8 full clear, a fractal run, a strike evening. On the website you see them together with how long it took, and Discord gets one summary instead of a message per boss.",
     howTitle: "Using a session",
-    step1Title: "Start it in the desktop uploader",
+    step1Title: "Start it in the desktop uploader or the Nexus addon",
     step1Body:
-      "Before you play, open the uploader, give the session a name if you like (e.g. “Full clear W1–W8”) and click “Start session”. Keep watching the ArcDPS folder as usual.",
+      "Before you play, give the session a name if you like (e.g. “Full clear W1–W8”) and start it: “Start session” in the desktop uploader, or “Record” in the Nexus addon inside the game. Keep auto-upload on as usual. Use one of the two, not both.",
     step2Title: "Play",
     step2Body:
-      "Every log the uploader picks up while the session runs is uploaded as always and added to the session. The uploader shows how many logs it has and how long it has lasted so far.",
+      "Every log the uploader or the addon picks up while the session runs is uploaded as always and added to the session. Both show how many logs it has and how long it has lasted so far.",
     step3Title: "End it",
     step3Body:
-      "Click “End session” when you're done. The uploader first waits until the session's last logs are uploaded, so none of them is missing.",
+      "Click “End session” in the uploader or “Stop recording” in the addon when you're done. Both first wait until the session's last logs are uploaded, so none of them is missing.",
     step4Title: "Look it up on the website",
     step4Body:
       "Open “Sessions” on the website: every session with its date, duration, kills, wipes and the wings / fractals played. Click one to see all of its logs in order.",
@@ -431,12 +434,14 @@ export const en = {
       "Starting a new session ends the previous one. Deleting a session on the website keeps its logs — they just no longer belong to a session.",
     expiryTitle: "Sessions end by themselves after 6 hours",
     expiryBody:
-      "If you forget to end a session, it is ended automatically 6 hours after it started (and its Discord summary is posted). The website marks it “Ended automatically”. Still playing? Resume it from the uploader or the website — it gets another 6 hours. Sessions you ended yourself can't be resumed.",
+      "If you forget to end a session, it is ended automatically 6 hours after it started (and its Discord summary is posted). The website marks it “Ended automatically”. Still playing? Resume it from the desktop uploader or the website — it gets another 6 hours. Sessions you ended yourself can't be resumed.",
     faqTitle: "Questions",
     q1: "Do logs uploaded on the website go into a session?",
-    a1: "No — sessions are started and ended in the desktop uploader, and only logs it uploads while a session runs belong to it.",
-    q2: "I closed the uploader in the middle of a raid.",
-    a2: "The session keeps running on the server. Open the uploader again and it continues where it left off.",
+    a1:
+      "No — sessions are started and ended in the desktop uploader or the Nexus addon, and only logs they upload while a session runs belong to it.",
+    q2: "I closed the uploader or the game in the middle of a raid.",
+    a2:
+      "The session keeps running on the server. Open the uploader or start the game again and it continues where it left off.",
     q3: "What if I don't use Discord?",
     a3: "Sessions work the same without it — you just get no summary message.",
     openSessions: "Open my sessions",

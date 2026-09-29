@@ -9,8 +9,7 @@ import Brand from "./Brand";
 export type Tab = "uploads" | "clears" | "settings";
 
 export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (tab: Tab) => void }) {
-  const { user, watch, clears } = useAppState();
-  const bosses = clears?.groups.flatMap((g) => g.bosses) ?? [];
+  const { user, watch } = useAppState();
   const { t } = useI18n();
 
   const tabClass = (active: boolean) =>
@@ -31,11 +30,6 @@ export default function Header({ tab, onTabChange }: { tab: Tab; onTabChange: (t
           <button className={tabClass(tab === "clears")} onClick={() => onTabChange("clears")}>
             <CalendarCheckIcon className="size-4" />
             {t("header.tabClears")}
-            {clears && (
-              <span className="font-mono text-xs text-muted-foreground">
-                {bosses.filter((b) => b.cleared).length}/{bosses.length}
-              </span>
-            )}
           </button>
         </nav>
         <div className="flex items-center gap-2">

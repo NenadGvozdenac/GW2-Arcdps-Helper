@@ -1,5 +1,6 @@
 import type { Session, SessionListItem, SessionPatch, SharedSession } from "../domain/types/session.types";
-import { fromSharedLogDto, type SharedLogDto } from "./logMapper";
+import type { LogDetail } from "../domain/types/log.types";
+import { fromSharedLogDto, toLog, type LogDetailDto, type SharedLogDto } from "./logMapper";
 import { http } from "./httpClient";
 
 /** Session as serialized over JSON (dates are ISO strings). */
@@ -93,6 +94,12 @@ export const sessionRepository = {
       owner: body.owner,
       logs: body.logs.map(fromSharedLogDto),
     };
+  },
+
+  /** The session's logs with their squads, oldest first. */
+  async logs(id: string): Promise<LogDetail[]> {
+    const body = await http.get<{ logs: LogDetailDto[] }>(`/sessions/${encodeURIComponent(id)}/logs`);
+    return body.logs.map((l) => toLog<LogDetail>(l));
   },
 
   delete: (id: string) => http.delete(`/sessions/${encodeURIComponent(id)}`),

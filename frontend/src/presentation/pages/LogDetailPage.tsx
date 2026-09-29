@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { AlertCircleIcon, ArrowLeftIcon, ExternalLinkIcon, Trash2Icon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
+import { logService } from "../../services/logService";
 import { profileService } from "../../services/profileService";
 import type { Category } from "../../domain/types/encounter.types";
+import type { PlayerSummary } from "../../domain/types/log.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import {
   AlertDialog,
@@ -30,6 +32,23 @@ const CATEGORY_PATH: Record<Category, string> = {
   other: "/logs",
 };
 
+/** The squad of one log, loaded on its own (the shared list leaves it out); null while loading or when it failed. */
+function useSquad(id: string | undefined): PlayerSummary[] | null {
+  const [squad, setSquad] = useState<{ id: string; players: PlayerSummary[] } | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    logService
+      .get(id)
+      .then((detail) => !cancelled && setSquad({ id, players: detail.players }))
+      .catch(() => !cancelled && setSquad({ id, players: [] }));
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+  return squad && squad.id === id ? squad.players : null;
+}
+
 function useLogDetailController(id: string | undefined) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,6 +58,7 @@ function useLogDetailController(id: string | undefined) {
   const [error, setError] = useState<unknown>(null);
 
   const log = logs.find((l) => l.id === id) ?? null;
+  const players = useSquad(log?.id);
   const group = encounterService.groupById(log?.groupId ?? null);
 
   const backLink = log
@@ -66,6 +86,7 @@ function useLogDetailController(id: string | undefined) {
 
   return {
     log,
+    players,
     backLink,
     canGoBack,
     goBack: () => navigate(-1),
@@ -79,7 +100,8 @@ function useLogDetailController(id: string | undefined) {
 
 export default function LogDetailPage() {
   const { id } = useParams();
-  const { log, backLink, canGoBack, goBack, setShared, deleting, error, remove, isOwnAccount } = useLogDetailController(id);
+  const { log, players, backLink, canGoBack, goBack, setShared, deleting, error, remove, isOwnAccount } =
+    useLogDetailController(id);
   const { t } = useI18n();
 
   if (!log) {
@@ -111,6 +133,7 @@ export default function LogDetailPage() {
 
       <LogView
         log={log}
+        players={players}
         isOwnAccount={isOwnAccount}
         actions={
           <>

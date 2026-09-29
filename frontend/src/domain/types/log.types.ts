@@ -14,6 +14,10 @@ export interface PlayerSummary {
   commander: boolean;
 }
 
+/**
+ * A log as the lists carry it (GET /logs, GET /logs/search): everything but the squad, which only the log page needs
+ * (see LogDetail) and which would make the lists many times larger.
+ */
 export interface Log {
   id: string;
   ownerId: string;
@@ -36,17 +40,21 @@ export interface Log {
   recordedBy: string | null;
   gw2Build: number | null;
   eliteInsightsVersion: string | null;
-  players: PlayerSummary[];
-  accounts: string[];
   /** Session the log was recorded in (desktop uploader), or null. */
   sessionId: string | null;
   /** Secret of the public link (/shared/logs/<token>); null = not shared. */
   shareToken: string | null;
 }
 
+/** A log with its squad (GET /logs/:id, shared logs and sessions). */
+export interface LogDetail extends Log {
+  players: PlayerSummary[];
+  accounts: string[];
+}
+
 /** A log opened through its public share link. */
 export interface SharedLog {
-  log: Log;
+  log: LogDetail;
   /** GW2 account of the player who shared it (may be empty). */
   owner: string;
 }

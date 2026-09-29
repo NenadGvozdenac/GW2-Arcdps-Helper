@@ -1,21 +1,26 @@
-import type { Log, LogFilter, LogPage, SharedLog } from "../domain/types/log.types";
+import type { Log, LogDetail, LogFilter, LogPage, SharedLog } from "../domain/types/log.types";
 import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../domain/types/upload.types";
 import { http } from "./httpClient";
-import { fromSharedLogDto, toLog, type LogDto, type SharedLogDto } from "./logMapper";
+import { fromSharedLogDto, toLog, type LogDetailDto, type LogDto, type SharedLogDto } from "./logMapper";
 
 const searchQuery = (filter: LogFilter, extra: Record<string, string>) =>
   new URLSearchParams({ ...filter, ...extra }).toString();
 
 export const logRepository = {
   async list(): Promise<Log[]> {
-    return (await http.get<{ logs: LogDto[] }>("/logs")).logs.map(toLog);
+    return (await http.get<{ logs: LogDto[] }>("/logs")).logs.map((l) => toLog(l));
+  },
+
+  /** One log with its squad. */
+  async get(id: string): Promise<LogDetail> {
+    return toLog<LogDetail>((await http.get<{ log: LogDetailDto }>(`/logs/${encodeURIComponent(id)}`)).log);
   },
 
   /** One page of logs matching the filter, searched on the server. */
   async search(filter: LogFilter, page: number, pageSize: number): Promise<LogPage> {
     const query = searchQuery(filter, { page: String(page), pageSize: String(pageSize) });
     const body = await http.get<{ logs: LogDto[]; total: number }>(`/logs/search?${query}`);
-    return { logs: body.logs.map(toLog), total: body.total };
+    return { logs: body.logs.map((l) => toLog(l)), total: body.total };
   },
 
   /** Ids of every log matching the filter (for "select all"). */

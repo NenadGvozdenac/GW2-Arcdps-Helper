@@ -353,8 +353,10 @@ export const de: Messages = {
   },
   sessions: {
     title: "Sessions",
-    subtitle: "Raid-Abende und andere Spielrunden, die im Desktop-Uploader als Session aufgezeichnet wurden.",
-    empty: "Noch keine Sessions. Starte eine im Desktop-Uploader (Uploads → Session), bevor du spielst.",
+    subtitle:
+      "Raid-Abende und andere Spielrunden, die im Desktop-Uploader oder im Nexus-Addon als Session aufgezeichnet wurden.",
+    empty:
+      "Noch keine Sessions. Starte vor dem Spielen eine im Desktop-Uploader (Uploads → Session) oder drück Record im Nexus-Addon.",
     unnamed: "Session",
     active: "Aktiv",
     logsCount: "{count} Log|{count} Logs",
@@ -402,12 +404,13 @@ export const de: Messages = {
     sharedLogsHint: "Klick auf ein Log, um es auf dps.report zu öffnen.",
     sharedNotFound: "Dieser Link funktioniert nicht",
     sharedNotFoundHint: "Die Session wurde gelöscht oder ihr Besitzer teilt sie nicht mehr.",
-    activeHint: "Diese Session läuft. Wird sie nicht im Uploader beendet, endet sie automatisch um {time}.",
+    activeHint:
+      "Diese Session läuft. Wird sie nicht im Uploader oder im Addon beendet, endet sie automatisch um {time}.",
     expired: "Automatisch beendet",
     expiredHint: "Nicht innerhalb von 6 Stunden beendet, daher automatisch beendet.",
     expiredTitle: "Nach 6 Stunden automatisch beendet",
     expiredBody:
-      "Diese Session wurde nicht innerhalb von 6 Stunden beendet und endete daher um {time}. Spielst du noch? Setz sie fort — neue Logs vom Uploader kommen wieder hinzu.",
+      "Diese Session wurde nicht innerhalb von 6 Stunden beendet und endete daher um {time}. Spielst du noch? Setz sie fort — neue Logs vom Uploader oder Addon kommen wieder hinzu.",
     resume: "Session fortsetzen",
   },
   sessionsGuide: {
@@ -416,15 +419,15 @@ export const de: Messages = {
     intro:
       "Eine Session fasst die Logs einer Spielrunde zusammen — ein W1–W8 Full Clear, eine Fraktal-Runde, ein Strike-Abend. Auf der Website siehst du sie gemeinsam mit der Gesamtdauer, und Discord bekommt eine Zusammenfassung statt einer Nachricht pro Boss.",
     howTitle: "Eine Session nutzen",
-    step1Title: "Im Desktop-Uploader starten",
+    step1Title: "Im Desktop-Uploader oder im Nexus-Addon starten",
     step1Body:
-      "Öffne vor dem Spielen den Uploader, gib der Session auf Wunsch einen Namen (z. B. „Full Clear W1–W8“) und klick auf „Session starten“. Lass den ArcDPS-Ordner wie gewohnt überwachen.",
+      "Gib der Session vor dem Spielen auf Wunsch einen Namen (z. B. „Full Clear W1–W8“) und starte sie: „Session starten“ im Desktop-Uploader oder „Record“ im Nexus-Addon im Spiel. Lass den automatischen Upload wie gewohnt an. Nutze eins von beiden, nicht beides.",
     step2Title: "Spielen",
     step2Body:
-      "Jedes Log, das der Uploader während der Session aufgreift, wird wie immer hochgeladen und der Session hinzugefügt. Der Uploader zeigt, wie viele Logs sie hat und wie lange sie bisher dauert.",
+      "Jedes Log, das Uploader oder Addon während der Session aufgreift, wird wie immer hochgeladen und der Session hinzugefügt. Beide zeigen, wie viele Logs sie hat und wie lange sie bisher dauert.",
     step3Title: "Beenden",
     step3Body:
-      "Klick auf „Session beenden“, wenn du fertig bist. Der Uploader wartet zuerst, bis die letzten Logs der Session hochgeladen sind, damit keins fehlt.",
+      "Klick auf „Session beenden“ im Uploader oder „Stop recording“ im Addon, wenn du fertig bist. Beide warten zuerst, bis die letzten Logs der Session hochgeladen sind, damit keins fehlt.",
     step4Title: "Auf der Website ansehen",
     step4Body:
       "Öffne „Sessions“ auf der Website: jede Session mit Datum, Dauer, Kills, Wipes und den gespielten Flügeln / Fraktalen. Klick auf eine, um alle ihre Logs der Reihe nach zu sehen.",
@@ -439,12 +442,14 @@ export const de: Messages = {
       "Eine neue Session zu starten beendet die vorherige. Löschst du eine Session auf der Website, bleiben ihre Logs erhalten — sie gehören nur zu keiner Session mehr.",
     expiryTitle: "Sessions enden nach 6 Stunden von selbst",
     expiryBody:
-      "Vergisst du, eine Session zu beenden, wird sie 6 Stunden nach dem Start automatisch beendet (und ihre Discord-Zusammenfassung gepostet). Die Website markiert sie als „Automatisch beendet“. Spielst du noch? Setz sie im Uploader oder auf der Website fort — sie bekommt weitere 6 Stunden. Selbst beendete Sessions können nicht fortgesetzt werden.",
+      "Vergisst du, eine Session zu beenden, wird sie 6 Stunden nach dem Start automatisch beendet (und ihre Discord-Zusammenfassung gepostet). Die Website markiert sie als „Automatisch beendet“. Spielst du noch? Setz sie im Desktop-Uploader oder auf der Website fort — sie bekommt weitere 6 Stunden. Selbst beendete Sessions können nicht fortgesetzt werden.",
     faqTitle: "Fragen",
     q1: "Kommen auf der Website hochgeladene Logs in eine Session?",
-    a1: "Nein — Sessions werden im Desktop-Uploader gestartet und beendet, und nur Logs, die er während einer Session hochlädt, gehören dazu.",
-    q2: "Ich habe den Uploader mitten im Raid geschlossen.",
-    a2: "Die Session läuft auf dem Server weiter. Öffne den Uploader wieder und er macht dort weiter, wo er aufgehört hat.",
+    a1:
+      "Nein — Sessions werden im Desktop-Uploader oder im Nexus-Addon gestartet und beendet, und nur Logs, die sie während einer Session hochladen, gehören dazu.",
+    q2: "Ich habe den Uploader oder das Spiel mitten im Raid geschlossen.",
+    a2:
+      "Die Session läuft auf dem Server weiter. Öffne den Uploader oder starte das Spiel neu und es geht dort weiter, wo es aufgehört hat.",
     q3: "Was, wenn ich Discord nicht nutze?",
     a3: "Sessions funktionieren ohne genauso — du bekommst nur keine Zusammenfassung.",
     openSessions: "Meine Sessions öffnen",

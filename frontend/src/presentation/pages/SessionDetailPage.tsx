@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { AlertCircleIcon, ArrowLeftIcon, HistoryIcon, Loader2Icon, RotateCcwIcon, Trash2Icon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
@@ -6,6 +6,7 @@ import { useAuth } from "../../controllers/AuthController";
 import { useLogs } from "../../controllers/LogsController";
 import { useSessions } from "../../controllers/SessionsController";
 import { sessionService } from "../../services/sessionService";
+import type { LogDetail } from "../../domain/types/log.types";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
 import {
   AlertDialog,
@@ -43,9 +44,24 @@ function useSessionDetailController(id: string | undefined) {
     const session = sessions.find((s) => s.id === id);
     return session ? sessionService.views([session], logs)[0] : null;
   }, [sessions, logs, id]);
+  // Only a session of training golems gets the practice summary; that needs the squads, so load them just then.
+  const isPractice = !!view && sessionService.isPractice(view.logs);
+  const logCount = view?.logs.length ?? 0;
+  const [squadLogs, setSquadLogs] = useState<LogDetail[] | null>(null);
+  useEffect(() => {
+    if (!isPractice || !id) return setSquadLogs(null);
+    let cancelled = false;
+    sessionService
+      .logsWithSquads(id)
+      .then((logs) => !cancelled && setSquadLogs(logs))
+      .catch(() => !cancelled && setSquadLogs(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [isPractice, id, logCount]);
   const practice = useMemo(
-    () => (view ? sessionService.practiceRun(view.logs, user?.gw2Account ?? "") : null),
-    [view, user?.gw2Account],
+    () => (squadLogs ? sessionService.practiceRun(squadLogs, user?.gw2Account ?? "") : null),
+    [squadLogs, user?.gw2Account],
   );
 
   async function remove() {

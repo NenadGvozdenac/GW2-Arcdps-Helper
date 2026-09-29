@@ -117,6 +117,12 @@ export const sessionService = {
     await sessionRepository.move(ownerId, id, overId);
   },
 
+  /** The session's logs with their squads, oldest first (the website's practice-run summary needs the players). */
+  async logs(ownerId: string, id: string): Promise<Log[]> {
+    await sessionService.get(ownerId, id);
+    return sessionRepository.logsOf(ownerId, id);
+  },
+
   async get(ownerId: string, id: string): Promise<Session> {
     await expireOverdue(ownerId);
     const session = await sessionRepository.findById(ownerId, id);

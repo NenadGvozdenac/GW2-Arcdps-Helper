@@ -1,6 +1,6 @@
 import { sessionRepository } from "../repositories/sessionRepository";
 import type { EncounterGroup } from "../domain/types/encounter.types";
-import type { Log } from "../domain/types/log.types";
+import type { Log, LogDetail } from "../domain/types/log.types";
 import type {
   PracticeRun,
   Session,
@@ -97,12 +97,18 @@ export const sessionService = {
     });
   },
 
+  /** Every log of the session is a training golem. */
+  isPractice: (logs: Log[]) => logs.length > 0 && logs.every(isGolem),
+
+  /** The session's logs with their squads (the shared list leaves the squads out). */
+  logsWithSquads: (id: string): Promise<LogDetail[]> => sessionRepository.logs(id),
+
   /**
    * Returns a PracticeRun when every log of the session is a training golem (null otherwise), with the highest-DPS
    * log of `account` (Name.1234) for each specialization they played.
    */
-  practiceRun(logs: Log[], account: string): PracticeRun | null {
-    if (!logs.length || !logs.every(isGolem)) return null;
+  practiceRun(logs: LogDetail[], account: string): PracticeRun | null {
+    if (!sessionService.isPractice(logs)) return null;
     const best = new Map<string, PracticeRun["bestPerSpec"][number]>();
     for (const log of logs) {
       const player = log.players.find((p) => account && p.account.toLowerCase() === account.toLowerCase());

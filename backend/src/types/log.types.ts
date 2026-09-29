@@ -49,6 +49,12 @@ export interface Log extends LogSummary {
   shareToken: string | null;
 }
 
+/**
+ * A log in lists (GET /logs, GET /logs/search): everything except the squad. The squad is by far the biggest part of a
+ * log and only the log page needs it (GET /logs/:id), so lists stay small even with thousands of logs.
+ */
+export type LogListItem = Omit<Log, "players" | "accounts">;
+
 /** A log as shown on a public shared page (without internal owner / session ids or its share secret). */
 export type SharedLog = Omit<Log, "ownerId" | "sessionId" | "shareToken">;
 
@@ -69,7 +75,7 @@ export interface LogFilter {
 
 /** One page of the owner's logs matching a filter, newest first. */
 export interface LogPage {
-  logs: Log[];
+  logs: LogListItem[];
   /** How many logs match the filter in total. */
   total: number;
 }

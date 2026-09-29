@@ -1,10 +1,13 @@
-import { and, count, desc, eq, gte, inArray, isNotNull, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, gte, inArray, isNotNull, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
 import type { Category } from "../types/encounter.types";
-import type { Log, LogFilter, LogPage, LogSummary } from "../types/log.types";
+import type { Log, LogFilter, LogListItem, LogPage, LogSummary } from "../types/log.types";
 
 const ownedBy = (ownerId: string) => eq(logs.ownerId, ownerId);
+
+// Every column except the squad (players / accounts): what lists need. See LogListItem.
+const { players: _players, accounts: _accounts, ...listColumns } = getTableColumns(logs);
 
 /** Same matching as the website's filter bar: boss name, or any account / character name containing the text. */
 function matching(ownerId: string, f: LogFilter): SQL | undefined {
@@ -43,15 +46,15 @@ export const logRepository = {
     return rows.map((r) => r.key!);
   },
 
-  listByOwner(ownerId: string): Promise<Log[]> {
-    return getDb().select().from(logs).where(ownedBy(ownerId)).orderBy(desc(logs.encounterTime));
+  listByOwner(ownerId: string): Promise<LogListItem[]> {
+    return getDb().select(listColumns).from(logs).where(ownedBy(ownerId)).orderBy(desc(logs.encounterTime));
   },
 
   async search(ownerId: string, filter: LogFilter, page: number, pageSize: number): Promise<LogPage> {
     const where = matching(ownerId, filter);
     const [rows, [{ total }]] = await Promise.all([
       getDb()
-        .select()
+        .select(listColumns)
         .from(logs)
         .where(where)
         .orderBy(desc(logs.encounterTime), desc(logs.id))

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
-import { FlagIcon } from "lucide-react";
+import { FlagIcon, Loader2Icon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
-import type { Log } from "../../domain/types/log.types";
+import type { Log, PlayerSummary } from "../../domain/types/log.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { cn } from "@/presentation/lib/utils";
@@ -11,6 +11,8 @@ import StatCard from "./StatCard";
 
 interface Props {
   log: Log;
+  /** The squad; null while it is still loading (the lists don't carry it, see LogDetail). */
+  players: PlayerSummary[] | null;
   /** Buttons in the boss card (dps.report, share, delete, …). */
   actions: ReactNode;
   /** Extra text after the date / "recorded by" line (e.g. who shared it). */
@@ -22,15 +24,17 @@ interface Props {
 }
 
 /** One log: boss card, squad totals and the players table. Used by the log page and the public shared-log page. */
-export default function LogView({ log, actions, meta, isOwnAccount, children }: Props) {
+export default function LogView({ log, players, actions, meta, isOwnAccount, children }: Props) {
   const { t, fmt } = useI18n();
+  const squad = players ?? [];
   const totals = {
-    squadDps: log.players.reduce((s, p) => s + p.dps, 0),
-    downs: log.players.reduce((s, p) => s + p.downs, 0),
-    deaths: log.players.reduce((s, p) => s + p.deaths, 0),
-    topDps: log.players[0]?.dps || 1,
-    hasSubgroups: new Set(log.players.map((p) => p.group)).size > 1,
+    squadDps: squad.reduce((s, p) => s + p.dps, 0),
+    downs: squad.reduce((s, p) => s + p.downs, 0),
+    deaths: squad.reduce((s, p) => s + p.deaths, 0),
+    topDps: squad[0]?.dps || 1,
+    hasSubgroups: new Set(squad.map((p) => p.group)).size > 1,
   };
+  const pending = players === null ? "…" : null;
 
   return (
     <>
@@ -54,9 +58,9 @@ export default function LogView({ log, actions, meta, isOwnAccount, children }: 
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label={t("logDetail.duration")} value={fmt.duration(log.durationMs)} mono />
-        <StatCard label={t("logDetail.squadDps")} value={fmt.number(totals.squadDps)} />
-        <StatCard label={t("logDetail.downs")} value={totals.downs} />
-        <StatCard label={t("logDetail.deaths")} value={totals.deaths} />
+        <StatCard label={t("logDetail.squadDps")} value={pending ?? fmt.number(totals.squadDps)} />
+        <StatCard label={t("logDetail.downs")} value={pending ?? totals.downs} />
+        <StatCard label={t("logDetail.deaths")} value={pending ?? totals.deaths} />
       </div>
 
       <Card>
@@ -64,6 +68,11 @@ export default function LogView({ log, actions, meta, isOwnAccount, children }: 
           <CardTitle>{t("logDetail.players")}</CardTitle>
         </CardHeader>
         <CardContent>
+          {players === null ? (
+            <div className="grid place-items-center py-10" role="status" aria-busy="true">
+              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
           <Table>
             <TableHeader>
               <TableRow>
@@ -79,7 +88,7 @@ export default function LogView({ log, actions, meta, isOwnAccount, children }: 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {log.players.map((p, i) => (
+              {squad.map((p, i) => (
                 <TableRow
                   key={p.account + p.name}
                   className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
@@ -123,6 +132,7 @@ export default function LogView({ log, actions, meta, isOwnAccount, children }: 
               ))}
             </TableBody>
           </Table>
+          )}
         </CardContent>
       </Card>
 

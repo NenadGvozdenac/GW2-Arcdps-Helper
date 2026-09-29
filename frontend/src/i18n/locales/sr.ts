@@ -348,8 +348,9 @@ export const sr: Messages = {
   },
   sessions: {
     title: "Sesije",
-    subtitle: "Raid večeri i druga igranja zabeležena kao sesija u desktop uploaderu.",
-    empty: "Još nema sesija. Pokreni je u desktop uploaderu (Uploads → Sesija) pre nego što kreneš da igraš.",
+    subtitle: "Raid večeri i druga igranja snimljena kao sesija u desktop uploaderu ili Nexus addonu.",
+    empty:
+      "Još nema sesija. Pre igranja pokreni jednu u desktop uploaderu (Uploads → Sesija) ili pritisni Record u Nexus addonu.",
     unnamed: "Sesija",
     active: "Aktivna",
     logsCount: "{count} log|{count} loga|{count} logova",
@@ -396,11 +397,12 @@ export const sr: Messages = {
     sharedLogsHint: "Klikni na log da ga otvoriš na dps.report.",
     sharedNotFound: "Ovaj link ne radi",
     sharedNotFoundHint: "Sesija je obrisana ili je vlasnik prekinuo deljenje.",
-    activeHint: "Sesija je u toku. Ako je ne završiš u uploaderu, sama se završava u {time}.",
+    activeHint: "Ova sesija je u toku. Ako je ne završiš u uploaderu ili addonu, automatski se završava u {time}.",
     expired: "Automatski završena",
     expiredHint: "Nije završena u roku od 6 sati, pa je završena automatski.",
     expiredTitle: "Automatski završena posle 6 sati",
-    expiredBody: "Ova sesija nije završena u roku od 6 sati, pa je završena u {time}. Još igraš? Nastavi je — novi logovi iz uploadera joj se ponovo dodaju.",
+    expiredBody:
+      "Ova sesija nije završena u roku od 6 sati, pa je završena u {time}. Još igraš? Nastavi je — novi logovi iz uploadera ili addona ponovo ulaze u nju.",
     resume: "Nastavi sesiju",
   },
   sessionsGuide: {
@@ -409,15 +411,15 @@ export const sr: Messages = {
     intro:
       "Sesija grupiše logove jednog igranja — full clear W1–W8, fraktale, strike veče. Na sajtu ih vidiš zajedno, sa trajanjem, a na Discord stiže jedan pregled umesto poruke za svakog bossa.",
     howTitle: "Kako se koristi",
-    step1Title: "Pokreni je u desktop uploaderu",
+    step1Title: "Pokreni je u desktop uploaderu ili Nexus addonu",
     step1Body:
-      "Pre igranja otvori uploader, po želji daj sesiji naziv (npr. „Full clear W1–W8“) i klikni „Pokreni sesiju“. Praćenje ArcDPS foldera radi kao i obično.",
+      "Pre igranja daj sesiji ime ako želiš (npr. „Full clear W1–W8“) i pokreni je: „Pokreni sesiju“ u desktop uploaderu ili „Record“ u Nexus addonu u igri. Automatski upload ostavi uključen kao i inače. Koristi jedno od ta dva, ne oba.",
     step2Title: "Igraj",
     step2Body:
-      "Svaki log koji uploader uhvati dok sesija traje uploaduje se kao i uvek i dodaje u sesiju. Uploader pokazuje koliko logova ima i koliko sesija traje.",
+      "Svaki log koji uploader ili addon pokupi dok sesija traje uploaduje se kao i uvek i dodaje u sesiju. Oba pokazuju koliko logova ima i koliko sesija traje.",
     step3Title: "Završi je",
     step3Body:
-      "Kad završiš, klikni „Završi sesiju“. Uploader prvo sačeka da se upload poslednjih logova sesije završi, da nijedan ne bi falio.",
+      "Kad završiš, klikni „Završi sesiju“ u uploaderu ili „Stop recording“ u addonu. Oba prvo sačekaju da se poslednji logovi sesije uploaduju, da nijedan ne fali.",
     step4Title: "Pogledaj je na sajtu",
     step4Body:
       "Otvori „Sesije“ na sajtu: svaka sesija sa datumom, trajanjem, killovima, wipeovima i wingovima / fraktalima. Klikni na nju da vidiš sve njene logove redom.",
@@ -432,12 +434,14 @@ export const sr: Messages = {
       "Pokretanje nove sesije završava prethodnu. Brisanje sesije na sajtu zadržava njene logove — samo više ne pripadaju sesiji.",
     expiryTitle: "Sesija se sama završava posle 6 sati",
     expiryBody:
-      "Ako zaboraviš da je završiš, sesija se automatski završava 6 sati posle početka (i šalje se njen Discord pregled). Sajt je označava sa „Automatski završena“. Još igraš? Nastavi je iz uploadera ili sa sajta — dobija još 6 sati. Sesija koju si sam završio ne može da se nastavi.",
+      "Ako zaboraviš da završiš sesiju, automatski se završava 6 sati posle početka (i šalje se njen Discord sažetak). Sajt je označava sa „Završena automatski“. Još igraš? Nastavi je iz desktop uploadera ili sa sajta — dobija još 6 sati. Sesije koje si sam završio ne mogu da se nastave.",
     faqTitle: "Pitanja",
     q1: "Da li logovi uploadovani na sajtu ulaze u sesiju?",
-    a1: "Ne — sesije se pokreću i završavaju u desktop uploaderu, i pripadaju im samo logovi koje on uploaduje dok sesija traje.",
-    q2: "Zatvorio sam uploader usred raida.",
-    a2: "Sesija i dalje traje na serveru. Ponovo otvori uploader i nastaviće gde je stao.",
+    a1:
+      "Ne — sesije se pokreću i završavaju u desktop uploaderu ili Nexus addonu, i u sesiju ulaze samo logovi koje oni uploaduju dok ona traje.",
+    q2: "Zatvorio sam uploader ili igru usred raida.",
+    a2:
+      "Sesija nastavlja da traje na serveru. Otvori uploader ili ponovo pokreni igru i nastavlja se tamo gde je stala.",
     q3: "Šta ako ne koristim Discord?",
     a3: "Sesije rade isto i bez njega — samo nema pregleda na Discordu.",
     openSessions: "Otvori moje sesije",

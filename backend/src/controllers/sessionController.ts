@@ -17,6 +17,11 @@ export const sessionController = {
     res.json({ sessions: await sessionService.list(res.locals.userId) });
   },
 
+  async logs(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ logs: await sessionService.logs(res.locals.userId, id) });
+  },
+
   /** GET /sessions/page?page=&pageSize= — one page of the sessions list with each session's totals. */
   async page(req: Request, res: Response<unknown, AuthLocals>) {
     const { page, pageSize } = validate(sessionPageSchema, req.query);

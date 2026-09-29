@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { SHARE_TOKEN_BYTES } from "../config/constants";
 import { logRepository } from "../repositories/logRepository";
-import type { Log, LogFilter, LogPage, SharedLog, SharedLogResponse } from "../types/log.types";
+import type { Log, LogFilter, LogListItem, LogPage, SharedLog, SharedLogResponse } from "../types/log.types";
 import { logNotFound } from "../utils/httpError";
 import { userService } from "./userService";
 
@@ -9,7 +9,7 @@ import { userService } from "./userService";
 export const toSharedLog = ({ ownerId: _o, sessionId: _s, shareToken: _t, ...log }: Log): SharedLog => log;
 
 export const logService = {
-  list: (ownerId: string): Promise<Log[]> => logRepository.listByOwner(ownerId),
+  list: (ownerId: string): Promise<LogListItem[]> => logRepository.listByOwner(ownerId),
 
   /** One page of the owner's logs matching the filter, newest first. */
   search: (ownerId: string, filter: LogFilter, page: number, pageSize: number): Promise<LogPage> =>

@@ -1,0 +1,6 @@
+{
+  // Only for the editor: tells VS Code which config each file belongs to (the renderer needs tsconfig.web.json for
+  // the "@/…" alias). Type-checking and builds use the two configs directly (npm run typecheck).
+  "files": [],
+  "references": [{ "path": "./tsconfig.node.json" }, { "path": "./tsconfig.web.json" }]
+}

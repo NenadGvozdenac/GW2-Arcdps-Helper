@@ -48,6 +48,7 @@ export function createRouter(): Router {
   router.get("/sessions/page", requireAuth, sessionController.page);
   router.get("/sessions/active", requireAuth, sessionController.active);
   router.post("/sessions/bulk-delete", requireAuth, sessionController.removeMany);
+  router.get("/sessions/:id/logs", requireAuth, sessionController.logs);
   router.patch("/sessions/:id", requireAuth, sessionController.update);
   router.post("/sessions/:id/end", requireAuth, sessionController.end);
   router.post("/sessions/:id/move", requireAuth, sessionController.move);

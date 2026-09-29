@@ -66,6 +66,7 @@ export default function SharedLogPage() {
     <div className="flex flex-col gap-6">
       <LogView
         log={log}
+        players={log.players}
         isOwnAccount={c.isOwnAccount}
         meta={owner && <span>· {t("logDetail.sharedBy", { name: owner })}</span>}
         actions={
