@@ -36,16 +36,17 @@ export default function LogTable({ logs, showGroup = false, openOnDpsReport = fa
   if (!logs.length) return <p className="py-8 text-center text-sm text-muted-foreground">{t("common.noLogs")}</p>;
 
   return (
-    <Table>
+    // Fixed layout with set column widths, so tables shown one under another (a session's wings, …) line up.
+    <Table className="table-fixed">
       <TableHeader>
         <TableRow>
-          {selection && <TableHead className="w-8" />}
+          {selection && <TableHead className="w-10" />}
           <TableHead>{t("logTable.boss")}</TableHead>
-          {showGroup && <TableHead className="hidden sm:table-cell">{t("logTable.group")}</TableHead>}
-          <TableHead>{t("logTable.result")}</TableHead>
-          <TableHead className="text-right">{t("logTable.duration")}</TableHead>
-          <TableHead className="hidden md:table-cell">{t("logTable.date")}</TableHead>
-          <TableHead className="hidden sm:table-cell" />
+          {showGroup && <TableHead className="hidden w-16 sm:table-cell">{t("logTable.group")}</TableHead>}
+          <TableHead className="w-28 sm:w-44">{t("logTable.result")}</TableHead>
+          <TableHead className="w-24 text-right">{t("logTable.duration")}</TableHead>
+          <TableHead className="hidden w-44 md:table-cell">{t("logTable.date")}</TableHead>
+          <TableHead className="hidden w-32 sm:table-cell" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -70,13 +71,13 @@ export default function LogTable({ logs, showGroup = false, openOnDpsReport = fa
               </TableCell>
             )}
             <TableCell className="whitespace-normal">
-              <div className="flex min-w-40 items-center gap-2.5">
+              <div className="flex items-center gap-2.5">
                 {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 shrink-0 rounded-md" loading="lazy" />}
-                <span className="font-medium">{l.bossName}</span>
+                <span className="min-w-0 font-medium break-words">{l.bossName}</span>
               </div>
             </TableCell>
             {showGroup && <TableCell className="hidden text-muted-foreground sm:table-cell">{groupLabel(l)}</TableCell>}
-            <TableCell>
+            <TableCell className="whitespace-normal">
               <ResultBadge log={l} />
             </TableCell>
             <TableCell className="text-right font-mono tabular-nums">{fmt.duration(l.durationMs)}</TableCell>

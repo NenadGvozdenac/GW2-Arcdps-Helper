@@ -9,29 +9,64 @@ import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggl
 import LogTable from "./LogTable";
 import { failBadge, successBadge } from "./ResultBadge";
 
-function useGroupedLogTableController(logs: Log[]) {
+/** The kills / wipes filter, remembered in this browser. */
+export function useSessionResultFilter() {
   const [filter, setFilterState] = useState<SessionResultFilter>(() => sessionResultFilterStorage.get() ?? "together");
   const setFilter = (next: SessionResultFilter) => {
     setFilterState(next);
     sessionResultFilterStorage.set(next);
   };
+  return { filter, setFilter };
+}
+
+/** Toggle between kills and wipes together, or kills first and wipes at the end. */
+export function SessionResultFilterToggle({
+  filter,
+  onChange,
+}: {
+  filter: SessionResultFilter;
+  onChange: (filter: SessionResultFilter) => void;
+}) {
+  const { t } = useI18n();
+  return (
+    <ToggleGroup
+      type="single"
+      size="sm"
+      variant="outline"
+      value={filter}
+      onValueChange={(v) => v && onChange(v as SessionResultFilter)}
+      aria-label={t("sessions.resultFilter")}
+    >
+      <ToggleGroupItem value="together" className="px-3 text-xs">
+        {t("sessions.filterTogether")}
+      </ToggleGroupItem>
+      <ToggleGroupItem value="split" className="px-3 text-xs">
+        {t("sessions.filterSplit")}
+      </ToggleGroupItem>
+    </ToggleGroup>
+  );
+}
+
+function useGroupedLogTableController(logs: Log[]) {
   const all = useMemo(() => sessionService.byGroup(logs), [logs]);
   const kills = useMemo(() => sessionService.byGroup(logs.filter((l) => l.success)), [logs]);
   const wipes = useMemo(() => sessionService.byGroup(logs.filter((l) => !l.success)), [logs]);
-  return { filter, setFilter, all, kills, wipes };
+  return { all, kills, wipes };
 }
 
 interface Props {
   logs: Log[];
+  /** From useSessionResultFilter(); the toggle itself sits in the page (top right of the logs card). */
+  filter: SessionResultFilter;
   /** Rows open the log on dps.report instead of the (sign-in only) log page — for shared sessions. */
   openOnDpsReport?: boolean;
 }
 
 /**
- * A session's logs split by wing / fractal / strike (W1, W2, …), each with its own kills / wipes. A filter on top
- * shows kills and wipes together, or kills first and all wipes at the end.
+ * A session's logs split by wing / fractal / strike (W1, W2, …), each with its own kills / wipes. The filter
+ * (SessionResultFilterToggle, in the page) shows kills and wipes together, or kills first and all wipes at the end.
  */
-export default function GroupedLogTable({ logs, openOnDpsReport = false }: Props) {
+export default function GroupedLogTable({ logs, filter, openOnDpsReport = false }: Props) {
   const c = useGroupedLogTableController(logs);
   const { t } = useI18n();
   if (!logs.length) return <LogTable logs={logs} />;
@@ -41,24 +76,7 @@ export default function GroupedLogTable({ logs, openOnDpsReport = false }: Props
 
   return (
     <div className="flex flex-col gap-6">
-      <ToggleGroup
-        type="single"
-        size="sm"
-        variant="outline"
-        value={c.filter}
-        onValueChange={(v) => v && c.setFilter(v as SessionResultFilter)}
-        aria-label={t("sessions.resultFilter")}
-        className="self-start"
-      >
-        <ToggleGroupItem value="together" className="px-3 text-xs">
-          {t("sessions.filterTogether")}
-        </ToggleGroupItem>
-        <ToggleGroupItem value="split" className="px-3 text-xs">
-          {t("sessions.filterSplit")}
-        </ToggleGroupItem>
-      </ToggleGroup>
-
-      {c.filter === "together" ? (
+      {filter === "together" ? (
         sections(c.all)
       ) : (
         <>

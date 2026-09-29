@@ -5,8 +5,8 @@ import { useI18n } from "../../controllers/I18nController";
 import { sessionService } from "../../services/sessionService";
 import type { SharedSession } from "../../domain/types/session.types";
 import { Badge } from "@/presentation/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import GroupedLogTable from "../components/GroupedLogTable";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import GroupedLogTable, { SessionResultFilterToggle, useSessionResultFilter } from "../components/GroupedLogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
@@ -46,6 +46,7 @@ export default function SharedSessionPage() {
   const { token } = useParams();
   const c = useSharedSessionController(token);
   const { t, fmt } = useI18n();
+  const resultFilter = useSessionResultFilter();
 
   if (c.state === "loading") {
     return (
@@ -99,10 +100,15 @@ export default function SharedSessionPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t("sessions.logsTitle")}</CardTitle>
+          {logs.length > 0 && (
+            <CardAction>
+              <SessionResultFilterToggle filter={resultFilter.filter} onChange={resultFilter.setFilter} />
+            </CardAction>
+          )}
           <CardDescription>{t("sessions.sharedLogsHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <GroupedLogTable logs={logs} openOnDpsReport />
+          <GroupedLogTable logs={logs} filter={resultFilter.filter} openOnDpsReport />
         </CardContent>
       </Card>
     </div>

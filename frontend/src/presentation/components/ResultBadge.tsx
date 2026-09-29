@@ -9,7 +9,7 @@ export const cmBadge = "border-cm/30 bg-cm/10 text-cm";
 export default function ResultBadge({ log }: { log: Log }) {
   const { t, fmt } = useI18n();
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex flex-wrap items-center gap-1.5">
       {log.success ? (
         <Badge variant="outline" className={successBadge}>
           {t("common.kill")}

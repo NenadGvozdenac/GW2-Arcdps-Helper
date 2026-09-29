@@ -20,8 +20,8 @@ import {
 } from "@/presentation/components/ui/alert-dialog";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import GroupedLogTable from "../components/GroupedLogTable";
+import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import GroupedLogTable, { SessionResultFilterToggle, useSessionResultFilter } from "../components/GroupedLogTable";
 import PracticeRunCard from "../components/PracticeRunCard";
 import SessionTitle from "../components/SessionTitle";
 import ShareButton from "../components/ShareButton";
@@ -91,6 +91,7 @@ export default function SessionDetailPage() {
   const { id } = useParams();
   const c = useSessionDetailController(id);
   const { t, fmt } = useI18n();
+  const resultFilter = useSessionResultFilter();
 
   const back = (
     <Button asChild variant="ghost" size="sm" className="self-start">
@@ -205,10 +206,15 @@ export default function SessionDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t("sessions.logsTitle")}</CardTitle>
+          {logs.length > 0 && (
+            <CardAction>
+              <SessionResultFilterToggle filter={resultFilter.filter} onChange={resultFilter.setFilter} />
+            </CardAction>
+          )}
           <CardDescription>{t("sessions.durationHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <GroupedLogTable logs={logs} />
+          <GroupedLogTable logs={logs} filter={resultFilter.filter} />
         </CardContent>
       </Card>
     </div>
