@@ -263,6 +263,20 @@ namespace
 		if (ImGui::Button(label.c_str())) g_showClears = !g_showClears;
 	}
 
+	/** Widest line of any wing cell: its title ("W3  Stronghold of the Faithful  0/4") or a boss with its mark. */
+	float ClearsColumnWidth(const Api::WeeklyClears& clears)
+	{
+		const float spacing = ImGui::GetStyle().ItemSpacing.x, mark = 9.0f; // BossMark is 2 * 4.5 wide
+		float width = 0;
+		for (const auto& g : clears.groups)
+		{
+			std::string rest = g.name + "  " + std::to_string(g.bosses.size()) + "/" + std::to_string(g.bosses.size());
+			width = std::max(width, ImGui::CalcTextSize(g.shortName.c_str()).x + spacing + ImGui::CalcTextSize(rest.c_str()).x);
+			for (const auto& b : g.bosses) width = std::max(width, mark + spacing + ImGui::CalcTextSize(b.name.c_str()).x);
+		}
+		return width;
+	}
+
 	/** Separate window with every raid wing and the bosses killed since the weekly reset; sized to its content. */
 	void RenderClearsWindow(const AccountState& acc)
 	{
@@ -282,8 +296,11 @@ namespace
 			ImGui::TextColored(GREY, "- resets in %s (Monday 07:30 UTC)", FormatUntil(acc.clears.nextResetMs).c_str());
 			ImGui::Spacing();
 
-			if (ImGui::BeginTable("clears", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_SizingFixedSame | ImGuiTableFlags_PadOuterX))
+			if (ImGui::BeginTable("clears", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_PadOuterX))
 			{
+				// Explicit widths: with an auto-resizing window, ImGui's own sizing cut the last column off.
+				float width = ClearsColumnWidth(acc.clears);
+				for (int i = 0; i < 3; ++i) ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthFixed, width);
 				for (const auto& g : acc.clears.groups)
 				{
 					ImGui::TableNextColumn();
