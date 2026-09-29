@@ -4,7 +4,7 @@ import type { DiscordEmbed } from "../types/discord.types";
 import type { Log } from "../types/log.types";
 import type { LogSpan, Session } from "../types/session.types";
 import { discordWebhookFailed } from "../utils/httpError";
-import { postToWebhook } from "./clients/discordClient";
+import { editWebhookMessage, postToWebhook } from "./clients/discordClient";
 
 const GREEN = 0x22c55e;
 const RED = 0xef4444;
@@ -88,6 +88,27 @@ function toEmbed(log: Log): DiscordEmbed {
   };
 }
 
+/** Session summary: kills per group, failed logs, totals and how long it took. */
+function sessionEmbed(session: Session, logs: Log[], span: LogSpan): DiscordEmbed {
+  const kills = logs.filter((l) => l.success).length;
+  const groups = [...new Set(logs.map((l) => GROUPS.find((g) => g.id === l.groupId)?.short).filter(Boolean))];
+  return {
+    title: session.name || "Session",
+    description: fitLines(sessionLines(logs)),
+    color: kills ? GREEN : RED,
+    fields: [
+      { name: "Duration", value: formatLongDuration(span.durationMs), inline: true },
+      { name: "Logs", value: String(logs.length), inline: true },
+      { name: "Kills / wipes", value: `${kills} / ${logs.length - kills}`, inline: true },
+      ...(groups.length ? [{ name: "Content", value: groups.join(" · ") }] : []),
+    ],
+    footer: {
+      text: session.endReason === "expired" ? "Session · ended automatically after 6 hours" : "Session",
+    },
+    timestamp: span.start.toISOString(),
+  };
+}
+
 export const discordService = {
   /**
    * Posts newly imported logs to the user's webhook (up to 10 per message).
@@ -107,30 +128,26 @@ export const discordService = {
     }
   },
 
-  /** One message summarising a finished session: kills per group, failed logs, totals and how long it took. */
-  async notifySession(webhookUrl: string | null, session: Session, logs: Log[], span: LogSpan): Promise<void> {
-    if (!webhookUrl || !logs.length) return;
-    const kills = logs.filter((l) => l.success).length;
-    const groups = [...new Set(logs.map((l) => GROUPS.find((g) => g.id === l.groupId)?.short).filter(Boolean))];
-    const embed: DiscordEmbed = {
-      title: session.name || "Session",
-      description: fitLines(sessionLines(logs)),
-      color: kills ? GREEN : RED,
-      fields: [
-        { name: "Duration", value: formatLongDuration(span.durationMs), inline: true },
-        { name: "Logs", value: String(logs.length), inline: true },
-        { name: "Kills / wipes", value: `${kills} / ${logs.length - kills}`, inline: true },
-        ...(groups.length ? [{ name: "Content", value: groups.join(" · ") }] : []),
-      ],
-      footer: {
-        text: session.endReason === "expired" ? "Session · ended automatically after 6 hours" : "Session",
-      },
-      timestamp: span.start.toISOString(),
-    };
+  /**
+   * One message summarising a finished session; returns its message ID (null when nothing was posted).
+   * Never throws, like notifyNewLogs.
+   */
+  async notifySession(webhookUrl: string | null, session: Session, logs: Log[], span: LogSpan): Promise<string | null> {
+    if (!webhookUrl || !logs.length) return null;
     try {
-      await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [embed] });
+      return await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [sessionEmbed(session, logs, span)] });
     } catch (err) {
       console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
+      return null;
+    }
+  },
+
+  /** Rewrites a session summary posted earlier (e.g. after a rename). Never throws: the message may be deleted. */
+  async updateSession(webhookUrl: string, messageId: string, session: Session, logs: Log[], span: LogSpan): Promise<void> {
+    try {
+      await editWebhookMessage(webhookUrl, messageId, { embeds: [sessionEmbed(session, logs, span)] });
+    } catch (err) {
+      console.warn("Discord message edit failed:", err instanceof Error ? err.message : err);
     }
   },
 

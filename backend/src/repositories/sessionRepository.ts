@@ -1,6 +1,6 @@
 import { and, asc, count, desc, eq, getTableColumns, inArray, isNull, lt, min, sql } from "drizzle-orm";
 import { getDb } from "../db/pool";
-import { logs, sessions } from "../db/schema";
+import { logs, sessionDiscordMessages, sessions } from "../db/schema";
 import type { Log } from "../types/log.types";
 import type { Session, SessionEndReason, SessionPatch } from "../types/session.types";
 
@@ -202,5 +202,22 @@ export const sessionRepository = {
       .from(logs)
       .where(and(eq(logs.ownerId, ownerId), eq(logs.sessionId, id)))
       .orderBy(asc(logs.encounterTime));
+  },
+
+  /** Remembers the Discord summary of a session; a resumed session that ends again replaces the old one. */
+  async saveDiscordMessage(sessionId: string, webhookUrl: string, messageId: string): Promise<void> {
+    await getDb()
+      .insert(sessionDiscordMessages)
+      .values({ sessionId, webhookUrl, messageId })
+      .onConflictDoUpdate({ target: sessionDiscordMessages.sessionId, set: { webhookUrl, messageId } });
+  },
+
+  async findDiscordMessage(sessionId: string): Promise<{ webhookUrl: string; messageId: string } | null> {
+    const [row] = await getDb()
+      .select({ webhookUrl: sessionDiscordMessages.webhookUrl, messageId: sessionDiscordMessages.messageId })
+      .from(sessionDiscordMessages)
+      .where(eq(sessionDiscordMessages.sessionId, sessionId))
+      .limit(1);
+    return row ?? null;
   },
 };

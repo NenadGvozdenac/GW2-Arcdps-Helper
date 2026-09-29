@@ -71,6 +71,16 @@ export const sessions = pgTable(
   ],
 );
 
+/** The Discord summary posted when a session ended, so renaming the session can edit that message. */
+export const sessionDiscordMessages = pgTable("session_discord_messages", {
+  sessionId: uuid("session_id")
+    .primaryKey()
+    .references(() => sessions.id, { onDelete: "cascade" }),
+  /** Webhook that posted the message — only it can edit the message, and the user may connect another one since. */
+  webhookUrl: text("webhook_url").notNull(),
+  messageId: text("message_id").notNull(),
+});
+
 export const logs = pgTable(
   "logs",
   {

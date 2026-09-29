@@ -38,10 +38,21 @@ async function endAndNotify(ownerId: string, id: string, reason: SessionEndReaso
   if (!session) return null;
   const logs = await sessionRepository.logsOf(ownerId, id);
   if (logs.length) {
-    const user = await userService.get(ownerId);
-    await discordService.notifySession(user.discordWebhookUrl, session, logs, logSpan(logs)!);
+    const { discordWebhookUrl } = await userService.get(ownerId);
+    const messageId = await discordService.notifySession(discordWebhookUrl, session, logs, logSpan(logs)!);
+    if (discordWebhookUrl && messageId) await sessionRepository.saveDiscordMessage(id, discordWebhookUrl, messageId);
   }
   return session;
+}
+
+/** Rewrites the session's Discord summary, if one was posted, so it shows the current name. */
+async function refreshDiscordMessage(ownerId: string, session: Session): Promise<void> {
+  if (!session.endedAt) return;
+  const message = await sessionRepository.findDiscordMessage(session.id);
+  if (!message) return;
+  const logs = await sessionRepository.logsOf(ownerId, session.id);
+  if (!logs.length) return;
+  await discordService.updateSession(message.webhookUrl, message.messageId, session, logs, logSpan(logs)!);
 }
 
 /**
@@ -86,10 +97,12 @@ export const sessionService = {
     return latest?.endReason === "expired" ? latest : null;
   },
 
-  /** Renames and / or pins the session. */
+  /** Renames and / or pins the session; a rename also updates the Discord summary of an ended session. */
   async update(ownerId: string, id: string, patch: SessionPatch): Promise<Session> {
+    const before = patch.name === undefined ? null : await sessionRepository.findById(ownerId, id);
     const session = await sessionRepository.update(ownerId, id, patch);
     if (!session) throw sessionNotFound();
+    if (before && before.name !== session.name) await refreshDiscordMessage(ownerId, session);
     return session;
   },
 
