@@ -95,8 +95,10 @@ async function syncToWeb(id: string): Promise<void> {
       isCM: result.log.isCM,
       isLegendaryCM: result.log.isLegendaryCM,
     });
-    // A raid kill can complete a boss of the weekly clear.
-    if (result.log.success && result.log.category === "raid") void clearsService.refresh();
+    // A raid or strike kill can complete a boss of the weekly clear.
+    if (result.log.success && (result.log.category === "raid" || result.log.category === "strike")) {
+      void clearsService.refresh();
+    }
   } catch (err) {
     if (err instanceof AppError && err.status === 401) {
       authService.handleUnauthorized();

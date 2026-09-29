@@ -4,6 +4,9 @@ import type { WeeklyClears } from "../types/clears.types";
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
+/** Raids and strikes reset weekly (fractals daily, so they are not part of this). */
+const WEEKLY_CATEGORIES = ["raid", "strike"] as const;
+
 /** Weekly reset: Monday 07:30 UTC (same as the website's statsService.lastWeeklyReset). */
 export function lastWeeklyReset(now = new Date()): Date {
   const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 7, 30));
@@ -13,23 +16,29 @@ export function lastWeeklyReset(now = new Date()): Date {
 }
 
 export const clearsService = {
-  /** Every raid wing (without seasonal groups) with the bosses killed since the weekly reset. */
-  async weeklyRaids(userId: string, now = new Date()): Promise<WeeklyClears> {
+  /** Every raid wing and strike group (without seasonal ones) with the bosses killed since the weekly reset. */
+  async weekly(userId: string, now = new Date()): Promise<WeeklyClears> {
     const resetAt = lastWeeklyReset(now);
-    const cleared = new Set(await logRepository.killedEncounterKeysSince(userId, "raid", resetAt));
+    const killed = await Promise.all(
+      WEEKLY_CATEGORIES.map((c) => logRepository.killedEncounterKeysSince(userId, c, resetAt)),
+    );
+    const cleared = new Set(killed.flat());
     return {
       resetAt: resetAt.toISOString(),
       nextResetAt: new Date(resetAt.getTime() + WEEK_MS).toISOString(),
-      groups: GROUPS.filter((g) => g.category === "raid" && !g.notInClear).map((g) => ({
-        id: g.id,
-        short: g.short,
-        name: g.name,
-        bosses: ENCOUNTERS.filter((e) => e.group === g.id).map((e) => ({
-          key: e.key,
-          name: e.name,
-          cleared: cleared.has(e.key),
+      groups: WEEKLY_CATEGORIES.flatMap((category) =>
+        GROUPS.filter((g) => g.category === category && !g.notInClear).map((g) => ({
+          id: g.id,
+          category,
+          short: g.short,
+          name: g.name,
+          bosses: ENCOUNTERS.filter((e) => e.group === g.id).map((e) => ({
+            key: e.key,
+            name: e.name,
+            cleared: cleared.has(e.key),
+          })),
         })),
-      })),
+      ),
     };
   },
 };

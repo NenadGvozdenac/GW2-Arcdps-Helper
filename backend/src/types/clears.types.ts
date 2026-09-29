@@ -7,13 +7,15 @@ export interface ClearBoss {
 
 export interface ClearGroup {
   id: string;
+  /** Raid wings come first, then strike groups. */
+  category: "raid" | "strike";
   /** "W1", "VoE", … */
   short: string;
   name: string;
   bosses: ClearBoss[];
 }
 
-/** Raid bosses killed since the weekly reset — shown by the desktop uploader and the Nexus addon. */
+/** Raid and strike bosses killed since the weekly reset — shown by the desktop uploader and the Nexus addon. */
 export interface WeeklyClears {
   /** Last weekly reset (Monday 07:30 UTC), ISO string. */
   resetAt: string;

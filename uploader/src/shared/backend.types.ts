@@ -20,13 +20,15 @@ export interface BackendSession {
   expiresAt: string;
 }
 
-/** GET /clears/weekly: raid bosses killed since the weekly reset (Monday 07:30 UTC). */
+/** GET /clears/weekly: raid and strike bosses killed since the weekly reset (Monday 07:30 UTC). */
 export interface WeeklyClears {
   resetAt: string;
   nextResetAt: string;
   groups: {
     id: string;
-    /** "W1", "VoE", … */
+    /** Raid wings come first, then strike groups. */
+    category: "raid" | "strike";
+    /** "W1", "VoE", "IBS", … */
     short: string;
     name: string;
     bosses: { key: string; name: string; cleared: boolean }[];

@@ -6,7 +6,7 @@ import { stateStore } from "./stateStore";
 
 let refreshTimer: NodeJS.Timeout | undefined;
 
-/** Raid bosses killed since the weekly reset; the backend computes them from the account's logs. */
+/** Raid and strike bosses killed since the weekly reset; the backend computes them from the account's logs. */
 export const clearsService = {
   async refresh(): Promise<void> {
     const credentials = authService.getCredentials();

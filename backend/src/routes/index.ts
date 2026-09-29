@@ -23,7 +23,7 @@ export function createRouter(): Router {
   router.post("/auth/reset-password", authController.resetPassword);
   router.get("/auth/me", requireAuth, authController.me);
 
-  // Raid bosses killed since the weekly reset (desktop uploader and Nexus addon).
+  // Raid and strike bosses killed since the weekly reset (desktop uploader and Nexus addon).
   router.get("/clears/weekly", requireAuth, clearsController.weekly);
 
   router.patch("/profile", requireAuth, profileController.update);

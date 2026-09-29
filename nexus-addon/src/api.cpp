@@ -214,7 +214,7 @@ namespace Api
 		for (const json& g : out.value("groups", json::array()))
 		{
 			if (!g.is_object()) continue;
-			ClearGroup group{ Str(g, "short"), Str(g, "name"), {} };
+			ClearGroup group{ Str(g, "category"), Str(g, "short"), Str(g, "name"), {} };
 			for (const json& b : g.value("bosses", json::array()))
 			{
 				if (b.is_object()) group.bosses.push_back({ Str(b, "name"), OptBool(b, "cleared").value_or(false) });

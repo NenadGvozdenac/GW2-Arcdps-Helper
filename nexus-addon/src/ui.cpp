@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstring>
 #include <string>
+#include <utility>
 
 #include "imgui/imgui.h"
 #include "imgui/imgui_internal.h"
@@ -139,36 +140,49 @@ namespace
 	}
 
 	/** Room the weekly-clear icon takes at the end of the recording row (0 while it isn't shown). */
-	float ClearsIconRoom(const AccountState& acc)
+	constexpr const char* CLEARS_LABEL = "Weekly";
+
+	/** Width of the weekly-clear button: calendar icon, a gap and "Weekly", with the usual frame padding. */
+	float ClearsButtonWidth()
 	{
-		return HasClears(acc) ? ImGui::GetFrameHeight() + ImGui::GetStyle().ItemSpacing.x : 0.0f;
+		float h = ImGui::GetFrameHeight();
+		return ImGui::GetStyle().FramePadding.x * 2 + h * 0.6f + ImGui::GetStyle().ItemInnerSpacing.x + ImGui::CalcTextSize(CLEARS_LABEL).x;
 	}
 
-	/** Square button with a calendar-and-check icon; opens / closes the weekly raid clear window. */
+	/** Room the weekly-clear button takes at the end of the recording row (0 while it isn't shown). */
+	float ClearsIconRoom(const AccountState& acc)
+	{
+		return HasClears(acc) ? ClearsButtonWidth() + ImGui::GetStyle().ItemSpacing.x : 0.0f;
+	}
+
+	/** "Weekly" button with a calendar-and-check icon; opens / closes the weekly raid clear window. */
 	void ClearsIconButton(const AccountState& acc)
 	{
 		if (!HasClears(acc)) return;
 		ImGui::SameLine();
-		float size = ImGui::GetFrameHeight();
+		const ImGuiStyle& style = ImGui::GetStyle();
+		float height = ImGui::GetFrameHeight(), width = ClearsButtonWidth();
 		ImVec2 p = ImGui::GetCursorScreenPos();
-		if (ImGui::InvisibleButton("##weeklyClear", ImVec2(size, size))) g_showClears = !g_showClears;
+		if (ImGui::InvisibleButton("##weeklyClear", ImVec2(width, height))) g_showClears = !g_showClears;
 		bool hovered = ImGui::IsItemHovered();
 
 		ImDrawList* draw = ImGui::GetWindowDrawList();
 		ImGuiCol bg = g_showClears ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button;
-		draw->AddRectFilled(p, ImVec2(p.x + size, p.y + size), ImGui::GetColorU32(bg), ImGui::GetStyle().FrameRounding);
+		draw->AddRectFilled(p, ImVec2(p.x + width, p.y + height), ImGui::GetColorU32(bg), style.FrameRounding);
 
-		// Calendar page: outline, a filled top strip, and a check mark inside.
+		// Calendar page: outline, a filled top strip, and a green check mark inside.
 		ImU32 color = ImGui::GetColorU32(ImGuiCol_Text);
-		float pad = size * 0.24f, t = 1.5f;
-		ImVec2 a(p.x + pad, p.y + pad + 1), b(p.x + size - pad, p.y + size - pad);
-		draw->AddRect(a, b, color, 2.0f, 0, t);
-		draw->AddRectFilled(a, ImVec2(b.x, a.y + (b.y - a.y) * 0.28f), color, 2.0f);
-		float w = b.x - a.x, h = b.y - a.y;
-		ImVec2 check[3] = { ImVec2(a.x + w * 0.25f, a.y + h * 0.62f), ImVec2(a.x + w * 0.44f, a.y + h * 0.80f), ImVec2(a.x + w * 0.76f, a.y + h * 0.45f) };
+		float icon = height * 0.6f, top = (height - icon) / 2;
+		ImVec2 a(p.x + style.FramePadding.x, p.y + top), b(a.x + icon, a.y + icon);
+		draw->AddRect(a, b, color, 2.0f, 0, 1.5f);
+		draw->AddRectFilled(a, ImVec2(b.x, a.y + icon * 0.28f), color, 2.0f);
+		ImVec2 check[3] = { ImVec2(a.x + icon * 0.25f, a.y + icon * 0.62f), ImVec2(a.x + icon * 0.44f, a.y + icon * 0.80f), ImVec2(a.x + icon * 0.76f, a.y + icon * 0.45f) };
 		draw->AddPolyline(check, 3, ImGui::GetColorU32(GREEN), 0, 2.0f);
 
-		if (hovered) ImGui::SetTooltip("Weekly raid clear");
+		ImVec2 text(b.x + style.ItemInnerSpacing.x, p.y + style.FramePadding.y);
+		draw->AddText(text, color, CLEARS_LABEL);
+
+		if (hovered) ImGui::SetTooltip("Weekly raid and strike clear");
 	}
 
 	void RenderRename(const AccountState& acc)
@@ -284,11 +298,13 @@ namespace
 		ImGui::SameLine();
 	}
 
-	void CountClears(const Api::WeeklyClears& clears, int& cleared, int& total)
+	/** Bosses killed / total of one category ("raid" or "strike"). */
+	void CountClears(const Api::WeeklyClears& clears, const std::string& category, int& cleared, int& total)
 	{
 		cleared = total = 0;
 		for (const auto& g : clears.groups)
 		{
+			if (g.category != category) continue;
 			for (const auto& b : g.bosses) cleared += b.cleared ? 1 : 0;
 			total += (int)g.bosses.size();
 		}
@@ -308,7 +324,35 @@ namespace
 		return width;
 	}
 
-	/** Separate window with every raid wing and the bosses killed since the weekly reset; sized to its content. */
+	/** The wings / strike groups of one category, three per row, each with its bosses. */
+	void RenderClearsTable(const Api::WeeklyClears& clears, const std::string& category, float width)
+	{
+		// Explicit widths: with an auto-resizing window, ImGui's own sizing cut the last column off.
+		if (!ImGui::BeginTable(("clears_" + category).c_str(), 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_PadOuterX)) return;
+		for (int i = 0; i < 3; ++i) ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthFixed, width);
+		for (const auto& g : clears.groups)
+		{
+			if (g.category != category) continue;
+			ImGui::TableNextColumn();
+			int done = 0;
+			for (const auto& b : g.bosses) done += b.cleared ? 1 : 0;
+			bool full = done == (int)g.bosses.size();
+
+			ImGui::TextColored(full ? GREEN : ImGui::GetStyleColorVec4(ImGuiCol_Text), "%s", g.shortName.c_str());
+			ImGui::SameLine();
+			ImGui::TextColored(GREY, "%s  %d/%d", g.name.c_str(), done, (int)g.bosses.size());
+			for (const auto& b : g.bosses)
+			{
+				BossMark(b.cleared);
+				if (b.cleared) ImGui::TextUnformatted(b.name.c_str());
+				else ImGui::TextColored(GREY, "%s", b.name.c_str());
+			}
+			ImGui::Spacing();
+		}
+		ImGui::EndTable();
+	}
+
+	/** Separate window with the raid wings and strike groups (one tab each) and the bosses killed since the weekly reset. */
 	void RenderClearsWindow(const AccountState& acc)
 	{
 		if (!g_showClears) return;
@@ -318,39 +362,26 @@ namespace
 			return;
 		}
 
-		if (ImGui::Begin("Weekly raid clear###GW2ArcDPSHelperClears", &g_showClears, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
+		if (ImGui::Begin("Weekly clear###GW2ArcDPSHelperClears", &g_showClears, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_AlwaysAutoResize))
 		{
-			int cleared, total;
-			CountClears(acc.clears, cleared, total);
-			ImGui::Text("%d/%d bosses", cleared, total);
-			ImGui::SameLine();
-			ImGui::TextColored(GREY, "- resets in %s (Monday 07:30 UTC)", FormatUntil(acc.clears.nextResetMs).c_str());
+			ImGui::TextColored(GREY, "Resets in %s (Monday 07:30 UTC)", FormatUntil(acc.clears.nextResetMs).c_str());
 			ImGui::Spacing();
 
-			if (ImGui::BeginTable("clears", 3, ImGuiTableFlags_BordersInner | ImGuiTableFlags_PadOuterX))
+			// One tab per category; the column width is measured over both, so switching tabs keeps the window size.
+			float width = ClearsColumnWidth(acc.clears);
+			if (ImGui::BeginTabBar("clearTabs"))
 			{
-				// Explicit widths: with an auto-resizing window, ImGui's own sizing cut the last column off.
-				float width = ClearsColumnWidth(acc.clears);
-				for (int i = 0; i < 3; ++i) ImGui::TableSetupColumn(nullptr, ImGuiTableColumnFlags_WidthFixed, width);
-				for (const auto& g : acc.clears.groups)
+				static const std::pair<std::string, const char*> TABS[] = { { "raid", "Raids" }, { "strike", "Strikes" } };
+				for (const auto& [category, title] : TABS)
 				{
-					ImGui::TableNextColumn();
-					int done = 0;
-					for (const auto& b : g.bosses) done += b.cleared ? 1 : 0;
-					bool full = done == (int)g.bosses.size();
-
-					ImGui::TextColored(full ? GREEN : ImGui::GetStyleColorVec4(ImGuiCol_Text), "%s", g.shortName.c_str());
-					ImGui::SameLine();
-					ImGui::TextColored(GREY, "%s  %d/%d", g.name.c_str(), done, (int)g.bosses.size());
-					for (const auto& b : g.bosses)
-					{
-						BossMark(b.cleared);
-						if (b.cleared) ImGui::TextUnformatted(b.name.c_str());
-						else ImGui::TextColored(GREY, "%s", b.name.c_str());
-					}
-					ImGui::Spacing();
+					int cleared, total;
+					CountClears(acc.clears, category, cleared, total);
+					std::string label = std::string(title) + "  " + std::to_string(cleared) + "/" + std::to_string(total) + "###" + category;
+					if (!ImGui::BeginTabItem(label.c_str())) continue;
+					RenderClearsTable(acc.clears, category, width);
+					ImGui::EndTabItem();
 				}
-				ImGui::EndTable();
+				ImGui::EndTabBar();
 			}
 			TextWrappedColored(GREY, "Kills from this addon, the desktop uploader and the website all count.");
 		}

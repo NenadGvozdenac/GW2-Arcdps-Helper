@@ -58,12 +58,13 @@ namespace Api
 
 	struct ClearGroup
 	{
-		std::string shortName; // W1, VoE, ...
+		std::string category;  // raid or strike
+		std::string shortName; // W1, VoE, IBS, ...
 		std::string name;
 		std::vector<ClearBoss> bosses;
 	};
 
-	/** Raid bosses killed since the weekly reset (Monday 07:30 UTC), from every source (addon, uploader, website). */
+	/** Raid and strike bosses killed since the weekly reset (Monday 07:30 UTC), from every source (addon, uploader, website). */
 	struct WeeklyClears
 	{
 		int64_t nextResetMs = 0;

@@ -22,7 +22,7 @@ struct AccountState
 	std::string sessionName;
 	int64_t sessionStartMs = 0;
 
-	// Weekly raid clear, refreshed every few minutes and after every uploaded raid kill.
+	// Weekly raid / strike clear, refreshed every few minutes and after every uploaded raid or strike kill.
 	bool clearsLoaded = false;
 	Api::WeeklyClears clears;
 };

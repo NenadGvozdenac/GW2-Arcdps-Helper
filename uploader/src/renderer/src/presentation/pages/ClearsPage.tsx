@@ -1,11 +1,21 @@
+import { useState } from "react";
 import { CheckIcon } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { localeFor } from "../../i18n/translate";
 import type { WeeklyClears } from "../../../../shared/backend.types";
+import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
 import { cn } from "@/presentation/lib/utils";
 
 const HOUR_MS = 60 * 60 * 1000;
+
+type ClearCategory = WeeklyClears["groups"][number]["category"];
+const CATEGORIES: ClearCategory[] = ["raid", "strike"];
+
+const countCleared = (groups: WeeklyClears["groups"]) => {
+  const bosses = groups.flatMap((g) => g.bosses);
+  return { cleared: bosses.filter((b) => b.cleared).length, total: bosses.length };
+};
 
 /** "in 3 days" / "in 5 hours" in the app language. */
 function relativeReset(nextResetAt: string, locale: string): string {
@@ -18,12 +28,15 @@ function relativeReset(nextResetAt: string, locale: string): string {
 function useClearsPageController() {
   const { clears } = useAppState();
   const { lang } = useI18n();
+  const [category, setCategory] = useState<ClearCategory>("raid");
   if (!clears) return null;
-  const bosses = clears.groups.flatMap((g) => g.bosses);
+  const groups = clears.groups.filter((g) => g.category === category);
   return {
-    groups: clears.groups,
-    cleared: bosses.filter((b) => b.cleared).length,
-    total: bosses.length,
+    category,
+    setCategory,
+    groups,
+    ...countCleared(groups),
+    tabs: CATEGORIES.map((c) => ({ category: c, ...countCleared(clears.groups.filter((g) => g.category === c)) })),
     resetsIn: relativeReset(clears.nextResetAt, localeFor(lang)),
   };
 }
@@ -90,14 +103,38 @@ export default function ClearsPage() {
           </p>
         </div>
         {c && (
-          <span className="font-mono text-2xl font-semibold tracking-tight">
-            {c.cleared}
-            <span className="text-muted-foreground">/{c.total}</span>
-          </span>
+          <div className="flex shrink-0 items-center gap-4">
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              size="sm"
+              value={c.category}
+              onValueChange={(v) => v && c.setCategory(v as ClearCategory)}
+            >
+              {c.tabs.map((tab) => (
+                <ToggleGroupItem key={tab.category} value={tab.category} className="gap-2 px-3">
+                  {t(tab.category === "raid" ? "clears.raids" : "clears.strikes")}
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {tab.cleared}/{tab.total}
+                  </span>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <span className="font-mono text-2xl font-semibold tracking-tight">
+              {c.cleared}
+              <span className="text-muted-foreground">/{c.total}</span>
+            </span>
+          </div>
         )}
       </div>
       {c && (
-        <div className="grid min-h-0 flex-1 auto-rows-[minmax(min-content,1fr)] grid-cols-3 gap-3 [@media(max-height:700px)]:gap-2">
+        // Raids (3 rows) share the window height; the strikes are a single row that keeps its own height.
+        <div
+          className={cn(
+            "grid min-h-0 flex-1 grid-cols-3 gap-3 [@media(max-height:700px)]:gap-2",
+            c.category === "raid" ? "auto-rows-[minmax(min-content,1fr)]" : "content-start",
+          )}
+        >
           {c.groups.map((g) => (
             <WingCard key={g.id} group={g} />
           ))}

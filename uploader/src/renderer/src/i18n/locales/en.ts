@@ -98,7 +98,9 @@ export const en = {
     account: "Signed in as {name} ({email})",
   },
   clears: {
-    title: "Weekly raid clear",
+    title: "Weekly clear",
+    raids: "Raids",
+    strikes: "Strikes",
     loading: "Loading…",
     resets: "Resets {when} (Monday 07:30 UTC). Kills from the uploader, the addon and the website all count.",
   },

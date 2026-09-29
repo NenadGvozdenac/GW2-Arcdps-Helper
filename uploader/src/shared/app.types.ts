@@ -22,7 +22,7 @@ export interface AppState {
   logFolderExists: boolean;
   watch: WatchState;
   session: SessionState;
-  /** Raid bosses killed since the weekly reset; null while signed out or not loaded yet. */
+  /** Raid and strike bosses killed since the weekly reset; null while signed out or not loaded yet. */
   clears: WeeklyClears | null;
   uploads: UploadEntry[]; // newest first
   update: UpdateState;

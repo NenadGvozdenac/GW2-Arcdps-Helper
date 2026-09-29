@@ -100,7 +100,9 @@ export const de: Messages = {
     account: "Angemeldet als {name} ({email})",
   },
   clears: {
-    title: "Wöchentlicher Raid-Clear",
+    title: "Wochen-Clear",
+    raids: "Raids",
+    strikes: "Strikes",
     loading: "Wird geladen…",
     resets: "Reset {when} (Montag 07:30 UTC). Kills aus dem Uploader, dem Addon und von der Website zählen alle.",
   },

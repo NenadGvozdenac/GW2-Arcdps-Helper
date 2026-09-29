@@ -229,7 +229,7 @@ namespace
 			if (result.success) u.success = result.success;
 			u.isCM = result.isCM;
 		});
-		if (result.success.value_or(false) && result.category == "raid") Account::RefreshClears();
+		if (result.success.value_or(false) && (result.category == "raid" || result.category == "strike")) Account::RefreshClears();
 		return true;
 	}
 

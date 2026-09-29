@@ -98,7 +98,9 @@ export const sr: Messages = {
     account: "Prijavljen kao {name} ({email})",
   },
   clears: {
-    title: "Nedeljni raid clear",
+    title: "Nedeljni clear",
+    raids: "Raidovi",
+    strikes: "Strikeovi",
     loading: "Učitavam…",
     resets: "Reset {when} (ponedeljak 07:30 UTC). Računaju se killovi iz aplikacije, addona i sa sajta.",
   },
