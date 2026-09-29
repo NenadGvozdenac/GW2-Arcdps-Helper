@@ -11,7 +11,8 @@ const aliases = ENCOUNTERS.flatMap((e) => e.aliases.map((alias) => ({ alias, e }
 
 export function findEncounter(triggerId: number | null, name: string): Encounter | undefined {
   const lower = name.toLowerCase();
-  const byName = lower ? aliases.find((x) => lower.includes(x.alias))?.e : undefined;
+  // Convergences reuse raid names ("Convergence: Nexus of Eternity") but aren't in the catalogue.
+  const byName = lower && !lower.includes("convergence") ? aliases.find((x) => lower.includes(x.alias))?.e : undefined;
   const byId = triggerId != null ? encounterById.get(triggerId) : undefined;
   if (byId) {
     // Trust the ID unless the name clearly points to a different wing/fractal/strike.

@@ -108,7 +108,7 @@ export const en = {
         "See at a glance which wings and strikes you have cleared since the weekly reset (Monday 07:30 UTC) and which CM fractals since the daily reset.",
       catalogueTitle: "Every encounter, organised",
       catalogueBody:
-        "Spirit Vale to Mount Balrior, Nightmare to Lonely Tower CM, Icebrood Saga to Secrets of the Obscure — grouped exactly like in game.",
+        "Spirit Vale to Visions of Eternity, Nightmare to Lonely Tower CM, Icebrood Saga to Secrets of the Obscure — grouped exactly like in game.",
       cmTitle: "Normal, CM and Legendary CM",
       cmBody: "Filter every page by mode. Challenge Mote and Legendary CM kills are marked separately.",
       recordsTitle: "Records and history",
@@ -201,7 +201,7 @@ export const en = {
         "Yes. Connect a Discord webhook under Settings and every new log is posted with the boss, result, duration and a link. Logs of a running session are posted together as one summary when it ends.",
       q9: "Which bosses are recognised?",
       a9:
-        "All raid wings (W1–W8), the CM fractals and the strikes. Other logs are still saved, under Other, and a session of only training golems gets a practice-run summary.",
+        "All raid wings (W1–W8) and Visions of Eternity raids, the CM fractals and the strikes. Other logs are still saved, under Other, and a session of only training golems gets a practice-run summary.",
       q10: "Do the uploader and the addon update themselves?",
       a10:
         "Yes. The installed desktop uploader downloads new versions in the background and installs them when you restart it (the portable version shows a link instead). Nexus updates the addon for you.",
@@ -242,7 +242,7 @@ export const en = {
     allLogsLink: "All logs",
   },
   categories: {
-    raid: { title: "Raids", subtitle: "Every wing, from Spirit Vale to Mount Balrior." },
+    raid: { title: "Raids", subtitle: "Every wing, from Spirit Vale to Visions of Eternity." },
     fractal: { title: "Fractals", subtitle: "Challenge Mote fractals and their bosses." },
     strike: { title: "Strike missions", subtitle: "Icebrood Saga, End of Dragons, Secrets of the Obscure." },
     bossesKilled: "Bosses killed",

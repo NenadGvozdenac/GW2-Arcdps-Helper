@@ -2,7 +2,7 @@ import { ENCOUNTERS, GROUPS } from "../domain/data/encounters";
 import type { Category, Encounter, EncounterGroup } from "../domain/types/encounter.types";
 
 export const encounterService = {
-  /** Every wing / fractal / strike in catalogue order (W1…W8, fractals, strikes). */
+  /** Every wing / fractal / strike in catalogue order (W1…W8, VoE, fractals, strikes). */
   allGroups: (): EncounterGroup[] => GROUPS,
 
   groupsFor: (category: Category): EncounterGroup[] => GROUPS.filter((g) => g.category === category),

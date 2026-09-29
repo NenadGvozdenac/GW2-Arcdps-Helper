@@ -12,6 +12,7 @@ export const GROUPS: EncounterGroup[] = [
   { id: "w6", short: "W6", name: "Mythwright Gambit", category: "raid" },
   { id: "w7", short: "W7", name: "The Key of Ahdashim", category: "raid" },
   { id: "w8", short: "W8", name: "Mount Balrior", category: "raid" },
+  { id: "voe", short: "VoE", name: "Visions of Eternity", category: "raid" },
   // Fractals (CM bosses)
   { id: "lonelytower", short: "100 CM", name: "Lonely Tower", category: "fractal" },
   { id: "silentsurf", short: "99 CM", name: "Silent Surf", category: "fractal" },
@@ -19,6 +20,7 @@ export const GROUPS: EncounterGroup[] = [
   { id: "shattered", short: "97 CM", name: "Shattered Observatory", category: "fractal" },
   { id: "nightmare", short: "96 CM", name: "Nightmare", category: "fractal" },
   { id: "kinfall", short: "95 CM", name: "Kinfall", category: "fractal" },
+  { id: "solitarythrone", short: "Throne", name: "Solitary Throne", category: "fractal" },
   // Strikes
   { id: "ibs", short: "IBS", name: "Icebrood Saga", category: "strike" },
   { id: "eod", short: "EoD", name: "End of Dragons", category: "strike" },
@@ -65,6 +67,9 @@ export const ENCOUNTERS: Encounter[] = [
   { key: "greer", name: "Greer, the Blightbringer", group: "w8", ids: [26725], aliases: ["greer"] },
   { key: "decima", name: "Decima, the Stormsinger", group: "w8", ids: [26774], aliases: ["decima"] },
   { key: "ura", name: "Ura, the Steamshrieker", group: "w8", ids: [26712], aliases: ["ura, the", "ura the steamshrieker", "steamshrieker"] },
+  // Visions of Eternity (standalone raid encounters, not a numbered wing)
+  { key: "kela", name: "Kela, Seneschal of Waves", group: "voe", ids: [27124], aliases: ["kela", "guardian's glade", "guardians glade"] },
+  { key: "vloxx", name: "Vloxx", group: "voe", ids: [28106], aliases: ["vloxx", "nexus of eternity"] },
 
   // Fractals
   { key: "mama", name: "MAMA", group: "nightmare", ids: [17021], aliases: ["mama", "m.a.m.a"] },
@@ -76,7 +81,8 @@ export const ENCOUNTERS: Encounter[] = [
   { key: "ai", name: "Ai, Keeper of the Peak", group: "sunqua", ids: [23254], aliases: ["ai, keeper", "keeper of the peak", "dark ai", "elemental ai"] },
   { key: "kana", name: "Kanaxai, Scythe of House Aurkus", group: "silentsurf", ids: [25577, 25572], aliases: ["kanaxai"] },
   { key: "eparch", name: "Eparch", group: "lonelytower", ids: [26231], aliases: ["eparch", "cerus and deimos"] },
-  { key: "whisp", name: "Whispering Shadow", group: "kinfall", ids: [], aliases: ["whispering shadow"] },
+  { key: "whisp", name: "Whispering Shadow", group: "kinfall", ids: [27010], aliases: ["whispering shadow"] },
+  { key: "tyrant", name: "The Eternal Tyrant", group: "solitarythrone", ids: [28051], aliases: ["eternal tyrant", "solitary throne"] },
 
   // Strikes — Icebrood Saga
   { key: "ice", name: "Icebrood Construct", group: "ibs", ids: [22154], aliases: ["icebrood construct", "shiverpeaks pass"] },

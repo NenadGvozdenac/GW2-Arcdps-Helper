@@ -109,7 +109,7 @@ export const sr: Messages = {
         "Na prvi pogled vidiš koje wingove i strikeove si očistio od nedeljnog reseta (ponedeljak 07:30 UTC) i koje CM fraktale od dnevnog.",
       catalogueTitle: "Svi bossovi, sređeni",
       catalogueBody:
-        "Od Spirit Vale do Mount Balrior, od Nightmare do Lonely Tower CM, od Icebrood Sage do Secrets of the Obscure — grupisano kao u igri.",
+        "Od Spirit Vale do Visions of Eternity, od Nightmare do Lonely Tower CM, od Icebrood Sage do Secrets of the Obscure — grupisano kao u igri.",
       cmTitle: "Normal, CM i Legendary CM",
       cmBody: "Svaka stranica se filtrira po modu. Challenge Mote i Legendary CM killovi su posebno označeni.",
       recordsTitle: "Rekordi i istorija",
@@ -202,7 +202,7 @@ export const sr: Messages = {
         "Možeš. Poveži Discord webhook u Podešavanjima i svaki novi log se objavi sa bossom, rezultatom, trajanjem i linkom. Logovi aktivne sesije se objave zajedno, kao jedan sažetak, kad se sesija završi.",
       q9: "Koji bossovi se prepoznaju?",
       a9:
-        "Svi raid wingovi (W1–W8), CM fraktali i strikeovi. Ostali logovi se takođe čuvaju, pod Ostalo, a sesija sa samo trening golemima dobija sažetak vežbanja.",
+        "Svi raid wingovi (W1–W8) i Visions of Eternity raidovi, CM fraktali i strikeovi. Ostali logovi se takođe čuvaju, pod Ostalo, a sesija sa samo trening golemima dobija sažetak vežbanja.",
       q10: "Da li se uploader i addon sami ažuriraju?",
       a10:
         "Da. Instalirani desktop uploader preuzima nove verzije u pozadini i instalira ih kad ga ponovo pokreneš (portable verzija umesto toga prikaže link). Addon ti ažurira Nexus.",
@@ -243,7 +243,7 @@ export const sr: Messages = {
     allLogsLink: "Svi logovi",
   },
   categories: {
-    raid: { title: "Raidovi", subtitle: "Svi wingovi, od Spirit Vale do Mount Balrior." },
+    raid: { title: "Raidovi", subtitle: "Svi wingovi, od Spirit Vale do Visions of Eternity." },
     fractal: { title: "Fraktali", subtitle: "Challenge Mote fraktali i njihovi bossovi." },
     strike: { title: "Strike misije", subtitle: "Icebrood Saga, End of Dragons, Secrets of the Obscure." },
     bossesKilled: "Ubijeni bossovi",

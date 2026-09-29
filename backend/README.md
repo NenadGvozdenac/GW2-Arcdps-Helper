@@ -86,7 +86,7 @@ Links are processed 4 at a time; at most 10 per request so a request fits a Verc
 
 ### Encounter catalogue
 
-`src/data/encounters.ts` lists every raid wing (W1–W8), fractal CM (95–100) and strike with Elite Insights trigger
+`src/data/encounters.ts` lists every raid wing (W1–W8) plus the Visions of Eternity raids, fractal CM (95–100), Solitary Throne and strike with Elite Insights trigger
 IDs and name aliases. **Keep it in sync with `../frontend/src/domain/data/encounters.ts`.**
 
 ## API
