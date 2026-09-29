@@ -286,12 +286,27 @@ export default function AllLogsPage() {
       </div>
 
       <Card>
-        <CardContent className={cn("transition-opacity", c.loading && "opacity-60")} aria-busy={c.loading}>
-          <LogTable
-            logs={c.visible}
-            showGroup
-            selection={c.organizing ? { selected: c.selected, onToggle: c.toggle } : undefined}
-          />
+        <CardContent className="relative" aria-busy={c.loading}>
+          {c.loading && c.visible.length === 0 ? (
+            // First load (or a filter with nothing shown yet): a spinner instead of "No logs".
+            <div className="grid place-items-center py-16" role="status">
+              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <div className={cn("transition-opacity", c.loading && "opacity-50")}>
+              <LogTable
+                logs={c.visible}
+                showGroup
+                selection={c.organizing ? { selected: c.selected, onToggle: c.toggle } : undefined}
+              />
+            </div>
+          )}
+          {c.loading && c.visible.length > 0 && (
+            // Next page / new filter: the current rows stay visible, dimmed, under a spinner.
+            <div className="pointer-events-none absolute inset-0 grid place-items-center" role="status">
+              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          )}
           <div className="mt-4">
             <Pagination
               page={c.page}
