@@ -3,16 +3,18 @@ import { useI18n } from "../../controllers/I18nController";
 import { sessionService } from "../../services/sessionService";
 import type { Log } from "../../domain/types/log.types";
 import type { SessionGroupLogs } from "../../domain/types/session.types";
+import { sessionResultFilterStorage, type SessionResultFilter } from "../../storage/sessionResultFilterStorage";
 import { Badge } from "@/presentation/components/ui/badge";
 import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
 import LogTable from "./LogTable";
 import { failBadge, successBadge } from "./ResultBadge";
 
-/** "together": kills and wipes in one list. "split": kills first, wipes at the end. */
-type ResultFilter = "together" | "split";
-
 function useGroupedLogTableController(logs: Log[]) {
-  const [filter, setFilter] = useState<ResultFilter>("together");
+  const [filter, setFilterState] = useState<SessionResultFilter>(() => sessionResultFilterStorage.get() ?? "together");
+  const setFilter = (next: SessionResultFilter) => {
+    setFilterState(next);
+    sessionResultFilterStorage.set(next);
+  };
   const all = useMemo(() => sessionService.byGroup(logs), [logs]);
   const kills = useMemo(() => sessionService.byGroup(logs.filter((l) => l.success)), [logs]);
   const wipes = useMemo(() => sessionService.byGroup(logs.filter((l) => !l.success)), [logs]);
@@ -44,7 +46,7 @@ export default function GroupedLogTable({ logs, openOnDpsReport = false }: Props
         size="sm"
         variant="outline"
         value={c.filter}
-        onValueChange={(v) => v && c.setFilter(v as ResultFilter)}
+        onValueChange={(v) => v && c.setFilter(v as SessionResultFilter)}
         aria-label={t("sessions.resultFilter")}
         className="self-start"
       >
