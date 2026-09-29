@@ -2,12 +2,18 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { authService } from "../services/authService";
 import { profileService } from "../services/profileService";
 import type { ProfileUpdate, RegisterInput, User } from "../domain/types/user.types";
+import type { Language } from "../i18n/i18n.types";
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (input: RegisterInput) => Promise<void>;
+  /** Creates the account (not signed in yet) and returns the email the confirmation link went to. */
+  register: (input: RegisterInput, language: Language) => Promise<string>;
+  /** Confirms the email from the emailed link and signs the user in. */
+  verifyEmail: (token: string) => Promise<void>;
+  /** Sets a new password from the emailed reset link and signs the user in. */
+  resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
   /** Saves the Discord webhook, or disconnects it when `url` is empty. */
@@ -37,8 +43,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await authService.login(email, password));
   }, []);
 
-  const register = useCallback(async (input: RegisterInput) => {
-    setUser(await authService.register(input));
+  const register = useCallback((input: RegisterInput, language: Language) => authService.register(input, language), []);
+
+  const verifyEmail = useCallback(async (token: string) => {
+    setUser(await authService.verifyEmail(token));
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, password: string, confirmPassword: string) => {
+    setUser(await authService.resetPassword(token, password, confirmPassword));
   }, []);
 
   const logout = useCallback(() => {
@@ -59,8 +71,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, updateProfile, setDiscordWebhook, setDpsReportToken }),
-    [user, loading, login, register, logout, updateProfile, setDiscordWebhook, setDpsReportToken],
+    () => ({
+      user,
+      loading,
+      login,
+      register,
+      verifyEmail,
+      resetPassword,
+      logout,
+      updateProfile,
+      setDiscordWebhook,
+      setDpsReportToken,
+    }),
+    [user, loading, login, register, verifyEmail, resetPassword, logout, updateProfile, setDiscordWebhook, setDpsReportToken],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

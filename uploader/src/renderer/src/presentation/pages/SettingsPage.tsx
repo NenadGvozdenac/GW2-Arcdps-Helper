@@ -11,8 +11,8 @@ import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { Switch } from "@/presentation/components/ui/switch";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { describeError } from "../utils/describeError";
 
 type EditableSettings = Omit<Settings, "language">;
@@ -47,7 +47,7 @@ function useSettingsController() {
 
 export default function SettingsPage() {
   const c = useSettingsController();
-  const { t, lang, setLang, languages } = useI18n();
+  const { t } = useI18n();
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
@@ -111,18 +111,7 @@ export default function SettingsPage() {
 
             <div className="grid gap-2">
               <Label>{t("settings.language")}</Label>
-              <Select value={lang} onValueChange={(v) => setLang(v as Settings["language"])}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {languages.map((l) => (
-                    <SelectItem key={l.code} value={l.code}>
-                      {l.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <LanguageSwitcher compact={false} />
             </div>
 
             {c.error && (

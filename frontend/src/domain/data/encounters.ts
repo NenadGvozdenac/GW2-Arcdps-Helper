@@ -30,19 +30,19 @@ export const GROUPS: EncounterGroup[] = [
 
 export const ENCOUNTERS: Encounter[] = [
   // W1
-  { key: "vg", name: "Vale Guardian", group: "w1", ids: [15438], aliases: ["vale guardian"] },
-  { key: "spiritrace", name: "Spirit Woods", group: "w1", ids: [50], aliases: ["spirit race", "spirit woods"] },
-  { key: "gors", name: "Gorseval", group: "w1", ids: [15429], aliases: ["gorseval"] },
-  { key: "sab", name: "Sabetha", group: "w1", ids: [15375], aliases: ["sabetha"] },
+  { key: "vg", name: "Vale Guardian", group: "w1", ids: [15438], noCM: true, aliases: ["vale guardian"] },
+  { key: "spiritrace", name: "Spirit Woods", group: "w1", ids: [50], noCM: true, aliases: ["spirit race", "spirit woods"] },
+  { key: "gors", name: "Gorseval", group: "w1", ids: [15429], noCM: true, aliases: ["gorseval"] },
+  { key: "sab", name: "Sabetha", group: "w1", ids: [15375], noCM: true, aliases: ["sabetha"] },
   // W2
-  { key: "sloth", name: "Slothasor", group: "w2", ids: [16123], aliases: ["slothasor"] },
-  { key: "trio", name: "Bandit Trio", group: "w2", ids: [16088, 16137, 16125], aliases: ["bandit trio", "berg", "zane", "narella"] },
-  { key: "matt", name: "Matthias Gabrel", group: "w2", ids: [16115], aliases: ["matthias"] },
+  { key: "sloth", name: "Slothasor", group: "w2", ids: [16123], noCM: true, aliases: ["slothasor"] },
+  { key: "trio", name: "Bandit Trio", group: "w2", ids: [16088, 16137, 16125], noCM: true, aliases: ["bandit trio", "berg", "zane", "narella"] },
+  { key: "matt", name: "Matthias Gabrel", group: "w2", ids: [16115], noCM: true, aliases: ["matthias"] },
   // W3
-  { key: "esc", name: "Escort", group: "w3", ids: [16253], aliases: ["escort", "mcleod", "siege the stronghold"] },
+  { key: "esc", name: "Escort", group: "w3", ids: [16253], noCM: true, aliases: ["escort", "mcleod", "siege the stronghold"] },
   { key: "kc", name: "Keep Construct", group: "w3", ids: [16235], aliases: ["keep construct"] },
-  { key: "tc", name: "Twisted Castle", group: "w3", ids: [16247], aliases: ["twisted castle"] },
-  { key: "xera", name: "Xera", group: "w3", ids: [16246, 16286], aliases: ["xera"] },
+  { key: "tc", name: "Twisted Castle", group: "w3", ids: [16247], noCM: true, aliases: ["twisted castle"] },
+  { key: "xera", name: "Xera", group: "w3", ids: [16246, 16286], noCM: true, aliases: ["xera"] },
   // W4
   { key: "cairn", name: "Cairn", group: "w4", ids: [17194], aliases: ["cairn"] },
   { key: "mo", name: "Mursaat Overseer", group: "w4", ids: [17172], aliases: ["mursaat overseer"] },
@@ -50,10 +50,10 @@ export const ENCOUNTERS: Encounter[] = [
   { key: "dei", name: "Deimos", group: "w4", ids: [17154], aliases: ["deimos"] },
   // W5
   { key: "sh", name: "Soulless Horror", group: "w5", ids: [19767], aliases: ["soulless horror", "desmina"] },
-  { key: "rr", name: "River of Souls", group: "w5", ids: [19828], aliases: ["river of souls"] },
-  { key: "bk", name: "Broken King", group: "w5", ids: [19691], aliases: ["broken king"] },
-  { key: "eos", name: "Eater of Souls", group: "w5", ids: [19536], aliases: ["eater of souls", "soul eater"] },
-  { key: "eyes", name: "Statue of Darkness", group: "w5", ids: [19651, 19844], aliases: ["statue of darkness", "eye of judgment", "eye of fate"] },
+  { key: "rr", name: "River of Souls", group: "w5", ids: [19828], noCM: true, aliases: ["river of souls"] },
+  { key: "bk", name: "Broken King", group: "w5", ids: [19691], noCM: true, aliases: ["broken king"] },
+  { key: "eos", name: "Eater of Souls", group: "w5", ids: [19536], noCM: true, aliases: ["eater of souls", "soul eater"] },
+  { key: "eyes", name: "Statue of Darkness", group: "w5", ids: [19651, 19844], noCM: true, aliases: ["statue of darkness", "eye of judgment", "eye of fate"] },
   { key: "dhuum", name: "Dhuum", group: "w5", ids: [19450], aliases: ["dhuum"] },
   // W6
   { key: "ca", name: "Conjured Amalgamate", group: "w6", ids: [43974, 37464], aliases: ["conjured amalgamate"] },
@@ -85,13 +85,13 @@ export const ENCOUNTERS: Encounter[] = [
   { key: "tyrant", name: "The Eternal Tyrant", group: "solitarythrone", ids: [28051], aliases: ["eternal tyrant", "solitary throne"] },
 
   // Strikes — Icebrood Saga
-  { key: "ice", name: "Icebrood Construct", group: "ibs", ids: [22154], aliases: ["icebrood construct", "shiverpeaks pass"] },
-  { key: "fraenir", name: "Fraenir of Jormag", group: "ibs", ids: [22492], aliases: ["fraenir"] },
-  { key: "vc", name: "Voice & Claw of the Fallen", group: "ibs", ids: [22343], aliases: ["voice of the fallen", "claw of the fallen", "voice and claw", "super kodan"] },
-  { key: "bone", name: "Boneskinner", group: "ibs", ids: [22521], aliases: ["boneskinner"] },
-  { key: "woj", name: "Whisper of Jormag", group: "ibs", ids: [22711], aliases: ["whisper of jormag"] },
-  { key: "cw", name: "Cold War", group: "ibs", ids: [22836], aliases: ["cold war", "varinia stormsounder"] },
-  { key: "fs", name: "Forging Steel", group: "ibs", ids: [22436], aliases: ["forging steel"] },
+  { key: "ice", name: "Icebrood Construct", group: "ibs", ids: [22154], noCM: true, aliases: ["icebrood construct", "shiverpeaks pass"] },
+  { key: "fraenir", name: "Fraenir of Jormag", group: "ibs", ids: [22492], noCM: true, aliases: ["fraenir"] },
+  { key: "vc", name: "Voice & Claw of the Fallen", group: "ibs", ids: [22343], noCM: true, aliases: ["voice of the fallen", "claw of the fallen", "voice and claw", "super kodan"] },
+  { key: "bone", name: "Boneskinner", group: "ibs", ids: [22521], noCM: true, aliases: ["boneskinner"] },
+  { key: "woj", name: "Whisper of Jormag", group: "ibs", ids: [22711], noCM: true, aliases: ["whisper of jormag"] },
+  { key: "cw", name: "Cold War", group: "ibs", ids: [22836], noCM: true, aliases: ["cold war", "varinia stormsounder"] },
+  { key: "fs", name: "Forging Steel", group: "ibs", ids: [22436], noCM: true, aliases: ["forging steel"] },
   // Strikes — End of Dragons
   { key: "ah", name: "Aetherblade Hideout", group: "eod", ids: [24033], aliases: ["aetherblade hideout", "mai trin"] },
   { key: "xjj", name: "Xunlai Jade Junkyard", group: "eod", ids: [23957], aliases: ["xunlai jade junkyard", "ankka"] },
@@ -102,5 +102,5 @@ export const ENCOUNTERS: Encounter[] = [
   { key: "co", name: "Cosmic Observatory", group: "soto", ids: [25705], aliases: ["cosmic observatory", "dagda"] },
   { key: "tof", name: "Temple of Febe", group: "soto", ids: [25989], aliases: ["temple of febe", "cerus"] },
   // Festival
-  { key: "freezie", name: "Freezie", group: "festival", ids: [21333], aliases: ["freezie"] },
+  { key: "freezie", name: "Freezie", group: "festival", ids: [21333], noCM: true, aliases: ["freezie"] },
 ];

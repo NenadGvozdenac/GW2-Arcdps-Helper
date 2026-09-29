@@ -378,6 +378,9 @@ namespace UI
 				SecureZeroMemory(g_password, sizeof(g_password));
 			}
 			EndDisabled();
+			ImGui::SameLine();
+			// Resetting happens on the website: it emails a link to a page where the new password is chosen.
+			if (ImGui::Button("Forgot password?")) Util::OpenUrl(std::string(WEB_URL) + "/forgot-password");
 		}
 		if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
 

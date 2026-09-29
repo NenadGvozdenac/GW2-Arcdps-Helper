@@ -14,6 +14,14 @@ export const validationError = (message: string) => new HttpError(400, "VALIDATI
 export const unauthenticated = () => new HttpError(401, "UNAUTHENTICATED", "You must be signed in.");
 export const invalidCredentials = () => new HttpError(401, "INVALID_CREDENTIALS", "Invalid email or password.");
 export const emailTaken = () => new HttpError(409, "EMAIL_TAKEN", "An account with this email already exists.");
+export const emailNotVerified = () =>
+  new HttpError(403, "EMAIL_NOT_VERIFIED", "Confirm your email address first - check your inbox.");
+export const invalidVerificationLink = () =>
+  new HttpError(400, "INVALID_VERIFICATION_LINK", "This confirmation link is invalid or has expired.");
+export const invalidResetLink = () =>
+  new HttpError(400, "INVALID_RESET_LINK", "This password reset link is invalid, expired or already used.");
+export const emailSendFailed = () =>
+  new HttpError(502, "EMAIL_SEND_FAILED", "The email could not be sent. Try again later.");
 export const userNotFound = () => new HttpError(404, "USER_NOT_FOUND", "User not found.");
 export const logNotFound = () => new HttpError(404, "LOG_NOT_FOUND", "Log not found.");
 export const sessionNotFound = () => new HttpError(404, "SESSION_NOT_FOUND", "Session not found.");

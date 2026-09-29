@@ -4,6 +4,22 @@ export interface TokenPayload {
   sub: string; // user id
 }
 
+export type EmailTokenPurpose = "verify-email" | "reset-password";
+
+/** Payload of a link sent by email; `purpose` keeps it from being usable as a sign-in token. */
+export interface EmailTokenPayload {
+  sub: string; // user id
+  purpose: EmailTokenPurpose;
+  /** reset-password only: fingerprint of the current password hash, so the link stops working once it is used. */
+  pwd?: string;
+}
+
+export type EmailLanguage = "en" | "sr";
+
+export interface RegisterResponse {
+  email: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
@@ -13,6 +29,7 @@ export interface RegisterInput {
   email: string;
   password: string;
   gw2Account: string;
+  language: EmailLanguage;
 }
 
 export interface LoginInput {

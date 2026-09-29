@@ -7,7 +7,9 @@ import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
+import { ApiError } from "../../domain/types/api.types";
 import AuthShell from "../components/AuthShell";
+import ResendVerificationButton from "../components/ResendVerificationButton";
 import { describeError } from "../utils/describeError";
 
 function useLoginController() {
@@ -29,7 +31,9 @@ function useLoginController() {
     }
   }
 
-  return { email, setEmail, password, setPassword, busy, error, submit };
+  const notVerified = error instanceof ApiError && error.code === "EMAIL_NOT_VERIFIED";
+
+  return { email, setEmail, password, setPassword, busy, error, notVerified, submit };
 }
 
 export default function LoginPage() {
@@ -67,7 +71,15 @@ export default function LoginPage() {
         />
       </div>
       <div className="grid gap-2">
-        <Label htmlFor="password">{t("auth.password")}</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">{t("auth.password")}</Label>
+          <Link
+            to="/forgot-password"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            {t("auth.forgotPassword")}
+          </Link>
+        </div>
         <Input
           id="password"
           type="password"
@@ -82,6 +94,12 @@ export default function LoginPage() {
           <AlertCircleIcon />
           <AlertDescription>{describeError(c.error, t)}</AlertDescription>
         </Alert>
+      )}
+      {c.notVerified && (
+        <div className="grid gap-2">
+          <p className="text-sm text-muted-foreground">{t("auth.notVerifiedHint")}</p>
+          <ResendVerificationButton email={c.email} />
+        </div>
       )}
     </AuthShell>
   );

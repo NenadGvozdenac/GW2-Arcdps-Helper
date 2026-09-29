@@ -5,6 +5,9 @@ import { HomeRoute, PublicRoute, RequireAuth, RequireGuest } from "./components/
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import UploadPage from "./pages/UploadPage";
 import CategoryPage from "./pages/CategoryPage";
@@ -42,7 +45,12 @@ export default function AppRouter() {
         <Route element={<RequireGuest />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
+        {/* Link from the confirmation email; signs in, so it works whether or not someone is signed in already. */}
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        {/* Link from the password-reset email; also usable while signed in. */}
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
           index
           element={

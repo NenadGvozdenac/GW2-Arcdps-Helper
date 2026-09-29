@@ -5,7 +5,7 @@ import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
 import { statsService } from "../../services/statsService";
-import type { Category } from "../../domain/types/encounter.types";
+import type { Category, Encounter } from "../../domain/types/encounter.types";
 import type { CmMode } from "../../domain/types/log.types";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Badge } from "@/presentation/components/ui/badge";
@@ -35,24 +35,32 @@ function useCategoryController(category: PageCategory) {
   const view = useMemo(() => {
     const resetAt = statsService.resetFor(category);
     const byEncounter = statsService.logsByEncounter(logs, category, mode);
-    const encounters = encounterService.encountersFor(category);
+    // In CM mode, bosses without a Challenge Mote (VG, Gorseval, IBS strikes…) are left out entirely.
+    const hasMode = (e: Encounter) => mode !== "cm" || !e.noCM;
+    const encounters = encounterService.encountersFor(category).filter(hasMode);
     const allLogs = [...byEncounter.values()].flat();
     const cleared = statsService.clearedSince(allLogs, resetAt);
     const totals = statsService.encounterStats(allLogs);
     const previousFrom = statsService.previousResetFor(category);
 
-    const groups = encounterService.groupsFor(category).map((group) => ({
-      group,
-      bosses: encounterService.encountersInGroup(group.id).map((encounter) => {
-        const bossLogs = byEncounter.get(encounter.key) ?? [];
-        return {
-          encounter,
-          logs: bossLogs,
-          stats: statsService.encounterStats(bossLogs),
-          clearedSinceReset: cleared.has(encounter.key),
-        };
-      }),
-    }));
+    const groups = encounterService
+      .groupsFor(category)
+      .map((group) => ({
+        group,
+        bosses: encounterService
+          .encountersInGroup(group.id)
+          .filter(hasMode)
+          .map((encounter) => {
+            const bossLogs = byEncounter.get(encounter.key) ?? [];
+            return {
+              encounter,
+              logs: bossLogs,
+              stats: statsService.encounterStats(bossLogs),
+              clearedSinceReset: cleared.has(encounter.key),
+            };
+          }),
+      }))
+      .filter((g) => g.bosses.length > 0);
 
     return {
       groups,

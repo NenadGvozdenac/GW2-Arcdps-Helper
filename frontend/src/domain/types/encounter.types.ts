@@ -15,6 +15,8 @@ export interface Encounter {
   ids: number[];
   /** Lowercase name fragments used when the trigger ID is unknown. */
   aliases: string[];
+  /** True for bosses without a Challenge Mote; hidden when the CM filter is on. */
+  noCM?: boolean;
 }
 
 export interface EncounterClassification {

@@ -1,23 +1,32 @@
 import { useI18n } from "../../controllers/I18nController";
 import type { Language } from "../../i18n/i18n.types";
-import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
+import { cn } from "@/presentation/lib/utils";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import LanguageFlag from "./LanguageFlag";
 
-export default function LanguageSwitcher() {
+/**
+ * Flag dropdown for the site language. `compact` (headers) shows only the flag in the button, otherwise flag + name
+ * (settings); the list always shows the full names.
+ */
+export default function LanguageSwitcher({ compact = true, className }: { compact?: boolean; className?: string }) {
   const { lang, setLang, languages, t } = useI18n();
+  const current = languages.find((l) => l.code === lang)!;
   return (
-    <ToggleGroup
-      type="single"
-      size="sm"
-      variant="outline"
-      value={lang}
-      onValueChange={(v) => v && setLang(v as Language)}
-      aria-label={t("nav.language")}
-    >
-      {languages.map((l) => (
-        <ToggleGroupItem key={l.code} value={l.code} title={l.label} className="px-2.5 text-xs font-semibold">
-          {l.code.toUpperCase()}
-        </ToggleGroupItem>
-      ))}
-    </ToggleGroup>
+    <Select value={lang} onValueChange={(v) => setLang(v as Language)}>
+      <SelectTrigger size="sm" className={cn(compact ? "gap-1.5 px-2" : "w-48", className)} aria-label={t("nav.language")}>
+        <SelectValue>
+          <LanguageFlag lang={lang} />
+          {!compact && current.label}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent position="popper" align="end">
+        {languages.map((l) => (
+          <SelectItem key={l.code} value={l.code}>
+            <LanguageFlag lang={l.code} />
+            {l.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

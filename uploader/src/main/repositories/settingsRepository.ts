@@ -11,11 +11,10 @@ function defaultLogFolder(): string {
 }
 
 function defaults(): Settings {
-  const locale = app.getLocale().toLowerCase().split("-")[0];
   return {
     logFolder: defaultLogFolder(),
     watchOnStartup: true,
-    language: ["sr", "sh", "hr", "bs", "me"].includes(locale) ? "sr" : "en",
+    language: "en",
     desktopNotifications: true,
   };
 }

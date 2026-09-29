@@ -33,7 +33,10 @@ function useLoginController() {
 
   const openRegister = () => uploaderBridge.openExternal(`${environment.webUrl}/register`);
 
-  return { email, setEmail, password, setPassword, busy, error, submit, openRegister };
+  // Resetting happens on the website: it emails a link to a page where the new password is chosen.
+  const openForgotPassword = () => uploaderBridge.openExternal(`${environment.webUrl}/forgot-password`);
+
+  return { email, setEmail, password, setPassword, busy, error, submit, openRegister, openForgotPassword };
 }
 
 export default function LoginPage() {
@@ -66,7 +69,16 @@ export default function LoginPage() {
               <Input id="email" type="email" autoComplete="email" value={c.email} onChange={(e) => c.setEmail(e.target.value)} required />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">{t("login.password")}</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password">{t("login.password")}</Label>
+                <button
+                  type="button"
+                  className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+                  onClick={c.openForgotPassword}
+                >
+                  {t("login.forgotPassword")}
+                </button>
+              </div>
               <Input
                 id="password"
                 type="password"

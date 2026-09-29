@@ -38,4 +38,13 @@ export const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
 export const SHARE_TOKEN_BYTES = 18;
 
 export const JWT_EXPIRES_IN = "30d";
+/** Lifetime of the link in the confirmation email. */
+export const EMAIL_VERIFICATION_EXPIRES_IN = "24h";
+/** Lifetime of the link in the password-reset email. */
+export const PASSWORD_RESET_EXPIRES_IN = "1h";
+/** A new confirmation / password-reset email is sent at most this often per account. */
+export const EMAIL_COOLDOWN_MS = 60_000;
+export const SMTP_TIMEOUT_MS = 15_000;
+/** Name shown as the sender of our emails; the address is SMTP_USER. */
+export const EMAIL_SENDER_NAME = "GW2 ArcDPS Helper";
 export const BCRYPT_ROUNDS = 10;

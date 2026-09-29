@@ -9,13 +9,17 @@ import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import AuthShell from "../components/AuthShell";
+import ResendVerificationButton from "../components/ResendVerificationButton";
 import { describeError } from "../utils/describeError";
 
 const EMPTY: RegisterInput = { gw2Account: "", email: "", password: "", confirmPassword: "" };
 
 function useRegisterController() {
   const { register } = useAuth();
+  const { lang } = useI18n();
   const [form, setForm] = useState<RegisterInput>(EMPTY);
+  /** Where the confirmation link was sent; set once the account exists. */
+  const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
@@ -25,19 +29,41 @@ function useRegisterController() {
     setError(null);
     setBusy(true);
     try {
-      await register(form);
+      setSentTo(await register(form, lang));
     } catch (err) {
       setError(err);
-      setBusy(false);
     }
+    setBusy(false);
   }
 
-  return { form, setField, busy, error, submit };
+  return { form, setField, busy, error, submit, sentTo };
+}
+
+/** Shown after registering: the account can be used once the emailed link is clicked. */
+function CheckInbox({ email }: { email: string }) {
+  const { t } = useI18n();
+  return (
+    <AuthShell
+      title={t("auth.checkInboxTitle")}
+      description={t("auth.checkInboxBody", { email })}
+      onSubmit={() => {}}
+      footer={
+        <Link to="/login" className="text-sm font-medium text-foreground underline-offset-4 hover:underline">
+          {t("auth.backToLogin")}
+        </Link>
+      }
+    >
+      <p className="text-sm text-muted-foreground">{t("auth.checkSpam")}</p>
+      <ResendVerificationButton email={email} />
+    </AuthShell>
+  );
 }
 
 export default function RegisterPage() {
-  const { form, setField, busy, error, submit } = useRegisterController();
+  const { form, setField, busy, error, submit, sentTo } = useRegisterController();
   const { t } = useI18n();
+
+  if (sentTo) return <CheckInbox email={sentTo} />;
 
   return (
     <AuthShell

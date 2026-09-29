@@ -15,12 +15,6 @@ export const isLanguage = (value: unknown): value is Language => value === "en" 
 
 export const localeFor = (lang: Language) => LANGUAGES.find((l) => l.code === lang)!.locale;
 
-/** Picks Serbian for sr/sh/hr/bs/me browsers, English otherwise. */
-export function detectLanguage(browserLanguages: readonly string[]): Language {
-  const slavic = ["sr", "sh", "hr", "bs", "me", "cnr"];
-  return browserLanguages.some((l) => slavic.includes(l.toLowerCase().split("-")[0])) ? "sr" : DEFAULT_LANGUAGE;
-}
-
 function lookup(messages: Messages, key: string): string | undefined {
   let node: unknown = messages;
   for (const part of key.split(".")) {

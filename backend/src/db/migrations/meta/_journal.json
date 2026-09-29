@@ -71,6 +71,20 @@
       "when": 1790672078639,
       "tag": "0009_session_discord_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790685666447,
+      "tag": "0010_email_verification",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1790685990865,
+      "tag": "0011_password_reset",
+      "breakpoints": true
     }
   ]
 }

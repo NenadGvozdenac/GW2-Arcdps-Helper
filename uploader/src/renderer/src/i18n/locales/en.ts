@@ -25,6 +25,7 @@ export const en = {
     signingIn: "Signing in…",
     noAccount: "Don't have an account?",
     register: "Create one on the website",
+    forgotPassword: "Forgot password?",
   },
   watch: {
     title: "Log folder",
@@ -107,6 +108,7 @@ export const en = {
     LOG_FOLDER_MISSING: "The log folder does not exist. Choose it first.",
     NETWORK_ERROR: "Could not reach the server. Check your internet connection.",
     INVALID_CREDENTIALS: "Invalid email or password.",
+    EMAIL_NOT_VERIFIED: "Confirm your email address first — click the link we emailed you.",
     UNAUTHENTICATED: "Your session expired. Sign in again.",
     VALIDATION_ERROR: "Some of the entered data is invalid.",
     ROUTE_NOT_FOUND: "The server is not a GW2 ArcDPS Helper API. The app was built with a wrong server URL.",

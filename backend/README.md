@@ -36,6 +36,8 @@ Or run everything (db + backend + frontend) with `make up` from the repo root.
 | `DATABASE_URL` | Postgres connection string (`?sslmode=require` for Neon / Vercel Postgres / Supabase) |
 | `JWT_SECRET` | Secret for signing tokens; **required and ≥ 32 characters in production** |
 | `CORS_ORIGIN` | Allowed frontend origins, comma-separated (empty = any origin) |
+| `APP_URL` | Frontend URL used in the confirmation-email link; **required in production** (dev default `http://localhost:5173`) |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP server for confirmation and password-reset emails (port `465` = TLS, otherwise STARTTLS; default `587`). Emails are sent from `SMTP_USER` (required with `SMTP_HOST`) as "GW2 ArcDPS Helper". **`SMTP_HOST` is required in production**; without it in development the email is printed to the console |
 | `PORT` | Port of the Node server (default `3000`; not used on Vercel) |
 | `NODE_ENV` | `production` enables the strict `JWT_SECRET` checks (also implied on Vercel) |
 
@@ -96,8 +98,12 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | Method | Path | Auth | Body | Response |
 |---|---|---|---|---|
 | GET | `/health` | – | – | `{ ok: true }` |
-| POST | `/auth/register` | – | `{ email, password, gw2Account }` | `201 { token, user }` |
-| POST | `/auth/login` | – | `{ email, password }` | `{ token, user }` |
+| POST | `/auth/register` | – | `{ email, password, gw2Account, language? }` | `201 { email }` — sends the confirmation email |
+| POST | `/auth/login` | – | `{ email, password }` | `{ token, user }`; `403 EMAIL_NOT_VERIFIED` until the email is confirmed |
+| POST | `/auth/verify-email` | – | `{ token }` (from the emailed link) | `{ token, user }` |
+| POST | `/auth/resend-verification` | – | `{ email, language? }` | `204` (at most one email per minute) |
+| POST | `/auth/forgot-password` | – | `{ email, language? }` | `204` — emails a reset link (valid 1 h, one use; at most one per minute) |
+| POST | `/auth/reset-password` | – | `{ token, password }` | `{ token, user }` — also confirms the email |
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
 | PUT | `/profile/discord-webhook` | ✓ | `{ url }` (Discord webhook URL, or `null` to disconnect) | `{ user }` |

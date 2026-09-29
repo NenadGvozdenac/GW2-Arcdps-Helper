@@ -3,12 +3,19 @@ import { getDb } from "../db/pool";
 import { users } from "../db/schema";
 import type { NewUser, User, UserPatch, UserRow } from "../types/user.types";
 
-const toUser = ({ passwordHash: _, ...user }: UserRow): User => user;
+const toUser = ({ passwordHash: _, verificationEmailSentAt: __, passwordResetSentAt: ___, ...user }: UserRow): User =>
+  user;
 
 // Matches the case-insensitive unique index users_email_lower_idx.
 const emailEquals = (email: string) => eq(sql`lower(${users.email})`, email.toLowerCase());
 
 export const userRepository = {
+  /** Returns the raw row (incl. password hash) — only for credential checks. */
+  async findRowById(id: string): Promise<UserRow | null> {
+    const [row] = await getDb().select().from(users).where(eq(users.id, id)).limit(1);
+    return row ?? null;
+  },
+
   async findById(id: string): Promise<User | null> {
     const [row] = await getDb().select().from(users).where(eq(users.id, id)).limit(1);
     return row ? toUser(row) : null;

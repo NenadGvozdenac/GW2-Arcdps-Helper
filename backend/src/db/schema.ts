@@ -34,6 +34,12 @@ export const users = pgTable(
      * dps.report account. null = anonymous uploads.
      */
     dpsReportToken: text("dps_report_token"),
+    /** Set when the user clicks the link in the confirmation email; signing in is refused while null. */
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    /** Last confirmation email sent, to throttle "resend" requests. */
+    verificationEmailSentAt: timestamp("verification_email_sent_at", { withTimezone: true }),
+    /** Last password-reset email sent, to throttle "forgot password" requests. */
+    passwordResetSentAt: timestamp("password_reset_sent_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],

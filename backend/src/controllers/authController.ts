@@ -2,7 +2,13 @@ import type { Request, Response } from "express";
 import { authService } from "../services/authService";
 import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
-import { loginSchema, registerSchema } from "../validation/schemas";
+import {
+  loginSchema,
+  registerSchema,
+  resendVerificationSchema,
+  resetPasswordSchema,
+  verifyEmailSchema,
+} from "../validation/schemas";
 import { validate } from "../validation/validate";
 
 export const authController = {
@@ -14,6 +20,28 @@ export const authController = {
   async login(req: Request, res: Response) {
     const { email, password } = validate(loginSchema, req.body);
     res.json(await authService.login(email, password));
+  },
+
+  async verifyEmail(req: Request, res: Response) {
+    const { token } = validate(verifyEmailSchema, req.body);
+    res.json(await authService.verifyEmail(token));
+  },
+
+  async resendVerification(req: Request, res: Response) {
+    const { email, language } = validate(resendVerificationSchema, req.body);
+    await authService.resendVerification(email, language);
+    res.status(204).end();
+  },
+
+  async forgotPassword(req: Request, res: Response) {
+    const { email, language } = validate(resendVerificationSchema, req.body);
+    await authService.forgotPassword(email, language);
+    res.status(204).end();
+  },
+
+  async resetPassword(req: Request, res: Response) {
+    const { token, password } = validate(resetPasswordSchema, req.body);
+    res.json(await authService.resetPassword(token, password));
   },
 
   async me(_req: Request, res: Response<unknown, AuthLocals>) {

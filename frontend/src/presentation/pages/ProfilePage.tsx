@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { AlertCircleIcon, CheckIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
-import type { Language } from "../../i18n/i18n.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import {
@@ -15,9 +14,9 @@ import {
 } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import DpsReportTokenCard from "../components/DpsReportTokenCard";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import PageHeader from "../components/PageHeader";
 import { describeError } from "../utils/describeError";
 
@@ -47,7 +46,7 @@ function useProfileController() {
 
 export default function ProfilePage() {
   const c = useProfileController();
-  const { t, lang, setLang, languages } = useI18n();
+  const { t } = useI18n();
 
 
   return (
@@ -100,18 +99,7 @@ export default function ProfilePage() {
           <CardDescription>{t("profile.languageHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <Select value={lang} onValueChange={(v) => setLang(v as Language)}>
-            <SelectTrigger className="w-48" aria-label={t("profile.language")}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map((l) => (
-                <SelectItem key={l.code} value={l.code}>
-                  {l.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <LanguageSwitcher compact={false} />
         </CardContent>
       </Card>
       <DpsReportTokenCard />

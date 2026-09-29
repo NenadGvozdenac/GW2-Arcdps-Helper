@@ -4,7 +4,7 @@ import type { users } from "../db/schema";
 export type UserRow = typeof users.$inferSelect;
 
 /** Public user shape returned by the API (never contains the password hash). */
-export type User = Omit<UserRow, "passwordHash">;
+export type User = Omit<UserRow, "passwordHash" | "verificationEmailSentAt" | "passwordResetSentAt">;
 
 export interface NewUser {
   email: string;
@@ -16,5 +16,16 @@ export interface ProfileUpdate {
   gw2Account: string;
 }
 
-/** Columns a signed-in user may change. */
-export type UserPatch = Partial<Pick<UserRow, "gw2Account" | "discordWebhookUrl" | "dpsReportToken">>;
+/** Columns updated through userRepository.update (profile settings, password, email confirmation). */
+export type UserPatch = Partial<
+  Pick<
+    UserRow,
+    | "gw2Account"
+    | "discordWebhookUrl"
+    | "dpsReportToken"
+    | "passwordHash"
+    | "emailVerifiedAt"
+    | "verificationEmailSentAt"
+    | "passwordResetSentAt"
+  >
+>;

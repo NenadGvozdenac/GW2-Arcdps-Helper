@@ -90,7 +90,9 @@ never call `fetch` or `localStorage` directly.
 
 | Route | Page |
 |---|---|
-| `/login`, `/register` | Sign in / create an account (guests only) |
+| `/login`, `/register`, `/forgot-password` | Sign in / create an account (then "check your inbox") / request a password-reset email (guests only) |
+| `/verify-email?token=…` | Link from the confirmation email: confirms the address and signs in |
+| `/reset-password?token=…` | Link from the password-reset email: new password, then signed in |
 | `/` | Overview: totals, weekly/daily clear per wing/fractal/strike, recent logs |
 | `/raids`, `/fractals`, `/strikes` | Every group and boss with kills/wipes/best time; Normal/CM filter; `?boss=<key>` opens a boss |
 | `/logs` | All logs with search, category/group/result filters |

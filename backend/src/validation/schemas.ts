@@ -16,10 +16,31 @@ const gw2Account = z
   .trim()
   .regex(/^.{3,32}\.\d{4}$/, "GW2 account must look like Name.1234");
 
+/** Language of the emails we send (the website's current language). */
+const emailLanguage = z.enum(["en", "sr"]).default("en");
+
+const password = z.string().min(6, "Password must be at least 6 characters.").max(200);
+
 export const registerSchema = z.object({
   email: z.email("Invalid email address.").trim().max(254),
-  password: z.string().min(6, "Password must be at least 6 characters.").max(200),
+  password,
   gw2Account,
+  language: emailLanguage,
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().min(1, "Token is required.").max(2000),
+});
+
+/** Also the body of POST /auth/forgot-password. */
+export const resendVerificationSchema = z.object({
+  email: z.string().trim().min(1, "Email is required.").max(254),
+  language: emailLanguage,
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required.").max(2000),
+  password,
 });
 
 export const loginSchema = z.object({
