@@ -25,7 +25,7 @@ export const GROUPS: EncounterGroup[] = [
   { id: "ibs", short: "IBS", name: "Icebrood Saga", category: "strike" },
   { id: "eod", short: "EoD", name: "End of Dragons", category: "strike" },
   { id: "soto", short: "SotO", name: "Secrets of the Obscure", category: "strike" },
-  { id: "festival", short: "Fest", name: "Festival", category: "strike" },
+  { id: "festival", short: "Fest", name: "Festival", category: "strike", notInClear: true },
 ];
 
 export const ENCOUNTERS: Encounter[] = [

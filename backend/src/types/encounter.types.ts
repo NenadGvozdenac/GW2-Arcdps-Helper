@@ -5,6 +5,8 @@ export interface EncounterGroup {
   name: string;
   short: string;
   category: Category;
+  /** Seasonal content (Festival): left out of the weekly / daily clear on the overview, still listed on its page. */
+  notInClear?: boolean;
 }
 
 export interface Encounter {

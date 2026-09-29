@@ -86,9 +86,12 @@ export const statsService = {
 
   clearProgress(logs: Log[], category: Category, since: Date): GroupClearProgress[] {
     const cleared = statsService.clearedSince(logs.filter((l) => l.category === category), since);
-    return encounterService.groupsFor(category).map((group) => {
-      const bosses = encounterService.encountersInGroup(group.id);
-      return { group, total: bosses.length, cleared: bosses.filter((b) => cleared.has(b.key)).length };
-    });
+    return encounterService
+      .groupsFor(category)
+      .filter((group) => !group.notInClear)
+      .map((group) => {
+        const bosses = encounterService.encountersInGroup(group.id);
+        return { group, total: bosses.length, cleared: bosses.filter((b) => cleared.has(b.key)).length };
+      });
   },
 };
