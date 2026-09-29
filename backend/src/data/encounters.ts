@@ -20,7 +20,7 @@ export const GROUPS: EncounterGroup[] = [
   { id: "shattered", short: "97 CM", name: "Shattered Observatory", category: "fractal" },
   { id: "nightmare", short: "96 CM", name: "Nightmare", category: "fractal" },
   { id: "kinfall", short: "95 CM", name: "Kinfall", category: "fractal" },
-  { id: "solitarythrone", short: "Throne", name: "Solitary Throne", category: "fractal" },
+  { id: "solitarythrone", short: "94 CM", name: "Solitary Throne", category: "fractal" },
   // Strikes
   { id: "ibs", short: "IBS", name: "Icebrood Saga", category: "strike" },
   { id: "eod", short: "EoD", name: "End of Dragons", category: "strike" },
