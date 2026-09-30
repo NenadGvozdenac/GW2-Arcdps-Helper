@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
 import CommanderIcon, { COMMANDER_ICON } from "./CommanderIcon";
+import ProfessionIcon, { squadProfessionIcons } from "./ProfessionIcon";
 
 interface Props {
   players: PlayerSummary[];
@@ -27,7 +28,7 @@ const average = (players: PlayerSummary[], boon: Boon) =>
 /** Uptime of each boon per player (the "Boons" tab of a log), grouped by subgroup when the squad has several. */
 export default function BoonTable({ players: squad, isOwnAccount }: Props) {
   const { t } = useI18n();
-  const iconsReady = useImagesLoaded(BOON_TABLE_IMAGES);
+  const iconsReady = useImagesLoaded([...BOON_TABLE_IMAGES, ...squadProfessionIcons(squad)]);
   if (!iconsReady) {
     return (
       <div className="grid place-items-center py-10" role="status" aria-busy="true">
@@ -87,11 +88,16 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
             >
               <TableCell className="relative pr-16 font-medium">
                 <ProviderBadges player={p} />
-                <span className="inline-flex items-center gap-1.5">
-                  <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
-                  {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
-                </span>
-                <div className="text-xs font-normal text-muted-foreground">{p.account}</div>
+                <div className="flex items-center gap-2.5">
+                  <ProfessionIcon profession={p.profession} className="size-7" />
+                  <div>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
+                      {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
+                    </span>
+                    <div className="text-xs font-normal text-muted-foreground">{p.account}</div>
+                  </div>
+                </div>
               </TableCell>
               {BOONS.map((boon) => (
                 <BoonCell key={boon} boon={boon} value={p.boons?.[boon] ?? 0} />

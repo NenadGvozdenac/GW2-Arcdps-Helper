@@ -7,8 +7,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/components/ui/tabs";
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
-import { preloadImages } from "../../hooks/useImagesLoaded";
+import { preloadImages, useImagesLoaded } from "../../hooks/useImagesLoaded";
 import BoonTable, { BOON_TABLE_IMAGES } from "./BoonTable";
+import ProfessionIcon, { squadProfessionIcons } from "./ProfessionIcon";
 import CommanderIcon from "./CommanderIcon";
 import ResultBadge from "./ResultBadge";
 import StatCard from "./StatCard";
@@ -32,13 +33,14 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
   const { t, fmt } = useI18n();
   // Load the "Boons" tab's icons in the background, so the tab is ready when it is opened.
   useEffect(() => void preloadImages(BOON_TABLE_IMAGES), []);
+  // The squad's profession icons: the players table waits for them (the boons table does too), so they don't pop in.
+  const professionIconsReady = useImagesLoaded(squadProfessionIcons(players ?? []));
   const squad = players ?? [];
   const totals = {
     squadDps: squad.reduce((s, p) => s + p.dps, 0),
     downs: squad.reduce((s, p) => s + p.downs, 0),
     deaths: squad.reduce((s, p) => s + p.deaths, 0),
     topDps: squad[0]?.dps || 1,
-    hasSubgroups: new Set(squad.map((p) => p.group)).size > 1,
   };
   const pending = players === null ? "…" : null;
 
@@ -84,7 +86,7 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
               <CardTitle>{t("logDetail.players")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {players === null ? (
+              {players === null || !professionIconsReady ? (
                 <div className="grid place-items-center py-10" role="status" aria-busy="true">
                   <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
                 </div>
@@ -95,8 +97,7 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                     <TableHead className="w-8">#</TableHead>
                     <TableHead>{t("logDetail.colCharacter")}</TableHead>
                     <TableHead>{t("logDetail.colAccount")}</TableHead>
-                    <TableHead>{t("logDetail.colSpec")}</TableHead>
-                    {totals.hasSubgroups && <TableHead className="text-right">{t("logDetail.colGroup")}</TableHead>}
+                    <TableHead className="text-right">{t("logDetail.colGroup")}</TableHead>
                     <TableHead className="text-right">{t("logDetail.colBossDps")}</TableHead>
                     <TableHead className="text-right">{t("logDetail.colTotalDps")}</TableHead>
                     <TableHead className="text-right">{t("logDetail.colDowns")}</TableHead>
@@ -111,18 +112,14 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                     >
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-medium">
-                        <span className="inline-flex items-center gap-1.5">
+                        <span className="inline-flex items-center gap-2">
+                          <ProfessionIcon profession={p.profession} />
                           {p.name}
                           {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{p.account}</TableCell>
-                      <TableCell>
-                        <span className="font-medium" style={{ color: professionColor(p.profession) }}>
-                          {p.profession || "—"}
-                        </span>
-                      </TableCell>
-                      {totals.hasSubgroups && <TableCell className="text-right text-muted-foreground">{p.group}</TableCell>}
+                      <TableCell className="text-right text-muted-foreground">{p.group || "—"}</TableCell>
                       <TableCell className="text-right">
                         <div className="relative ml-auto h-6 min-w-32 overflow-hidden rounded bg-muted">
                           <div

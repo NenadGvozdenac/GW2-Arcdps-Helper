@@ -545,7 +545,6 @@ export const en = {
     players: "Players",
     colCharacter: "Character",
     colAccount: "Account",
-    colSpec: "Spec",
     colGroup: "Group",
     colBossDps: "Boss DPS",
     colTotalDps: "Total DPS",

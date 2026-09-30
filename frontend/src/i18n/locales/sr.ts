@@ -545,7 +545,6 @@ export const sr: Messages = {
     players: "Igrači",
     colCharacter: "Karakter",
     colAccount: "Nalog",
-    colSpec: "Spec",
     colGroup: "Grupa",
     colBossDps: "Boss DPS",
     colTotalDps: "Ukupno DPS",

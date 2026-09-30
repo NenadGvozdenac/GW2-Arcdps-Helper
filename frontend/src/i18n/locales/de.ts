@@ -554,7 +554,6 @@ export const de: Messages = {
     players: "Spieler",
     colCharacter: "Charakter",
     colAccount: "Account",
-    colSpec: "Spez.",
     colGroup: "Gruppe",
     colBossDps: "Boss-DPS",
     colTotalDps: "Gesamt-DPS",

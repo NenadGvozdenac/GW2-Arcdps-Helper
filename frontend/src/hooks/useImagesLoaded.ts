@@ -27,15 +27,17 @@ export function preloadImages(urls: readonly string[]): Promise<void> {
 
 /** True once every image has loaded (or failed); already-loaded images are ready right away, without a flash. */
 export function useImagesLoaded(urls: readonly string[]): boolean {
-  const [ready, setReady] = useState(() => urls.every((u) => loaded.has(u)));
+  const key = urls.join("|");
+  const allLoaded = urls.every((u) => loaded.has(u));
+  const [readyKey, setReadyKey] = useState<string | null>(null);
   useEffect(() => {
-    if (ready) return;
+    if (allLoaded) return;
     let cancelled = false;
-    preloadImages(urls).then(() => !cancelled && setReady(true));
+    preloadImages(urls).then(() => !cancelled && setReadyKey(key));
     return () => {
       cancelled = true;
     };
-    // `urls` is a module-level constant at every call site.
-  }, []);
-  return ready;
+    // `key` stands for `urls`.
+  }, [key]);
+  return allLoaded || readyKey === key;
 }
