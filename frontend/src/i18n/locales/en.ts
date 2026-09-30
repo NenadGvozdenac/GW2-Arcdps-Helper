@@ -570,7 +570,7 @@ export const en = {
     languageHint: "Language of the website. Saved in this browser.",
   },
   deleteAccount: {
-    title: "Delete account",
+    title: "Danger zone",
     description: "Permanently deletes your account with all of its logs, sessions and settings. Reports already on dps.report stay there. This cannot be undone.",
     button: "Delete account",
     confirmTitle: "Delete your account?",

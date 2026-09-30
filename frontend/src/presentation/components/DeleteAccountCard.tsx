@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertCircleIcon, Loader2Icon, Trash2Icon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon, Trash2Icon, TriangleAlertIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
@@ -14,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/presentation/components/ui/alert-dialog";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { describeError } from "../utils/describeError";
@@ -48,18 +48,20 @@ function useDeleteAccountController() {
   return { open, setDialogOpen, password, setPassword, busy, error, confirm };
 }
 
-/** Settings → permanently delete the account, confirmed with the password in a dialog. */
+/** Settings → "Danger zone": permanently delete the account, confirmed with the password in a dialog. */
 export default function DeleteAccountCard() {
   const c = useDeleteAccountController();
   const { t } = useI18n();
 
   return (
-    <Card className="border-destructive/40">
-      <CardHeader>
-        <CardTitle>{t("deleteAccount.title")}</CardTitle>
-        <CardDescription>{t("deleteAccount.description")}</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className="border-destructive/50 bg-destructive/5">
+      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <TriangleAlertIcon className="size-4" /> {t("deleteAccount.title")}
+          </CardTitle>
+          <CardDescription>{t("deleteAccount.description")}</CardDescription>
+        </div>
         <AlertDialog open={c.open} onOpenChange={c.setDialogOpen}>
           <AlertDialogTrigger asChild>
             <Button variant="destructive">
@@ -109,7 +111,7 @@ export default function DeleteAccountCard() {
             </form>
           </AlertDialogContent>
         </AlertDialog>
-      </CardContent>
+      </CardHeader>
     </Card>
   );
 }

@@ -64,7 +64,7 @@ export default function DiscordWebhookCard() {
   return (
     <Card>
       <form
-        className="flex flex-col gap-6"
+        className="flex flex-1 flex-col gap-6"
         onSubmit={(e) => {
           e.preventDefault();
           c.save();
@@ -109,7 +109,7 @@ export default function DiscordWebhookCard() {
             </Alert>
           )}
         </CardContent>
-        <CardFooter className="flex flex-wrap items-center gap-3">
+        <CardFooter className="mt-auto flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={!!c.busy || !c.dirty || !c.url.trim()}>
             {spinner("save")}
             {t("discord.save")}

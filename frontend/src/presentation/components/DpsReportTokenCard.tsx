@@ -69,7 +69,7 @@ export default function DpsReportTokenCard() {
   return (
     <Card>
       <form
-        className="flex flex-col gap-6"
+        className="flex flex-1 flex-col gap-6"
         onSubmit={(e) => {
           e.preventDefault();
           c.save();
@@ -130,7 +130,7 @@ export default function DpsReportTokenCard() {
             </Alert>
           )}
         </CardContent>
-        <CardFooter className="flex flex-wrap items-center gap-3">
+        <CardFooter className="mt-auto flex flex-wrap items-center gap-3">
           <Button type="submit" disabled={!!c.busy || !c.dirty || !c.token.trim()}>
             {spinner("save")}
             {t("dpsReportToken.save")}

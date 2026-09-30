@@ -579,7 +579,7 @@ export const de: Messages = {
     languageHint: "Sprache der Website. Wird in diesem Browser gespeichert.",
   },
   deleteAccount: {
-    title: "Konto löschen",
+    title: "Gefahrenzone",
     description: "Löscht dein Konto mit allen Logs, Sessions und Einstellungen dauerhaft. Berichte, die schon auf dps.report liegen, bleiben dort. Das kann nicht rückgängig gemacht werden.",
     button: "Konto löschen",
     confirmTitle: "Konto wirklich löschen?",

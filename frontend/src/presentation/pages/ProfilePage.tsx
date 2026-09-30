@@ -51,60 +51,63 @@ export default function ProfilePage() {
 
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <PageHeader title={t("profile.title")} />
-      <Card>
-        <form
-          className="flex flex-col gap-6"
-          onSubmit={(e) => {
-            e.preventDefault();
-            c.save();
-          }}
-        >
-          <CardContent className="flex flex-col gap-5">
-            <div className="grid gap-2">
-              <Label htmlFor="email">{t("profile.email")}</Label>
-              <Input id="email" value={c.email} disabled />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="gw2Account">{t("profile.gw2Account")}</Label>
-              <Input
-                id="gw2Account"
-                value={c.gw2Account}
-                onChange={(e) => c.setGw2Account(e.target.value)}
-                placeholder="Name.1234"
-                required
-              />
-              <p className="text-sm text-muted-foreground">{t("profile.gw2AccountHint")}</p>
-            </div>
-            {c.error != null && (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                <AlertDescription>{describeError(c.error, t)}</AlertDescription>
-              </Alert>
-            )}
+      {/* 2×2 grid of settings (one column on phones), the danger zone across the full width below it. */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <form
+            className="flex flex-1 flex-col gap-6"
+            onSubmit={(e) => {
+              e.preventDefault();
+              c.save();
+            }}
+          >
+            <CardContent className="flex flex-col gap-5">
+              <div className="grid gap-2">
+                <Label htmlFor="email">{t("profile.email")}</Label>
+                <Input id="email" value={c.email} disabled />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="gw2Account">{t("profile.gw2Account")}</Label>
+                <Input
+                  id="gw2Account"
+                  value={c.gw2Account}
+                  onChange={(e) => c.setGw2Account(e.target.value)}
+                  placeholder="Name.1234"
+                  required
+                />
+                <p className="text-sm text-muted-foreground">{t("profile.gw2AccountHint")}</p>
+              </div>
+              {c.error != null && (
+                <Alert variant="destructive">
+                  <AlertCircleIcon />
+                  <AlertDescription>{describeError(c.error, t)}</AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+            <CardFooter className="mt-auto gap-3">
+              <Button type="submit">{t("common.save")}</Button>
+              {c.saved && (
+                <span className="inline-flex items-center gap-1 text-sm text-success">
+                  <CheckIcon className="size-4" /> {t("common.saved")}
+                </span>
+              )}
+            </CardFooter>
+          </form>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("profile.language")}</CardTitle>
+            <CardDescription>{t("profile.languageHint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <LanguageSwitcher compact={false} />
           </CardContent>
-          <CardFooter className="gap-3">
-            <Button type="submit">{t("common.save")}</Button>
-            {c.saved && (
-              <span className="inline-flex items-center gap-1 text-sm text-success">
-                <CheckIcon className="size-4" /> {t("common.saved")}
-              </span>
-            )}
-          </CardFooter>
-        </form>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("profile.language")}</CardTitle>
-          <CardDescription>{t("profile.languageHint")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <LanguageSwitcher compact={false} />
-        </CardContent>
-      </Card>
-      <DpsReportTokenCard />
-      <DiscordWebhookCard />
+        </Card>
+        <DpsReportTokenCard />
+        <DiscordWebhookCard />
+      </div>
       <DeleteAccountCard />
     </div>
   );

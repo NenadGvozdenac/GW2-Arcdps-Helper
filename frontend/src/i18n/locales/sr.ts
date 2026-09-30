@@ -570,7 +570,7 @@ export const sr: Messages = {
     languageHint: "Jezik sajta. Čuva se u ovom browseru.",
   },
   deleteAccount: {
-    title: "Brisanje naloga",
+    title: "Opasna zona",
     description: "Trajno briše tvoj nalog sa svim logovima, sesijama i podešavanjima. Izveštaji koji su već na dps.report-u ostaju tamo. Ovo ne može da se poništi.",
     button: "Obriši nalog",
     confirmTitle: "Obrisati nalog?",
