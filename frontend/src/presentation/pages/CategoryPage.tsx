@@ -47,7 +47,8 @@ function useCategoryController(category: PageCategory) {
   const now = useNow();
 
   const view = useMemo(() => {
-    // Everything on the cards counts from the last reset: daily for fractals, weekly for raids and strikes.
+    // Everything — the cards and each boss's row — counts from the last reset: daily for fractals, weekly for raids
+    // and strikes. Older logs are under "Yesterday" / "Last week".
     const resetAt = statsService.resetFor(category, now);
     const nextResetAt = statsService.nextResetFor(category, now);
     const byEncounter = statsService.logsByEncounter(logs, category, mode);
@@ -67,7 +68,7 @@ function useCategoryController(category: PageCategory) {
           .encountersInGroup(group.id)
           .filter(hasMode)
           .map((encounter) => {
-            const bossLogs = byEncounter.get(encounter.key) ?? [];
+            const bossLogs = statsService.logsBetween(byEncounter.get(encounter.key) ?? [], resetAt);
             return {
               encounter,
               logs: bossLogs,
@@ -108,11 +109,17 @@ function useCategoryController(category: PageCategory) {
     selectedBoss,
     toggleBoss,
     labels: (category === "fractal"
-      ? { cleared: "categories.clearedToday", kills: "categories.killsToday", wipes: "categories.wipesToday" }
+      ? {
+          cleared: "categories.clearedToday",
+          kills: "categories.killsToday",
+          wipes: "categories.wipesToday",
+          noLogs: "boss.noLogsToday",
+        }
       : {
           cleared: "categories.clearedThisWeek",
           kills: "categories.killsThisWeek",
           wipes: "categories.wipesThisWeek",
+          noLogs: "boss.noLogsThisWeek",
         }) satisfies Record<string, TranslationKey>,
   };
 }
@@ -193,6 +200,7 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
                 <BossRow
                   key={b.encounter.key}
                   {...b}
+                  emptyLabel={t(c.labels.noLogs)}
                   open={c.selectedBoss === b.encounter.key}
                   onToggle={() => c.toggleBoss(b.encounter.key)}
                 />

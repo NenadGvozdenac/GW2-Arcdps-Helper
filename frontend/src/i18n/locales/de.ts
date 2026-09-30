@@ -295,7 +295,8 @@ export const de: Messages = {
     previousRange: "{from} – {to} · {count} Logs",
   },
   boss: {
-    noLogs: "keine Logs",
+    noLogsToday: "heute nichts",
+    noLogsThisWeek: "diese Woche nichts",
     killsShort: "{count}K",
     wipesShort: "{count}W",
     best: "Bestzeit {time}",

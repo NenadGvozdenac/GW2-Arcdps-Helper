@@ -71,7 +71,7 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
                 key={p.account + p.name}
                 className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
               >
-                <TableCell className="relative pr-24 font-medium">
+                <TableCell className="relative pr-16 font-medium">
                   <ProviderBadges player={p} />
                   <span className="inline-flex items-center gap-1.5">
                     <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
@@ -118,30 +118,26 @@ function SummaryRow({ label, players, strong }: { label: string; players: Player
   );
 }
 
-const PROVIDER_STYLE: Record<ProvidedBoon, string> = {
-  quickness: "border-orange-400/60 bg-orange-400/15 text-orange-700 dark:text-orange-300",
-  alacrity: "border-fuchsia-400/60 bg-fuchsia-400/15 text-fuchsia-700 dark:text-fuchsia-300",
+/** Boon icons from the GW2 wiki (public/icons). */
+const BOON_ICON: Record<ProvidedBoon, string> = {
+  quickness: "/icons/quickness.png",
+  alacrity: "/icons/alacrity.png",
 };
 
-/** Small tags in the name cell's top-right corner for the quickness / alacrity the player provides their subgroup. */
+/** Boon icons in the name cell's top-right corner for the quickness / alacrity the player provides their subgroup. */
 function ProviderBadges({ player }: { player: PlayerSummary }) {
   const { t } = useI18n();
   const provided = PROVIDED_BOONS.filter((b) => (player.generation?.[b] ?? 0) >= BOON_PROVIDER_MIN_GENERATION);
   if (!provided.length) return null;
   return (
     <span className="absolute top-1.5 right-2 flex gap-1">
-      {provided.map((boon) => (
-        <span
-          key={boon}
-          title={t("logDetail.providesBoon", {
-            boon: t(`sessionExport.boons.${boon}`),
-            value: Math.round(player.generation![boon]!),
-          })}
-          className={cn("rounded border px-1 text-[10px] leading-4 font-semibold", PROVIDER_STYLE[boon])}
-        >
-          {t(`logDetail.boonShort.${boon}`)}
-        </span>
-      ))}
+      {provided.map((boon) => {
+        const label = t("logDetail.providesBoon", {
+          boon: t(`sessionExport.boons.${boon}`),
+          value: Math.round(player.generation![boon]!),
+        });
+        return <img key={boon} src={BOON_ICON[boon]} alt={label} title={label} className="size-5 rounded-sm" />;
+      })}
     </span>
   );
 }

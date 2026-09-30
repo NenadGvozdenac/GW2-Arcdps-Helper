@@ -20,11 +20,13 @@ interface Props {
   logs: Log[];
   stats: EncounterStats;
   clearedSinceReset: boolean;
+  /** Shown instead of the stats when the boss has no logs (in the current reset period). */
+  emptyLabel: string;
   open: boolean;
   onToggle: () => void;
 }
 
-export default function BossRow({ encounter, logs, stats, clearedSinceReset, open, onToggle }: Props) {
+export default function BossRow({ encounter, logs, stats, clearedSinceReset, emptyLabel, open, onToggle }: Props) {
   const { t, fmt } = useI18n();
   const hasLogs = logs.length > 0;
 
@@ -66,7 +68,7 @@ export default function BossRow({ encounter, logs, stats, clearedSinceReset, ope
               <ChevronRightIcon className={cn("size-4 text-muted-foreground transition-transform", open && "rotate-90")} />
             </>
           ) : (
-            <span className="text-muted-foreground">{t("boss.noLogs")}</span>
+            <span className="text-muted-foreground">{emptyLabel}</span>
           )}
         </span>
         <span className="hidden min-w-24 text-right text-xs text-muted-foreground sm:block">

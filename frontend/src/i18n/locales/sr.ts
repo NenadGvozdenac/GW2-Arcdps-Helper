@@ -290,7 +290,8 @@ export const sr: Messages = {
     previousRange: "{from} – {to} · logova: {count}",
   },
   boss: {
-    noLogs: "nema logova",
+    noLogsToday: "ništa danas",
+    noLogsThisWeek: "ništa ove nedelje",
     killsShort: "{count}K",
     wipesShort: "{count}W",
     best: "best {time}",

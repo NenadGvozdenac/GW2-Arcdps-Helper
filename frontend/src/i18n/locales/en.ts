@@ -289,7 +289,8 @@ export const en = {
     previousRange: "{from} – {to} · {count} logs",
   },
   boss: {
-    noLogs: "no logs",
+    noLogsToday: "nothing today",
+    noLogsThisWeek: "nothing this week",
     killsShort: "{count}K",
     wipesShort: "{count}W",
     best: "best {time}",
