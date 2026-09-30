@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useI18n } from "../../controllers/I18nController";
 import { BOON_PROVIDER_MIN_GENERATION, BOON_STACK_MAX, BOONS, PROVIDED_BOONS } from "../../domain/data/boons";
 import type { Boon, PlayerSummary } from "../../domain/types/log.types";
@@ -10,8 +11,6 @@ interface Props {
   players: PlayerSummary[];
   isOwnAccount: (account: string) => boolean;
 }
-
-type ProvidedBoon = (typeof PROVIDED_BOONS)[number];
 
 const hasBoonData =(players: PlayerSummary[]) => players.some((p) => p.boons && Object.keys(p.boons).length > 0);
 const average = (players: PlayerSummary[], boon: Boon) =>
@@ -32,76 +31,96 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
 
   return (
     <Table>
+      {!bySubgroup && (
         <TableHeader>
-          <TableRow>
-            <TableHead>{t("logDetail.colCharacter")}</TableHead>
-            {BOONS.map((boon) => (
-              <TableHead key={boon} className="text-center" title={t(`sessionExport.boons.${boon}`)}>
-                {t(`logDetail.boonShort.${boon}`)}
-              </TableHead>
-            ))}
-          </TableRow>
+          <HeaderRow label={<span>{t("logDetail.colCharacter")}</span>} />
         </TableHeader>
-        <TableBody>
-          {sections.flatMap((section, i) => [
-            ...(bySubgroup
-              ? [
-                  // Empty gap between subgroups, then the subgroup's title row.
-                  ...(i > 0
-                    ? [
-                        <TableRow key={`gap-${section.group}`} className="border-0 hover:bg-transparent">
-                          <TableCell colSpan={columns} className="h-5 p-0" />
-                        </TableRow>,
-                      ]
-                    : []),
-                  <TableRow key={`title-${section.group}`} className="border-b-2 bg-muted hover:bg-muted">
-                    <TableCell colSpan={columns} className="py-2">
+      )}
+      <TableBody>
+        {sections.flatMap((section, i) => [
+          ...(bySubgroup
+            ? [
+                // Empty gap between subgroups, then the subgroup's own header: its name and the boon icons, one row.
+                ...(i > 0
+                  ? [
+                      <TableRow key={`gap-${section.group}`} className="border-0 hover:bg-transparent">
+                        <TableCell colSpan={columns} className="h-5 p-0" />
+                      </TableRow>,
+                    ]
+                  : []),
+                <HeaderRow
+                  key={`header-${section.group}`}
+                  className="border-b-2 bg-muted hover:bg-muted"
+                  label={
+                    <>
                       <span className="text-sm font-semibold">
                         {t("logDetail.subgroupTitle", { group: section.group })}
                       </span>
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
                         {t("logDetail.subgroupPlayers", { count: section.players.length })}
                       </span>
-                    </TableCell>
-                  </TableRow>,
-                ]
-              : []),
-            ...section.players.map((p) => (
-              <TableRow
-                key={p.account + p.name}
-                className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
-              >
-                <TableCell className="relative pr-16 font-medium">
-                  <ProviderBadges player={p} />
-                  <span className="inline-flex items-center gap-1.5">
-                    <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
-                    {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
-                  </span>
-                  <div className="text-xs font-normal text-muted-foreground">{p.account}</div>
-                </TableCell>
-                {BOONS.map((boon) => (
-                  <BoonCell key={boon} boon={boon} value={p.boons?.[boon] ?? 0} />
-                ))}
-              </TableRow>
-            )),
-            ...(bySubgroup
-              ? [
-                  <SummaryRow
-                    key={`average-${section.group}`}
-                    label={t("logDetail.subgroupAverage")}
-                    players={section.players}
-                  />,
-                ]
-              : []),
-          ])}
-          {bySubgroup && (
-            <TableRow className="border-0 hover:bg-transparent">
-              <TableCell colSpan={columns} className="h-5 p-0" />
+                    </>
+                  }
+                />,
+              ]
+            : []),
+          ...section.players.map((p) => (
+            <TableRow
+              key={p.account + p.name}
+              className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
+            >
+              <TableCell className="relative pr-16 font-medium">
+                <ProviderBadges player={p} />
+                <span className="inline-flex items-center gap-1.5">
+                  <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
+                  {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
+                </span>
+                <div className="text-xs font-normal text-muted-foreground">{p.account}</div>
+              </TableCell>
+              {BOONS.map((boon) => (
+                <BoonCell key={boon} boon={boon} value={p.boons?.[boon] ?? 0} />
+              ))}
             </TableRow>
-          )}
-          <SummaryRow label={t("logDetail.squadAverage")} players={squad} strong />
-        </TableBody>
+          )),
+          ...(bySubgroup
+            ? [
+                <SummaryRow
+                  key={`average-${section.group}`}
+                  label={t("logDetail.subgroupAverage")}
+                  players={section.players}
+                />,
+              ]
+            : []),
+        ])}
+        {bySubgroup && (
+          <TableRow className="border-0 hover:bg-transparent">
+            <TableCell colSpan={columns} className="h-5 p-0" />
+          </TableRow>
+        )}
+        <SummaryRow label={t("logDetail.squadAverage")} players={squad} strong />
+      </TableBody>
     </Table>
+  );
+}
+
+/** Boon icons from the GW2 wiki, saved as public/icons/<boon>.png. */
+const boonIcon = (boon: Boon) => `/icons/${boon}.png`;
+
+/** A header row: `label` in the first column, then every boon's icon (its name shows on hover). */
+function HeaderRow({ label, className }: { label: ReactNode; className?: string }) {
+  const { t } = useI18n();
+  return (
+    <TableRow className={className}>
+      <TableHead>{label}</TableHead>
+      {BOONS.map((boon) => {
+        const name = t(`sessionExport.boons.${boon}`);
+        return (
+          <TableHead key={boon} className="text-center">
+            <img src={boonIcon(boon)} alt={name} title={name} className="mx-auto size-6" />
+          </TableHead>
+        );
+      })}
+    </TableRow>
   );
 }
 
@@ -118,12 +137,6 @@ function SummaryRow({ label, players, strong }: { label: string; players: Player
   );
 }
 
-/** Boon icons from the GW2 wiki (public/icons). */
-const BOON_ICON: Record<ProvidedBoon, string> = {
-  quickness: "/icons/quickness.png",
-  alacrity: "/icons/alacrity.png",
-};
-
 /** Boon icons in the name cell's top-right corner for the quickness / alacrity the player provides their subgroup. */
 function ProviderBadges({ player }: { player: PlayerSummary }) {
   const { t } = useI18n();
@@ -136,7 +149,7 @@ function ProviderBadges({ player }: { player: PlayerSummary }) {
           boon: t(`sessionExport.boons.${boon}`),
           value: Math.round(player.generation![boon]!),
         });
-        return <img key={boon} src={BOON_ICON[boon]} alt={label} title={label} className="size-5 rounded-sm" />;
+        return <img key={boon} src={boonIcon(boon)} alt={label} title={label} className="size-5 rounded-sm" />;
       })}
     </span>
   );
