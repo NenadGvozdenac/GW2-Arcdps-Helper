@@ -28,6 +28,8 @@ export const registerSchema = z.object({
   password,
   gw2Account,
   language: emailLanguage,
+  /** The "I accept the Terms of Service and Privacy Policy" checkbox — registering is refused without it. */
+  acceptTerms: z.literal(true, { error: "You must accept the Terms of Service and Privacy Policy." }),
 });
 
 export const verifyEmailSchema = z.object({

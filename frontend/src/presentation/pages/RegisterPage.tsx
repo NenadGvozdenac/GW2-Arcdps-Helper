@@ -7,12 +7,15 @@ import type { RegisterInput } from "../../domain/types/user.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
+import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { Label } from "@/presentation/components/ui/label";
 import AuthShell from "../components/AuthShell";
 import ResendVerificationButton from "../components/ResendVerificationButton";
 import { describeError } from "../utils/describeError";
 
-const EMPTY: RegisterInput = { gw2Account: "", email: "", password: "", confirmPassword: "" };
+const EMPTY: RegisterInput = { gw2Account: "", email: "", password: "", confirmPassword: "", acceptTerms: false };
+
+type TextField = Exclude<keyof RegisterInput, "acceptTerms">;
 
 function useRegisterController() {
   const { register } = useAuth();
@@ -23,7 +26,8 @@ function useRegisterController() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const setField = (field: keyof RegisterInput, value: string) => setForm((f) => ({ ...f, [field]: value }));
+  const setField = (field: TextField, value: string) => setForm((f) => ({ ...f, [field]: value }));
+  const setAcceptTerms = (acceptTerms: boolean) => setForm((f) => ({ ...f, acceptTerms }));
 
   async function submit() {
     setError(null);
@@ -36,7 +40,16 @@ function useRegisterController() {
     setBusy(false);
   }
 
-  return { form, setField, busy, error, submit, sentTo };
+  return { form, setField, setAcceptTerms, busy, error, submit, sentTo };
+}
+
+/** Opens in a new tab so the half-filled form isn't lost. */
+function LegalLink({ to, children }: { to: string; children: string }) {
+  return (
+    <Link to={to} target="_blank" className="font-medium text-foreground underline underline-offset-4">
+      {children}
+    </Link>
+  );
 }
 
 /** Shown after registering: the account can be used once the emailed link is clicked. */
@@ -60,7 +73,7 @@ function CheckInbox({ email }: { email: string }) {
 }
 
 export default function RegisterPage() {
-  const { form, setField, busy, error, submit, sentTo } = useRegisterController();
+  const { form, setField, setAcceptTerms, busy, error, submit, sentTo } = useRegisterController();
   const { t } = useI18n();
 
   if (sentTo) return <CheckInbox email={sentTo} />;
@@ -128,6 +141,19 @@ export default function RegisterPage() {
           onChange={(e) => setField("confirmPassword", e.target.value)}
           required
         />
+      </div>
+      <div className="flex items-start gap-3">
+        <Checkbox
+          id="acceptTerms"
+          className="mt-0.5"
+          checked={form.acceptTerms}
+          onCheckedChange={(checked) => setAcceptTerms(checked === true)}
+        />
+        <Label htmlFor="acceptTerms" className="block text-sm leading-snug font-normal text-muted-foreground">
+          {t("auth.acceptTermsBefore")} <LegalLink to="/terms">{t("auth.acceptTermsTerms")}</LegalLink>{" "}
+          {t("auth.acceptTermsAnd")} <LegalLink to="/privacy">{t("auth.acceptTermsPrivacy")}</LegalLink>
+          {t("auth.acceptTermsAfter")}
+        </Label>
       </div>
       {error != null && (
         <Alert variant="destructive">

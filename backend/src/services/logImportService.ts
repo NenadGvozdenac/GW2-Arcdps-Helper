@@ -5,7 +5,7 @@ import type { Log, LogSummary } from "../types/log.types";
 import type { ImportedLog, SubmitResult } from "../types/submit.types";
 import { parsePermalink } from "../utils/permalink";
 import { fetchEliteInsightsJson, fetchUploadMetadata, logUrl, uploadLogFile } from "./clients/dpsReportClient";
-import { parseFromEliteInsights, parseFromMetadata } from "./logParser";
+import { parseFromEliteInsights, parseFromMetadata } from "./misc/logParser";
 
 export async function fetchLogSummary(permalink: string): Promise<LogSummary> {
   const url = logUrl(permalink);

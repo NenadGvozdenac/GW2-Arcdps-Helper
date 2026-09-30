@@ -38,9 +38,11 @@ export interface EiPlayer {
   hasCommanderTag?: boolean;
   isFake?: boolean;
   friendlyNPC?: boolean;
-  dpsAll?: { dps: number }[];
+  dpsAll?: { dps: number; breakbarDamage?: number }[];
   dpsTargets?: { dps: number }[][];
-  defenses?: { downCount?: number; deadCount?: number }[];
+  defenses?: { downCount?: number; deadCount?: number; damageTaken?: number }[];
+  /** Per buff: uptime over the whole fight (%, or average stacks for intensity buffs: might, stability). */
+  buffUptimes?: { id: number; buffData?: { uptime?: number }[] }[];
 }
 
 /** Response of `https://dps.report/getUploadMetadata` (fallback when the JSON isn't available). */

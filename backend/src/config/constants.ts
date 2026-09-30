@@ -17,6 +17,22 @@ export const SESSIONS_PAGE_SIZE = 10;
 export const SESSIONS_PAGE_SIZE_MAX = 100;
 export const PARALLEL_FETCHES = 4;
 
+/** Elite Insights buff ids of the boons stored per player (see PlayerSummary.boons). */
+export const BOON_IDS = {
+  might: 740,
+  fury: 725,
+  quickness: 1187,
+  alacrity: 30328,
+  protection: 717,
+  regeneration: 718,
+  vigor: 726,
+  aegis: 743,
+  stability: 1122,
+  swiftness: 719,
+  resistance: 26980,
+  resolution: 873,
+} as const;
+
 /**
  * Only real Discord webhook URLs are accepted — the server posts to this URL, so anything else would let users
  * make it call arbitrary addresses.

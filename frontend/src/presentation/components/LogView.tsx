@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
-import { FlagIcon, Loader2Icon } from "lucide-react";
+import { FlagIcon, Loader2Icon, SparklesIcon, UsersIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import type { Log, PlayerSummary } from "../../domain/types/log.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/components/ui/tabs";
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
+import BoonTable from "./BoonTable";
 import ResultBadge from "./ResultBadge";
 import StatCard from "./StatCard";
 
@@ -63,78 +65,106 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
         <StatCard label={t("logDetail.deaths")} value={pending ?? totals.deaths} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("logDetail.players")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {players === null ? (
-            <div className="grid place-items-center py-10" role="status" aria-busy="true">
-              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-8">#</TableHead>
-                <TableHead>{t("logDetail.colCharacter")}</TableHead>
-                <TableHead>{t("logDetail.colAccount")}</TableHead>
-                <TableHead>{t("logDetail.colSpec")}</TableHead>
-                {totals.hasSubgroups && <TableHead className="text-right">{t("logDetail.colGroup")}</TableHead>}
-                <TableHead className="text-right">{t("logDetail.colBossDps")}</TableHead>
-                <TableHead className="text-right">{t("logDetail.colTotalDps")}</TableHead>
-                <TableHead className="text-right">{t("logDetail.colDowns")}</TableHead>
-                <TableHead className="text-right">{t("logDetail.colDeaths")}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {squad.map((p, i) => (
-                <TableRow
-                  key={p.account + p.name}
-                  className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
-                >
-                  <TableCell className="text-muted-foreground">{i + 1}</TableCell>
-                  <TableCell className="font-medium">
-                    <span className="inline-flex items-center gap-1.5">
-                      {p.commander && (
-                        <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />
-                      )}
-                      {p.name}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">{p.account}</TableCell>
-                  <TableCell>
-                    <span className="font-medium" style={{ color: professionColor(p.profession) }}>
-                      {p.profession || "—"}
-                    </span>
-                  </TableCell>
-                  {totals.hasSubgroups && <TableCell className="text-right text-muted-foreground">{p.group}</TableCell>}
-                  <TableCell className="text-right">
-                    <div className="relative ml-auto h-6 min-w-32 overflow-hidden rounded bg-muted">
-                      <div
-                        className="absolute inset-y-0 left-0 opacity-40"
-                        style={{
-                          width: `${(p.dps / totals.topDps) * 100}%`,
-                          background: professionColor(p.profession),
-                        }}
-                      />
-                      <span className="relative px-2 font-mono text-xs leading-6 font-semibold tabular-nums">
-                        {fmt.number(p.dps)}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
-                    {fmt.number(p.totalDps)}
-                  </TableCell>
-                  <TableCell className="text-right">{p.downs || ""}</TableCell>
-                  <TableCell className="text-right">{p.deaths || ""}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          )}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="players">
+        <TabsList>
+          <TabsTrigger value="players">
+            <UsersIcon /> {t("logDetail.tabPlayers")}
+          </TabsTrigger>
+          <TabsTrigger value="boons">
+            <SparklesIcon /> {t("logDetail.tabBoons")}
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="players">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("logDetail.players")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {players === null ? (
+                <div className="grid place-items-center py-10" role="status" aria-busy="true">
+                  <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-8">#</TableHead>
+                    <TableHead>{t("logDetail.colCharacter")}</TableHead>
+                    <TableHead>{t("logDetail.colAccount")}</TableHead>
+                    <TableHead>{t("logDetail.colSpec")}</TableHead>
+                    {totals.hasSubgroups && <TableHead className="text-right">{t("logDetail.colGroup")}</TableHead>}
+                    <TableHead className="text-right">{t("logDetail.colBossDps")}</TableHead>
+                    <TableHead className="text-right">{t("logDetail.colTotalDps")}</TableHead>
+                    <TableHead className="text-right">{t("logDetail.colDowns")}</TableHead>
+                    <TableHead className="text-right">{t("logDetail.colDeaths")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {squad.map((p, i) => (
+                    <TableRow
+                      key={p.account + p.name}
+                      className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
+                    >
+                      <TableCell className="text-muted-foreground">{i + 1}</TableCell>
+                      <TableCell className="font-medium">
+                        <span className="inline-flex items-center gap-1.5">
+                          {p.commander && (
+                            <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />
+                          )}
+                          {p.name}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{p.account}</TableCell>
+                      <TableCell>
+                        <span className="font-medium" style={{ color: professionColor(p.profession) }}>
+                          {p.profession || "—"}
+                        </span>
+                      </TableCell>
+                      {totals.hasSubgroups && <TableCell className="text-right text-muted-foreground">{p.group}</TableCell>}
+                      <TableCell className="text-right">
+                        <div className="relative ml-auto h-6 min-w-32 overflow-hidden rounded bg-muted">
+                          <div
+                            className="absolute inset-y-0 left-0 opacity-40"
+                            style={{
+                              width: `${(p.dps / totals.topDps) * 100}%`,
+                              background: professionColor(p.profession),
+                            }}
+                          />
+                          <span className="relative px-2 font-mono text-xs leading-6 font-semibold tabular-nums">
+                            {fmt.number(p.dps)}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
+                        {fmt.number(p.totalDps)}
+                      </TableCell>
+                      <TableCell className="text-right">{p.downs || ""}</TableCell>
+                      <TableCell className="text-right">{p.deaths || ""}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="boons">
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("logDetail.tabBoons")}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {players === null ? (
+                <div className="grid place-items-center py-10" role="status" aria-busy="true">
+                  <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : (
+                <BoonTable players={players} isOwnAccount={isOwnAccount} />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <p className="text-xs text-muted-foreground">
         {t("logDetail.footer", {

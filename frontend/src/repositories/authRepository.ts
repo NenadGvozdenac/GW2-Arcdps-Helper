@@ -5,7 +5,13 @@ import { tokenStorage } from "../storage/tokenStorage";
 
 export const authRepository = {
   /** Creates an unconfirmed account and returns its email; the server emails a confirmation link to it. */
-  async register(body: { email: string; password: string; gw2Account: string; language: Language }): Promise<string> {
+  async register(body: {
+    email: string;
+    password: string;
+    gw2Account: string;
+    language: Language;
+    acceptTerms: true;
+  }): Promise<string> {
     return (await http.post<{ email: string }>("/auth/register", body)).email;
   },
 

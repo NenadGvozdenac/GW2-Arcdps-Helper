@@ -62,7 +62,8 @@ src/
 ├── controllers/      HTTP layer: validate input, call a service, send JSON
 ├── validation/       zod schemas + validate() → 400 VALIDATION_ERROR
 ├── services/         business logic
-│   └── clients/      external HTTP clients (dps.report)
+│   ├── clients/      external HTTP clients (dps.report)
+│   └── misc/         helpers used by the services (log parser, encounter classifier, email template)
 ├── repositories/     Drizzle ORM queries — the only layer that touches the database
 ├── db/               schema.ts (tables), Drizzle client + pool, migration runner, generated migrations/
 ├── data/             encounter catalogue: raid wings, fractal CMs, strikes

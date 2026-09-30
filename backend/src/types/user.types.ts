@@ -4,12 +4,13 @@ import type { users } from "../db/schema";
 export type UserRow = typeof users.$inferSelect;
 
 /** Public user shape returned by the API (never contains the password hash). */
-export type User = Omit<UserRow, "passwordHash" | "verificationEmailSentAt" | "passwordResetSentAt">;
+export type User = Omit<UserRow, "passwordHash" | "verificationEmailSentAt" | "passwordResetSentAt" | "termsAcceptedAt">;
 
 export interface NewUser {
   email: string;
   passwordHash: string;
   gw2Account: string;
+  termsAcceptedAt: Date;
 }
 
 export interface ProfileUpdate {

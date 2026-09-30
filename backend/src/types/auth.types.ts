@@ -32,6 +32,7 @@ export interface RegisterInput {
   password: string;
   gw2Account: string;
   language: EmailLanguage;
+  acceptTerms: true;
 }
 
 export interface LoginInput {

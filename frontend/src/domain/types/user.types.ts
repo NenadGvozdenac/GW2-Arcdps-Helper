@@ -18,6 +18,8 @@ export interface RegisterInput {
   email: string;
   password: string;
   confirmPassword: string;
+  /** The "I accept the Terms of Service and Privacy Policy" checkbox; registering requires it. */
+  acceptTerms: boolean;
 }
 
 export interface ProfileUpdate {

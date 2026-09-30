@@ -1,7 +1,20 @@
-import type { EiJson, EiPlayer, UploadMetadata } from "../types/dpsreport.types";
-import type { LogSummary, PlayerSummary } from "../types/log.types";
-import { parseEiDate } from "../utils/date";
+import { BOON_IDS } from "../../config/constants";
+import type { EiJson, EiPlayer, UploadMetadata } from "../../types/dpsreport.types";
+import type { Boon, BoonUptimes, LogSummary, PlayerSummary } from "../../types/log.types";
+import { parseEiDate } from "../../utils/date";
 import { classifyEncounter } from "./encounterClassifier";
+
+const round1 = (n: number) => Math.round(n * 10) / 10;
+
+function boonUptimes(p: EiPlayer): BoonUptimes {
+  const byId = new Map((p.buffUptimes ?? []).map((b) => [b.id, b.buffData?.[0]?.uptime ?? 0]));
+  const boons: BoonUptimes = {};
+  for (const [boon, id] of Object.entries(BOON_IDS) as [Boon, number][]) {
+    const uptime = byId.get(id);
+    if (uptime) boons[boon] = round1(uptime);
+  }
+  return boons;
+}
 
 function toPlayerSummary(p: EiPlayer): PlayerSummary {
   return {
@@ -14,15 +27,22 @@ function toPlayerSummary(p: EiPlayer): PlayerSummary {
     downs: p.defenses?.[0]?.downCount ?? 0,
     deaths: p.defenses?.[0]?.deadCount ?? 0,
     commander: !!p.hasCommanderTag,
+    breakbar: round1(p.dpsAll?.[0]?.breakbarDamage ?? 0),
+    damageTaken: p.defenses?.[0]?.damageTaken ?? 0,
+    boons: boonUptimes(p),
   };
 }
 
-/** Builds a summary from the full Elite Insights JSON. */
-export function parseFromEliteInsights(permalink: string, url: string, ei: EiJson, meta: UploadMetadata): LogSummary {
-  const players = (ei.players ?? [])
+/** The squad of a log as stored (real players only, highest boss DPS first). */
+export const parsePlayers = (ei: EiJson): PlayerSummary[] =>
+  (ei.players ?? [])
     .filter((p) => !p.isFake && !p.friendlyNPC)
     .map(toPlayerSummary)
     .sort((a, b) => b.dps - a.dps);
+
+/** Builds a summary from the full Elite Insights JSON. */
+export function parseFromEliteInsights(permalink: string, url: string, ei: EiJson, meta: UploadMetadata): LogSummary {
+  const players = parsePlayers(ei);
 
   const mainTarget = (ei.targets ?? []).find((t) => !t.isFake && !t.enemyPlayer);
   const burned = mainTarget?.healthPercentBurned;
@@ -62,6 +82,7 @@ export function parseFromMetadata(permalink: string, url: string, meta: UploadMe
     downs: 0,
     deaths: 0,
     commander: false,
+    boons: {},
   }));
 
   return {

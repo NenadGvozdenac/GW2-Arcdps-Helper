@@ -1,4 +1,10 @@
+import type { BOON_IDS } from "../config/constants";
 import type { Category } from "./encounter.types";
+
+export type Boon = keyof typeof BOON_IDS;
+
+/** Uptime per boon over the fight: % for most boons, average stacks for might and stability. Missing = never had it. */
+export type BoonUptimes = Partial<Record<Boon, number>>;
 
 export interface PlayerSummary {
   account: string;
@@ -12,6 +18,15 @@ export interface PlayerSummary {
   downs: number;
   deaths: number;
   commander: boolean;
+  /** Breakbar (CC) damage against everything; missing on logs imported before it was stored. */
+  breakbar?: number;
+  /** Damage taken; missing on logs imported before it was stored. */
+  damageTaken?: number;
+  /**
+   * Boon uptimes; {} when the log has no Elite Insights data to read them from. Logs imported before boons were stored
+   * get them from the one-off script src/scripts/backfillBoons.ts.
+   */
+  boons?: BoonUptimes;
 }
 
 /** Parsed, storage-independent summary of a single dps.report log. */

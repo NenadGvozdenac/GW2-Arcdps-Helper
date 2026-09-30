@@ -40,6 +40,8 @@ export const users = pgTable(
     verificationEmailSentAt: timestamp("verification_email_sent_at", { withTimezone: true }),
     /** Last password-reset email sent, to throttle "forgot password" requests. */
     passwordResetSentAt: timestamp("password_reset_sent_at", { withTimezone: true }),
+    /** When the user accepted the Terms of Service and Privacy Policy at registration; null = registered before they existed. */
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],

@@ -16,6 +16,7 @@ export const authService = {
   validateRegistration(input: RegisterInput): void {
     if (!authService.isValidGw2Account(input.gw2Account)) throw new ValidationError("validation.invalidGw2Account");
     authService.validatePassword(input.password, input.confirmPassword);
+    if (!input.acceptTerms) throw new ValidationError("validation.mustAcceptTerms");
   },
 
   validatePassword(password: string, confirmPassword: string): void {
@@ -31,6 +32,7 @@ export const authService = {
       password: input.password,
       gw2Account: input.gw2Account.trim(),
       language,
+      acceptTerms: true,
     });
   },
 

@@ -32,6 +32,7 @@ export const authService = {
       email: input.email,
       passwordHash,
       gw2Account: input.gw2Account,
+      termsAcceptedAt: new Date(),
     });
     if (!user) throw emailTaken();
     await sendVerificationEmail(user, input.language);

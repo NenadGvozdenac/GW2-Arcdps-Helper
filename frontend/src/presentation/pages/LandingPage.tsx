@@ -444,14 +444,22 @@ export default function LandingPage() {
       <footer className="border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p className="max-w-2xl">{t("landing.footer.disclaimer")}</p>
-          <a
-            href={SOURCE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 hover:text-foreground"
-          >
-            <GithubMark className="size-4" /> {t("landing.footer.source")}
-          </a>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link to="/privacy" className="hover:text-foreground">
+              {t("landing.footer.privacy")}
+            </Link>
+            <Link to="/terms" className="hover:text-foreground">
+              {t("landing.footer.terms")}
+            </Link>
+            <a
+              href={SOURCE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 hover:text-foreground"
+            >
+              <GithubMark className="size-4" /> {t("landing.footer.source")}
+            </a>
+          </div>
         </div>
       </footer>
     </div>

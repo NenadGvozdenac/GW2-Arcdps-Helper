@@ -3,7 +3,7 @@ import type { Language } from "../i18n/languages";
 import { emailMessages, type EmailMessages } from "../i18n/messages";
 import { emailSendFailed } from "../utils/httpError";
 import { sendMail } from "./clients/mailClient";
-import { renderEmail } from "./emailTemplate";
+import { renderEmail } from "./misc/emailTemplate";
 
 type EmailKind = "verification" | "passwordReset";
 

@@ -17,6 +17,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          // ExcelJS is big and only needed for the session export: its own chunk, loaded on demand.
+          if (id.includes("node_modules/exceljs")) return "exceljs";
           if (id.includes("node_modules")) return "vendor";
         },
       },

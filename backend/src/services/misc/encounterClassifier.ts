@@ -1,5 +1,5 @@
-import { ENCOUNTERS, GROUPS } from "../data/encounters";
-import type { Encounter, EncounterClassification } from "../types/encounter.types";
+import { ENCOUNTERS, GROUPS } from "../../data/encounters";
+import type { Encounter, EncounterClassification } from "../../types/encounter.types";
 
 const encounterById = new Map<number, Encounter>();
 for (const e of ENCOUNTERS) for (const id of e.ids) encounterById.set(id, e);

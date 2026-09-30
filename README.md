@@ -22,7 +22,8 @@ session recording, also runs inside the game as a Nexus addon — see [nexus-add
 │       ├── routes/          URL → controller mapping
 │       ├── controllers/     HTTP layer (req/res)
 │       ├── services/        business logic (auth, tokens, log import/parsing)
-│       │   └── clients/     clients for external services (dps.report)
+│       │   ├── clients/     clients for external services (dps.report)
+│       │   └── misc/        helpers used by the services (log parser, encounter classifier, email template)
 │       ├── repositories/    SQL queries
 │       └── utils/
 ├── uploader/                Electron desktop app: ArcDPS folder → dps.report → GW2 ArcDPS Helper (POST /api/logs)

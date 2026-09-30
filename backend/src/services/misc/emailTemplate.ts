@@ -1,7 +1,7 @@
 // HTML layout of our emails. Email clients (Gmail, Outlook, Apple Mail) ignore most CSS in <head> and don't support
 // flexbox or grid, so the layout is nested tables with inline styles; the <style> block only adds extras for the
 // clients that honour it (mobile padding, dark mode).
-import type { EmailMessages } from "../i18n/messages";
+import type { EmailMessages } from "../../i18n/messages";
 
 type EmailCopy = EmailMessages["verification"];
 

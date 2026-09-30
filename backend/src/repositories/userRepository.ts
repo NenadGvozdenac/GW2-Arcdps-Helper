@@ -3,8 +3,13 @@ import { getDb } from "../db/pool";
 import { users } from "../db/schema";
 import type { NewUser, User, UserPatch, UserRow } from "../types/user.types";
 
-const toUser = ({ passwordHash: _, verificationEmailSentAt: __, passwordResetSentAt: ___, ...user }: UserRow): User =>
-  user;
+const toUser = ({
+  passwordHash: _,
+  verificationEmailSentAt: __,
+  passwordResetSentAt: ___,
+  termsAcceptedAt: ____,
+  ...user
+}: UserRow): User => user;
 
 // Matches the case-insensitive unique index users_email_lower_idx.
 const emailEquals = (email: string) => eq(sql`lower(${users.email})`, email.toLowerCase());

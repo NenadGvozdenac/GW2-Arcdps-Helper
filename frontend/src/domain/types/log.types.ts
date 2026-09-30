@@ -1,3 +1,4 @@
+import type { BOONS } from "../data/boons";
 import type { Category } from "./encounter.types";
 
 export interface PlayerSummary {
@@ -12,7 +13,17 @@ export interface PlayerSummary {
   downs: number;
   deaths: number;
   commander: boolean;
+  /** Breakbar (CC) damage; missing on logs imported before it was stored. */
+  breakbar?: number;
+  damageTaken?: number;
+  /** {} or missing = no boon data for this log. */
+  boons?: BoonUptimes;
 }
+
+export type Boon = (typeof BOONS)[number];
+
+/** Uptime over the fight: % for most boons, average stacks for might and stability. Missing = never had it. */
+export type BoonUptimes = Partial<Record<Boon, number>>;
 
 /**
  * A log as the lists carry it (GET /logs, GET /logs/search): everything but the squad, which only the log page needs

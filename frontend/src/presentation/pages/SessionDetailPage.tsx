@@ -1,11 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { AlertCircleIcon, ArrowLeftIcon, HistoryIcon, Loader2Icon, RotateCcwIcon, Trash2Icon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  ArrowLeftIcon,
+  FileSpreadsheetIcon,
+  HistoryIcon,
+  Loader2Icon,
+  RotateCcwIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { useAuth } from "../../controllers/AuthController";
 import { useLogs } from "../../controllers/LogsController";
 import { useSessions } from "../../controllers/SessionsController";
+import { sessionExportService } from "../../services/sessionExportService";
 import { sessionService } from "../../services/sessionService";
+import { localeFor } from "../../i18n/translate";
 import type { LogDetail } from "../../domain/types/log.types";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
 import {
@@ -37,7 +47,9 @@ function useSessionDetailController(id: string | undefined) {
   const navigate = useNavigate();
   const [deleting, setDeleting] = useState(false);
   const [resuming, setResuming] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const { t, lang } = useI18n();
 
   const { user } = useAuth();
   const view = useMemo(() => {
@@ -90,8 +102,23 @@ function useSessionDetailController(id: string | undefined) {
     }
   }
 
+  async function exportExcel() {
+    if (!view) return;
+    setExporting(true);
+    setError(null);
+    try {
+      await sessionExportService.export(view.session, t, localeFor(lang));
+    } catch (err) {
+      setError(err);
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return {
     setError,
+    exporting,
+    exportExcel,
     setShared: (shared: boolean) => (view ? setSessionShared(view.session.id, shared) : Promise.resolve()),
     practice,
     view,
@@ -152,7 +179,13 @@ export default function SessionDetailPage() {
           </div>
         }
         actions={
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            {session.endedAt && logs.length > 0 && (
+              <Button variant="outline" onClick={c.exportExcel} disabled={c.exporting}>
+                {c.exporting ? <Loader2Icon className="animate-spin" /> : <FileSpreadsheetIcon />}
+                {c.exporting ? t("sessionExport.exporting") : t("sessionExport.button")}
+              </Button>
+            )}
             <ShareButton
               kind="sessions"
               shareToken={session.shareToken}
