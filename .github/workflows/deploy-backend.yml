@@ -65,16 +65,6 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-      # ONE-OFF (remove together with backend/src/scripts/backfillBoons.ts): fills in boon uptimes of logs imported
-      # before they were stored. Only touches logs still missing them, so later runs are quick no-ops. It doesn't
-      # block the deploy: logs it couldn't fill just show "no boon data" and are retried on the next deploy.
-      - name: Backfill boon uptimes (one-off)
-        run: node dist/scripts/backfillBoons.js
-        continue-on-error: true
-        timeout-minutes: 60
-        env:
-          NODE_ENV: production
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
   deploy:
     name: Deploy to Vercel (production)

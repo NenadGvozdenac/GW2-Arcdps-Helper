@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { HistoryIcon, XIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
@@ -19,6 +19,19 @@ import StatCard from "../components/StatCard";
 
 type PageCategory = Exclude<Category, "other">;
 
+/** How often the page re-checks the reset (so the numbers reset by themselves while it stays open). */
+const CLOCK_TICK_MS = 60_000;
+
+/** The current time, updated every minute. */
+function useNow(): Date {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), CLOCK_TICK_MS);
+    return () => clearInterval(id);
+  }, []);
+  return now;
+}
+
 const MODES: { value: CmMode; label: TranslationKey }[] = [
   { value: "all", label: "categories.modeAll" },
   { value: "normal", label: "categories.modeNormal" },
@@ -31,17 +44,20 @@ function useCategoryController(category: PageCategory) {
   const [mode, setMode] = useState<CmMode>("all");
   const [showPrevious, setShowPrevious] = useState(false);
   const selectedBoss = params.get("boss");
+  const now = useNow();
 
   const view = useMemo(() => {
-    const resetAt = statsService.resetFor(category);
+    // Everything on the cards counts from the last reset: daily for fractals, weekly for raids and strikes.
+    const resetAt = statsService.resetFor(category, now);
+    const nextResetAt = statsService.nextResetFor(category, now);
     const byEncounter = statsService.logsByEncounter(logs, category, mode);
     // In CM mode, bosses without a Challenge Mote (VG, Gorseval, IBS strikes…) are left out entirely.
     const hasMode = (e: Encounter) => mode !== "cm" || !e.noCM;
     const encounters = encounterService.encountersFor(category).filter(hasMode);
     const allLogs = [...byEncounter.values()].flat();
     const cleared = statsService.clearedSince(allLogs, resetAt);
-    const totals = statsService.encounterStats(allLogs);
-    const previousFrom = statsService.previousResetFor(category);
+    const sinceReset = statsService.encounterStats(statsService.logsBetween(allLogs, resetAt));
+    const previousFrom = statsService.previousResetFor(category, now);
 
     const groups = encounterService
       .groupsFor(category)
@@ -66,14 +82,14 @@ function useCategoryController(category: PageCategory) {
       groups,
       previous: { from: previousFrom, to: resetAt, logs: statsService.logsBetween(allLogs, previousFrom, resetAt) },
       summary: {
-        killed: encounters.filter((e) => byEncounter.get(e.key)?.some((l) => l.success)).length,
-        clearedSinceReset: cleared.size,
+        cleared: encounters.filter((e) => cleared.has(e.key)).length,
         total: encounters.length,
-        kills: totals.kills,
-        wipes: totals.wipes,
+        kills: sinceReset.kills,
+        wipes: sinceReset.wipes,
+        resetInMs: nextResetAt.getTime() - now.getTime(),
       },
     };
-  }, [logs, category, mode]);
+  }, [logs, category, mode, now]);
 
   function toggleBoss(key: string) {
     const next = new URLSearchParams(params);
@@ -91,7 +107,13 @@ function useCategoryController(category: PageCategory) {
     previousLabel: (category === "fractal" ? "categories.showYesterday" : "categories.showLastWeek") as TranslationKey,
     selectedBoss,
     toggleBoss,
-    clearedLabel: (category === "fractal" ? "categories.clearedToday" : "categories.clearedThisWeek") as TranslationKey,
+    labels: (category === "fractal"
+      ? { cleared: "categories.clearedToday", kills: "categories.killsToday", wipes: "categories.wipesToday" }
+      : {
+          cleared: "categories.clearedThisWeek",
+          kills: "categories.killsThisWeek",
+          wipes: "categories.wipesThisWeek",
+        }) satisfies Record<string, TranslationKey>,
   };
 }
 
@@ -128,10 +150,10 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
       />
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t("categories.bossesKilled")} value={`${summary.killed}/${summary.total}`} />
-        <StatCard label={t(c.clearedLabel)} value={`${summary.clearedSinceReset}/${summary.total}`} />
-        <StatCard label={t("categories.kills")} value={summary.kills} tone="success" />
-        <StatCard label={t("categories.wipes")} value={summary.wipes} tone="fail" />
+        <StatCard label={t(c.labels.cleared)} value={`${summary.cleared}/${summary.total}`} />
+        <StatCard label={t(c.labels.kills)} value={summary.kills} tone="success" />
+        <StatCard label={t(c.labels.wipes)} value={summary.wipes} tone="fail" />
+        <StatCard label={t("categories.nextReset")} value={fmt.countdown(summary.resetInMs)} mono />
       </div>
 
       {c.showPrevious && (

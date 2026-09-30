@@ -6,6 +6,8 @@ export interface Formatters {
   dateTime: (d: Date) => string;
   date: (d: Date) => string;
   number: (n: number) => string;
+  /** Time until something (a reset): "3d 04h", "5h 12m", "8m". */
+  countdown: (ms: number) => string;
 }
 
 export function formatDuration(ms: number): string {
@@ -26,6 +28,16 @@ export function formatSpan(ms: number): string {
   return `${s}s`;
 }
 
+export function formatCountdown(ms: number): string {
+  const minutes = Math.max(0, Math.ceil(ms / 60_000));
+  const d = Math.floor(minutes / 1440);
+  const h = Math.floor((minutes % 1440) / 60);
+  const m = minutes % 60;
+  if (d) return `${d}d ${String(h).padStart(2, "0")}h`;
+  if (h) return `${h}h ${String(m).padStart(2, "0")}m`;
+  return `${m}m`;
+}
+
 /** Date/number formatters for a BCP 47 locale such as "en-GB" or "sr-Latn-RS". */
 export function createFormatters(locale: string): Formatters {
   const dateTimeFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
@@ -37,5 +49,6 @@ export function createFormatters(locale: string): Formatters {
     dateTime: (d) => dateTimeFmt.format(d),
     date: (d) => dateFmt.format(d),
     number: (n) => numberFmt.format(n),
+    countdown: formatCountdown,
   };
 }

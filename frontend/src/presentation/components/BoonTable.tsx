@@ -1,10 +1,10 @@
-import { FlagIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { BOON_STACK_MAX, BOONS } from "../../domain/data/boons";
 import type { Boon, PlayerSummary } from "../../domain/types/log.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
+import CommanderIcon from "./CommanderIcon";
 
 interface Props {
   players: PlayerSummary[];
@@ -26,10 +26,10 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
     ? groups.map((g) => ({ group: g, players: squad.filter((p) => p.group === g).sort((a, b) => b.dps - a.dps) }))
     : [{ group: 0, players: squad }];
 
+  const columns = BOONS.length + 1;
+
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">{t("logDetail.boonsHint")}</p>
-      <Table>
+    <Table>
         <TableHeader>
           <TableRow>
             <TableHead>{t("logDetail.colCharacter")}</TableHead>
@@ -41,7 +41,29 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sections.flatMap((section) => [
+          {sections.flatMap((section, i) => [
+            ...(bySubgroup
+              ? [
+                  // Empty gap between subgroups, then the subgroup's title row.
+                  ...(i > 0
+                    ? [
+                        <TableRow key={`gap-${section.group}`} className="border-0 hover:bg-transparent">
+                          <TableCell colSpan={columns} className="h-5 p-0" />
+                        </TableRow>,
+                      ]
+                    : []),
+                  <TableRow key={`title-${section.group}`} className="border-b-2 bg-muted hover:bg-muted">
+                    <TableCell colSpan={columns} className="py-2">
+                      <span className="text-sm font-semibold">
+                        {t("logDetail.subgroupTitle", { group: section.group })}
+                      </span>
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {t("logDetail.subgroupPlayers", { count: section.players.length })}
+                      </span>
+                    </TableCell>
+                  </TableRow>,
+                ]
+              : []),
             ...section.players.map((p) => (
               <TableRow
                 key={p.account + p.name}
@@ -49,8 +71,8 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
               >
                 <TableCell className="font-medium">
                   <span className="inline-flex items-center gap-1.5">
-                    {p.commander && <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />}
                     <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
+                    {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
                   </span>
                   <div className="text-xs font-normal text-muted-foreground">{p.account}</div>
                 </TableCell>
@@ -62,23 +84,27 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
             ...(bySubgroup
               ? [
                   <SummaryRow
-                    key={`group-${section.group}`}
-                    label={t("logDetail.subgroupAverage", { group: section.group })}
+                    key={`average-${section.group}`}
+                    label={t("logDetail.subgroupAverage")}
                     players={section.players}
                   />,
                 ]
               : []),
           ])}
-          <SummaryRow key="squad" label={t("logDetail.squadAverage")} players={squad} strong />
+          {bySubgroup && (
+            <TableRow className="border-0 hover:bg-transparent">
+              <TableCell colSpan={columns} className="h-5 p-0" />
+            </TableRow>
+          )}
+          <SummaryRow label={t("logDetail.squadAverage")} players={squad} strong />
         </TableBody>
-      </Table>
-    </div>
+    </Table>
   );
 }
 
 function SummaryRow({ label, players, strong }: { label: string; players: PlayerSummary[]; strong?: boolean }) {
   return (
-    <TableRow className={cn("bg-muted/40 hover:bg-muted/40", strong && "border-t-2")}>
+    <TableRow className={cn("bg-muted/40 hover:bg-muted/40", strong && "border-y-2 bg-muted hover:bg-muted")}>
       <TableCell className={cn("text-muted-foreground italic", strong && "font-semibold text-foreground not-italic")}>
         {label}
       </TableCell>

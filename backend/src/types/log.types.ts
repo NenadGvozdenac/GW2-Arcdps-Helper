@@ -22,10 +22,7 @@ export interface PlayerSummary {
   breakbar?: number;
   /** Damage taken; missing on logs imported before it was stored. */
   damageTaken?: number;
-  /**
-   * Boon uptimes; {} when the log has no Elite Insights data to read them from. Logs imported before boons were stored
-   * get them from the one-off script src/scripts/backfillBoons.ts.
-   */
+  /** Boon uptimes; {} when the log has no Elite Insights data to read them from. */
   boons?: BoonUptimes;
 }
 

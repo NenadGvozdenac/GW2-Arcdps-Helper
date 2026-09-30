@@ -42,7 +42,7 @@ export default function BossRow({ encounter, logs, stats, clearedSinceReset, ope
         <span
           className={cn(
             "size-2.5 rounded-full",
-            clearedSinceReset ? "bg-success shadow-[0_0_8px] shadow-success/60" : stats.kills ? "bg-success/40" : "bg-muted",
+            clearedSinceReset ? "bg-success shadow-[0_0_8px] shadow-success/60" : "bg-muted",
           )}
           title={clearedSinceReset ? t("boss.clearedSinceReset") : undefined}
         />

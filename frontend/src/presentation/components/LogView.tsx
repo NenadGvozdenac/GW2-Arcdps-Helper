@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { FlagIcon, Loader2Icon, SparklesIcon, UsersIcon } from "lucide-react";
+import { Loader2Icon, SparklesIcon, UsersIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import type { Log, PlayerSummary } from "../../domain/types/log.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/compone
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
 import BoonTable from "./BoonTable";
+import CommanderIcon from "./CommanderIcon";
 import ResultBadge from "./ResultBadge";
 import StatCard from "./StatCard";
 
@@ -108,10 +109,8 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-medium">
                         <span className="inline-flex items-center gap-1.5">
-                          {p.commander && (
-                            <FlagIcon className="size-3.5 text-warning" aria-label={t("logDetail.commander")} />
-                          )}
                           {p.name}
+                          {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
                         </span>
                       </TableCell>
                       <TableCell className="text-muted-foreground">{p.account}</TableCell>

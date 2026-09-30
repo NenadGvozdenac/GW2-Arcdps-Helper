@@ -50,6 +50,13 @@ export const statsService = {
     return category === "fractal" ? statsService.lastDailyReset(now) : statsService.lastWeeklyReset(now);
   },
 
+  /** When the current period ends: tomorrow 00:00 UTC for fractals, next Monday 07:30 UTC for raids and strikes. */
+  nextResetFor(category: Category, now = new Date()): Date {
+    const d = statsService.resetFor(category, now);
+    d.setUTCDate(d.getUTCDate() + (category === "fractal" ? 1 : 7));
+    return d;
+  },
+
   /** Start of the reset period before the current one: yesterday for fractals, last week for raids and strikes. */
   previousResetFor(category: Category, now = new Date()): Date {
     const d = statsService.resetFor(category, now);
