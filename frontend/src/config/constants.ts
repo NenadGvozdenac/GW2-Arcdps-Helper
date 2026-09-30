@@ -44,6 +44,9 @@ export const DPS_REPORT_TOKEN_RE = /^[A-Za-z0-9]{8,64}$/;
 export const DPS_REPORT_TOKEN_URL = "https://dps.report/getUserToken";
 
 /** Same pattern as DISCORD_WEBHOOK_RE in backend/src/config/constants.ts. */
+/** Session filter of a webhook; same limits as in backend/src/config/constants.ts. */
+export const DISCORD_MAX_FILTER_ACCOUNTS = 10;
+export const DISCORD_DEFAULT_MIN_ACCOUNTS = 3;
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 
 export const SOURCE_URL = "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";

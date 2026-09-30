@@ -121,9 +121,23 @@ export const discordService = {
    * The webhook that posts new logs or session summaries; null when none of them does, or the one that would is
    * paused ("Active" unchecked).
    */
-  webhookFor(webhooks: DiscordWebhook[], kind: "logs" | "sessions"): string | null {
+  webhookFor(webhooks: DiscordWebhook[], kind: "logs" | "sessions"): DiscordWebhook | null {
     const webhook = webhooks.find((w) => w.content === "all" || w.content === kind);
-    return webhook?.enabled ? webhook.url : null;
+    return webhook?.enabled ? webhook : null;
+  },
+
+  /**
+   * The webhook's session filter: true when it has none, or when at least one log has `minAccounts` of its accounts
+   * (all of them, if it lists fewer) in the squad. Then the whole summary is posted.
+   */
+  passesSessionFilter(webhook: Pick<DiscordWebhook, "accounts" | "minAccounts">, logs: Pick<Log, "accounts">[]) {
+    if (!webhook.accounts.length) return true;
+    const wanted = new Set(webhook.accounts.map((a) => a.toLowerCase()));
+    const needed = Math.min(webhook.minAccounts, wanted.size);
+    return logs.some((log) => {
+      const squad = new Set(log.accounts.map((a) => a.toLowerCase()));
+      return [...wanted].filter((a) => squad.has(a)).length >= needed;
+    });
   },
 
   /**

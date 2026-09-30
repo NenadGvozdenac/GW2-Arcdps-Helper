@@ -16,6 +16,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { DISCORD_DEFAULT_MIN_ACCOUNTS } from "../config/constants";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
@@ -64,6 +65,12 @@ export const discordWebhooks = pgTable(
     content: text().$type<DiscordContent>().notNull().default("all"),
     /** Unchecking "Active" pauses the webhook without forgetting its URL: nothing is posted to it until re-enabled. */
     enabled: boolean().notNull().default(true),
+    /**
+     * Session filter (only for a webhook that posts sessions): a session summary is posted only when at least one of
+     * its logs has minAccounts of these GW2 accounts in the squad. Empty = every session is posted.
+     */
+    accounts: text().array().notNull().default([]),
+    minAccounts: integer("min_accounts").notNull().default(DISCORD_DEFAULT_MIN_ACCOUNTS),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("discord_webhooks_user_position_idx").on(t.userId, t.position)],

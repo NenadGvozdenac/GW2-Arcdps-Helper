@@ -7,6 +7,12 @@ export interface DiscordWebhook {
   content: DiscordContent;
   /** false = paused: nothing is posted to it. */
   enabled: boolean;
+  /**
+   * Session filter (webhook that posts sessions): a session summary is posted only when one of its logs has
+   * `minAccounts` of these GW2 accounts. Empty = every session.
+   */
+  accounts: string[];
+  minAccounts: number;
 }
 
 export interface User {

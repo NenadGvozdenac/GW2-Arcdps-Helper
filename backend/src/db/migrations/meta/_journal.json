@@ -106,6 +106,13 @@
       "when": 1790769747390,
       "tag": "0014_discord_webhooks",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1790770330043,
+      "tag": "0015_discord_webhook_session_filter",
+      "breakpoints": true
     }
   ]
 }

@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
 import {
+  DISCORD_DEFAULT_MIN_ACCOUNTS,
+  DISCORD_MAX_FILTER_ACCOUNTS,
   DISCORD_MAX_WEBHOOKS,
   DISCORD_WEBHOOK_RE,
   DPS_REPORT_TOKEN_RE,
@@ -85,7 +87,20 @@ const discordWebhookUrl = z
  */
 export const discordWebhooksSchema = z.object({
   webhooks: z
-    .array(z.object({ url: discordWebhookUrl, content: discordContent, enabled: z.boolean().default(true) }))
+    .array(
+      z.object({
+        url: discordWebhookUrl,
+        content: discordContent,
+        enabled: z.boolean().default(true),
+        accounts: z
+          .array(gw2Account)
+          .max(DISCORD_MAX_FILTER_ACCOUNTS, `At most ${DISCORD_MAX_FILTER_ACCOUNTS} accounts.`)
+          .default([])
+          // Same account twice (in any case) would count twice.
+          .transform((list) => [...new Map(list.map((a) => [a.toLowerCase(), a])).values()]),
+        minAccounts: z.number().int().min(1).max(DISCORD_MAX_FILTER_ACCOUNTS).default(DISCORD_DEFAULT_MIN_ACCOUNTS),
+      }),
+    )
     .max(DISCORD_MAX_WEBHOOKS, `At most ${DISCORD_MAX_WEBHOOKS} webhooks.`)
     .refine(
       (w) => w.length < 2 || (new Set(w.map((x) => x.content)).size === 2 && w.every((x) => x.content !== "all")),

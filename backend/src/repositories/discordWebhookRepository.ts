@@ -3,7 +3,13 @@ import { getDb } from "../db/pool";
 import { discordWebhooks } from "../db/schema";
 import type { DiscordWebhook } from "../types/discord.types";
 
-const columns = { url: discordWebhooks.url, content: discordWebhooks.content, enabled: discordWebhooks.enabled };
+const columns = {
+  url: discordWebhooks.url,
+  content: discordWebhooks.content,
+  enabled: discordWebhooks.enabled,
+  accounts: discordWebhooks.accounts,
+  minAccounts: discordWebhooks.minAccounts,
+};
 
 export const discordWebhookRepository = {
   /** The user's webhooks in order (first, second). */

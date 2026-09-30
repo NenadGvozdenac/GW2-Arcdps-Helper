@@ -26,7 +26,7 @@ async function notifyDiscord(userId: string, results: SubmitResult[], sessionAct
   const added = results.flatMap((r) => (r.status === "ok" ? [r.log] : []));
   if (!added.length) return;
   const webhooks = await userService.getDiscordWebhooks(userId);
-  await discordService.notifyNewLogs(discordService.webhookFor(webhooks, "logs"), added);
+  await discordService.notifyNewLogs(discordService.webhookFor(webhooks, "logs")?.url ?? null, added);
 }
 
 export const logController = {
