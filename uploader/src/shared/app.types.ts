@@ -14,10 +14,27 @@ export interface SessionState {
   resumable: BackendSession | null;
 }
 
+/**
+ * "Sign in with the browser": the website was opened on a sign-in request and the app waits for it to be approved
+ * there. `waiting` until then; `denied` / `expired` stay shown until the user retries or cancels.
+ */
+export interface BrowserLoginState {
+  status: "waiting" | "denied" | "expired";
+  /** Shown here and on the website, so the user can check they approve this app. */
+  code: string;
+  /** The page that was opened (to open it again). */
+  url: string;
+}
+
+/** What the browser is opened for: straight to the confirmation, or the password reset (which leads there too). */
+export type BrowserLoginMode = "signIn" | "forgotPassword";
+
 /** Everything the renderer needs to draw the UI; pushed on every change. */
 export interface AppState {
   environment: AppEnvironment;
   user: BackendUser | null;
+  /** A "Sign in with the browser" in progress (or just failed), else null. */
+  browserLogin: BrowserLoginState | null;
   settings: Settings;
   logFolderExists: boolean;
   watch: WatchState;
@@ -47,6 +64,9 @@ export interface UploaderApi {
   onStateChanged(listener: (state: AppState) => void): () => void;
 
   login(req: LoginRequest): Promise<IpcResult>;
+  /** Opens the website to approve this app's sign-in (there, or after the password reset) and waits for it. */
+  startBrowserLogin(mode: BrowserLoginMode): Promise<IpcResult>;
+  cancelBrowserLogin(): Promise<void>;
   logout(): Promise<void>;
 
   saveSettings(patch: Partial<Settings>): Promise<IpcResult>;

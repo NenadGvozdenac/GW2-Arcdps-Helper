@@ -529,11 +529,32 @@ namespace UI
 		RenderHowItWorks();
 		ImGui::Separator();
 
+		// A browser sign-in just started: open its page (here, on the UI thread).
+		if (std::string url = Account::TakeUrlToOpen(); !url.empty()) Util::OpenUrl(url);
+
 		ImGui::TextUnformatted("GW2 ArcDPS Helper account");
 		if (acc.signedIn)
 		{
 			ImGui::Text("Signed in as %s%s%s", acc.email.c_str(), acc.gw2Account.empty() ? "" : " - ", acc.gw2Account.c_str());
 			if (ImGui::Button("Sign out")) Account::Logout();
+		}
+		else if (acc.browserStatus == "waiting")
+		{
+			ImGui::TextUnformatted("Confirm the sign-in in your browser: check that the website shows this code and click");
+			ImGui::TextUnformatted("\"Sign in the app\".");
+			ImGui::TextColored(YELLOW, "Code: %s", acc.browserCode.c_str());
+			ImGui::TextColored(GREY, "Waiting for the confirmation...");
+			if (ImGui::Button("Open the page again")) Util::OpenUrl(acc.browserUrl);
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel")) Account::CancelBrowserLogin();
+		}
+		else if (!acc.browserStatus.empty())
+		{
+			ImGui::TextColored(RED, "%s", acc.browserStatus == "denied" ? "The sign-in was denied on the website."
+			                                                          : "The sign-in request expired (after 5 minutes).");
+			if (ImGui::Button("Try again")) Account::StartBrowserLogin(false);
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel")) Account::CancelBrowserLogin();
 		}
 		else
 		{
@@ -549,8 +570,12 @@ namespace UI
 			}
 			EndDisabled();
 			ImGui::SameLine();
-			// Resetting happens on the website: it emails a link to a page where the new password is chosen.
-			if (ImGui::Button("Forgot password?")) Util::OpenUrl(std::string(WEB_URL) + "/forgot-password");
+			// Opens the password reset on the website; someone already signed in there just approves this addon instead.
+			if (ImGui::Button("Forgot password?")) Account::StartBrowserLogin(true);
+			// No password needed: approve this addon on the website where you are signed in.
+			BeginDisabled(acc.busy);
+			if (ImGui::Button("Sign in with the browser") && !acc.busy) Account::StartBrowserLogin(false);
+			EndDisabled();
 		}
 		if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());
 

@@ -15,6 +15,11 @@ struct AccountState
 	bool busy = false;       // a sign-in / session request is running
 	std::string message;     // last error (or info) to show in the UI
 
+	// "Sign in with the browser": waiting (for the approval on the website), denied or expired; empty = not in use.
+	std::string browserStatus;
+	std::string browserCode; // shown here and on the website
+	std::string browserUrl;  // the page that was opened (to open it again)
+
 	// Recording = an active session on GW2 ArcDPS Helper; new logs are attached to it.
 	bool recording = false;
 	bool ending = false;     // "Stop" pressed, waiting for the session's uploads before ending it
@@ -34,6 +39,15 @@ namespace Account
 	void Stop();
 
 	void Login(const std::string& email, const std::string& password);
+
+	/**
+	 * Opens the website on a new sign-in request — its confirmation page, or with `forgotPassword` the password reset
+	 * (someone already signed in there is sent on to the confirmation) — and signs in once it is approved there.
+	 */
+	void StartBrowserLogin(bool forgotPassword);
+	void CancelBrowserLogin();
+	/** A page to open in the browser, once (the UI thread opens it: ShellExecute wants a UI thread). */
+	std::string TakeUrlToOpen();
 	void Logout();
 
 	void StartRecording(const std::string& name);

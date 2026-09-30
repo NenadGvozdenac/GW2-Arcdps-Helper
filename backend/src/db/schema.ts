@@ -18,6 +18,7 @@ import {
 } from "drizzle-orm/pg-core";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
+import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
 import type { SessionEndReason } from "../types/session.types";
 
 export const users = pgTable(
@@ -128,3 +129,21 @@ export const logs = pgTable(
     uniqueIndex("logs_share_token_idx").on(t.shareToken),
   ],
 );
+
+/**
+ * A desktop uploader / Nexus addon asking to be signed in by someone already signed in on the website ("Sign in with
+ * the browser"). The app polls it with its secret; the website approves it for the signed-in user. Short-lived.
+ */
+export const appLoginRequests = pgTable("app_login_requests", {
+  id: uuid().primaryKey().defaultRandom(),
+  /** SHA-256 of the secret only the app knows - collecting the sign-in needs it, the id in the website link doesn't. */
+  secretHash: text("secret_hash").notNull(),
+  /** Short code shown in the app and on the website, so the user can check they approve their own app. */
+  code: text().notNull(),
+  client: text().$type<AppLoginClient>().notNull(),
+  status: text().$type<AppLoginStatus>().notNull().default("pending"),
+  /** The user who approved it; the app is signed in as them. */
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});

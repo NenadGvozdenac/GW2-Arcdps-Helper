@@ -3,6 +3,8 @@ export const IPC = {
   getState: "state:get",
   stateChanged: "state:changed",
   login: "auth:login",
+  startBrowserLogin: "auth:browser-login:start",
+  cancelBrowserLogin: "auth:browser-login:cancel",
   logout: "auth:logout",
   saveSettings: "settings:save",
   chooseLogFolder: "settings:choose-log-folder",

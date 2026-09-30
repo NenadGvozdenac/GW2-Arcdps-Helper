@@ -10,6 +10,8 @@ export const FILE_WAIT_TIMEOUT_MS = 120_000;
 export const DPS_REPORT_ATTEMPTS = 3;
 export const DPS_REPORT_TIMEOUT_MS = 120_000;
 export const BACKEND_TIMEOUT_MS = 60_000;
+/** How often a "Sign in with the browser" request is checked while the user approves it on the website. */
+export const BROWSER_LOGIN_POLL_MS = 2_000;
 
 /** How many upload entries are kept in history. */
 export const MAX_UPLOADS_KEPT = 200;

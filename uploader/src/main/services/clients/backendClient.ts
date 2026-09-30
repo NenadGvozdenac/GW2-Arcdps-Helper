@@ -1,5 +1,7 @@
 import { BACKEND_TIMEOUT_MS } from "../../config/constants";
 import type {
+  AppLoginCreated,
+  AppLoginPollResult,
   AuthResponse,
   BackendErrorBody,
   BackendSession,
@@ -28,6 +30,17 @@ async function request<T>(apiUrl: string, path: string, init: RequestInit & { to
 export const backendClient = {
   login: (apiUrl: string, email: string, password: string) =>
     request<AuthResponse>(apiUrl, "/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
+
+  /** Starts a "Sign in with the browser" request. */
+  createAppLogin: (apiUrl: string) =>
+    request<AppLoginCreated>(apiUrl, "/auth/app-login", { method: "POST", body: JSON.stringify({ client: "uploader" }) }),
+
+  /** Whether the request was approved on the website yet; `approved` carries the sign-in (only once). */
+  pollAppLogin: (apiUrl: string, id: string, secret: string) =>
+    request<AppLoginPollResult>(apiUrl, `/auth/app-login/${encodeURIComponent(id)}/poll`, {
+      method: "POST",
+      body: JSON.stringify({ secret }),
+    }),
 
   async me(apiUrl: string, token: string): Promise<BackendUser> {
     return (await request<{ user: BackendUser }>(apiUrl, "/auth/me", { token })).user;

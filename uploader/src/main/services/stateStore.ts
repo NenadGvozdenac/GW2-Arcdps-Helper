@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { environment } from "../config/environment";
 import { settingsRepository } from "../repositories/settingsRepository";
 import { uploadsRepository } from "../repositories/uploadsRepository";
-import type { AppState, SessionState } from "../../shared/app.types";
+import type { AppState, BrowserLoginState, SessionState } from "../../shared/app.types";
 import type { BackendUser, WeeklyClears } from "../../shared/backend.types";
 import type { Settings } from "../../shared/settings.types";
 import type { UpdateState } from "../../shared/update.types";
@@ -14,6 +14,7 @@ type Listener = (state: AppState) => void;
 /** Single source of truth for the main process. Every change is persisted and pushed to listeners. */
 function createStateStore() {
   let user: BackendUser | null = null;
+  let browserLogin: BrowserLoginState | null = null;
   let settings = {} as Settings;
   let uploads: UploadEntry[] = [];
   let watch: WatchState = { watching: false, startedAt: null };
@@ -27,6 +28,7 @@ function createStateStore() {
   const snapshot = (): AppState => ({
     environment,
     user,
+    browserLogin,
     settings,
     logFolderExists: !!settings.logFolder && existsSync(settings.logFolder),
     watch,
@@ -70,6 +72,11 @@ function createStateStore() {
 
     setUser(next: BackendUser | null) {
       user = next;
+      emit();
+    },
+
+    setBrowserLogin(next: BrowserLoginState | null) {
+      browserLogin = next;
       emit();
     },
 

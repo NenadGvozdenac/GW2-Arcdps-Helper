@@ -7,6 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import VerifyEmailPage from "./pages/VerifyEmailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import AppLoginPage from "./pages/AppLoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import UploadPage from "./pages/UploadPage";
@@ -46,10 +47,12 @@ export default function AppRouter() {
         <Route element={<RequireGuest />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
         {/* Link from the confirmation email; signs in, so it works whether or not someone is signed in already. */}
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        {/* Guests reset their password here; the desktop uploader / Nexus addon open it too (?app=<id>), and a
+            signed-in user is sent on to confirm that app's sign-in (see ForgotPasswordPage). */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         {/* Link from the password-reset email; also usable while signed in. */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route
@@ -73,6 +76,8 @@ export default function AppRouter() {
         <Route path="shared/logs/:token" element={guide(<SharedLogPage />)} />
         <Route path="settings/discord" element={<Navigate to="/guide/discord" replace />} />
         <Route element={<RequireAuth />}>
+          {/* "Sign in with the browser" of the desktop uploader / Nexus addon — a page of its own, outside the app layout. */}
+          <Route path="app-login/:id" element={<AppLoginPage />} />
           <Route element={<Layout />}>
             <Route path="upload" element={<UploadPage />} />
             <Route path="raids" element={<CategoryPage key="raid" category="raid" />} />

@@ -138,6 +138,24 @@ namespace Api
 		return !token.empty();
 	}
 
+	bool CreateAppLogin(AppLogin& result, Error& err)
+	{
+		json body = { { "client", "addon" } }, out;
+		if (!Backend("POST", "/auth/app-login", "", &body, out, err)) return false;
+		result = { Str(out, "id"), Str(out, "secret"), Str(out, "code") };
+		return !result.id.empty() && !result.secret.empty();
+	}
+
+	bool PollAppLogin(const AppLogin& request, AppLoginPoll& result, Error& err)
+	{
+		json body = { { "secret", request.secret } }, out;
+		if (!Backend("POST", "/auth/app-login/" + Util::UrlEncode(request.id) + "/poll", "", &body, out, err)) return false;
+		result.status = Str(out, "status");
+		result.token = Str(out, "token");
+		result.user = ToUser(out.value("user", json::object()));
+		return !result.status.empty();
+	}
+
 	bool Me(const std::string& token, User& user, Error& err)
 	{
 		json out;

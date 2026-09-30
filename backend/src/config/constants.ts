@@ -60,6 +60,12 @@ export const EMAIL_VERIFICATION_EXPIRES_IN = "24h";
 export const PASSWORD_RESET_EXPIRES_IN = "1h";
 /** A new confirmation / password-reset email is sent at most this often per account. */
 export const EMAIL_COOLDOWN_MS = 60_000;
+/** How long an app has to be approved on the website ("Sign in with the browser"). */
+export const APP_LOGIN_TTL_MS = 5 * 60_000;
+/** Random bytes of the secret an app keeps to collect its sign-in. */
+export const APP_LOGIN_SECRET_BYTES = 32;
+/** Characters of the code shown in the app and on the website - no 0/O, 1/I that are easy to mix up. */
+export const APP_LOGIN_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const SMTP_TIMEOUT_MS = 15_000;
 /** Name shown as the sender of our emails; the address is SMTP_USER. */
 export const EMAIL_SENDER_NAME = "GW2 ArcDPS Helper";

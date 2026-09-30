@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { appLoginController } from "../controllers/appLoginController";
 import { authController } from "../controllers/authController";
 import { clearsController } from "../controllers/clearsController";
 import { logController } from "../controllers/logController";
@@ -22,6 +23,12 @@ export function createRouter(): Router {
   router.post("/auth/forgot-password", authController.forgotPassword);
   router.post("/auth/reset-password", authController.resetPassword);
   router.get("/auth/me", requireAuth, authController.me);
+  // "Sign in with the browser" for the desktop uploader and the Nexus addon.
+  router.post("/auth/app-login", appLoginController.create);
+  router.post("/auth/app-login/:id/poll", appLoginController.poll);
+  router.get("/auth/app-login/:id", requireAuth, appLoginController.info);
+  router.post("/auth/app-login/:id/approve", requireAuth, appLoginController.approve);
+  router.post("/auth/app-login/:id/deny", requireAuth, appLoginController.deny);
 
   // Raid and strike bosses killed since the weekly reset (desktop uploader and Nexus addon).
   router.get("/clears/weekly", requireAuth, clearsController.weekly);

@@ -1,6 +1,6 @@
 import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { IPC } from "../../shared/ipc";
-import type { IpcResult, LoginRequest } from "../../shared/app.types";
+import type { BrowserLoginMode, IpcResult, LoginRequest } from "../../shared/app.types";
 import type { Settings } from "../../shared/settings.types";
 import { mainT } from "../i18n/mainMessages";
 import { authService } from "../services/authService";
@@ -28,6 +28,10 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
   ipcMain.handle(IPC.getState, () => stateStore.get());
 
   ipcMain.handle(IPC.login, (_e, req: LoginRequest) => result(() => authService.login(req)));
+  ipcMain.handle(IPC.startBrowserLogin, (_e, mode: BrowserLoginMode) =>
+    result(() => authService.startBrowserLogin(mode === "forgotPassword" ? "forgotPassword" : "signIn")),
+  );
+  ipcMain.handle(IPC.cancelBrowserLogin, () => authService.cancelBrowserLogin());
   ipcMain.handle(IPC.logout, () => authService.logout());
 
   ipcMain.handle(IPC.saveSettings, (_e, patch: Partial<Settings>) => result(() => settingsService.save(patch)));

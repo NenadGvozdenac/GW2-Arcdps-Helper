@@ -1,5 +1,18 @@
 // Subset of the GW2 ArcDPS Helper backend contract (see backend/src/types) that the uploader uses.
 
+/** POST /auth/app-login: a "Sign in with the browser" request. `secret` stays in the app. */
+export interface AppLoginCreated {
+  id: string;
+  secret: string;
+  code: string;
+  expiresAt: string;
+}
+
+/** POST /auth/app-login/:id/poll */
+export type AppLoginPollResult =
+  | { status: "pending" | "denied" | "expired" }
+  | { status: "approved"; token: string; user: BackendUser };
+
 export interface BackendUser {
   id: string;
   email: string;

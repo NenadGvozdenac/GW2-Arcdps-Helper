@@ -5,6 +5,7 @@
 #include <functional>
 #include <mutex>
 #include <thread>
+#include <utility>
 
 #include "api.h"
 #include "globals.h"
@@ -18,6 +19,9 @@ namespace
 	constexpr int64_t REFRESH_MS = 60000;
 	/** The weekly clear also changes through the website and the desktop uploader, and at the weekly reset. */
 	constexpr int64_t CLEARS_REFRESH_MS = 5 * 60000;
+	/** How often a "Sign in with the browser" request is checked, and how long it is waited for at most. */
+	constexpr int64_t BROWSER_POLL_MS = 2000;
+	constexpr int64_t BROWSER_WAIT_MS = 6 * 60000; // the backend lets a request live 5 minutes
 
 	std::mutex g_mutex;
 	std::condition_variable g_cv;
@@ -25,6 +29,9 @@ namespace
 	bool g_stop = false;
 	std::thread g_thread;
 	AccountState g_state;
+	/** Bumped by every browser sign-in start / cancel, so a poll loop that is no longer wanted stops. */
+	uint64_t g_browserGen = 0;
+	std::string g_urlToOpen;
 
 	void Set(const std::function<void(AccountState&)>& change)
 	{
@@ -91,6 +98,49 @@ namespace
 			s.gw2Account = user.gw2Account;
 			s.dpsReportToken = user.dpsReportToken;
 		});
+	}
+
+	void RefreshSession();
+	void LoadClears();
+
+	/** Stores a fresh sign-in (password or browser) and loads what the signed-in UI shows. */
+	void SignIn(const std::string& token, const Api::User& user)
+	{
+		Config::Update([&](Settings& s) { s.token = token; });
+		ApplyUser(user);
+		Set([&](AccountState& s) {
+			s.signedIn = true;
+			s.message.clear();
+			s.browserStatus.clear();
+			s.browserCode.clear();
+			s.browserUrl.clear();
+		});
+		LogInfo("Signed in as " + user.email);
+		RefreshSession();
+		LoadClears();
+	}
+
+	/** Waits for the browser sign-in `request` to be approved; stops when a newer start / cancel bumped the generation. */
+	void PollBrowserLogin(uint64_t gen, const Api::AppLogin& request)
+	{
+		const int64_t deadline = Util::NowMs() + BROWSER_WAIT_MS;
+		auto current = [gen] {
+			std::lock_guard lock(g_mutex);
+			return g_browserGen == gen;
+		};
+		while (Util::NowMs() < deadline)
+		{
+			if (!SleepOrStop(BROWSER_POLL_MS) || !current()) return;
+			Api::AppLoginPoll res;
+			Api::Error err;
+			if (!Api::PollAppLogin(request, res, err)) continue; // offline for a moment: try again on the next tick
+			if (res.status == "pending") continue;
+			if (!current()) return;
+			if (res.status == "approved" && !res.token.empty()) return SignIn(res.token, res.user);
+			Set([&](AccountState& s) { s.browserStatus = res.status == "denied" ? "denied" : "expired"; });
+			return;
+		}
+		if (current()) Set([](AccountState& s) { s.browserStatus = "expired"; });
 	}
 
 	/** Picks up a session that is still running on the server (e.g. after restarting the game). */
@@ -227,16 +277,53 @@ namespace Account
 				Set([&](AccountState& s) { s.message = err.message.empty() ? "Sign-in failed." : err.message; });
 				return;
 			}
-			Config::Update([&](Settings& s) { s.token = token; });
-			ApplyUser(user);
-			Set([&](AccountState& s) {
-				s.signedIn = true;
-				s.message.clear();
-			});
-			LogInfo("Signed in as " + user.email);
-			RefreshSession();
-			LoadClears();
+			SignIn(token, user);
 		});
+	}
+
+	void StartBrowserLogin(bool forgotPassword)
+	{
+		uint64_t gen;
+		{
+			std::lock_guard lock(g_mutex);
+			gen = ++g_browserGen;
+			g_state.message.clear();
+		}
+		Post([gen, forgotPassword] {
+			Api::AppLogin request;
+			Api::Error err;
+			if (!Api::CreateAppLogin(request, err))
+			{
+				Set([&](AccountState& s) { s.message = "Could not start the browser sign-in: " + err.message; });
+				return;
+			}
+			std::string id = Util::UrlEncode(request.id);
+			std::string url = std::string(WEB_URL) + (forgotPassword ? "/forgot-password?app=" + id : "/app-login/" + id);
+			{
+				std::lock_guard lock(g_mutex);
+				if (g_browserGen != gen) return; // cancelled meanwhile
+				g_state.browserStatus = "waiting";
+				g_state.browserCode = request.code;
+				g_state.browserUrl = url;
+				g_urlToOpen = url;
+			}
+			PollBrowserLogin(gen, request);
+		});
+	}
+
+	void CancelBrowserLogin()
+	{
+		std::lock_guard lock(g_mutex);
+		++g_browserGen;
+		g_state.browserStatus.clear();
+		g_state.browserCode.clear();
+		g_state.browserUrl.clear();
+	}
+
+	std::string TakeUrlToOpen()
+	{
+		std::lock_guard lock(g_mutex);
+		return std::exchange(g_urlToOpen, std::string());
 	}
 
 	void Logout()

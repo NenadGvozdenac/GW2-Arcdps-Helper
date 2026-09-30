@@ -74,6 +74,24 @@ namespace Api
 	bool UploadToDpsReport(const std::wstring& filePath, const std::string& userToken, DpsReportLog& out, Error& err);
 
 	bool Login(const std::string& email, const std::string& password, std::string& token, User& user, Error& err);
+
+	/** A "Sign in with the browser" request: the website approves it, the addon polls it with the secret. */
+	struct AppLogin
+	{
+		std::string id;
+		std::string secret; // never leaves the addon; the website link only carries the id
+		std::string code;   // shown here and on the website, so the user can check they approve this addon
+	};
+
+	struct AppLoginPoll
+	{
+		std::string status; // pending, approved, denied, expired
+		std::string token;  // approved only
+		User user;          // approved only
+	};
+
+	bool CreateAppLogin(AppLogin& out, Error& err);
+	bool PollAppLogin(const AppLogin& request, AppLoginPoll& out, Error& err);
 	bool Me(const std::string& token, User& user, Error& err);
 	/** Imports one dps.report link; with a sessionId the log is attached to that session. */
 	bool SubmitLog(const std::string& token, const std::string& permalink, const std::string& sessionId, SubmitResult& out, Error& err);

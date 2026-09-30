@@ -1,7 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { AlertCircleIcon, Loader2Icon } from "lucide-react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { AlertCircleIcon, Loader2Icon, MonitorSmartphoneIcon } from "lucide-react";
+import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
+import { appLoginService } from "../../services/appLoginService";
 import { authService } from "../../services/authService";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
@@ -39,9 +41,20 @@ const backToLogin = (label: string) => (
   </Link>
 );
 
+/**
+ * Password reset for guests. The desktop uploader / Nexus addon open it as /forgot-password?app=<request id>: whoever
+ * is already signed in here is sent on to approve that app's sign-in instead (no password needed at all).
+ */
 export default function ForgotPasswordPage() {
   const c = useForgotPasswordController();
   const { t } = useI18n();
+  const { user, loading } = useAuth();
+  const appRequest = useSearchParams()[0].get("app");
+  const appPage = appRequest ? appLoginService.pagePath(appRequest) : null;
+
+  // A saved sign-in is being restored and will most likely redirect away — don't flash the form.
+  if (loading) return null;
+  if (user) return <Navigate to={appPage ?? "/"} replace />;
 
   if (c.sentTo) {
     return (
@@ -71,6 +84,23 @@ export default function ForgotPasswordPage() {
         </>
       }
     >
+      {appPage && (
+        <Alert>
+          <MonitorSmartphoneIcon />
+          <AlertDescription>
+            <span>
+              {t("appLogin.forgotHint")}{" "}
+              <Link
+                to="/login"
+                state={{ from: appPage }}
+                className="font-medium text-foreground underline underline-offset-4"
+              >
+                {t("appLogin.forgotHintLink")}
+              </Link>
+            </span>
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="grid gap-2">
         <Label htmlFor="email">{t("auth.email")}</Label>
         <Input

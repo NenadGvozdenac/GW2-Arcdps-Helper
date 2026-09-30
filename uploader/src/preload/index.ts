@@ -12,6 +12,8 @@ const api: UploaderApi = {
   },
 
   login: (req) => ipcRenderer.invoke(IPC.login, req),
+  startBrowserLogin: (mode) => ipcRenderer.invoke(IPC.startBrowserLogin, mode),
+  cancelBrowserLogin: () => ipcRenderer.invoke(IPC.cancelBrowserLogin),
   logout: () => ipcRenderer.invoke(IPC.logout),
 
   saveSettings: (patch) => ipcRenderer.invoke(IPC.saveSettings, patch),

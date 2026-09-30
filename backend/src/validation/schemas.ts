@@ -32,6 +32,16 @@ export const registerSchema = z.object({
   acceptTerms: z.literal(true, { error: "You must accept the Terms of Service and Privacy Policy." }),
 });
 
+/** POST /auth/app-login - which app asks to be signed in through the website. */
+export const appLoginCreateSchema = z.object({
+  client: z.enum(["uploader", "addon"]),
+});
+
+/** POST /auth/app-login/:id/poll - the secret the app got when it created the request. */
+export const appLoginPollSchema = z.object({
+  secret: z.string().min(1).max(200),
+});
+
 export const verifyEmailSchema = z.object({
   token: z.string().min(1, "Token is required.").max(2000),
 });
