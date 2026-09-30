@@ -7,7 +7,8 @@ interface Props {
   title: string;
   description?: string;
   onSubmit: () => void;
-  children: ReactNode;
+  /** Optional: a card that is only a message (title + description) has no body. */
+  children?: ReactNode;
   footer: ReactNode;
 }
 
@@ -33,7 +34,7 @@ export default function AuthShell({ title, description, onSubmit, children, foot
               {description && <CardDescription>{description}</CardDescription>}
             </div>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">{children}</CardContent>
+          {children && <CardContent className="flex flex-col gap-4">{children}</CardContent>}
           <CardFooter className="flex flex-col gap-3">{footer}</CardFooter>
         </form>
       </Card>

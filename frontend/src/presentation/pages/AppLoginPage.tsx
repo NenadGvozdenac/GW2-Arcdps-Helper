@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, MonitorSmartphoneIcon, XCircleIcon } from "lucide-react";
+import { AlertCircleIcon, Loader2Icon, MonitorSmartphoneIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import type { AppLoginRequest } from "../../domain/types/appLogin.types";
@@ -92,9 +92,7 @@ export default function AppLoginPage() {
         description={t("appLogin.expiredBody")}
         onSubmit={() => {}}
         footer={toSite(t("appLogin.toSite"))}
-      >
-        <XCircleIcon className="size-10 text-muted-foreground" />
-      </AuthShell>
+      />
     );
   }
 
@@ -108,13 +106,7 @@ export default function AppLoginPage() {
         description={t(approved ? "appLogin.approvedBody" : "appLogin.deniedBody", { app })}
         onSubmit={() => {}}
         footer={toSite(t("appLogin.toSite"))}
-      >
-        {approved ? (
-          <CheckCircle2Icon className="size-10 text-success" />
-        ) : (
-          <XCircleIcon className="size-10 text-muted-foreground" />
-        )}
-      </AuthShell>
+      />
     );
   }
 
