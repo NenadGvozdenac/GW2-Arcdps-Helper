@@ -26,9 +26,6 @@ export interface BrowserLoginState {
   url: string;
 }
 
-/** What the browser is opened for: straight to the confirmation, or the password reset (which leads there too). */
-export type BrowserLoginMode = "signIn" | "forgotPassword";
-
 /** Everything the renderer needs to draw the UI; pushed on every change. */
 export interface AppState {
   environment: AppEnvironment;
@@ -64,8 +61,8 @@ export interface UploaderApi {
   onStateChanged(listener: (state: AppState) => void): () => void;
 
   login(req: LoginRequest): Promise<IpcResult>;
-  /** Opens the website to approve this app's sign-in (there, or after the password reset) and waits for it. */
-  startBrowserLogin(mode: BrowserLoginMode): Promise<IpcResult>;
+  /** Opens the website to approve this app's sign-in there and waits for it. */
+  startBrowserLogin(): Promise<IpcResult>;
   cancelBrowserLogin(): Promise<void>;
   logout(): Promise<void>;
 

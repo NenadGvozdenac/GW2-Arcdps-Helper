@@ -3,7 +3,7 @@ import { BROWSER_LOGIN_POLL_MS } from "../config/constants";
 import { environment } from "../config/environment";
 import { credentialsRepository } from "../repositories/credentialsRepository";
 import type { BackendUser } from "../../shared/backend.types";
-import type { BrowserLoginMode, LoginRequest } from "../../shared/app.types";
+import type { LoginRequest } from "../../shared/app.types";
 import type { Credentials } from "../types/storage.types";
 import { AppError } from "../utils/appError";
 import { backendClient } from "./clients/backendClient";
@@ -109,16 +109,14 @@ export const authService = {
   },
 
   /**
-   * "Sign in with the browser": opens the website on a new sign-in request — straight on its confirmation page, or on
-   * the password reset (someone already signed in there is sent on to the confirmation) — and waits until it is
-   * approved there, then signs in as that user without a password.
+   * "Sign in with the browser": opens the website's confirmation page for a new sign-in request and waits until it is
+   * approved there (by whoever is signed in on the website), then signs in as that user without a password.
    */
-  async startBrowserLogin(mode: BrowserLoginMode): Promise<void> {
+  async startBrowserLogin(): Promise<void> {
     stopBrowserLogin();
     const { apiUrl, webUrl } = environment;
     const created = await backendClient.createAppLogin(apiUrl);
-    const id = encodeURIComponent(created.id);
-    const url = mode === "forgotPassword" ? `${webUrl}/forgot-password?app=${id}` : `${webUrl}/app-login/${id}`;
+    const url = `${webUrl}/app-login/${encodeURIComponent(created.id)}`;
     browserRequest = {
       id: created.id,
       secret: created.secret,

@@ -552,7 +552,7 @@ namespace UI
 		{
 			ImGui::TextColored(RED, "%s", acc.browserStatus == "denied" ? "The sign-in was denied on the website."
 			                                                          : "The sign-in request expired (after 5 minutes).");
-			if (ImGui::Button("Try again")) Account::StartBrowserLogin(false);
+			if (ImGui::Button("Try again")) Account::StartBrowserLogin();
 			ImGui::SameLine();
 			if (ImGui::Button("Cancel")) Account::CancelBrowserLogin();
 		}
@@ -570,11 +570,11 @@ namespace UI
 			}
 			EndDisabled();
 			ImGui::SameLine();
-			// Opens the password reset on the website; someone already signed in there just approves this addon instead.
-			if (ImGui::Button("Forgot password?")) Account::StartBrowserLogin(true);
+			// Resetting happens on the website: it emails a link to a page where the new password is chosen.
+			if (ImGui::Button("Forgot password?")) Util::OpenUrl(std::string(WEB_URL) + "/forgot-password");
 			// No password needed: approve this addon on the website where you are signed in.
 			BeginDisabled(acc.busy);
-			if (ImGui::Button("Sign in with the browser") && !acc.busy) Account::StartBrowserLogin(false);
+			if (ImGui::Button("Sign in with the browser") && !acc.busy) Account::StartBrowserLogin();
 			EndDisabled();
 		}
 		if (!acc.message.empty()) ImGui::TextColored(RED, "%s", acc.message.c_str());

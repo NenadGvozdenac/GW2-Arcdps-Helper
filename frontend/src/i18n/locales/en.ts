@@ -589,8 +589,6 @@ export const en = {
     toSite: "Go to the website",
     clientUploader: "desktop uploader",
     clientAddon: "Nexus addon",
-    forgotHint: "Know your password? Sign in here and the app is signed in right away.",
-    forgotHintLink: "Sign in",
   },
   deleteAccount: {
     title: "Danger zone",

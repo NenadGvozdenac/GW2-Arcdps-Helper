@@ -8,6 +8,4 @@ export const appLoginService = {
   get: (id: string) => appLoginRepository.get(id),
   approve: (id: string) => appLoginRepository.approve(id),
   deny: (id: string) => appLoginRepository.deny(id),
-  /** Where an app's "Forgot password?" / "Sign in with the browser" leads to, for request `id`. */
-  pagePath: (id: string) => `/app-login/${encodeURIComponent(id)}`,
 };

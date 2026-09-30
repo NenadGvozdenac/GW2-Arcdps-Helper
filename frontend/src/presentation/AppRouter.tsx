@@ -47,12 +47,10 @@ export default function AppRouter() {
         <Route element={<RequireGuest />}>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Route>
         {/* Link from the confirmation email; signs in, so it works whether or not someone is signed in already. */}
         <Route path="/verify-email" element={<VerifyEmailPage />} />
-        {/* Guests reset their password here; the desktop uploader / Nexus addon open it too (?app=<id>), and a
-            signed-in user is sent on to confirm that app's sign-in (see ForgotPasswordPage). */}
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         {/* Link from the password-reset email; also usable while signed in. */}
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route

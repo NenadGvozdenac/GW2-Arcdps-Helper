@@ -3,7 +3,7 @@ import { AlertCircleIcon, ExternalLinkIcon, Globe2Icon, Loader2Icon } from "luci
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
-import type { BrowserLoginMode, BrowserLoginState, IpcError } from "../../../../shared/app.types";
+import type { BrowserLoginState, IpcError } from "../../../../shared/app.types";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -31,17 +31,17 @@ function useLoginController() {
     }
   }
 
-  /**
-   * Opens the website on a sign-in request and waits there: whoever is signed in on the website approves this app
-   * (no password here). "Forgot password?" goes the same way, via the password reset page.
-   */
-  async function startBrowserLogin(mode: BrowserLoginMode) {
+  /** Opens the website on a sign-in request and waits: whoever is signed in there approves this app (no password here). */
+  async function signInWithBrowser() {
     setError(null);
-    const res = await uploaderBridge.startBrowserLogin(mode);
+    const res = await uploaderBridge.startBrowserLogin();
     if (!res.ok) setError(res.error);
   }
 
   const openRegister = () => uploaderBridge.openExternal(`${environment.webUrl}/register`);
+
+  // Resetting happens on the website: it emails a link to a page where the new password is chosen.
+  const openForgotPassword = () => uploaderBridge.openExternal(`${environment.webUrl}/forgot-password`);
 
   return {
     email,
@@ -53,8 +53,8 @@ function useLoginController() {
     submit,
     openRegister,
     browserLogin,
-    signInWithBrowser: () => startBrowserLogin("signIn"),
-    openForgotPassword: () => startBrowserLogin("forgotPassword"),
+    signInWithBrowser,
+    openForgotPassword,
     cancelBrowserLogin: () => uploaderBridge.cancelBrowserLogin(),
   };
 }

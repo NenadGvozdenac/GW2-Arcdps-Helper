@@ -281,7 +281,7 @@ namespace Account
 		});
 	}
 
-	void StartBrowserLogin(bool forgotPassword)
+	void StartBrowserLogin()
 	{
 		uint64_t gen;
 		{
@@ -289,7 +289,7 @@ namespace Account
 			gen = ++g_browserGen;
 			g_state.message.clear();
 		}
-		Post([gen, forgotPassword] {
+		Post([gen] {
 			Api::AppLogin request;
 			Api::Error err;
 			if (!Api::CreateAppLogin(request, err))
@@ -297,8 +297,7 @@ namespace Account
 				Set([&](AccountState& s) { s.message = "Could not start the browser sign-in: " + err.message; });
 				return;
 			}
-			std::string id = Util::UrlEncode(request.id);
-			std::string url = std::string(WEB_URL) + (forgotPassword ? "/forgot-password?app=" + id : "/app-login/" + id);
+			std::string url = std::string(WEB_URL) + "/app-login/" + Util::UrlEncode(request.id);
 			{
 				std::lock_guard lock(g_mutex);
 				if (g_browserGen != gen) return; // cancelled meanwhile

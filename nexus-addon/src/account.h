@@ -40,11 +40,8 @@ namespace Account
 
 	void Login(const std::string& email, const std::string& password);
 
-	/**
-	 * Opens the website on a new sign-in request — its confirmation page, or with `forgotPassword` the password reset
-	 * (someone already signed in there is sent on to the confirmation) — and signs in once it is approved there.
-	 */
-	void StartBrowserLogin(bool forgotPassword);
+	/** Opens the website's confirmation page for a new sign-in request and signs in once it is approved there. */
+	void StartBrowserLogin();
 	void CancelBrowserLogin();
 	/** A page to open in the browser, once (the UI thread opens it: ShellExecute wants a UI thread). */
 	std::string TakeUrlToOpen();

@@ -589,8 +589,6 @@ export const sr: Messages = {
     toSite: "Idi na sajt",
     clientUploader: "desktop uploader",
     clientAddon: "Nexus addon",
-    forgotHint: "Znaš lozinku? Prijavi se ovde i aplikacija će se odmah prijaviti.",
-    forgotHintLink: "Prijavi se",
   },
   deleteAccount: {
     title: "Opasna zona",

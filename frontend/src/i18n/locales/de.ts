@@ -598,8 +598,6 @@ export const de: Messages = {
     toSite: "Zur Website",
     clientUploader: "Desktop-Uploader",
     clientAddon: "Nexus-Addon",
-    forgotHint: "Du kennst dein Passwort? Melde dich hier an, dann ist die App sofort angemeldet.",
-    forgotHintLink: "Anmelden",
   },
   deleteAccount: {
     title: "Gefahrenzone",
