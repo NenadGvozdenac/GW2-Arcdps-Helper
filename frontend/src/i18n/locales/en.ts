@@ -571,6 +571,7 @@ export const en = {
     gw2AccountHint: "Your identity in the app. Also used to highlight your row in player tables.",
     language: "Language",
     languageHint: "Language of the website. Saved in this browser.",
+    legal: "Legal",
   },
   deleteAccount: {
     title: "Danger zone",

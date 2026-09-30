@@ -571,6 +571,7 @@ export const sr: Messages = {
     gw2AccountHint: "Tvoj identitet u aplikaciji. Koristi se i da se tvoj red istakne u tabeli igrača.",
     language: "Jezik",
     languageHint: "Jezik sajta. Čuva se u ovom browseru.",
+    legal: "Pravne informacije",
   },
   deleteAccount: {
     title: "Opasna zona",

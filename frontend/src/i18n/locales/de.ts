@@ -580,6 +580,7 @@ export const de: Messages = {
     gw2AccountHint: "Deine Identität in der App. Wird auch genutzt, um deine Zeile in Spielertabellen hervorzuheben.",
     language: "Sprache",
     languageHint: "Sprache der Website. Wird in diesem Browser gespeichert.",
+    legal: "Rechtliches",
   },
   deleteAccount: {
     title: "Gefahrenzone",

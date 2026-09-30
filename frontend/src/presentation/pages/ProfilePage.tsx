@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { AlertCircleIcon, CheckIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { AlertCircleIcon, CheckIcon, FileTextIcon, ShieldCheckIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
@@ -104,6 +105,18 @@ export default function ProfilePage() {
           <CardContent>
             <LanguageSwitcher compact={false} />
           </CardContent>
+          {/* The card is mostly empty, so the legal pages live at its bottom, set apart by a line. */}
+          <CardFooter className="mt-auto flex-col items-start gap-2 border-t">
+            <span className="text-sm font-medium">{t("profile.legal")}</span>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+              <Link to="/privacy" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <ShieldCheckIcon className="size-4" /> {t("landing.footer.privacy")}
+              </Link>
+              <Link to="/terms" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+                <FileTextIcon className="size-4" /> {t("landing.footer.terms")}
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
         <DpsReportTokenCard />
         <DiscordWebhookCard />
