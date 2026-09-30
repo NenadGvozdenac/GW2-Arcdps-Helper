@@ -24,3 +24,9 @@ export const BOON_STACK_MAX: ReadonlyMap<Boon, number> = new Map<Boon, number>([
   ["might", 25],
   ["stability", 10],
 ]);
+
+/** Boons one player per subgroup is usually brought for; they get a badge in the log's boon table. */
+export const PROVIDED_BOONS = ["quickness", "alacrity"] as const satisfies readonly Boon[];
+
+/** A player counts as providing a boon when they generate at least this much (%) of their subgroup's uptime of it. */
+export const BOON_PROVIDER_MIN_GENERATION = 20;

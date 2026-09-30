@@ -6,8 +6,12 @@ import { classifyEncounter } from "./encounterClassifier";
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-function boonUptimes(p: EiPlayer): BoonUptimes {
-  const byId = new Map((p.buffUptimes ?? []).map((b) => [b.id, b.buffData?.[0]?.uptime ?? 0]));
+/** Per stored boon, the value `pick` reads from one of the player's EI buff lists (zeros left out). */
+function perBoon(
+  buffs: { id: number; buffData?: { uptime?: number; generation?: number }[] }[] | undefined,
+  pick: (data: { uptime?: number; generation?: number }) => number | undefined,
+): BoonUptimes {
+  const byId = new Map((buffs ?? []).map((b) => [b.id, pick(b.buffData?.[0] ?? {}) ?? 0]));
   const boons: BoonUptimes = {};
   for (const [boon, id] of Object.entries(BOON_IDS) as [Boon, number][]) {
     const uptime = byId.get(id);
@@ -29,7 +33,8 @@ function toPlayerSummary(p: EiPlayer): PlayerSummary {
     commander: !!p.hasCommanderTag,
     breakbar: round1(p.dpsAll?.[0]?.breakbarDamage ?? 0),
     damageTaken: p.defenses?.[0]?.damageTaken ?? 0,
-    boons: boonUptimes(p),
+    boons: perBoon(p.buffUptimes, (d) => d.uptime),
+    generation: perBoon(p.groupBuffs, (d) => d.generation),
   };
 }
 
@@ -83,6 +88,7 @@ export function parseFromMetadata(permalink: string, url: string, meta: UploadMe
     deaths: 0,
     commander: false,
     boons: {},
+    generation: {},
   }));
 
   return {

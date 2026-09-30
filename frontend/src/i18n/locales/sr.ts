@@ -558,6 +558,7 @@ export const sr: Messages = {
     subgroupPlayers: "{count} igrač|{count} igrača|{count} igrača",
     subgroupAverage: "Prosek podgrupe",
     squadAverage: "Prosek skvada",
+    providesBoon: "Daje {boon} podgrupi ({value}% uptime-a)",
     boonShort: {
       might: "Might",
       fury: "Fury",

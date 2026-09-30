@@ -24,6 +24,11 @@ export interface PlayerSummary {
   damageTaken?: number;
   /** Boon uptimes; {} when the log has no Elite Insights data to read them from. */
   boons?: BoonUptimes;
+  /**
+   * Boons this player generated for their subgroup (% of the subgroup's uptime, stacks for might / stability) — shows
+   * who provided quickness / alacrity. {} when the log has no Elite Insights data.
+   */
+  generation?: BoonUptimes;
 }
 
 /** Parsed, storage-independent summary of a single dps.report log. */

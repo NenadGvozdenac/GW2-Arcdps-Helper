@@ -43,6 +43,8 @@ export interface EiPlayer {
   defenses?: { downCount?: number; deadCount?: number; damageTaken?: number }[];
   /** Per buff: uptime over the whole fight (%, or average stacks for intensity buffs: might, stability). */
   buffUptimes?: { id: number; buffData?: { uptime?: number }[] }[];
+  /** Per buff: how much of the subgroup's uptime this player generated (%, stacks for intensity buffs). */
+  groupBuffs?: { id: number; buffData?: { generation?: number }[] }[];
 }
 
 /** Response of `https://dps.report/getUploadMetadata` (fallback when the JSON isn't available). */

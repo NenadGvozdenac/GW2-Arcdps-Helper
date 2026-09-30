@@ -558,6 +558,7 @@ export const en = {
     subgroupPlayers: "{count} player|{count} players",
     subgroupAverage: "Subgroup average",
     squadAverage: "Squad average",
+    providesBoon: "Provides {boon} for the subgroup ({value}% of its uptime)",
     boonShort: {
       might: "Might",
       fury: "Fury",

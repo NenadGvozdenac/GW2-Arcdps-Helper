@@ -1,5 +1,5 @@
 import { useI18n } from "../../controllers/I18nController";
-import { BOON_STACK_MAX, BOONS } from "../../domain/data/boons";
+import { BOON_PROVIDER_MIN_GENERATION, BOON_STACK_MAX, BOONS, PROVIDED_BOONS } from "../../domain/data/boons";
 import type { Boon, PlayerSummary } from "../../domain/types/log.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { cn } from "@/presentation/lib/utils";
@@ -11,7 +11,9 @@ interface Props {
   isOwnAccount: (account: string) => boolean;
 }
 
-const hasBoonData = (players: PlayerSummary[]) => players.some((p) => p.boons && Object.keys(p.boons).length > 0);
+type ProvidedBoon = (typeof PROVIDED_BOONS)[number];
+
+const hasBoonData =(players: PlayerSummary[]) => players.some((p) => p.boons && Object.keys(p.boons).length > 0);
 const average = (players: PlayerSummary[], boon: Boon) =>
   players.reduce((sum, p) => sum + (p.boons?.[boon] ?? 0), 0) / players.length;
 
@@ -69,7 +71,8 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
                 key={p.account + p.name}
                 className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
               >
-                <TableCell className="font-medium">
+                <TableCell className="relative pr-24 font-medium">
+                  <ProviderBadges player={p} />
                   <span className="inline-flex items-center gap-1.5">
                     <span style={{ color: professionColor(p.profession) }}>{p.name}</span>
                     {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
@@ -112,6 +115,34 @@ function SummaryRow({ label, players, strong }: { label: string; players: Player
         <BoonCell key={boon} boon={boon} value={average(players, boon)} />
       ))}
     </TableRow>
+  );
+}
+
+const PROVIDER_STYLE: Record<ProvidedBoon, string> = {
+  quickness: "border-orange-400/60 bg-orange-400/15 text-orange-700 dark:text-orange-300",
+  alacrity: "border-fuchsia-400/60 bg-fuchsia-400/15 text-fuchsia-700 dark:text-fuchsia-300",
+};
+
+/** Small tags in the name cell's top-right corner for the quickness / alacrity the player provides their subgroup. */
+function ProviderBadges({ player }: { player: PlayerSummary }) {
+  const { t } = useI18n();
+  const provided = PROVIDED_BOONS.filter((b) => (player.generation?.[b] ?? 0) >= BOON_PROVIDER_MIN_GENERATION);
+  if (!provided.length) return null;
+  return (
+    <span className="absolute top-1.5 right-2 flex gap-1">
+      {provided.map((boon) => (
+        <span
+          key={boon}
+          title={t("logDetail.providesBoon", {
+            boon: t(`sessionExport.boons.${boon}`),
+            value: Math.round(player.generation![boon]!),
+          })}
+          className={cn("rounded border px-1 text-[10px] leading-4 font-semibold", PROVIDER_STYLE[boon])}
+        >
+          {t(`logDetail.boonShort.${boon}`)}
+        </span>
+      ))}
+    </span>
   );
 }
 

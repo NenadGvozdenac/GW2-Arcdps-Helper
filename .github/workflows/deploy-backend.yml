@@ -65,6 +65,16 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      # ONE-OFF (remove together with backend/src/scripts/backfillBoonGeneration.ts): fills in the quickness / alacrity
+      # providers of logs imported before boon generation was stored. Only touches logs still missing it, so later runs
+      # are quick no-ops. It doesn't block the deploy: logs it couldn't fill are retried on the next deploy.
+      - name: Backfill boon generation (one-off)
+        run: node dist/scripts/backfillBoonGeneration.js
+        continue-on-error: true
+        timeout-minutes: 60
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
   deploy:
     name: Deploy to Vercel (production)

@@ -18,6 +18,8 @@ export interface PlayerSummary {
   damageTaken?: number;
   /** {} or missing = no boon data for this log. */
   boons?: BoonUptimes;
+  /** Boons this player generated for their subgroup (% of its uptime); {} or missing = no data. */
+  generation?: BoonUptimes;
 }
 
 export type Boon = (typeof BOONS)[number];

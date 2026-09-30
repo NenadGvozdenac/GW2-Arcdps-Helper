@@ -567,6 +567,7 @@ export const de: Messages = {
     subgroupPlayers: "{count} Spieler|{count} Spieler",
     subgroupAverage: "Gruppendurchschnitt",
     squadAverage: "Squad-Durchschnitt",
+    providesBoon: "Gibt der Gruppe {boon} ({value} % der Uptime)",
     boonShort: {
       might: "Macht",
       fury: "Wut",

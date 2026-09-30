@@ -1,5 +1,5 @@
 import type { Cell, Row, Workbook, Worksheet } from "exceljs";
-import { BOON_STACK_MAX, BOONS } from "../domain/data/boons";
+import { BOON_PROVIDER_MIN_GENERATION, BOON_STACK_MAX, BOONS, PROVIDED_BOONS } from "../domain/data/boons";
 import type { Boon, LogDetail, PlayerSummary } from "../domain/types/log.types";
 import type { Session } from "../domain/types/session.types";
 import type { Translate, TranslationKey } from "../i18n/i18n.types";
@@ -308,7 +308,13 @@ function dpsSheet(wb: Workbook, ctx: Ctx, bosses: BossSummary[]) {
         p.downs,
         p.deaths,
         ...BOONS.map((boon) => (boons ? (p.boons?.[boon] ?? 0) : "")),
-        [isTop ? t("sessionExport.topDps") : "", p.commander ? t("sessionExport.commander") : ""]
+        [
+          isTop ? t("sessionExport.topDps") : "",
+          p.commander ? t("sessionExport.commander") : "",
+          ...PROVIDED_BOONS.filter((b) => (p.generation?.[b] ?? 0) >= BOON_PROVIDER_MIN_GENERATION).map((b) =>
+            t("logDetail.providesBoon", { boon: t(BOON_LABEL[b]), value: Math.round(p.generation![b]!) }),
+          ),
+        ]
           .filter(Boolean)
           .join(", "),
       ]);
