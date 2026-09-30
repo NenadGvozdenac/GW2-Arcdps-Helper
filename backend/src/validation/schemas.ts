@@ -52,6 +52,11 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Password is required."),
 });
 
+/** DELETE /profile: the current password, to confirm deleting the account. */
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, "Password is required."),
+});
+
 export const profileUpdateSchema = z.object({
   gw2Account,
 });

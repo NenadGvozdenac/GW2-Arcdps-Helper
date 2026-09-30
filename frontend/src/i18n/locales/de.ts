@@ -579,6 +579,16 @@ export const de: Messages = {
     language: "Sprache",
     languageHint: "Sprache der Website. Wird in diesem Browser gespeichert.",
   },
+  deleteAccount: {
+    title: "Konto löschen",
+    description: "Löscht dein Konto mit allen Logs, Sessions und Einstellungen dauerhaft. Berichte, die schon auf dps.report liegen, bleiben dort. Das kann nicht rückgängig gemacht werden.",
+    button: "Konto löschen",
+    confirmTitle: "Konto wirklich löschen?",
+    confirmBody: "Dein Konto, alle Logs und Sessions, dein Discord-Webhook und dein dps.report-Token werden endgültig gelöscht. Desktop-Uploader und Nexus-Addon werden abgemeldet.",
+    passwordLabel: "Gib zur Bestätigung dein Passwort ein",
+    confirm: "Endgültig löschen",
+    deleting: "Wird gelöscht…",
+  },
   dpsReportToken: {
     title: "dps.report-User-Token",
     description:
@@ -658,6 +668,7 @@ export const de: Messages = {
     INVALID_JSON: "Ungültige Anfrage.",
     UNAUTHENTICATED: "Du musst angemeldet sein.",
     INVALID_CREDENTIALS: "E-Mail oder Passwort falsch.",
+    WRONG_PASSWORD: "Das Passwort ist nicht korrekt.",
     EMAIL_TAKEN: "Ein Konto mit dieser E-Mail existiert bereits.",
     EMAIL_NOT_VERIFIED: "Bestätige zuerst deine E-Mail-Adresse — klick auf den Link, den wir dir geschickt haben.",
     INVALID_VERIFICATION_LINK: "Dieser Bestätigungslink ist ungültig oder abgelaufen. Melde dich an, um einen neuen zu bekommen.",

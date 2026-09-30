@@ -2,6 +2,9 @@ import type { ProfileUpdate, User } from "../domain/types/user.types";
 import { http } from "./httpClient";
 
 export const userRepository = {
+  /** Deletes the signed-in user's account with all of its logs and sessions (the password confirms it). */
+  deleteAccount: (password: string) => http.deleteWithBody("/profile", { password }),
+
   async updateProfile(patch: ProfileUpdate): Promise<User> {
     return (await http.patch<{ user: User }>("/profile", patch)).user;
   },

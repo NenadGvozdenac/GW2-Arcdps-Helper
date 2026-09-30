@@ -37,6 +37,8 @@ export const http = {
   put: <T>(path: string, body?: unknown) => request<T>("PUT", path, body),
   patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
   delete: (path: string) => request<void>("DELETE", path),
+  /** DELETE with a JSON body (e.g. a password confirming the action). */
+  deleteWithBody: (path: string, body: unknown) => request<void>("DELETE", path, body),
   /** DELETE that returns a JSON body. */
   deleteJson: <T>(path: string) => request<T>("DELETE", path),
 };

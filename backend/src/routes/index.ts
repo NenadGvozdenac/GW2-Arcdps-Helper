@@ -27,6 +27,7 @@ export function createRouter(): Router {
   router.get("/clears/weekly", requireAuth, clearsController.weekly);
 
   router.patch("/profile", requireAuth, profileController.update);
+  router.delete("/profile", requireAuth, profileController.deleteAccount);
   router.put("/profile/discord-webhook", requireAuth, profileController.setDiscordWebhook);
   router.post("/profile/discord-webhook/test", requireAuth, profileController.testDiscordWebhook);
   router.put("/profile/dps-report-token", requireAuth, profileController.setDpsReportToken);

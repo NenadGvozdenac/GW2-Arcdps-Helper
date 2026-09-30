@@ -69,7 +69,7 @@ const en: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "5. How long we keep it",
         blocks: [
-          "Account data, logs and sessions are kept for as long as your account exists. You can delete logs and sessions yourself at any time. When you ask for your account to be deleted, we delete the account and everything linked to it; server and backup copies are overwritten within 30 days. Reports already published on dps.report are not controlled by us.",
+          "Account data, logs and sessions are kept for as long as your account exists. You can delete logs and sessions yourself at any time. You can also delete your account yourself in Settings → Delete account: the account and everything linked to it are deleted right away; server and backup copies are overwritten within 30 days. Reports already published on dps.report are not controlled by us.",
         ],
       },
       {
@@ -156,7 +156,7 @@ const en: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "8. Ending your use",
         blocks: [
-          "You can stop using the service at any time and ask for your account to be deleted. We may suspend or delete accounts that break these terms or harm the service.",
+          "You can stop using the service at any time and delete your account yourself in Settings. We may suspend or delete accounts that break these terms or harm the service.",
         ],
       },
       {
@@ -218,7 +218,7 @@ const sr: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "5. Koliko ih čuvamo",
         blocks: [
-          "Podaci naloga, logovi i sesije čuvaju se dok nalog postoji. Logove i sesije možete sami obrisati u bilo kom trenutku. Kada zatražite brisanje naloga, brišemo nalog i sve povezano s njim; kopije na serveru i u rezervnim kopijama prepisuju se u roku od 30 dana. Izveštaji već objavljeni na dps.report-u nisu pod našom kontrolom.",
+          "Podaci naloga, logovi i sesije čuvaju se dok nalog postoji. Logove i sesije možete sami obrisati u bilo kom trenutku. Nalog možete i sami obrisati u Podešavanjima → Brisanje naloga: nalog i sve povezano s njim briše se odmah; kopije na serveru i u rezervnim kopijama prepisuju se u roku od 30 dana. Izveštaji već objavljeni na dps.report-u nisu pod našom kontrolom.",
         ],
       },
       {
@@ -305,7 +305,7 @@ const sr: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "8. Prestanak korišćenja",
         blocks: [
-          "Možete prestati da koristite servis u bilo kom trenutku i zatražiti brisanje naloga. Možemo suspendovati ili obrisati naloge koji krše ove uslove ili štete servisu.",
+          "Možete prestati da koristite servis u bilo kom trenutku i sami obrisati nalog u Podešavanjima. Možemo suspendovati ili obrisati naloge koji krše ove uslove ili štete servisu.",
         ],
       },
       {
@@ -367,7 +367,7 @@ const de: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "5. Speicherdauer",
         blocks: [
-          "Kontodaten, Logs und Sessions werden gespeichert, solange dein Konto besteht. Logs und Sessions kannst du jederzeit selbst löschen. Wenn du die Löschung deines Kontos verlangst, löschen wir das Konto und alle zugehörigen Daten; Kopien auf Servern und in Backups werden innerhalb von 30 Tagen überschrieben. Bereits auf dps.report veröffentlichte Berichte liegen nicht in unserer Hand.",
+          "Kontodaten, Logs und Sessions werden gespeichert, solange dein Konto besteht. Logs und Sessions kannst du jederzeit selbst löschen. Dein Konto kannst du auch selbst unter Einstellungen → Konto löschen löschen: Das Konto und alle zugehörigen Daten werden sofort gelöscht; Kopien auf Servern und in Backups werden innerhalb von 30 Tagen überschrieben. Bereits auf dps.report veröffentlichte Berichte liegen nicht in unserer Hand.",
         ],
       },
       {
@@ -454,7 +454,7 @@ const de: Record<LegalDocumentKind, LegalDocument> = {
       {
         heading: "8. Beendigung",
         blocks: [
-          "Du kannst die Nutzung jederzeit beenden und die Löschung deines Kontos verlangen. Wir können Konten sperren oder löschen, die gegen diese Bedingungen verstoßen oder dem Dienst schaden.",
+          "Du kannst die Nutzung jederzeit beenden und dein Konto selbst in den Einstellungen löschen. Wir können Konten sperren oder löschen, die gegen diese Bedingungen verstoßen oder dem Dienst schaden.",
         ],
       },
       {

@@ -570,6 +570,16 @@ export const sr: Messages = {
     language: "Jezik",
     languageHint: "Jezik sajta. Čuva se u ovom browseru.",
   },
+  deleteAccount: {
+    title: "Brisanje naloga",
+    description: "Trajno briše tvoj nalog sa svim logovima, sesijama i podešavanjima. Izveštaji koji su već na dps.report-u ostaju tamo. Ovo ne može da se poništi.",
+    button: "Obriši nalog",
+    confirmTitle: "Obrisati nalog?",
+    confirmBody: "Tvoj nalog, svi logovi i sesije, Discord webhook i dps.report token biće trajno obrisani. Desktop uploader i Nexus addon će biti odjavljeni.",
+    passwordLabel: "Unesi lozinku za potvrdu",
+    confirm: "Obriši trajno",
+    deleting: "Brišem…",
+  },
   dpsReportToken: {
     title: "dps.report user token",
     description:
@@ -648,6 +658,7 @@ export const sr: Messages = {
     INVALID_JSON: "Neispravan zahtev.",
     UNAUTHENTICATED: "Moraš biti prijavljen.",
     INVALID_CREDENTIALS: "Pogrešan email ili lozinka.",
+    WRONG_PASSWORD: "Lozinka nije tačna.",
     EMAIL_TAKEN: "Nalog sa ovim emailom već postoji.",
     EMAIL_NOT_VERIFIED: "Prvo potvrdi email adresu — klikni na link koji smo ti poslali.",
     INVALID_VERIFICATION_LINK: "Link za potvrdu nije ispravan ili je istekao. Prijavi se da dobiješ novi.",

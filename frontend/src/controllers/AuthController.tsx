@@ -20,6 +20,8 @@ interface AuthContextValue {
   setDiscordWebhook: (url: string) => Promise<void>;
   /** Saves the dps.report user token, or removes it when `token` is empty. */
   setDpsReportToken: (token: string) => Promise<void>;
+  /** Permanently deletes the account (confirmed with the password), signs out and reloads on the landing page. */
+  deleteAccount: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,6 +72,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await profileService.setDpsReportToken(token));
   }, []);
 
+  const deleteAccount = useCallback(async (password: string) => {
+    await profileService.deleteAccount(password);
+    authService.logout();
+    // A fresh start as a guest on the landing page, which also drops every log and session still held in memory.
+    // (Clearing `user` here instead would let the settings page's guard redirect to the sign-in page first.)
+    window.location.replace("/");
+  }, []);
+
   const value = useMemo(
     () => ({
       user,
@@ -82,8 +92,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile,
       setDiscordWebhook,
       setDpsReportToken,
+      deleteAccount,
     }),
-    [user, loading, login, register, verifyEmail, resetPassword, logout, updateProfile, setDiscordWebhook, setDpsReportToken],
+    [
+      user,
+      loading,
+      login,
+      register,
+      verifyEmail,
+      resetPassword,
+      logout,
+      updateProfile,
+      setDiscordWebhook,
+      setDpsReportToken,
+      deleteAccount,
+    ],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

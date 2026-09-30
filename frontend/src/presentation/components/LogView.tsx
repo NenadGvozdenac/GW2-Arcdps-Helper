@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Loader2Icon, SparklesIcon, UsersIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import type { Log, PlayerSummary } from "../../domain/types/log.types";
@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/components/ui/tabs";
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
-import BoonTable from "./BoonTable";
+import { preloadImages } from "../../hooks/useImagesLoaded";
+import BoonTable, { BOON_TABLE_IMAGES } from "./BoonTable";
 import CommanderIcon from "./CommanderIcon";
 import ResultBadge from "./ResultBadge";
 import StatCard from "./StatCard";
@@ -29,6 +30,8 @@ interface Props {
 /** One log: boss card, squad totals and the players table. Used by the log page and the public shared-log page. */
 export default function LogView({ log, players, actions, meta, isOwnAccount, children }: Props) {
   const { t, fmt } = useI18n();
+  // Load the "Boons" tab's icons in the background, so the tab is ready when it is opened.
+  useEffect(() => void preloadImages(BOON_TABLE_IMAGES), []);
   const squad = players ?? [];
   const totals = {
     squadDps: squad.reduce((s, p) => s + p.dps, 0),

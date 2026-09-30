@@ -14,6 +14,7 @@ import {
 } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
+import DeleteAccountCard from "../components/DeleteAccountCard";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import DpsReportTokenCard from "../components/DpsReportTokenCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
@@ -104,6 +105,7 @@ export default function ProfilePage() {
       </Card>
       <DpsReportTokenCard />
       <DiscordWebhookCard />
+      <DeleteAccountCard />
     </div>
   );
 }

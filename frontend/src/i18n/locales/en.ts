@@ -570,6 +570,16 @@ export const en = {
     language: "Language",
     languageHint: "Language of the website. Saved in this browser.",
   },
+  deleteAccount: {
+    title: "Delete account",
+    description: "Permanently deletes your account with all of its logs, sessions and settings. Reports already on dps.report stay there. This cannot be undone.",
+    button: "Delete account",
+    confirmTitle: "Delete your account?",
+    confirmBody: "Your account, every log and session, your Discord webhook and dps.report token are deleted for good. The desktop uploader and the Nexus addon will be signed out.",
+    passwordLabel: "Enter your password to confirm",
+    confirm: "Delete for good",
+    deleting: "Deleting…",
+  },
   dpsReportToken: {
     title: "dps.report user token",
     description:
@@ -648,6 +658,7 @@ export const en = {
     INVALID_JSON: "Invalid request.",
     UNAUTHENTICATED: "You must be signed in.",
     INVALID_CREDENTIALS: "Invalid email or password.",
+    WRONG_PASSWORD: "The password is not correct.",
     EMAIL_TAKEN: "An account with this email already exists.",
     EMAIL_NOT_VERIFIED: "Confirm your email address first — click the link we emailed you.",
     INVALID_VERIFICATION_LINK: "This confirmation link is invalid or has expired. Sign in to get a new one.",

@@ -1,24 +1,40 @@
 import type { ReactNode } from "react";
+import { Loader2Icon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
+import { useImagesLoaded } from "../../hooks/useImagesLoaded";
 import { BOON_PROVIDER_MIN_GENERATION, BOON_STACK_MAX, BOONS, PROVIDED_BOONS } from "../../domain/data/boons";
 import type { Boon, PlayerSummary } from "../../domain/types/log.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { cn } from "@/presentation/lib/utils";
 import { professionColor } from "../utils/professionColors";
-import CommanderIcon from "./CommanderIcon";
+import CommanderIcon, { COMMANDER_ICON } from "./CommanderIcon";
 
 interface Props {
   players: PlayerSummary[];
   isOwnAccount: (account: string) => boolean;
 }
 
-const hasBoonData =(players: PlayerSummary[]) => players.some((p) => p.boons && Object.keys(p.boons).length > 0);
+/** Boon icons from the GW2 wiki, saved as public/icons/<boon>.png. */
+const boonIcon = (boon: Boon) => `/icons/${boon}.png`;
+
+/** Every image the table shows — the log page preloads them, and the table waits for them before it appears. */
+export const BOON_TABLE_IMAGES: readonly string[] = [...BOONS.map(boonIcon), COMMANDER_ICON];
+
+const hasBoonData = (players: PlayerSummary[]) => players.some((p) => p.boons && Object.keys(p.boons).length > 0);
 const average = (players: PlayerSummary[], boon: Boon) =>
   players.reduce((sum, p) => sum + (p.boons?.[boon] ?? 0), 0) / players.length;
 
 /** Uptime of each boon per player (the "Boons" tab of a log), grouped by subgroup when the squad has several. */
 export default function BoonTable({ players: squad, isOwnAccount }: Props) {
   const { t } = useI18n();
+  const iconsReady = useImagesLoaded(BOON_TABLE_IMAGES);
+  if (!iconsReady) {
+    return (
+      <div className="grid place-items-center py-10" role="status" aria-busy="true">
+        <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
   if (!hasBoonData(squad)) return <p className="py-6 text-sm text-muted-foreground">{t("logDetail.boonsNone")}</p>;
 
   const groups = [...new Set(squad.map((p) => p.group))].sort((a, b) => a - b);
@@ -102,9 +118,6 @@ export default function BoonTable({ players: squad, isOwnAccount }: Props) {
     </Table>
   );
 }
-
-/** Boon icons from the GW2 wiki, saved as public/icons/<boon>.png. */
-const boonIcon = (boon: Boon) => `/icons/${boon}.png`;
 
 /** A header row: `label` in the first column, then every boon's icon (its name shows on hover). */
 function HeaderRow({ label, className }: { label: ReactNode; className?: string }) {

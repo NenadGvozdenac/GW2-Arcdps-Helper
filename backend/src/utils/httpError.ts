@@ -13,6 +13,8 @@ export class HttpError extends Error {
 export const validationError = (message: string) => new HttpError(400, "VALIDATION_ERROR", message);
 export const unauthenticated = () => new HttpError(401, "UNAUTHENTICATED", "You must be signed in.");
 export const invalidCredentials = () => new HttpError(401, "INVALID_CREDENTIALS", "Invalid email or password.");
+/** 403, not 401: the user is signed in, only the password they typed to confirm an action is wrong. */
+export const wrongPassword = () => new HttpError(403, "WRONG_PASSWORD", "The password is not correct.");
 export const emailTaken = () => new HttpError(409, "EMAIL_TAKEN", "An account with this email already exists.");
 export const emailNotVerified = () =>
   new HttpError(403, "EMAIL_NOT_VERIFIED", "Confirm your email address first - check your inbox.");

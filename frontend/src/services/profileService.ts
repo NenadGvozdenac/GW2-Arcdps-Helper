@@ -35,6 +35,8 @@ export const profileService = {
     return userRepository.setDpsReportToken(trimmed || null);
   },
 
+  deleteAccount: (password: string): Promise<void> => userRepository.deleteAccount(password),
+
   isOwnAccount: (user: User | null, account: string) =>
     !!user?.gw2Account && user.gw2Account.toLowerCase() === account.toLowerCase(),
 };

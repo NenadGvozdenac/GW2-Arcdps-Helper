@@ -21,6 +21,11 @@ export const userRepository = {
     return row ?? null;
   },
 
+  async exists(id: string): Promise<boolean> {
+    const [row] = await getDb().select({ id: users.id }).from(users).where(eq(users.id, id)).limit(1);
+    return !!row;
+  },
+
   async findById(id: string): Promise<User | null> {
     const [row] = await getDb().select().from(users).where(eq(users.id, id)).limit(1);
     return row ? toUser(row) : null;
@@ -36,6 +41,12 @@ export const userRepository = {
   async create(user: NewUser): Promise<User | null> {
     const [row] = await getDb().insert(users).values(user).onConflictDoNothing().returning();
     return row ? toUser(row) : null;
+  },
+
+  /** Deletes the user; their sessions, logs and session Discord messages go with them (ON DELETE CASCADE). */
+  async delete(id: string): Promise<boolean> {
+    const rows = await getDb().delete(users).where(eq(users.id, id)).returning({ id: users.id });
+    return rows.length > 0;
   },
 
   async update(id: string, patch: UserPatch): Promise<User | null> {

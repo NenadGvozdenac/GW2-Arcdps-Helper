@@ -1,13 +1,25 @@
+import bcrypt from "bcryptjs";
 import { userRepository } from "../repositories/userRepository";
 import type { ProfileUpdate, User } from "../types/user.types";
 import { discordService } from "./discordService";
-import { userNotFound } from "../utils/httpError";
+import { userNotFound, wrongPassword } from "../utils/httpError";
 
 export const userService = {
   async get(id: string): Promise<User> {
     const user = await userRepository.findById(id);
     if (!user) throw userNotFound();
     return user;
+  },
+
+  /**
+   * Permanently deletes the account with all of its logs and sessions, after checking the password. Reports already
+   * uploaded to dps.report stay there (they aren't ours to delete).
+   */
+  async deleteAccount(id: string, password: string): Promise<void> {
+    const row = await userRepository.findRowById(id);
+    if (!row) throw userNotFound();
+    if (!(await bcrypt.compare(password, row.passwordHash))) throw wrongPassword();
+    await userRepository.delete(id);
   },
 
   async updateProfile(id: string, patch: ProfileUpdate): Promise<User> {
