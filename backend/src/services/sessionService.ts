@@ -38,9 +38,9 @@ async function endAndNotify(ownerId: string, id: string, reason: SessionEndReaso
   if (!session) return null;
   const logs = await sessionRepository.logsOf(ownerId, id);
   if (logs.length) {
-    const { discordWebhookUrl } = await userService.get(ownerId);
-    const messageId = await discordService.notifySession(discordWebhookUrl, session, logs, logSpan(logs)!);
-    if (discordWebhookUrl && messageId) await sessionRepository.saveDiscordMessage(id, discordWebhookUrl, messageId);
+    const webhookUrl = discordService.webhookFor(await userService.getDiscordWebhooks(ownerId), "sessions");
+    const messageId = await discordService.notifySession(webhookUrl, session, logs, logSpan(logs)!);
+    if (webhookUrl && messageId) await sessionRepository.saveDiscordMessage(id, webhookUrl, messageId);
   }
   return session;
 }

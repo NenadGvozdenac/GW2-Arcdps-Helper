@@ -3,7 +3,7 @@ import { userService } from "../services/userService";
 import type { AuthLocals } from "../types/auth.types";
 import {
   deleteAccountSchema,
-  discordWebhookSchema,
+  discordWebhooksSchema,
   discordWebhookTestSchema,
   dpsReportTokenSchema,
   profileUpdateSchema,
@@ -16,9 +16,13 @@ export const profileController = {
     res.json({ user: await userService.updateProfile(res.locals.userId, patch) });
   },
 
-  async setDiscordWebhook(req: Request, res: Response<unknown, AuthLocals>) {
-    const { url } = validate(discordWebhookSchema, req.body);
-    res.json({ user: await userService.setDiscordWebhook(res.locals.userId, url) });
+  async getDiscordWebhooks(_req: Request, res: Response<unknown, AuthLocals>) {
+    res.json({ webhooks: await userService.getDiscordWebhooks(res.locals.userId) });
+  },
+
+  async setDiscordWebhooks(req: Request, res: Response<unknown, AuthLocals>) {
+    const { webhooks } = validate(discordWebhooksSchema, req.body);
+    res.json({ webhooks: await userService.setDiscordWebhooks(res.locals.userId, webhooks) });
   },
 
   /** The desktop uploader and the Nexus addon read it back from GET /auth/me. */
@@ -36,8 +40,8 @@ export const profileController = {
 
   /** Sends a test message to the given URL, so it can be checked before saving. */
   async testDiscordWebhook(req: Request, res: Response) {
-    const { url } = validate(discordWebhookTestSchema, req.body);
-    await userService.testDiscordWebhook(url);
+    const { url, content } = validate(discordWebhookTestSchema, req.body);
+    await userService.testDiscordWebhook(url, content);
     res.status(204).end();
   },
 };

@@ -1,4 +1,4 @@
-import type { ProfileUpdate, User } from "../domain/types/user.types";
+import type { DiscordContent, DiscordWebhook, ProfileUpdate, User } from "../domain/types/user.types";
 import { http } from "./httpClient";
 
 export const userRepository = {
@@ -9,12 +9,18 @@ export const userRepository = {
     return (await http.patch<{ user: User }>("/profile", patch)).user;
   },
 
-  /** null disconnects the webhook. */
-  async setDiscordWebhook(url: string | null): Promise<User> {
-    return (await http.put<{ user: User }>("/profile/discord-webhook", { url })).user;
+  async getDiscordWebhooks(): Promise<DiscordWebhook[]> {
+    return (await http.get<{ webhooks: DiscordWebhook[] }>("/profile/discord-webhooks")).webhooks;
   },
 
-  testDiscordWebhook: (url: string) => http.post<void>("/profile/discord-webhook/test", { url }),
+  /** Replaces the whole list, in order; an empty list disconnects them. */
+  async setDiscordWebhooks(webhooks: DiscordWebhook[]): Promise<DiscordWebhook[]> {
+    return (await http.put<{ webhooks: DiscordWebhook[] }>("/profile/discord-webhooks", { webhooks })).webhooks;
+  },
+
+  /** `content` is what the webhook will post; the test message says so. */
+  testDiscordWebhook: (url: string, content: DiscordContent) =>
+    http.post<void>("/profile/discord-webhooks/test", { url, content }),
 
   /** null removes the token. */
   async setDpsReportToken(token: string | null): Promise<User> {

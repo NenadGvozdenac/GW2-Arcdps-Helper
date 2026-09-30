@@ -22,7 +22,6 @@ export type UserPatch = Partial<
   Pick<
     UserRow,
     | "gw2Account"
-    | "discordWebhookUrl"
     | "dpsReportToken"
     | "passwordHash"
     | "emailVerifiedAt"

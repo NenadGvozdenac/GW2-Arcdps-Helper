@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
 import {
+  DISCORD_MAX_WEBHOOKS,
   DISCORD_WEBHOOK_RE,
   DPS_REPORT_TOKEN_RE,
   LOGS_PAGE_SIZE,
@@ -71,15 +72,29 @@ export const profileUpdateSchema = z.object({
   gw2Account,
 });
 
+const discordContent = z.enum(["all", "logs", "sessions"]).default("all");
+
 const discordWebhookUrl = z
   .string({ error: "Webhook URL is required." })
   .trim()
   .regex(DISCORD_WEBHOOK_RE, "Not a Discord webhook URL (https://discord.com/api/webhooks/…).");
 
-/** null disconnects the webhook. */
-export const discordWebhookSchema = z.object({ url: discordWebhookUrl.nullable() });
+/**
+ * PUT /profile/discord-webhooks: the whole list, in order (empty disconnects). With two webhooks one posts only logs
+ * and the other only sessions.
+ */
+export const discordWebhooksSchema = z.object({
+  webhooks: z
+    .array(z.object({ url: discordWebhookUrl, content: discordContent, enabled: z.boolean().default(true) }))
+    .max(DISCORD_MAX_WEBHOOKS, `At most ${DISCORD_MAX_WEBHOOKS} webhooks.`)
+    .refine(
+      (w) => w.length < 2 || (new Set(w.map((x) => x.content)).size === 2 && w.every((x) => x.content !== "all")),
+      "With two webhooks, one posts only logs and the other only sessions.",
+    ),
+});
 
-export const discordWebhookTestSchema = z.object({ url: discordWebhookUrl });
+/** `content` is what the webhook will post, so the test message can say so. */
+export const discordWebhookTestSchema = z.object({ url: discordWebhookUrl, content: discordContent });
 
 /** dps.report user token (from dps.report/getUserToken); null or "" removes it. */
 export const dpsReportTokenSchema = z.object({

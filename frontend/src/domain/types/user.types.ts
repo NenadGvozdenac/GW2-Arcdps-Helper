@@ -1,9 +1,18 @@
+/** What the first Discord webhook posts; a second webhook, when connected, posts the rest. */
+export type DiscordContent = "all" | "logs" | "sessions";
+
+/** One of the user's Discord webhooks (at most two; with two, one posts logs and the other sessions). */
+export interface DiscordWebhook {
+  url: string;
+  content: DiscordContent;
+  /** false = paused: nothing is posted to it. */
+  enabled: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
   gw2Account: string;
-  /** Discord webhook new logs are posted to; null = not connected. */
-  discordWebhookUrl: string | null;
   /** dps.report user token for this account's uploads (website, desktop uploader, Nexus addon); null = not set. */
   dpsReportToken: string | null;
 }

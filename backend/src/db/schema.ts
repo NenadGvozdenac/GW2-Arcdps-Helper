@@ -19,6 +19,7 @@ import {
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
+import type { DiscordContent } from "../types/discord.types";
 import type { SessionEndReason } from "../types/session.types";
 
 export const users = pgTable(
@@ -28,8 +29,6 @@ export const users = pgTable(
     email: text().notNull(),
     passwordHash: text("password_hash").notNull(),
     gw2Account: text("gw2_account").notNull().default(""),
-    /** Discord webhook that gets a message for every newly imported log; null = not connected. */
-    discordWebhookUrl: text("discord_webhook_url"),
     /**
      * dps.report user token: uploads made for this user (website, desktop uploader, Nexus addon) land in their
      * dps.report account. null = anonymous uploads.
@@ -46,6 +45,28 @@ export const users = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
+);
+
+/**
+ * A user's Discord webhooks: at most two. One posts new logs and / or session summaries ("all", "logs", "sessions");
+ * with two, each posts one of them.
+ */
+export const discordWebhooks = pgTable(
+  "discord_webhooks",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** 0 = first, 1 = second (the order on the settings page). */
+    position: integer().notNull(),
+    url: text().notNull(),
+    content: text().$type<DiscordContent>().notNull().default("all"),
+    /** Unchecking "Active" pauses the webhook without forgetting its URL: nothing is posted to it until re-enabled. */
+    enabled: boolean().notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("discord_webhooks_user_position_idx").on(t.userId, t.position)],
 );
 
 /** A group of logs recorded together (e.g. a raid night), started and ended from the desktop uploader. */

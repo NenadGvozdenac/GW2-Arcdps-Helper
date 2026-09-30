@@ -1,6 +1,6 @@
 import { userRepository } from "../repositories/userRepository";
 import { ValidationError } from "../domain/types/validation.types";
-import type { ProfileUpdate, User } from "../domain/types/user.types";
+import type { DiscordContent, DiscordWebhook, ProfileUpdate, User } from "../domain/types/user.types";
 import { DISCORD_WEBHOOK_RE, DPS_REPORT_TOKEN_RE } from "../config/constants";
 import { authService } from "./authService";
 
@@ -13,19 +13,21 @@ export const profileService = {
 
   isValidDiscordWebhook: (url: string) => DISCORD_WEBHOOK_RE.test(url.trim()),
 
-  /** Saves the webhook, or disconnects it when `url` is empty. */
-  setDiscordWebhook(url: string): Promise<User> {
-    const trimmed = url.trim();
-    if (trimmed && !profileService.isValidDiscordWebhook(trimmed)) {
+  getDiscordWebhooks: (): Promise<DiscordWebhook[]> => userRepository.getDiscordWebhooks(),
+
+  /** Saves the webhooks in order (an empty list disconnects them); every URL must be a Discord webhook. */
+  setDiscordWebhooks(webhooks: DiscordWebhook[]): Promise<DiscordWebhook[]> {
+    const trimmed = webhooks.map((w) => ({ ...w, url: w.url.trim() }));
+    if (trimmed.some((w) => !profileService.isValidDiscordWebhook(w.url))) {
       throw new ValidationError("validation.invalidDiscordWebhook");
     }
-    return userRepository.setDiscordWebhook(trimmed || null);
+    return userRepository.setDiscordWebhooks(trimmed);
   },
 
-  testDiscordWebhook(url: string): Promise<void> {
+  testDiscordWebhook(url: string, content: DiscordContent): Promise<void> {
     const trimmed = url.trim();
     if (!profileService.isValidDiscordWebhook(trimmed)) throw new ValidationError("validation.invalidDiscordWebhook");
-    return userRepository.testDiscordWebhook(trimmed);
+    return userRepository.testDiscordWebhook(trimmed, content);
   },
 
   /** Saves the dps.report user token, or removes it when `token` is empty. */

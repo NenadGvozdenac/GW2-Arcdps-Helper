@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRightIcon, BellIcon, KeyRoundIcon, XIcon, type LucideIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
+import { profileService } from "../../services/profileService";
 import { setupTipStorage } from "../../storage/setupTipStorage";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Button } from "@/presentation/components/ui/button";
@@ -11,10 +12,24 @@ import { Card, CardContent } from "@/presentation/components/ui/card";
 function useSetupTipController() {
   const { user } = useAuth();
   const [dismissed, setDismissed] = useState(() => (user ? setupTipStorage.isDismissed(user.id) : true));
+  /** Whether a Discord webhook is connected; null until loaded (or when loading failed), then it isn't nudged. */
+  const [hasWebhook, setHasWebhook] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!user || dismissed) return;
+    let cancelled = false;
+    profileService
+      .getDiscordWebhooks()
+      .then((webhooks) => !cancelled && setHasWebhook(webhooks.length > 0))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [user, dismissed]);
 
   const missing: { icon: LucideIcon; text: TranslationKey }[] = [];
   if (user && !user.dpsReportToken) missing.push({ icon: KeyRoundIcon, text: "setupTip.dpsReportToken" });
-  if (user && !user.discordWebhookUrl) missing.push({ icon: BellIcon, text: "setupTip.discordWebhook" });
+  if (user && hasWebhook === false) missing.push({ icon: BellIcon, text: "setupTip.discordWebhook" });
 
   return {
     missing,

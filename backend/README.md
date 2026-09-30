@@ -108,7 +108,8 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/auth/reset-password` | – | `{ token, password }` | `{ token, user }` — also confirms the email |
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
-| PUT | `/profile/discord-webhook` | ✓ | `{ url }` (Discord webhook URL, or `null` to disconnect) | `{ user }` |
+| GET | `/profile/discord-webhooks` | ✓ | — | `{ webhooks: [{ url, content, enabled }] }` |
+| PUT | `/profile/discord-webhooks` | ✓ | `{ webhooks: [{ url, content: "all" \| "logs" \| "sessions", enabled }] }` (at most 2; with 2, one `logs` and one `sessions`; `[]` disconnects) | `{ webhooks }` |
 | GET | `/sessions` | ✓ | – | `{ sessions }` (newest first; `endedAt` null = active). A session not ended within 6 h is ended automatically (`endReason: "expired"`) |
 | POST | `/sessions` | ✓ | `{ name? }` | `201 { session }` — ends a still-active session first |
 | GET | `/sessions/active` | ✓ | – | `{ session, resumable }` — `resumable`: the last session if it expired |
@@ -127,7 +128,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
 | POST | `/logs/bulk-delete` | ✓ | `{ ids }` | `{ deleted }` |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
-| POST | `/profile/discord-webhook/test` | ✓ | `{ url }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
+| POST | `/profile/discord-webhooks/test` | ✓ | `{ url, content }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |
 | GET | `/logs/search?search=&category=&groupId=&result=&page=&pageSize=` | ✓ | – | `{ logs, total, page, pageSize }` — one page (20 by default) of matching logs, newest first; with `idsOnly=true` `{ ids }` of every match |
 | POST | `/logs` | ✓ | `{ urls: string[] (1–10), sessionId? }` — logs of an active session are posted to Discord when it ends | `{ results: SubmitResult[] }` |

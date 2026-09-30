@@ -54,7 +54,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <PageHeader title={t("profile.title")} />
-      {/* 2×2 grid of settings (one column on phones), the danger zone across the full width below it. */}
+      {/* 2×2 grid of settings (one column on phones); Discord and the danger zone across the full width below it. */}
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <form
@@ -119,8 +119,8 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
         <DpsReportTokenCard />
-        <DiscordWebhookCard />
       </div>
+      <DiscordWebhookCard />
       <DeleteAccountCard />
     </div>
   );

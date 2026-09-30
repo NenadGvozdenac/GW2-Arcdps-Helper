@@ -1,6 +1,6 @@
 import { DISCORD_DESCRIPTION_LIMIT, DISCORD_MAX_EMBEDS, DISCORD_USERNAME } from "../config/constants";
 import { GROUPS } from "../data/encounters";
-import type { DiscordEmbed } from "../types/discord.types";
+import type { DiscordContent, DiscordEmbed, DiscordWebhook } from "../types/discord.types";
 import type { Log } from "../types/log.types";
 import type { LogSpan, Session } from "../types/session.types";
 import { discordWebhookFailed } from "../utils/httpError";
@@ -109,7 +109,23 @@ function sessionEmbed(session: Session, logs: Log[], span: LogSpan): DiscordEmbe
   };
 }
 
+/** Test message per webhook content, so the channel knows what it will get. */
+const TEST_MESSAGES: Record<DiscordContent, string> = {
+  all: "✅ GW2 ArcDPS Helper is connected — new logs and session summaries will be posted in this channel.",
+  logs: "✅ GW2 ArcDPS Helper is connected — new logs will be posted in this channel.",
+  sessions: "✅ GW2 ArcDPS Helper is connected — session summaries will be posted in this channel.",
+};
+
 export const discordService = {
+  /**
+   * The webhook that posts new logs or session summaries; null when none of them does, or the one that would is
+   * paused ("Active" unchecked).
+   */
+  webhookFor(webhooks: DiscordWebhook[], kind: "logs" | "sessions"): string | null {
+    const webhook = webhooks.find((w) => w.content === "all" || w.content === kind);
+    return webhook?.enabled ? webhook.url : null;
+  },
+
   /**
    * Posts newly imported logs to the user's webhook (up to 10 per message).
    * Never throws: a broken webhook must not make the import itself fail.
@@ -152,12 +168,9 @@ export const discordService = {
   },
 
   /** Sends a test message; throws DISCORD_WEBHOOK_FAILED so the user sees that the URL doesn't work. */
-  async sendTest(webhookUrl: string): Promise<void> {
+  async sendTest(webhookUrl: string, content: DiscordContent): Promise<void> {
     try {
-      await postToWebhook(webhookUrl, {
-        username: DISCORD_USERNAME,
-        content: "✅ GW2 ArcDPS Helper is connected — new logs will be posted in this channel.",
-      });
+      await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, content: TEST_MESSAGES[content] });
     } catch (err) {
       console.warn("Discord webhook test failed:", err instanceof Error ? err.message : err);
       throw discordWebhookFailed();

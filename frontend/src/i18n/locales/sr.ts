@@ -617,7 +617,7 @@ export const sr: Messages = {
   },
   discord: {
     title: "Discord obaveštenja",
-    description: "Svaki novi log se šalje u Discord kanal — i sa ovog sajta i iz desktop uploadera.",
+    description: "Novi logovi i rezimei sesija se šalju na Discord — u jedan kanal, ili podeljeno u dva.",
     connected: "Povezano",
     notConnected: "Nije povezano",
     urlLabel: "URL webhooka",
@@ -628,6 +628,14 @@ export const sr: Messages = {
     saved: "Sačuvano",
     disconnected: "Isključeno",
     howTo: "Kako da dobijem URL webhooka?",
+    contentLabel: "Šta se šalje na ovaj webhook",
+    contentAll: "Logovi + sesije",
+    contentLogs: "Logovi",
+    contentSessions: "Sesije",
+    active: "Aktivan",
+    addSecond: "Dodaj drugi webhook",
+    removeSecond: "Ukloni drugi webhook",
+    secondUrlLabel: "URL drugog webhooka",
   },
   discordGuide: {
     back: "Nazad na podešavanja",

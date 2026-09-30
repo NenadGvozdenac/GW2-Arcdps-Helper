@@ -41,6 +41,8 @@ export const BOON_IDS = {
 export const DPS_REPORT_TOKEN_RE = /^[A-Za-z0-9]{8,64}$/;
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 export const DISCORD_TIMEOUT_MS = 5_000;
+/** A user can connect a second webhook, so logs and session summaries go to different channels. */
+export const DISCORD_MAX_WEBHOOKS = 2;
 /** Discord allows at most 10 embeds per message. */
 export const DISCORD_MAX_EMBEDS = 10;
 export const DISCORD_USERNAME = "GW2 ArcDPS Helper";

@@ -617,7 +617,7 @@ export const en = {
   },
   discord: {
     title: "Discord notifications",
-    description: "Post every new log to a Discord channel — from this site and from the desktop uploader.",
+    description: "Post new logs and session summaries to Discord — to one channel, or split across two.",
     connected: "Connected",
     notConnected: "Not connected",
     urlLabel: "Webhook URL",
@@ -628,6 +628,14 @@ export const en = {
     saved: "Saved",
     disconnected: "Disconnected",
     howTo: "How do I get a webhook URL?",
+    contentLabel: "Post to this webhook",
+    contentAll: "Logs + sessions",
+    contentLogs: "Logs",
+    contentSessions: "Sessions",
+    active: "Active",
+    addSecond: "Add a second webhook",
+    removeSecond: "Remove the second webhook",
+    secondUrlLabel: "Second webhook URL",
   },
   discordGuide: {
     back: "Back to settings",

@@ -43,7 +43,7 @@ export const userRepository = {
     return row ? toUser(row) : null;
   },
 
-  /** Deletes the user; their sessions, logs and session Discord messages go with them (ON DELETE CASCADE). */
+  /** Deletes the user; their sessions, logs, Discord webhooks and session Discord messages go with them (ON DELETE CASCADE). */
   async delete(id: string): Promise<boolean> {
     const rows = await getDb().delete(users).where(eq(users.id, id)).returning({ id: users.id });
     return rows.length > 0;

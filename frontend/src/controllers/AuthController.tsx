@@ -16,8 +16,6 @@ interface AuthContextValue {
   resetPassword: (token: string, password: string, confirmPassword: string) => Promise<void>;
   logout: () => void;
   updateProfile: (data: ProfileUpdate) => Promise<void>;
-  /** Saves the Discord webhook, or disconnects it when `url` is empty. */
-  setDiscordWebhook: (url: string) => Promise<void>;
   /** Saves the dps.report user token, or removes it when `token` is empty. */
   setDpsReportToken: (token: string) => Promise<void>;
   /** Permanently deletes the account (confirmed with the password), signs out and reloads on the landing page. */
@@ -64,10 +62,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await profileService.save(data));
   }, []);
 
-  const setDiscordWebhook = useCallback(async (url: string) => {
-    setUser(await profileService.setDiscordWebhook(url));
-  }, []);
-
   const setDpsReportToken = useCallback(async (token: string) => {
     setUser(await profileService.setDpsReportToken(token));
   }, []);
@@ -90,7 +84,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resetPassword,
       logout,
       updateProfile,
-      setDiscordWebhook,
       setDpsReportToken,
       deleteAccount,
     }),
@@ -103,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       resetPassword,
       logout,
       updateProfile,
-      setDiscordWebhook,
       setDpsReportToken,
       deleteAccount,
     ],
