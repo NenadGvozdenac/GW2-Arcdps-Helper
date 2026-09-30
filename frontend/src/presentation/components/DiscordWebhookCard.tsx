@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircleIcon, CheckIcon, CircleHelpIcon, Loader2Icon, PlusIcon, UsersIcon, XIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, CircleHelpIcon, Loader2Icon, PlusIcon, SendIcon, UsersIcon, XIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { DISCORD_DEFAULT_MIN_ACCOUNTS, DISCORD_MAX_FILTER_ACCOUNTS } from "../../config/constants";
 import { profileService } from "../../services/profileService";
@@ -28,7 +28,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/presentation/components/ui/dialog";
-import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { describeError } from "../utils/describeError";
 import { successBadge } from "./ResultBadge";
 
@@ -219,24 +219,24 @@ function WebhookFields(p: WebhookFieldsProps) {
         spellCheck={false}
       />
       <div className="grid gap-2">
-        <Label>{t("discord.contentLabel")}</Label>
-        {/* The test button sits on the toggle's row, pushed to the right (wraps below it when there is no room). */}
+        <Label htmlFor={`${p.id}Content`}>{t("discord.contentLabel")}</Label>
+        {/* The test button sits on the dropdown's row, pushed to the right (wraps below it when there is no room). */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={p.content}
-            onValueChange={(v) => v && p.onContentChange(v as DiscordContent)}
-            className="flex-wrap"
-          >
-            {p.contents.map((v) => (
-              <ToggleGroupItem key={v} value={v} className="px-4">
-                {t(CONTENT_LABELS[v])}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          <Select value={p.content} onValueChange={(v) => p.onContentChange(v as DiscordContent)} disabled={p.busy}>
+            <SelectTrigger id={`${p.id}Content`} className="min-w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {p.contents.map((v) => (
+                <SelectItem key={v} value={v}>
+                  {t(CONTENT_LABELS[v])}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button type="button" onClick={p.onTest} disabled={p.busy || !p.url.trim()}>
-            {p.testing && <Loader2Icon className="animate-spin" />}
+            {/* Always an icon, so the spinner swaps in without widening the button (which would wrap it). */}
+            {p.testing ? <Loader2Icon className="animate-spin" /> : <SendIcon />}
             {t("discord.test")}
           </Button>
         </div>
