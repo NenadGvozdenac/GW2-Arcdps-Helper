@@ -538,8 +538,11 @@ function formatFight(ms: number): string {
   return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, "0")}`;
 }
 
+/** "<session name> dd-MM-yyyy.xlsx", dated by the first fight (the player's local day). */
 function fileName(session: Session, logs: LogDetail[]): string {
-  const day = (logs[0]?.encounterTime ?? session.startedAt).toISOString().slice(0, 10);
+  const d = logs[0]?.encounterTime ?? session.startedAt;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const day = `${pad(d.getDate())}-${pad(d.getMonth() + 1)}-${d.getFullYear()}`;
   const name = (session.name || "session").replace(/[\\/:*?"<>|]+/g, "").trim() || "session";
   return `${name} ${day}.xlsx`;
 }
