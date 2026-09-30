@@ -137,6 +137,40 @@ function colorScale(ws: Worksheet, ref: string, max: number) {
   });
 }
 
+/** Roughly how many characters a cell shows once Excel applies its number format. */
+function displayLength(cell: Cell): number {
+  const v = cell.value;
+  if (v == null || v === "") return 0;
+  if (v instanceof Date) return FMT.dateTime.length;
+  if (typeof v === "number") {
+    if (cell.numFmt === FMT.fight || cell.numFmt === FMT.span) return 8;
+    if (cell.numFmt === FMT.percent) return v.toFixed(1).length + 1;
+    if (cell.numFmt === FMT.one) return v.toFixed(1).length;
+    if (cell.numFmt === FMT.int) return Math.round(v).toLocaleString("en").length;
+    return String(v).length;
+  }
+  if (typeof v === "object" && "text" in v) return String(v.text).length; // hyperlink
+  return String(v).length;
+}
+
+/**
+ * Sets every column just wide enough for its longest value (headers included), so nothing is cut off. Merged block
+ * titles and the big sheet / section titles are left out — they may run across the columns next to them.
+ */
+function autoFitColumns(ws: Worksheet) {
+  const widths: number[] = [];
+  ws.eachRow((row) => {
+    row.eachCell((cell, col) => {
+      if (cell.isMerged || (cell.font?.size ?? 0) >= 12) return;
+      const factor = cell.font?.bold ? 1.15 : 1.05; // bold text is wider
+      widths[col] = Math.max(widths[col] ?? 0, Math.ceil(displayLength(cell) * factor));
+    });
+  });
+  widths.forEach((w, col) => {
+    if (w) ws.getColumn(col).width = Math.min(Math.max(w + 2, 6), 80);
+  });
+}
+
 const columnLetter = (n: number): string =>
   n <= 26 ? String.fromCharCode(64 + n) : columnLetter(Math.floor((n - 1) / 26)) + columnLetter(((n - 1) % 26) + 1);
 
@@ -152,25 +186,6 @@ interface Ctx {
 function overviewSheet(wb: Workbook, ctx: Ctx, session: Session, logs: LogDetail[], bosses: BossSummary[]) {
   const { t } = ctx;
   const ws = wb.addWorksheet(t("sessionExport.sheetOverview"));
-  ws.columns = [
-    { width: 26 },
-    { width: 26 },
-    { width: 12 },
-    { width: 12 },
-    { width: 8 },
-    { width: 8 },
-    { width: 8 },
-    { width: 11 },
-    { width: 12 },
-    { width: 13 },
-    { width: 9 },
-    { width: 9 },
-    { width: 12 },
-    { width: 34 },
-    { width: 17 },
-    { width: 17 },
-    { width: 10 },
-  ];
 
   const title = ws.addRow([session.name || t("sessions.unnamed")]);
   title.font = { bold: true, size: 14 };
@@ -257,24 +272,23 @@ function dpsSheet(wb: Workbook, ctx: Ctx, bosses: BossSummary[]) {
   const { t } = ctx;
   const ws = wb.addWorksheet(t("sessionExport.sheetDps"));
   const fixed = [
-    { header: t("sessionExport.colCharacter"), width: 22 },
-    { header: t("sessionExport.colAccount"), width: 22 },
-    { header: t("sessionExport.colProfession"), width: 14 },
-    { header: t("sessionExport.colSubgroup"), width: 9 },
-    { header: t("sessionExport.colBossDps"), width: 11 },
-    { header: t("sessionExport.colAllDps"), width: 11 },
-    { header: t("sessionExport.colBreakbar"), width: 10 },
-    { header: t("sessionExport.colDamageTaken"), width: 12 },
-    { header: t("sessionExport.downs"), width: 8 },
-    { header: t("sessionExport.deaths"), width: 8 },
+    { header: t("sessionExport.colCharacter") },
+    { header: t("sessionExport.colAccount") },
+    { header: t("sessionExport.colProfession") },
+    { header: t("sessionExport.colSubgroup") },
+    { header: t("sessionExport.colBossDps") },
+    { header: t("sessionExport.colAllDps") },
+    { header: t("sessionExport.colBreakbar") },
+    { header: t("sessionExport.colDamageTaken") },
+    { header: t("sessionExport.downs") },
+    { header: t("sessionExport.deaths") },
   ];
   const boonStart = fixed.length + 1;
   const columns = [
     ...fixed,
-    ...BOONS.map((b) => ({ header: t(BOON_LABEL[b]), width: 11 })),
-    { header: t("sessionExport.colNote"), width: 14 },
+    ...BOONS.map((b) => ({ header: t(BOON_LABEL[b]) })),
+    { header: t("sessionExport.colNote") },
   ];
-  ws.columns = columns.map((c) => ({ width: c.width }));
   const total = columns.length;
 
   for (const b of bosses) {
@@ -414,18 +428,6 @@ function playersSheet(wb: Workbook, ctx: Ctx, logs: LogDetail[], bosses: BossSum
   }
 
   const shownBoons: Boon[] = ["might", "quickness", "alacrity", "fury"];
-  ws.columns = [
-    { width: 22 },
-    { width: 30 },
-    { width: 26 },
-    { width: 9 },
-    { width: 13 },
-    { width: 13 },
-    { width: 11 },
-    { width: 8 },
-    { width: 8 },
-    ...shownBoons.map(() => ({ width: 12 })),
-  ];
   styleHeader(
     ws.addRow([
       t("sessionExport.colAccount"),
@@ -469,22 +471,6 @@ function playersSheet(wb: Workbook, ctx: Ctx, logs: LogDetail[], bosses: BossSum
 function pullsSheet(wb: Workbook, ctx: Ctx, logs: LogDetail[]) {
   const { t } = ctx;
   const ws = wb.addWorksheet(t("sessionExport.sheetPulls"));
-  ws.columns = [
-    { width: 5 },
-    { width: 17 },
-    { width: 26 },
-    { width: 24 },
-    { width: 10 },
-    { width: 9 },
-    { width: 10 },
-    { width: 12 },
-    { width: 12 },
-    { width: 34 },
-    { width: 8 },
-    { width: 8 },
-    { width: 20 },
-    { width: 10 },
-  ];
   styleHeader(
     ws.addRow([
       "#",
@@ -585,6 +571,7 @@ export const sessionExportService = {
     dpsSheet(wb, ctx, bosses);
     playersSheet(wb, ctx, logs, bosses);
     pullsSheet(wb, ctx, logs);
+    wb.eachSheet(autoFitColumns);
 
     saveFile((await wb.xlsx.writeBuffer()) as ArrayBuffer, fileName(session, logs));
   },
