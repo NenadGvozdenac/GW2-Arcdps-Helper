@@ -445,9 +445,9 @@ export default function DiscordWebhookCard() {
             {t("discord.description")}{" "}
             <Link
               to="/guide/discord"
-              className="inline-flex items-center gap-1 text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+              className="inline-flex items-center gap-1 text-foreground underline-offset-4 hover:underline"
             >
-              <CircleHelpIcon className="size-4" /> {t("discord.howTo")}
+              <CircleHelpIcon className="size-3.5" /> {t("discord.howTo")}
             </Link>
           </CardDescription>
         </CardHeader>

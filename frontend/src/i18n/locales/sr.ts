@@ -595,7 +595,7 @@ export const sr: Messages = {
     description: "Trajno briše tvoj nalog sa svim logovima, sesijama i podešavanjima. Izveštaji koji su već na dps.report-u ostaju tamo. Ovo ne može da se poništi.",
     button: "Obriši nalog",
     confirmTitle: "Obrisati nalog?",
-    confirmBody: "Tvoj nalog, svi logovi i sesije, Discord webhook i dps.report token biće trajno obrisani. Desktop uploader i Nexus addon će biti odjavljeni.",
+    confirmBody: "Tvoj nalog, svi logovi i sesije, Discord webhookovi i dps.report token biće trajno obrisani. Desktop uploader i Nexus addon će biti odjavljeni.",
     passwordLabel: "Unesi lozinku za potvrdu",
     confirm: "Obriši trajno",
     deleting: "Brišem…",
@@ -654,7 +654,7 @@ export const sr: Messages = {
     back: "Nazad na podešavanja",
     title: "Poveži Discord webhook",
     intro:
-      "Webhook omogućava da GW2 ArcDPS Helper šalje poruke u jedan kanal tvog Discord servera. Svaki log koji dodaš — na ovom sajtu ili preko desktop uploadera — pojaviće se tamo sa bossom, rezultatom, trajanjem i dps.report linkom.",
+      "Webhook omogućava da GW2 ArcDPS Helper šalje poruke u jedan kanal tvog Discord servera: svaki novi log (sa ovog sajta, iz desktop uploadera ili Nexus addona) i rezime svake sesije. Možeš koristiti jedan kanal za oboje, ili dva — jedan za logove, drugi za sesije.",
     needTitle: "Šta ti treba",
     needBody:
       "Discord server na kome imaš dozvolu „Manage Webhooks“ (vlasnik i admini je imaju). Najlakše je iz browsera na računaru ili iz Discord desktop aplikacije.",
@@ -668,15 +668,46 @@ export const sr: Messages = {
     step4Title: "Kopiraj URL",
     step4Body: "Klikni „Copy Webhook URL“. Izgleda ovako: https://discord.com/api/webhooks/123…/abc…",
     step5Title: "Nalepi ga u podešavanja",
-    step5Body: "Otvori Podešavanja na ovom sajtu, nalepi URL u „Discord obaveštenja“ i klikni „Pošalji probnu poruku“.",
-    step6Title: "Sačuvaj",
-    step6Body: "Kad se probna poruka pojavi u kanalu, klikni „Sačuvaj“. Od sada se tamo šalje svaki novi log.",
+    step5Body: "Otvori Podešavanja na ovom sajtu i nalepi URL u „URL webhooka“ pod „Discord obaveštenja“.",
+    step6Title: "Izaberi šta se šalje",
+    step6Body:
+      "Pod „Šta se šalje na ovaj webhook“ izaberi „Logovi + sesije“, samo „Logovi“ ili samo „Sesije“.",
     postedTitle: "Šta se šalje",
     postedBody:
-      "Jedna poruka po uploadu, sa najviše 10 logova: boss (i CM / LCM), kill ili wipe sa preostalim HP-om bossa, trajanje, wing / fraktal / strike, ko je snimio log i link ka dps.report. Logovi koje si već dodao se ne šalju ponovo.",
+      "Logovi: jedna poruka po uploadu, sa najviše 10 logova — boss (i CM / LCM), kill ili wipe sa preostalim HP-om bossa, trajanje, wing / fraktal / strike, ko je snimio log i link ka dps.report. Logovi koje si već dodao se ne šalju ponovo. Logovi aktivne sesije se ne šalju jedan po jedan: kad se sesija završi, šalje se jedan rezime sa svakim bossom, rezultatom i linkom, plus trajanje i kill / wipe.",
     safetyTitle: "Čuvaj URL u tajnosti",
     safetyBody:
       "Svako ko ima URL webhooka može da piše u taj kanal. Ne deli ga; ako procuri, obriši webhook u Discordu i napravi novi. Da prestanu poruke, klikni „Isključi“ u podešavanjima ili obriši webhook u Discordu.",
+    stepsTitle: "Poveži prvi webhook",
+    step7Title: "Testiraj i sačuvaj",
+    step7Body:
+      "Klikni „Pošalji probnu poruku“ — poruka kaže šta će stizati u kanal. Kad se pojavi, klikni „Sačuvaj“.",
+    twoTitle: "Logovi i sesije u dva kanala",
+    twoIntro:
+      "Opciono: razdvoji pojedinačne logove i rezimee sesija, na primer #raid-logovi i #raid-večeri.",
+    two1Title: "Napravi drugi webhook",
+    two1Body: "U Discordu ponovi korake 1–4 za drugi kanal i kopiraj njegov URL.",
+    two2Title: "Dodaj ga u podešavanjima",
+    two2Body: "Klikni „Dodaj drugi webhook“ i nalepi URL u „URL drugog webhooka“.",
+    two3Title: "Podeli šta se šalje",
+    two3Body: "Jedan webhook podesi na „Logovi“ ili „Sesije“ — drugi automatski dobija ostatak.",
+    two4Title: "Testiraj i sačuvaj",
+    two4Body: "Pošalji probnu poruku na oba i klikni „Sačuvaj“. X pored drugog webhooka ga ponovo uklanja.",
+    filterTitle: "Samo sesije sa mojom ekipom",
+    filterIntro:
+      "Opciono, na webhooku koji šalje sesije: sesija se šalje samo ako je tvoja ekipa bila u njoj — korisno kad raiduješ i sa drugim squadovima.",
+    filter1Title: "Otvori ekipu",
+    filter1Body: "Na webhooku koji šalje sesije klikni „Uredi ekipu“.",
+    filter2Title: "Dodaj naloge",
+    filter2Body: "Upiši GW2 nalog (Ime.1234) i klikni „Dodaj“, najviše 10 naloga. X uklanja nalog.",
+    filter3Title: "Podesi minimum",
+    filter3Body: "„Najmanje“ je koliko ovih naloga mora biti u jednom logu sesije (podrazumevano 3).",
+    filter4Title: "Primeni i sačuvaj",
+    filter4Body:
+      "Klikni „Primeni“, pa „Sačuvaj“. Ceo rezime se šalje kad bar jedan log ispuni uslov; inače se sesija ne šalje. Bez naloga se šalju sve sesije.",
+    pauseTitle: "Pauziraj webhook",
+    pauseBody:
+      "Isključi „Aktivan“ pored webhooka i klikni „Sačuvaj“ da prestanu poruke, a URL ostane sačuvan. Uključi ga ponovo da nastaviš.",
     openSettings: "Otvori podešavanja",
   },
   legal: {

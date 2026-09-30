@@ -595,7 +595,7 @@ export const en = {
     description: "Permanently deletes your account with all of its logs, sessions and settings. Reports already on dps.report stay there. This cannot be undone.",
     button: "Delete account",
     confirmTitle: "Delete your account?",
-    confirmBody: "Your account, every log and session, your Discord webhook and dps.report token are deleted for good. The desktop uploader and the Nexus addon will be signed out.",
+    confirmBody: "Your account, every log and session, your Discord webhooks and dps.report token are deleted for good. The desktop uploader and the Nexus addon will be signed out.",
     passwordLabel: "Enter your password to confirm",
     confirm: "Delete for good",
     deleting: "Deleting…",
@@ -654,7 +654,7 @@ export const en = {
     back: "Back to settings",
     title: "Connect a Discord webhook",
     intro:
-      "A webhook lets GW2 ArcDPS Helper post a message to one channel of your Discord server. Every log you add — on this site or with the desktop uploader — then shows up there with the boss, result, duration and a dps.report link.",
+      "A webhook lets GW2 ArcDPS Helper post to one channel of your Discord server: every new log (from this site, the desktop uploader or the Nexus addon) and a summary of every session. You can use one channel for both, or two — one for logs, one for sessions.",
     needTitle: "What you need",
     needBody:
       "A Discord server where you have the “Manage Webhooks” permission (server owners and admins have it). A desktop browser or the Discord desktop app is easiest.",
@@ -668,15 +668,48 @@ export const en = {
     step4Title: "Copy the URL",
     step4Body: "Click “Copy Webhook URL”. It looks like https://discord.com/api/webhooks/123…/abc…",
     step5Title: "Paste it in Settings",
-    step5Body: "Open Settings on this site, paste the URL into “Discord notifications” and click “Send test message”.",
-    step6Title: "Save",
-    step6Body: "When the test message shows up in the channel, click “Save”. From now on every new log is posted there.",
+    step5Body:
+      "Open Settings on this site and paste the URL into “Webhook URL” under “Discord notifications”.",
+    step6Title: "Choose what it posts",
+    step6Body: "Under “Post to this webhook” pick “Logs + sessions”, only “Logs” or only “Sessions”.",
     postedTitle: "What gets posted",
     postedBody:
-      "One message per upload with up to 10 logs: boss (and CM / LCM), kill or wipe with the boss HP left, duration, wing / fractal / strike, who recorded it and a link to dps.report. Logs you had already added are not posted again.",
+      "Logs: one message per upload with up to 10 logs — boss (and CM / LCM), kill or wipe with the boss HP left, duration, wing / fractal / strike, who recorded it and a dps.report link. Logs you had already added are not posted again. Logs of a running session aren't posted one by one: when the session ends, one summary lists every boss with its result and link, plus the duration and kills / wipes.",
     safetyTitle: "Keep the URL private",
     safetyBody:
       "Anyone with the webhook URL can post to that channel. Don't share it; if it leaks, delete the webhook in Discord and create a new one. To stop the messages, click “Disconnect” in Settings or delete the webhook in Discord.",
+    stepsTitle: "Connect your first webhook",
+    step7Title: "Test and save",
+    step7Body:
+      "Click “Send test message” — the message says what the channel will get. When it shows up, click “Save”.",
+    twoTitle: "Logs and sessions in two channels",
+    twoIntro:
+      "Optional: keep single logs and session summaries apart, for example #raid-logs and #raid-nights.",
+    two1Title: "Create a second webhook",
+    two1Body: "In Discord, repeat steps 1–4 for the other channel and copy its URL.",
+    two2Title: "Add it in Settings",
+    two2Body: "Click “Add a second webhook” and paste the URL into “Second webhook URL”.",
+    two3Title: "Split what they post",
+    two3Body: "Set one webhook to “Logs” or “Sessions” — the other one automatically gets the rest.",
+    two4Title: "Test and save",
+    two4Body:
+      "Send a test message to each and click “Save”. The X next to the second webhook removes it again.",
+    filterTitle: "Only sessions with my group",
+    filterIntro:
+      "Optional, on the webhook that posts sessions: post a session only if your group was in it — handy when you also raid with other squads.",
+    filter1Title: "Open the group",
+    filter1Body: "On the webhook that posts sessions, click “Edit group”.",
+    filter2Title: "Add accounts",
+    filter2Body: "Type a GW2 account (Name.1234) and click “Add”, up to 10 accounts. The X removes one.",
+    filter3Title: "Set the minimum",
+    filter3Body:
+      "“At least” is how many of these accounts must be in one log of the session (3 by default).",
+    filter4Title: "Apply and save",
+    filter4Body:
+      "Click “Apply”, then “Save”. The whole summary is posted when at least one log matches; otherwise the session isn't posted. Without accounts every session is posted.",
+    pauseTitle: "Pause a webhook",
+    pauseBody:
+      "Uncheck “Active” next to a webhook and click “Save” to stop its messages without losing the URL. Check it again to resume.",
     openSettings: "Open Settings",
   },
   legal: {

@@ -1,23 +1,71 @@
 import { Link } from "react-router-dom";
-import { ArrowLeftIcon, InfoIcon, MessageSquareIcon, ShieldAlertIcon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  InfoIcon,
+  MessageSquareIcon,
+  PauseIcon,
+  ShieldAlertIcon,
+  SplitIcon,
+  UsersIcon,
+} from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Alert, AlertDescription, AlertTitle } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import PageHeader from "../components/PageHeader";
 
-const STEPS: { title: TranslationKey; body: TranslationKey }[] = [
+type Step = { title: TranslationKey; body: TranslationKey };
+
+const STEPS: Step[] = [
   { title: "discordGuide.step1Title", body: "discordGuide.step1Body" },
   { title: "discordGuide.step2Title", body: "discordGuide.step2Body" },
   { title: "discordGuide.step3Title", body: "discordGuide.step3Body" },
   { title: "discordGuide.step4Title", body: "discordGuide.step4Body" },
   { title: "discordGuide.step5Title", body: "discordGuide.step5Body" },
   { title: "discordGuide.step6Title", body: "discordGuide.step6Body" },
+  { title: "discordGuide.step7Title", body: "discordGuide.step7Body" },
 ];
 
-/** How to create a Discord webhook and connect it in Settings (public page at /guide/discord). */
+const TWO_STEPS: Step[] = [
+  { title: "discordGuide.two1Title", body: "discordGuide.two1Body" },
+  { title: "discordGuide.two2Title", body: "discordGuide.two2Body" },
+  { title: "discordGuide.two3Title", body: "discordGuide.two3Body" },
+  { title: "discordGuide.two4Title", body: "discordGuide.two4Body" },
+];
+
+const FILTER_STEPS: Step[] = [
+  { title: "discordGuide.filter1Title", body: "discordGuide.filter1Body" },
+  { title: "discordGuide.filter2Title", body: "discordGuide.filter2Body" },
+  { title: "discordGuide.filter3Title", body: "discordGuide.filter3Body" },
+  { title: "discordGuide.filter4Title", body: "discordGuide.filter4Body" },
+];
+
+/** Numbered steps, each with a title and a line of explanation. */
+function StepList({ steps }: { steps: Step[] }) {
+  const { t } = useI18n();
+  return (
+    <ol className="flex flex-col gap-6">
+      {steps.map((s, i) => (
+        <li key={s.title} className="flex gap-4">
+          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
+            {i + 1}
+          </span>
+          <div className="space-y-1 pt-1">
+            <h3 className="font-semibold">{t(s.title)}</h3>
+            <p className="text-sm text-muted-foreground text-pretty">{t(s.body)}</p>
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * How to create a Discord webhook and connect it in Settings, plus the optional second channel, session filter and
+ * pausing (public page at /guide/discord).
+ */
 export default function DiscordGuidePage() {
   const { user } = useAuth();
   const { t } = useI18n();
@@ -41,22 +89,43 @@ export default function DiscordGuidePage() {
       </Alert>
 
       <Card>
+        <CardHeader>
+          <CardTitle>{t("discordGuide.stepsTitle")}</CardTitle>
+        </CardHeader>
         <CardContent>
-          <ol className="flex flex-col gap-6">
-            {STEPS.map((s, i) => (
-              <li key={s.title} className="flex gap-4">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-                  {i + 1}
-                </span>
-                <div className="space-y-1 pt-1">
-                  <h2 className="font-semibold">{t(s.title)}</h2>
-                  <p className="text-sm text-muted-foreground text-pretty">{t(s.body)}</p>
-                </div>
-              </li>
-            ))}
-          </ol>
+          <StepList steps={STEPS} />
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SplitIcon className="size-4" /> {t("discordGuide.twoTitle")}
+          </CardTitle>
+          <CardDescription>{t("discordGuide.twoIntro")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StepList steps={TWO_STEPS} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UsersIcon className="size-4" /> {t("discordGuide.filterTitle")}
+          </CardTitle>
+          <CardDescription>{t("discordGuide.filterIntro")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <StepList steps={FILTER_STEPS} />
+        </CardContent>
+      </Card>
+
+      <Alert>
+        <PauseIcon />
+        <AlertTitle>{t("discordGuide.pauseTitle")}</AlertTitle>
+        <AlertDescription>{t("discordGuide.pauseBody")}</AlertDescription>
+      </Alert>
 
       <Card>
         <CardHeader>

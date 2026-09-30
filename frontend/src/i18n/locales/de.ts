@@ -604,7 +604,7 @@ export const de: Messages = {
     description: "Löscht dein Konto mit allen Logs, Sessions und Einstellungen dauerhaft. Berichte, die schon auf dps.report liegen, bleiben dort. Das kann nicht rückgängig gemacht werden.",
     button: "Konto löschen",
     confirmTitle: "Konto wirklich löschen?",
-    confirmBody: "Dein Konto, alle Logs und Sessions, dein Discord-Webhook und dein dps.report-Token werden endgültig gelöscht. Desktop-Uploader und Nexus-Addon werden abgemeldet.",
+    confirmBody: "Dein Konto, alle Logs und Sessions, deine Discord-Webhooks und dein dps.report-Token werden endgültig gelöscht. Desktop-Uploader und Nexus-Addon werden abgemeldet.",
     passwordLabel: "Gib zur Bestätigung dein Passwort ein",
     confirm: "Endgültig löschen",
     deleting: "Wird gelöscht…",
@@ -663,7 +663,7 @@ export const de: Messages = {
     back: "Zurück zu den Einstellungen",
     title: "Discord-Webhook verbinden",
     intro:
-      "Mit einem Webhook kann GW2 ArcDPS Helper Nachrichten in einen Channel deines Discord-Servers posten. Jedes Log, das du hinzufügst — auf dieser Seite oder mit dem Desktop-Uploader — erscheint dort mit Boss, Ergebnis, Dauer und dps.report-Link.",
+      "Mit einem Webhook kann GW2 ArcDPS Helper in einen Channel deines Discord-Servers posten: jedes neue Log (von dieser Seite, dem Desktop-Uploader oder dem Nexus-Addon) und eine Zusammenfassung jeder Session. Du kannst einen Channel für beides nutzen oder zwei — einen für Logs, einen für Sessions.",
     needTitle: "Was du brauchst",
     needBody:
       "Einen Discord-Server, auf dem du die Berechtigung „Webhooks verwalten“ hast (Server-Besitzer und Admins haben sie). Am einfachsten geht es im Desktop-Browser oder in der Discord-Desktop-App.",
@@ -678,15 +678,48 @@ export const de: Messages = {
     step4Body: "Klick auf „Webhook-URL kopieren“. Sie sieht so aus: https://discord.com/api/webhooks/123…/abc…",
     step5Title: "In den Einstellungen einfügen",
     step5Body:
-      "Öffne die Einstellungen auf dieser Seite, füge die URL bei „Discord-Benachrichtigungen“ ein und klick auf „Testnachricht senden“.",
-    step6Title: "Speichern",
-    step6Body: "Wenn die Testnachricht im Channel erscheint, klick auf „Speichern“. Ab jetzt wird jedes neue Log dort gepostet.",
+      "Öffne die Einstellungen auf dieser Seite und füge die URL bei „Webhook-URL“ unter „Discord-Benachrichtigungen“ ein.",
+    step6Title: "Wählen, was gepostet wird",
+    step6Body: "Wähl unter „An diesen Webhook senden“ „Logs + Sessions“, nur „Logs“ oder nur „Sessions“.",
     postedTitle: "Was gepostet wird",
     postedBody:
-      "Eine Nachricht pro Upload mit bis zu 10 Logs: Boss (und CM / LCM), Kill oder Wipe mit verbleibender Boss-HP, Dauer, Flügel / Fraktal / Strike, wer es aufgezeichnet hat und ein Link zu dps.report. Bereits hinzugefügte Logs werden nicht erneut gepostet.",
+      "Logs: eine Nachricht pro Upload mit bis zu 10 Logs — Boss (und CM / LCM), Kill oder Wipe mit verbleibender Boss-HP, Dauer, Flügel / Fraktal / Strike, wer es aufgezeichnet hat und ein dps.report-Link. Bereits hinzugefügte Logs werden nicht erneut gepostet. Logs einer laufenden Session werden nicht einzeln gepostet: Wenn sie endet, listet eine Zusammenfassung jeden Boss mit Ergebnis und Link, dazu Dauer und Kills / Wipes.",
     safetyTitle: "Halte die URL geheim",
     safetyBody:
       "Jeder mit der Webhook-URL kann in diesen Channel posten. Teile sie nicht; falls sie durchsickert, lösch den Webhook in Discord und erstell einen neuen. Um die Nachrichten zu stoppen, klick in den Einstellungen auf „Trennen“ oder lösch den Webhook in Discord.",
+    stepsTitle: "Ersten Webhook verbinden",
+    step7Title: "Testen und speichern",
+    step7Body:
+      "Klick auf „Testnachricht senden“ — die Nachricht sagt, was der Channel bekommt. Wenn sie erscheint, klick auf „Speichern“.",
+    twoTitle: "Logs und Sessions in zwei Channels",
+    twoIntro:
+      "Optional: Einzelne Logs und Session-Zusammenfassungen trennen, z. B. #raid-logs und #raid-abende.",
+    two1Title: "Zweiten Webhook erstellen",
+    two1Body: "Wiederhole in Discord die Schritte 1–4 für den anderen Channel und kopier seine URL.",
+    two2Title: "In den Einstellungen hinzufügen",
+    two2Body: "Klick auf „Zweiten Webhook hinzufügen“ und füge die URL bei „URL des zweiten Webhooks“ ein.",
+    two3Title: "Aufteilen, was gepostet wird",
+    two3Body: "Stell einen Webhook auf „Logs“ oder „Sessions“ — der andere bekommt automatisch den Rest.",
+    two4Title: "Testen und speichern",
+    two4Body:
+      "Sende an beide eine Testnachricht und klick auf „Speichern“. Das X neben dem zweiten Webhook entfernt ihn wieder.",
+    filterTitle: "Nur Sessions mit meiner Gruppe",
+    filterIntro:
+      "Optional, beim Webhook, der Sessions postet: Eine Session wird nur gepostet, wenn deine Gruppe dabei war — praktisch, wenn du auch mit anderen Squads raidest.",
+    filter1Title: "Gruppe öffnen",
+    filter1Body: "Klick beim Webhook, der Sessions postet, auf „Gruppe bearbeiten“.",
+    filter2Title: "Accounts hinzufügen",
+    filter2Body:
+      "Gib einen GW2-Account (Name.1234) ein und klick auf „Hinzufügen“, bis zu 10 Accounts. Das X entfernt einen.",
+    filter3Title: "Minimum festlegen",
+    filter3Body:
+      "„Mindestens“ ist, wie viele dieser Accounts in einem Log der Session sein müssen (standardmäßig 3).",
+    filter4Title: "Übernehmen und speichern",
+    filter4Body:
+      "Klick auf „Übernehmen“, dann auf „Speichern“. Die ganze Zusammenfassung wird gepostet, wenn mindestens ein Log passt; sonst wird die Session nicht gepostet. Ohne Accounts wird jede Session gepostet.",
+    pauseTitle: "Webhook pausieren",
+    pauseBody:
+      "Entferne den Haken bei „Aktiv“ neben einem Webhook und klick auf „Speichern“, um seine Nachrichten zu stoppen, ohne die URL zu verlieren. Setz ihn wieder, um fortzufahren.",
     openSettings: "Einstellungen öffnen",
   },
   legal: {
