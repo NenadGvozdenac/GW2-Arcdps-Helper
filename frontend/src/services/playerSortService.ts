@@ -8,33 +8,23 @@ export interface PlayerSort {
   direction: PlayerSortDirection;
 }
 
-/** How a field's two directions read: numbers high / low first, the subgroup 1 → N. */
-export type PlayerSortKind = "number" | "group";
-
-const FIELDS: { field: PlayerSortField; kind: PlayerSortKind; value: (p: PlayerSummary) => number }[] = [
-  { field: "bossDps", kind: "number", value: (p) => p.dps },
-  { field: "group", kind: "group", value: (p) => p.group },
-  { field: "totalDps", kind: "number", value: (p) => p.totalDps },
-  { field: "downs", kind: "number", value: (p) => p.downs },
-  { field: "deaths", kind: "number", value: (p) => p.deaths },
+const FIELDS: { field: PlayerSortField; value: (p: PlayerSummary) => number }[] = [
+  { field: "bossDps", value: (p) => p.dps },
+  { field: "group", value: (p) => p.group },
+  { field: "totalDps", value: (p) => p.totalDps },
+  { field: "downs", value: (p) => p.downs },
+  { field: "deaths", value: (p) => p.deaths },
 ];
 
 export const DEFAULT_PLAYER_SORT: PlayerSort = { field: "bossDps", direction: "desc" };
 
-/** Numbers read best largest-first, the subgroup 1-first. */
-const firstDirection = (kind: PlayerSortKind): PlayerSortDirection => (kind === "number" ? "desc" : "asc");
-
 export const playerSortService = {
   /** Every option of the sort menu, in menu order: Boss DPS first, then the subgroup, then the rest. */
-  options(): (PlayerSort & { kind: PlayerSortKind })[] {
-    return FIELDS.flatMap(({ field, kind }) => {
-      const first = firstDirection(kind);
-      const second: PlayerSortDirection = first === "desc" ? "asc" : "desc";
-      return [
-        { field, kind, direction: first },
-        { field, kind, direction: second },
-      ];
-    });
+  options(): PlayerSort[] {
+    return FIELDS.flatMap(({ field }): PlayerSort[] => [
+      { field, direction: "desc" },
+      { field, direction: "asc" },
+    ]);
   },
 
   toKey: (sort: PlayerSort) => `${sort.field}-${sort.direction}`,

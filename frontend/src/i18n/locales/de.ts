@@ -563,8 +563,6 @@ export const de: Messages = {
     sortBy: "Sortieren nach",
     sortHighFirst: "{field}: höchste zuerst",
     sortLowFirst: "{field}: niedrigste zuerst",
-    sortGroupAsc: "{field}: 1 → 10",
-    sortGroupDesc: "{field}: 10 → 1",
     tabPlayers: "Spieler",
     tabBoons: "Boons",
     boonsNone: "Für dieses Log gibt es keine Boon-Daten (dps.report hat keinen detaillierten Bericht dazu).",

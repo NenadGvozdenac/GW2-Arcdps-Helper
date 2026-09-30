@@ -7,7 +7,6 @@ import {
   playerSortService,
   type PlayerSort,
   type PlayerSortField,
-  type PlayerSortKind,
 } from "../../services/playerSortService";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
@@ -44,10 +43,10 @@ const SORT_FIELD_LABEL: Record<PlayerSortField, TranslationKey> = {
   deaths: "logDetail.colDeaths",
 };
 
-/** "<field>: highest first", "<field>: 1 → 10"… */
-const SORT_DIRECTION_LABEL: Record<PlayerSortKind, Record<PlayerSort["direction"], TranslationKey>> = {
-  number: { desc: "logDetail.sortHighFirst", asc: "logDetail.sortLowFirst" },
-  group: { asc: "logDetail.sortGroupAsc", desc: "logDetail.sortGroupDesc" },
+/** "<field>: highest first" / "<field>: lowest first". */
+const SORT_DIRECTION_LABEL: Record<PlayerSort["direction"], TranslationKey> = {
+  desc: "logDetail.sortHighFirst",
+  asc: "logDetail.sortLowFirst",
 };
 
 /** Sort menu of the players table; the choice is remembered in this browser. */
@@ -64,7 +63,7 @@ function PlayerSortSelect({ sort, onChange }: { sort: PlayerSort; onChange: (sor
       <SelectContent position="popper" align="end">
         {playerSortService.options().map((o) => (
           <SelectItem key={playerSortService.toKey(o)} value={playerSortService.toKey(o)}>
-            {t(SORT_DIRECTION_LABEL[o.kind][o.direction], { field: t(SORT_FIELD_LABEL[o.field]) })}
+            {t(SORT_DIRECTION_LABEL[o.direction], { field: t(SORT_FIELD_LABEL[o.field]) })}
           </SelectItem>
         ))}
       </SelectContent>

@@ -554,8 +554,6 @@ export const sr: Messages = {
     sortBy: "Sortiraj po",
     sortHighFirst: "{field}: najviše prvo",
     sortLowFirst: "{field}: najmanje prvo",
-    sortGroupAsc: "{field}: 1 → 10",
-    sortGroupDesc: "{field}: 10 → 1",
     tabPlayers: "Igrači",
     tabBoons: "Boonovi",
     boonsNone: "Ovaj log nema podatke o boonovima (dps.report nema detaljan izveštaj za njega).",

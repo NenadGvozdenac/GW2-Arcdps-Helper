@@ -554,8 +554,6 @@ export const en = {
     sortBy: "Sort by",
     sortHighFirst: "{field}: highest first",
     sortLowFirst: "{field}: lowest first",
-    sortGroupAsc: "{field}: 1 → 10",
-    sortGroupDesc: "{field}: 10 → 1",
     tabPlayers: "Players",
     tabBoons: "Boons",
     boonsNone: "This log has no boon data (dps.report has no detailed report for it).",
