@@ -21,6 +21,8 @@ export const FRESH_HIGHLIGHT_MS = 8_000;
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
 export const LOGS_PAGE_SIZE_STORAGE_KEY = "gw2arcdpshelper.logsPageSize";
+/** How the log page's players table is sorted (e.g. "bossDps-desc"). */
+export const PLAYER_SORT_STORAGE_KEY = "gw2arcdpshelper.playerSort";
 export const DOWNLOADS_STORAGE_KEY = "gw2arcdpshelper.downloads";
 export const SESSION_RESULT_FILTER_STORAGE_KEY = "gw2arcdpshelper.sessionResultFilter";
 /** + ".<userId>": the overview's "finish your setup" tip was closed for that account. */

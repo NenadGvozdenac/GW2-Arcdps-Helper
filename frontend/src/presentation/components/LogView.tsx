@@ -1,8 +1,16 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Loader2Icon, SparklesIcon, UsersIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import type { Log, PlayerSummary } from "../../domain/types/log.types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import type { TranslationKey } from "../../i18n/i18n.types";
+import {
+  playerSortService,
+  type PlayerSort,
+  type PlayerSortField,
+  type PlayerSortKind,
+} from "../../services/playerSortService";
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/components/ui/tabs";
 import { cn } from "@/presentation/lib/utils";
@@ -28,6 +36,42 @@ interface Props {
   children?: ReactNode;
 }
 
+const SORT_FIELD_LABEL: Record<PlayerSortField, TranslationKey> = {
+  bossDps: "logDetail.colBossDps",
+  group: "logDetail.colGroup",
+  totalDps: "logDetail.colTotalDps",
+  downs: "logDetail.colDowns",
+  deaths: "logDetail.colDeaths",
+};
+
+/** "<field>: highest first", "<field>: 1 → 10"… */
+const SORT_DIRECTION_LABEL: Record<PlayerSortKind, Record<PlayerSort["direction"], TranslationKey>> = {
+  number: { desc: "logDetail.sortHighFirst", asc: "logDetail.sortLowFirst" },
+  group: { asc: "logDetail.sortGroupAsc", desc: "logDetail.sortGroupDesc" },
+};
+
+/** Sort menu of the players table; the choice is remembered in this browser. */
+function PlayerSortSelect({ sort, onChange }: { sort: PlayerSort; onChange: (sort: PlayerSort) => void }) {
+  const { t } = useI18n();
+  return (
+    <Select
+      value={playerSortService.toKey(sort)}
+      onValueChange={(key) => onChange(playerSortService.fromKey(key))}
+    >
+      <SelectTrigger size="sm" className="w-56" aria-label={t("logDetail.sortBy")}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent position="popper" align="end">
+        {playerSortService.options().map((o) => (
+          <SelectItem key={playerSortService.toKey(o)} value={playerSortService.toKey(o)}>
+            {t(SORT_DIRECTION_LABEL[o.kind][o.direction], { field: t(SORT_FIELD_LABEL[o.field]) })}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
 /** One log: boss card, squad totals and the players table. Used by the log page and the public shared-log page. */
 export default function LogView({ log, players, actions, meta, isOwnAccount, children }: Props) {
   const { t, fmt } = useI18n();
@@ -36,11 +80,18 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
   // The squad's profession icons: the players table waits for them (the boons table does too), so they don't pop in.
   const professionIconsReady = useImagesLoaded(squadProfessionIcons(players ?? []));
   const squad = players ?? [];
+  const [sort, setSort] = useState<PlayerSort>(playerSortService.saved);
+  const changeSort = (next: PlayerSort) => {
+    setSort(next);
+    playerSortService.save(next);
+  };
+  const sortedSquad = playerSortService.sort(squad, sort);
   const totals = {
     squadDps: squad.reduce((s, p) => s + p.dps, 0),
     downs: squad.reduce((s, p) => s + p.downs, 0),
     deaths: squad.reduce((s, p) => s + p.deaths, 0),
-    topDps: squad[0]?.dps || 1,
+    // The DPS bars are relative to the best player, wherever the sort puts them.
+    topDps: Math.max(1, ...squad.map((p) => p.dps)),
   };
   const pending = players === null ? "…" : null;
 
@@ -84,6 +135,11 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
           <Card>
             <CardHeader>
               <CardTitle>{t("logDetail.players")}</CardTitle>
+              {squad.length > 1 && (
+                <CardAction>
+                  <PlayerSortSelect sort={sort} onChange={changeSort} />
+                </CardAction>
+              )}
             </CardHeader>
             <CardContent>
               {players === null || !professionIconsReady ? (
@@ -105,7 +161,7 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {squad.map((p, i) => (
+                  {sortedSquad.map((p, i) => (
                     <TableRow
                       key={p.account + p.name}
                       className={cn(isOwnAccount(p.account) && "bg-warning/10 hover:bg-warning/15")}
