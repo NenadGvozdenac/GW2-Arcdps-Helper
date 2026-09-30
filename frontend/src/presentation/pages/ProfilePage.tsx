@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircleIcon, CheckIcon, FileTextIcon, ShieldCheckIcon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, FileTextIcon, Loader2Icon, ShieldCheckIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
+import type { DiscordWebhook } from "../../domain/types/user.types";
+import { profileService } from "../../services/profileService";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import {
@@ -27,10 +29,23 @@ function useProfileController() {
   const [gw2Account, setGw2Account] = useState("");
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  /** The Discord webhooks, loaded before the page shows so every card appears at once. */
+  const [webhooks, setWebhooks] = useState<{ list: DiscordWebhook[] | null; error: unknown } | null>(null);
 
   useEffect(() => {
     setGw2Account(user?.gw2Account ?? "");
   }, [user]);
+
+  useEffect(() => {
+    let cancelled = false;
+    profileService.getDiscordWebhooks().then(
+      (list) => !cancelled && setWebhooks({ list, error: null }),
+      (err) => !cancelled && setWebhooks({ list: null, error: err }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function save() {
     setError(null);
@@ -43,13 +58,20 @@ function useProfileController() {
     }
   }
 
-  return { email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save };
+  return { email: user?.email ?? "", gw2Account, setGw2Account, saved, error, save, webhooks };
 }
 
 export default function ProfilePage() {
   const c = useProfileController();
   const { t } = useI18n();
 
+  if (!c.webhooks) {
+    return (
+      <div className="flex justify-center py-24" role="status">
+        <Loader2Icon className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -109,10 +131,16 @@ export default function ProfilePage() {
           <CardFooter className="mt-auto flex-col items-start gap-2 border-t">
             <span className="text-sm font-medium">{t("profile.legal")}</span>
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-              <Link to="/privacy" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Link
+                to="/privacy"
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+              >
                 <ShieldCheckIcon className="size-4" /> {t("landing.footer.privacy")}
               </Link>
-              <Link to="/terms" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground">
+              <Link
+                to="/terms"
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+              >
                 <FileTextIcon className="size-4" /> {t("landing.footer.terms")}
               </Link>
             </div>
@@ -120,7 +148,7 @@ export default function ProfilePage() {
         </Card>
         <DpsReportTokenCard />
       </div>
-      <DiscordWebhookCard />
+      <DiscordWebhookCard initialWebhooks={c.webhooks.list} loadError={c.webhooks.error} />
       <DeleteAccountCard />
     </div>
   );

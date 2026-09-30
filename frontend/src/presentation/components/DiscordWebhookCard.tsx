@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { AlertCircleIcon, CheckIcon, CircleHelpIcon, Loader2Icon, PlusIcon, UsersIcon, XIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
@@ -49,21 +49,23 @@ const otherContent = (content: DiscordContent): DiscordContent => (content === "
 
 const postsSessions = (content: DiscordContent) => content !== "logs";
 
-function useDiscordWebhookController() {
-  /** What is saved on the server, in order; null while loading. */
-  const [saved, setSaved] = useState<DiscordWebhook[] | null>(null);
-  const [url, setUrl] = useState("");
-  const [content, setContent] = useState<DiscordContent>("all");
-  const [enabled, setEnabled] = useState(true);
-  const [hasSecond, setHasSecond] = useState(false);
-  const [secondUrl, setSecondUrl] = useState("");
-  const [secondEnabled, setSecondEnabled] = useState(true);
+function useDiscordWebhookController(initial: DiscordWebhook[] | null, loadError: unknown) {
+  const [first, second] = initial ?? [];
+  const initialSessions = initial?.find((w) => postsSessions(w.content));
+  /** What is saved on the server, in order; null when it couldn't be loaded (then the form can't be saved). */
+  const [saved, setSaved] = useState<DiscordWebhook[] | null>(initial);
+  const [url, setUrl] = useState(first?.url ?? "");
+  const [content, setContent] = useState<DiscordContent>(first?.content ?? "all");
+  const [enabled, setEnabled] = useState(first?.enabled ?? true);
+  const [hasSecond, setHasSecond] = useState(!!second);
+  const [secondUrl, setSecondUrl] = useState(second?.url ?? "");
+  const [secondEnabled, setSecondEnabled] = useState(second?.enabled ?? true);
   /** The session filter belongs to whichever webhook posts sessions, so it follows that role, not a box. */
-  const [filterAccounts, setFilterAccounts] = useState<string[]>([]);
-  const [minAccounts, setMinAccounts] = useState(DISCORD_DEFAULT_MIN_ACCOUNTS);
+  const [filterAccounts, setFilterAccounts] = useState<string[]>(initialSessions?.accounts ?? []);
+  const [minAccounts, setMinAccounts] = useState(initialSessions?.minAccounts ?? DISCORD_DEFAULT_MIN_ACCOUNTS);
   const [busy, setBusy] = useState<Action | null>(null);
   const [notice, setNotice] = useState<TranslationKey | null>(null);
-  const [error, setError] = useState<unknown>(null);
+  const [error, setError] = useState<unknown>(loadError);
 
   /** Shows the saved webhooks in the form. */
   function load(webhooks: DiscordWebhook[]) {
@@ -79,10 +81,6 @@ function useDiscordWebhookController() {
     setFilterAccounts(sessionsWebhook?.accounts ?? []);
     setMinAccounts(sessionsWebhook?.minAccounts ?? DISCORD_DEFAULT_MIN_ACCOUNTS);
   }
-
-  useEffect(() => {
-    profileService.getDiscordWebhooks().then(load, setError);
-  }, []);
 
   async function run(action: Action, fn: () => Promise<void>, success: TranslationKey) {
     setBusy(action);
@@ -112,7 +110,8 @@ function useDiscordWebhookController() {
   ];
 
   return {
-    loading: saved === null,
+    /** The webhooks could not be loaded: the form stays locked so saving cannot wipe them. */
+    unavailable: saved === null,
     url,
     setUrl,
     content,
@@ -408,8 +407,14 @@ function SessionFilter(p: SessionFilterProps) {
   );
 }
 
-export default function DiscordWebhookCard() {
-  const c = useDiscordWebhookController();
+interface DiscordWebhookCardProps {
+  /** Loaded by the settings page before it shows; null when loading failed. */
+  initialWebhooks: DiscordWebhook[] | null;
+  loadError?: unknown;
+}
+
+export default function DiscordWebhookCard({ initialWebhooks, loadError }: DiscordWebhookCardProps) {
+  const c = useDiscordWebhookController(initialWebhooks, loadError);
   const { t } = useI18n();
   const spinner = (a: Action) => c.busy === a && <Loader2Icon className="animate-spin" />;
   const sessionFilter = (
@@ -417,7 +422,7 @@ export default function DiscordWebhookCard() {
       accounts={c.filterAccounts}
       minAccounts={c.minAccounts}
       onChange={c.setFilter}
-      busy={!!c.busy || c.loading}
+      busy={!!c.busy || c.unavailable}
     />
   );
 
@@ -466,7 +471,7 @@ export default function DiscordWebhookCard() {
               onEnabledChange={c.setEnabled}
               onTest={c.test}
               testing={c.busy === "test"}
-              busy={!!c.busy || c.loading}
+              busy={!!c.busy || c.unavailable}
             >
               {postsSessions(c.content) && sessionFilter}
             </WebhookFields>
@@ -483,7 +488,7 @@ export default function DiscordWebhookCard() {
                 onEnabledChange={c.setSecondEnabled}
                 onTest={c.testSecond}
                 testing={c.busy === "testSecond"}
-                busy={!!c.busy || c.loading}
+                busy={!!c.busy || c.unavailable}
                 onRemove={c.removeSecond}
               >
                 {postsSessions(c.secondContent) && sessionFilter}
