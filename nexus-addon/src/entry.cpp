@@ -187,3 +187,49 @@ extern "C" __declspec(dllexport) AddonDefinition_t* GetAddonDef()
 	AddonDef.UpdateLink = localBuild ? nullptr : "https://github.com/NenadGvozdenac/GW2-Arcdps-Helper";
 	return &AddonDef;
 }
+
+// ArcDPS also loads every DLL in addons/ and logs error 127 when get_init_addr is missing.
+// These exports register an empty ArcDPS extension (no callbacks) so that warning goes away;
+// all real work happens through Nexus.
+struct ArcExports
+{
+	uintptr_t size;
+	uint32_t sig;
+	uint32_t imguivers;
+	const char* out_name;
+	const char* out_build;
+	void* wnd_nofilter;
+	void* combat;
+	void* imgui;
+	void* options_end;
+	void* combat_local;
+	void* wnd_filter;
+	void* options_windows;
+};
+
+static ArcExports ArcDef{};
+
+static ArcExports* ArcInit()
+{
+	ArcDef.size = sizeof(ArcExports);
+	ArcDef.sig = 0x4E474148; // unique id among ArcDPS extensions
+	ArcDef.imguivers = 18000; // ImGui 1.80
+	ArcDef.out_name = ADDON_NAME;
+	ArcDef.out_build = "nexus";
+	return &ArcDef;
+}
+
+static uintptr_t ArcRelease()
+{
+	return 0;
+}
+
+extern "C" __declspec(dllexport) void* get_init_addr(char*, void*, void*, HANDLE, void*, void*, uint32_t)
+{
+	return reinterpret_cast<void*>(ArcInit);
+}
+
+extern "C" __declspec(dllexport) void* get_release_addr()
+{
+	return reinterpret_cast<void*>(ArcRelease);
+}
