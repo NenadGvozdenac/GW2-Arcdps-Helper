@@ -82,7 +82,6 @@ export interface UploaderApi {
   resumeSession(): Promise<IpcResult>;
 
   uploadFiles(): Promise<void>;
-  retryUpload(id: string): Promise<void>;
   clearFinished(): Promise<void>;
   openExternal(url: string): Promise<void>;
 

@@ -11,8 +11,8 @@ the game.
   - **Record** starts a session on GW2 ArcDPS Helper. Every new log is attached to it. **Stop recording** waits
     for the session's pending uploads and then ends it, so the Discord summary contains all of them.
   - **Auto-upload new logs** turns the folder watcher on or off. Recording turns it on.
-  - The list shows the recent logs. Click a boss to open the dps.report link, right-click to copy it, and use
-    **Retry** on failed uploads. If a log already reached dps.report, Retry repeats only the GW2 ArcDPS Helper step.
+  - The list shows the recent logs. Click a boss to open the dps.report link, right-click to copy it.
+    Logs that fail to upload are not shown.
 - **Options** (Nexus → Addons → GW2 ArcDPS Helper): sign in, the ArcDPS log folder and alerts. The addon always
   talks to the production API.
 - **dps.report user token**: stored on the account, not in the addon. Set it on the website (Profile). The addon

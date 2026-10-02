@@ -7,7 +7,7 @@ import { stateStore } from "./stateStore";
 export const notifier = {
   uploadFinished(entry: UploadEntry): void {
     const { desktopNotifications, language } = stateStore.getSettings();
-    // Failed uploads stay visible in the upload list; no notification for them.
+    // No notification for failed uploads.
     if (!desktopNotifications || !Notification.isSupported() || entry.stage !== "done") return;
 
     const t = mainT(language);

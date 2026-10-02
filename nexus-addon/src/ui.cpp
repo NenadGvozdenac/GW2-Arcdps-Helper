@@ -86,7 +86,7 @@ namespace
 			"dps.report and saves it to your GW2 ArcDPS Helper account (sign in below). Without an account, logs only go "
 			"to dps.report.");
 		Bullet("Open the window with ALT+SHIFT+U or the icon in the Nexus bar. Click a log to open it on dps.report, "
-			"right-click to copy the link, and use Retry if an upload failed.");
+			"right-click to copy the link.");
 		Bullet("Record starts a session on the website: every log until you press Stop belongs to it, and one Discord "
 			"summary is posted when it ends. A session you forget ends by itself after 6 hours.");
 		Bullet("Use either this addon or the desktop uploader - with both running, every log is uploaded twice.");
@@ -104,7 +104,7 @@ namespace
 			case Stage::Uploading: return "Uploading";
 			case Stage::Syncing: return "Saving";
 			case Stage::Done: return u.synced ? "Done" : "dps.report only";
-			case Stage::Failed: return "Failed";
+			case Stage::Failed: return "";
 		}
 		return "";
 	}
@@ -390,7 +390,9 @@ namespace
 
 	void RenderUploads()
 	{
+		// Logs that could not be uploaded are not shown at all.
 		std::vector<Upload> uploads = Uploads::Snapshot();
+		uploads.erase(std::remove_if(uploads.begin(), uploads.end(), [](const Upload& u) { return u.stage == Stage::Failed; }), uploads.end());
 		if (uploads.empty())
 		{
 			ImGui::TextColored(GREY, "No logs yet. Kill something!");
@@ -438,17 +440,7 @@ namespace
 			else ImGui::TextColored(GREY, "-");
 
 			ImGui::TableSetColumnIndex(3);
-			if (u.stage == Stage::Failed)
-			{
-				ImGui::TextColored(RED, "Failed");
-				if (ImGui::IsItemHovered()) ImGui::SetTooltip("%s", u.error.c_str());
-				ImGui::SameLine();
-				if (ImGui::SmallButton("Retry")) Uploads::Retry(u.id);
-			}
-			else
-			{
-				ImGui::TextColored(u.stage == Stage::Done ? (u.synced ? GREEN : GREY) : YELLOW, "%s", StageText(u));
-			}
+			ImGui::TextColored(u.stage == Stage::Done ? (u.synced ? GREEN : GREY) : YELLOW, "%s", StageText(u));
 			ImGui::PopID();
 		}
 		ImGui::EndTable();

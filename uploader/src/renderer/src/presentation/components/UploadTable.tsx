@@ -1,4 +1,4 @@
-import { ExternalLinkIcon, GlobeIcon, RotateCwIcon } from "lucide-react";
+import { ExternalLinkIcon, GlobeIcon } from "lucide-react";
 import { useAppState } from "../../controllers/AppStateController";
 import { useI18n } from "../../controllers/I18nController";
 import { uploaderBridge } from "../../repositories/uploaderBridge";
@@ -6,7 +6,6 @@ import type { UploadEntry } from "../../../../shared/upload.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { describeError } from "../utils/describeError";
 import StageBadge from "./StageBadge";
 
 function useUploadTableController() {
@@ -14,7 +13,6 @@ function useUploadTableController() {
   return {
     openDpsReport: (e: UploadEntry) => e.permalink && uploaderBridge.openExternal(e.permalink),
     openWeb: (e: UploadEntry) => e.webLogId && uploaderBridge.openExternal(`${environment.webUrl}/logs/${e.webLogId}`),
-    retry: (e: UploadEntry) => uploaderBridge.retryUpload(e.id),
   };
 }
 
@@ -43,11 +41,6 @@ export default function UploadTable({ uploads }: { uploads: UploadEntry[] }) {
             <TableCell className="max-w-64">
               <div className="truncate font-medium">{e.bossName ?? e.fileName}</div>
               {e.bossName && <div className="truncate text-xs text-muted-foreground">{e.fileName}</div>}
-              {e.stage === "failed" && e.errorCode && (
-                <div className="truncate text-xs text-destructive" title={e.errorDetail ?? ""}>
-                  {describeError(e.errorCode, t)}
-                </div>
-              )}
             </TableCell>
             <TableCell className="text-muted-foreground">{e.groupName ?? "—"}</TableCell>
             <TableCell>
@@ -88,11 +81,6 @@ export default function UploadTable({ uploads }: { uploads: UploadEntry[] }) {
                 {e.webLogId && (
                   <Button variant="ghost" size="sm" onClick={() => c.openWeb(e)}>
                     <GlobeIcon /> {t("uploads.openWeb")}
-                  </Button>
-                )}
-                {e.stage === "failed" && (
-                  <Button variant="outline" size="sm" onClick={() => c.retry(e)}>
-                    <RotateCwIcon /> {t("uploads.retry")}
                   </Button>
                 )}
               </div>

@@ -87,7 +87,6 @@ export const de: Messages = {
     colStatus: "Status",
     openDpsReport: "dps.report",
     openWeb: "Web",
-    retry: "Erneut versuchen",
     uploaded: "Hochgeladene Logs",
     kills: "Kills",
     wipes: "Wipes",

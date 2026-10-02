@@ -169,14 +169,6 @@ export const uploadService = {
     schedule(() => runPipeline(entry.id, waitForFile));
   },
 
-  /** Retries a failed entry; if it already reached dps.report only the GW2 ArcDPS Helper step is repeated. */
-  retry(id: string): void {
-    const entry = stateStore.getUpload(id);
-    if (!entry || entry.stage !== "failed") return;
-    stateStore.updateUpload(id, { stage: "queued", errorCode: null, errorDetail: null });
-    schedule(() => runPipeline(id, false));
-  },
-
   clearFinished(): void {
     stateStore.removeUploads((u) => u.stage === "done" || u.stage === "failed");
   },

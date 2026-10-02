@@ -15,7 +15,6 @@ export const IPC = {
   endSession: "session:end",
   resumeSession: "session:resume",
   uploadFiles: "uploads:pick-files",
-  retryUpload: "uploads:retry",
   clearFinished: "uploads:clear-finished",
   openExternal: "shell:open-external",
   installUpdate: "update:install",

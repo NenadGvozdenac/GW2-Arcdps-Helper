@@ -68,7 +68,6 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
     for (const file of res.filePaths.filter(isLogFile)) uploadService.enqueue(file, false);
   });
 
-  ipcMain.handle(IPC.retryUpload, (_e, id: string) => uploadService.retry(id));
   ipcMain.handle(IPC.clearFinished, () => uploadService.clearFinished());
 
   ipcMain.handle(IPC.installUpdate, () => updateService.install());

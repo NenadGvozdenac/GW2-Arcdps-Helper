@@ -28,7 +28,6 @@ const api: UploaderApi = {
   resumeSession: () => ipcRenderer.invoke(IPC.resumeSession),
 
   uploadFiles: () => ipcRenderer.invoke(IPC.uploadFiles),
-  retryUpload: (id) => ipcRenderer.invoke(IPC.retryUpload, id),
   clearFinished: () => ipcRenderer.invoke(IPC.clearFinished),
   openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url),
 

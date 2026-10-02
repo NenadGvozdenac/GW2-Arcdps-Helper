@@ -343,19 +343,6 @@ namespace Uploads
 		g_cv.notify_all();
 	}
 
-	void Retry(uint64_t id)
-	{
-		{
-			std::lock_guard lock(g_mutex);
-			auto it = std::find_if(g_uploads.begin(), g_uploads.end(), [&](const Upload& u) { return u.id == id; });
-			if (it == g_uploads.end() || it->stage != Stage::Failed) return;
-			it->stage = Stage::Queued;
-			it->error.clear();
-			g_queue.push_back({ id, false });
-		}
-		g_cv.notify_all();
-	}
-
 	void ClearFinished()
 	{
 		std::lock_guard lock(g_mutex);

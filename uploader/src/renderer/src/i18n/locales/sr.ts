@@ -86,7 +86,6 @@ export const sr: Messages = {
     colStatus: "Status",
     openDpsReport: "dps.report",
     openWeb: "Sajt",
-    retry: "Pokušaj ponovo",
     uploaded: "Uploadovani logovi",
     kills: "Killovi",
     wipes: "Wipeovi",

@@ -14,7 +14,7 @@ It replaces the old Java `AutoLogUploader`; Discord posting was intentionally dr
 4. For each new log: wait until ArcDPS finished writing → upload to dps.report (3 attempts on network errors)
    → `POST /api/logs` with the permalink → the backend stores it for the web app.
 
-Failed uploads can be retried; if the file already reached dps.report only the GW2 ArcDPS Helper step is repeated.
+Logs that fail to upload are not shown in the list.
 While watching, closing the window keeps the app running in the tray.
 
 ## Updates

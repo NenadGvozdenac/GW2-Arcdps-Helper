@@ -86,7 +86,6 @@ export const en = {
     colStatus: "Status",
     openDpsReport: "dps.report",
     openWeb: "Web",
-    retry: "Retry",
     uploaded: "Uploaded logs",
     kills: "Kills",
     wipes: "Wipes",

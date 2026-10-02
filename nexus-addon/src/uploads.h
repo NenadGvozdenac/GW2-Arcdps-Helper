@@ -38,8 +38,6 @@ namespace Uploads
 	void Stop();
 
 	void Enqueue(const std::wstring& path, bool waitForFile = true);
-	/** Retries a failed entry; if it already reached dps.report only the GW2 ArcDPS Helper step is repeated. */
-	void Retry(uint64_t id);
 	void ClearFinished();
 
 	std::vector<Upload> Snapshot();
