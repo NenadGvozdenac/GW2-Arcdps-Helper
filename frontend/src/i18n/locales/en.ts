@@ -618,10 +618,10 @@ export const en = {
     removed: "Removed",
   },
   emptyLogs: {
-    title: "Empty logs",
-    description: "Wipes where the boss is still at 100% and every player did 0 DPS.",
+    title: "Upload settings",
     label: "Skip empty logs",
-    hint: "Skipped logs are not saved, not posted to Discord and not shown as uploaded in the desktop uploader or the Nexus addon.",
+    hint: "Wipes where the boss is still at 100% and nobody did any damage are not saved, not posted to Discord and not shown as uploaded in the desktop uploader or the Nexus addon.",
+    whyToggle: "Why are empty logs skipped?",
     why: "Why? ArcDPS has a bug that sometimes writes a log even though the fight never really started. These logs get uploaded by mistake and only clutter your log list and Discord.",
     saved: "Saved",
   },

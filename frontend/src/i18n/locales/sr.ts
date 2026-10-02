@@ -618,10 +618,10 @@ export const sr: Messages = {
     removed: "Uklonjeno",
   },
   emptyLogs: {
-    title: "Prazni logovi",
-    description: "Wipeovi gde je boss i dalje na 100% a svi igrači su uradili 0 DPS-a.",
+    title: "Podešavanja uploada",
     label: "Preskoči prazne logove",
-    hint: "Preskočeni logovi se ne čuvaju, ne šalju se na Discord i ne prikazuju se kao uploadovani u desktop uploaderu ni u Nexus addonu.",
+    hint: "Wipeovi gde je boss i dalje na 100% a niko nije naneo štetu se ne čuvaju, ne šalju se na Discord i ne prikazuju se kao uploadovani u desktop uploaderu ni u Nexus addonu.",
+    whyToggle: "Zašto se prazni logovi preskaču?",
     why: "Zašto? ArcDPS ima bag zbog kog ponekad napravi log iako borba zapravo nije ni počela. Takvi logovi se uploaduju greškom i samo zatrpavaju listu logova i Discord.",
     saved: "Sačuvano",
   },

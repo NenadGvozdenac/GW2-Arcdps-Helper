@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { AlertCircleIcon, CheckIcon, InfoIcon, Loader2Icon } from "lucide-react";
+import { AlertCircleIcon, CheckIcon, CircleHelpIcon, Loader2Icon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { Button } from "@/presentation/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { Label } from "@/presentation/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/presentation/components/ui/popover";
 import { describeError } from "../utils/describeError";
 
 function useEmptyLogsController() {
@@ -35,7 +37,7 @@ function useEmptyLogsController() {
 /**
  * Whether empty logs (a wipe with the boss at 100% and 0 DPS from everyone, written by an ArcDPS bug) are skipped:
  * not saved, not posted to Discord and dropped from the desktop uploader's and the Nexus addon's upload list.
- * Saved as soon as the checkbox changes.
+ * Saved as soon as the checkbox changes. The "?" next to the title explains why (the ArcDPS bug).
  */
 export default function EmptyLogsCard() {
   const c = useEmptyLogsController();
@@ -45,7 +47,6 @@ export default function EmptyLogsCard() {
     <Card>
       <CardHeader>
         <CardTitle>{t("emptyLogs.title")}</CardTitle>
-        <CardDescription>{t("emptyLogs.description")}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
@@ -57,14 +58,29 @@ export default function EmptyLogsCard() {
             disabled={c.busy}
           />
           <div className="grid gap-1.5">
-            <Label htmlFor="skipEmptyLogs">{t("emptyLogs.label")}</Label>
+            <div className="flex items-center gap-1">
+              <Label htmlFor="skipEmptyLogs">{t("emptyLogs.label")}</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="-my-1 size-6 text-foreground"
+                    aria-label={t("emptyLogs.whyToggle")}
+                    title={t("emptyLogs.whyToggle")}
+                  >
+                    <CircleHelpIcon />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-80 text-sm text-pretty">
+                  {t("emptyLogs.why")}
+                </PopoverContent>
+              </Popover>
+            </div>
             <p className="text-sm text-muted-foreground text-pretty">{t("emptyLogs.hint")}</p>
           </div>
         </div>
-        <Alert>
-          <InfoIcon />
-          <AlertDescription className="text-pretty">{t("emptyLogs.why")}</AlertDescription>
-        </Alert>
         {c.error != null && (
           <Alert variant="destructive">
             <AlertCircleIcon />
