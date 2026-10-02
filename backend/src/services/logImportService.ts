@@ -34,8 +34,6 @@ export async function importLog(
   if (!permalink) return { url, status: "error", code: "INVALID_LINK", message: "Not a valid dps.report link." };
 
   const existing = await logRepository.findByPermalink(ownerId, permalink);
-  // Saved before "Skip empty logs" existed (or while it was off): skipped now just like a new one.
-  if (existing?.isEmpty && skipEmptyLogs) return { url, status: "skipped", reason: "EMPTY_LOG" };
   if (existing) {
     // A log added earlier without a session still joins the session it is re-uploaded in.
     if (sessionId && !existing.sessionId) {
@@ -47,9 +45,8 @@ export async function importLog(
 
   try {
     const summary = await fetchLogSummary(permalink);
-    const isEmpty = isEmptyLog(summary);
-    if (skipEmptyLogs && isEmpty) return { url, status: "skipped", reason: "EMPTY_LOG" };
-    const id = await logRepository.create(ownerId, summary, sessionId, isEmpty);
+    if (skipEmptyLogs && isEmptyLog(summary)) return { url, status: "skipped", reason: "EMPTY_LOG" };
+    const id = await logRepository.create(ownerId, summary, sessionId);
     // A null id means the same link was stored concurrently — report it as a duplicate.
     const stored = await logRepository.findByPermalink(ownerId, permalink);
     if (!stored) throw new Error("Log was not stored.");

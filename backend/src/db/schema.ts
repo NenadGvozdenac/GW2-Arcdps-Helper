@@ -142,11 +142,6 @@ export const logs = pgTable(
     durationMs: integer("duration_ms").notNull(),
     /** % of boss HP remaining (useful for wipes). */
     bossHealthLeft: real("boss_health_left"),
-    /**
-     * An empty log from the ArcDPS bug (wipe, boss at 100%, 0 DPS from everyone — see isEmptyLog). Hidden everywhere
-     * while the owner has users.skipEmptyLogs on; shown again when they turn it off.
-     */
-    isEmpty: boolean("is_empty").notNull().default(false),
     encounterTime: timestamp("encounter_time", { withTimezone: true }).notNull(),
     recordedBy: text("recorded_by"),
     gw2Build: integer("gw2_build"),

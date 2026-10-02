@@ -64,8 +64,6 @@ export interface Log extends LogSummary {
   sessionId: string | null;
   /** Secret of the public link (/shared/logs/<token>); null = not shared. */
   shareToken: string | null;
-  /** Empty log from the ArcDPS bug; hidden while the owner skips empty logs. */
-  isEmpty: boolean;
 }
 
 /**

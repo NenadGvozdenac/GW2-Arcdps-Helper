@@ -1,1 +1,0 @@
-ALTER TABLE "logs" ADD COLUMN "is_empty" boolean DEFAULT false NOT NULL;

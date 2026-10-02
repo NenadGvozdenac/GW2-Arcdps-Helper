@@ -86,9 +86,7 @@ Express 5 forwards errors thrown in async handlers to `errorHandler`, which turn
 5. `encounterClassifier` maps it to an encounter + group (trigger ID first, boss-name aliases as fallback).
 6. If the user has `skipEmptyLogs` on (the default) and the log is empty — a wipe with the boss at 100% and 0 DPS from
    everyone, which an ArcDPS bug sometimes writes — it is not stored → `skipped` (no Discord post; the desktop uploader
-   and the Nexus addon drop it from their upload list). Every log is stored with `is_empty`, so empty logs saved earlier
-   are left out of lists, search, sessions and weekly clears while the setting is on (and come back when it is off);
-   re-submitting one also answers `skipped`.
+   and the Nexus addon drop it from their upload list). Empty logs saved while the setting was off stay.
 7. `logRepository.create` stores it (`UNIQUE (owner_id, permalink)` makes concurrent submits safe).
 
 Links are processed 4 at a time; at most 10 per request so a request fits a Vercel function's time limit.

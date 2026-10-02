@@ -2,7 +2,6 @@ import { and, asc, count, desc, eq, getTableColumns, inArray, isNull, lt, min, s
 import { getDb } from "../db/pool";
 import { logs, sessionDiscordMessages, sessions } from "../db/schema";
 import type { Log } from "../types/log.types";
-import { notHiddenEmpty } from "./logRepository";
 import type { Session, SessionEndReason, SessionPatch } from "../types/session.types";
 
 const ownedBy = (ownerId: string) => eq(sessions.ownerId, ownerId);
@@ -21,8 +20,7 @@ export type SessionWithStats = Session & {
 };
 
 // Correlated subqueries over the session's logs (logs_session_idx); only run for the rows of one page.
-// Empty logs hidden by the owner's setting don't count.
-const sessionLogs = sql`FROM logs WHERE logs.session_id = ${sessions.id} AND logs.owner_id = ${sessions.ownerId} AND ${notHiddenEmpty}`;
+const sessionLogs = sql`FROM logs WHERE logs.session_id = ${sessions.id} AND logs.owner_id = ${sessions.ownerId}`;
 const withStats = {
   ...getTableColumns(sessions),
   logCount: sql<number>`(SELECT count(*) ${sessionLogs})`.mapWith(Number),
@@ -197,12 +195,12 @@ export const sessionRepository = {
     return deleted.length > 0;
   },
 
-  /** The session's logs, oldest first (without empty logs hidden by the owner's setting). */
+  /** The session's logs, oldest first. */
   logsOf(ownerId: string, id: string): Promise<Log[]> {
     return getDb()
       .select()
       .from(logs)
-      .where(and(eq(logs.ownerId, ownerId), eq(logs.sessionId, id), notHiddenEmpty))
+      .where(and(eq(logs.ownerId, ownerId), eq(logs.sessionId, id)))
       .orderBy(asc(logs.encounterTime));
   },
 
