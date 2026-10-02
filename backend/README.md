@@ -84,8 +84,8 @@ Express 5 forwards errors thrown in async handlers to `errorHandler`, which turn
 4. `logParser` builds a summary (boss, success, CM/LCM, duration, boss HP left, players with DPS/downs/deaths);
    old logs without EI JSON fall back to the metadata.
 5. `encounterClassifier` maps it to an encounter + group (trigger ID first, boss-name aliases as fallback).
-6. If the user has `skipEmptyLogs` on (the default) and the log is empty — a wipe with the boss at 100% and 0 DPS from
-   everyone, which an ArcDPS bug sometimes writes — it is not stored → `skipped` (no Discord post; the desktop uploader
+6. If the user has `skipEmptyLogs` on (the default) and the log is empty — a wipe with the boss at 100% and 0 DPS on the
+   boss from everyone (damage on other targets doesn't count), which an ArcDPS bug sometimes writes — it is not stored → `skipped` (no Discord post; the desktop uploader
    and the Nexus addon drop it from their upload list). Empty logs saved while the setting was off stay.
 7. `logRepository.create` stores it (`UNIQUE (owner_id, permalink)` makes concurrent submits safe).
 

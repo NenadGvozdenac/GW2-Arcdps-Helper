@@ -35,7 +35,7 @@ function useEmptyLogsController() {
 }
 
 /**
- * Whether empty logs (a wipe with the boss at 100% and 0 DPS from everyone, written by an ArcDPS bug) are skipped:
+ * Whether empty logs (a wipe with the boss at 100% and 0 DPS on the boss from everyone, written by an ArcDPS bug) are skipped:
  * not saved, not posted to Discord and dropped from the desktop uploader's and the Nexus addon's upload list.
  * Saved as soon as the checkbox changes. The "?" next to the label explains why (the ArcDPS bug).
  */

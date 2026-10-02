@@ -36,7 +36,7 @@ export const users = pgTable(
      */
     dpsReportToken: text("dps_report_token"),
     /**
-     * Skip "empty" logs (a wipe with the boss at 100% and 0 DPS from everyone) that an ArcDPS bug sometimes writes:
+     * Skip "empty" logs (a wipe with the boss at 100% and 0 DPS on the boss from everyone) that an ArcDPS bug sometimes writes:
      * they are not saved, posted to Discord or shown as uploaded in the uploader / addon.
      */
     skipEmptyLogs: boolean("skip_empty_logs").notNull().default(true),

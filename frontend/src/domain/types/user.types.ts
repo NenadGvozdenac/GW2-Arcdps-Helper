@@ -21,7 +21,7 @@ export interface User {
   gw2Account: string;
   /** dps.report user token for this account's uploads (website, desktop uploader, Nexus addon); null = not set. */
   dpsReportToken: string | null;
-  /** Skip empty logs (wipe at 100% with 0 DPS from everyone) that an ArcDPS bug sometimes writes. On by default. */
+  /** Skip empty logs (wipe at 100% with 0 DPS on the boss from everyone) that an ArcDPS bug sometimes writes. On by default. */
   skipEmptyLogs: boolean;
 }
 

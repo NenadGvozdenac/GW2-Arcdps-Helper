@@ -113,11 +113,9 @@ export function parseFromMetadata(permalink: string, url: string, meta: UploadMe
 }
 
 /**
- * An "empty" log: a wipe with the boss still at 100% and no damage from anyone. ArcDPS sometimes writes these by
- * mistake. Needs the Elite Insights data — summaries built from metadata alone have no health or DPS to judge by.
+ * An "empty" log: a wipe with the boss still at 100% and no damage on the boss from anyone. ArcDPS sometimes writes these
+ * by mistake. Damage on other targets doesn't count (players often hit something else in such logs). Needs the Elite
+ * Insights data — summaries built from metadata alone have no health or DPS to judge by.
  */
 export const isEmptyLog = (log: LogSummary): boolean =>
-  !log.success &&
-  log.bossHealthLeft != null &&
-  log.bossHealthLeft >= 100 &&
-  log.players.every((p) => p.dps === 0 && p.totalDps === 0);
+  !log.success && log.bossHealthLeft != null && log.bossHealthLeft >= 100 && log.players.every((p) => p.dps === 0);
