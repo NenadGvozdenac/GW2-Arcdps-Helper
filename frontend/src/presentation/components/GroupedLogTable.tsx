@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useI18n } from "../../controllers/I18nController";
 import { sessionService } from "../../services/sessionService";
 import type { Log } from "../../domain/types/log.types";
 import type { SessionGroupLogs } from "../../domain/types/session.types";
 import { sessionResultFilterStorage, type SessionResultFilter } from "../../storage/sessionResultFilterStorage";
 import { Badge } from "@/presentation/components/ui/badge";
-import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import { cn } from "@/presentation/lib/utils";
 import LogTable from "./LogTable";
 import { failBadge, successBadge } from "./ResultBadge";
 
@@ -19,7 +20,7 @@ export function useSessionResultFilter() {
   return { filter, setFilter };
 }
 
-/** Toggle between kills and wipes together, or kills first and wipes at the end. */
+/** Dropdown: kills and wipes together, or kills first and wipes at the end. */
 export function SessionResultFilterToggle({
   filter,
   onChange,
@@ -29,21 +30,15 @@ export function SessionResultFilterToggle({
 }) {
   const { t } = useI18n();
   return (
-    <ToggleGroup
-      type="single"
-      size="sm"
-      variant="outline"
-      value={filter}
-      onValueChange={(v) => v && onChange(v as SessionResultFilter)}
-      aria-label={t("sessions.resultFilter")}
-    >
-      <ToggleGroupItem value="together" className="px-3 text-xs">
-        {t("sessions.filterTogether")}
-      </ToggleGroupItem>
-      <ToggleGroupItem value="split" className="px-3 text-xs">
-        {t("sessions.filterSplit")}
-      </ToggleGroupItem>
-    </ToggleGroup>
+    <Select value={filter} onValueChange={(v) => onChange(v as SessionResultFilter)}>
+      <SelectTrigger size="sm" aria-label={t("sessions.resultFilter")}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent position="popper" align="end">
+        <SelectItem value="together">{t("sessions.filterTogether")}</SelectItem>
+        <SelectItem value="split">{t("sessions.filterSplit")}</SelectItem>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -51,7 +46,8 @@ function useGroupedLogTableController(logs: Log[]) {
   const all = useMemo(() => sessionService.byGroup(logs), [logs]);
   const kills = useMemo(() => sessionService.byGroup(logs.filter((l) => l.success)), [logs]);
   const wipes = useMemo(() => sessionService.byGroup(logs.filter((l) => !l.success)), [logs]);
-  return { all, kills, wipes };
+  const killCount = logs.filter((l) => l.success).length;
+  return { all, kills, wipes, killCount, wipeCount: logs.length - killCount };
 }
 
 interface Props {
@@ -79,21 +75,49 @@ export default function GroupedLogTable({ logs, filter, openOnDpsReport = false 
       {filter === "together" ? (
         sections(c.all)
       ) : (
-        <>
+        <div className="flex flex-col gap-10">
           {c.kills.length > 0 && (
-            <div className="flex flex-col gap-6">
-              <h3 className="text-sm font-medium text-muted-foreground">{t("sessions.kills")}</h3>
+            <ResultPart kind="kill" title={t("sessions.kills")} count={c.killCount}>
               {sections(c.kills)}
-            </div>
+            </ResultPart>
           )}
           {c.wipes.length > 0 && (
-            <div className="flex flex-col gap-6">
-              <h3 className="text-sm font-medium text-muted-foreground">{t("sessions.wipes")}</h3>
+            <ResultPart kind="wipe" title={t("sessions.wipes")} count={c.wipeCount}>
               {sections(c.wipes)}
-            </div>
+            </ResultPart>
           )}
-        </>
+        </div>
       )}
+    </div>
+  );
+}
+
+/** "Kills, then wipes": one of the two parts, under a coloured heading with a rule below it. */
+function ResultPart({
+  kind,
+  title,
+  count,
+  children,
+}: {
+  kind: "kill" | "wipe";
+  title: string;
+  count: number;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col gap-6">
+      <div
+        className={cn(
+          "flex items-center gap-2 border-b-2 pb-2",
+          kind === "kill" ? "border-success/50" : "border-destructive/50",
+        )}
+      >
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <Badge variant="outline" className={kind === "kill" ? successBadge : failBadge}>
+          {count}
+        </Badge>
+      </div>
+      {children}
     </div>
   );
 }
