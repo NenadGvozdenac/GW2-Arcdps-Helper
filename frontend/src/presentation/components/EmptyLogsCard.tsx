@@ -2,6 +2,8 @@ import { useState } from "react";
 import { AlertCircleIcon, CheckIcon, CircleHelpIcon, Loader2Icon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
+import { useLogs } from "../../controllers/LogsController";
+import { useSessions } from "../../controllers/SessionsController";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/presentation/components/ui/card";
@@ -12,6 +14,8 @@ import { describeError } from "../utils/describeError";
 
 function useEmptyLogsController() {
   const { user, setSkipEmptyLogs } = useAuth();
+  const logs = useLogs();
+  const sessions = useSessions();
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
@@ -22,6 +26,9 @@ function useEmptyLogsController() {
     setSaved(false);
     try {
       await setSkipEmptyLogs(enabled);
+      // Already saved empty logs are hidden / shown again by the setting, so reload what the other pages show.
+      void logs.refresh();
+      void sessions.refresh();
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
@@ -37,7 +44,8 @@ function useEmptyLogsController() {
 /**
  * Whether empty logs (a wipe with the boss at 100% and 0 DPS from everyone, written by an ArcDPS bug) are skipped:
  * not saved, not posted to Discord and dropped from the desktop uploader's and the Nexus addon's upload list.
- * Saved as soon as the checkbox changes. The "?" next to the title explains why (the ArcDPS bug).
+ * Empty logs saved earlier are hidden while it is on.
+ * Saved as soon as the checkbox changes. The "?" next to the label explains why (the ArcDPS bug).
  */
 export default function EmptyLogsCard() {
   const c = useEmptyLogsController();

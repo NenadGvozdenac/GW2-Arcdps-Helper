@@ -65,6 +65,13 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+      # TEMPORARY one-off: marks empty logs saved before logs.is_empty existed. Remove this step together with
+      # src/db/markEmptyLogs.ts once it ran in production.
+      - name: Mark existing empty logs
+        run: node dist/db/markEmptyLogs.js
+        env:
+          NODE_ENV: production
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
   deploy:
     name: Deploy to Vercel (production)
