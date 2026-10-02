@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { Switch } from "@/presentation/components/ui/switch";
+import FeedbackCard from "../components/FeedbackCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { describeError } from "../utils/describeError";
 
@@ -131,6 +132,8 @@ export default function SettingsPage() {
           </CardFooter>
         </form>
       </Card>
+
+      <FeedbackCard />
     </div>
   );
 }

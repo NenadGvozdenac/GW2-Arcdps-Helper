@@ -18,5 +18,6 @@ export const IPC = {
   retryUpload: "uploads:retry",
   clearFinished: "uploads:clear-finished",
   openExternal: "shell:open-external",
+  sendFeedback: "feedback:send",
   installUpdate: "update:install",
 } as const;

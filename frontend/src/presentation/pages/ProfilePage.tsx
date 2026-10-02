@@ -21,6 +21,7 @@ import DeleteAccountCard from "../components/DeleteAccountCard";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import DpsReportTokenCard from "../components/DpsReportTokenCard";
 import EmptyLogsCard from "../components/EmptyLogsCard";
+import FeedbackCard from "../components/FeedbackCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import PageHeader from "../components/PageHeader";
 import { describeError } from "../utils/describeError";
@@ -151,6 +152,7 @@ export default function ProfilePage() {
         <EmptyLogsCard />
       </div>
       <DiscordWebhookCard initialWebhooks={c.webhooks.list} loadError={c.webhooks.error} />
+      <FeedbackCard />
       <DeleteAccountCard />
     </div>
   );

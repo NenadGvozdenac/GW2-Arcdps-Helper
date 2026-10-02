@@ -103,4 +103,11 @@ namespace Api
 	bool EndSession(const std::string& token, const std::string& id, Error& err);
 
 	bool GetWeeklyClears(const std::string& token, WeeklyClears& out, Error& err);
+
+	/**
+	 * Feedback to the developer (saved and emailed). category: addon, uploader, website or other. With a token it is
+	 * linked to the account; without one (signed out) contactEmail may say where to answer.
+	 */
+	bool SendFeedback(const std::string& token, const std::string& category, const std::string& title,
+		const std::string& description, const std::string& contactEmail, Error& err);
 }

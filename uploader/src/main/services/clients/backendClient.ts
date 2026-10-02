@@ -7,6 +7,7 @@ import type {
   BackendSession,
   BackendSubmitResult,
   BackendUser,
+  FeedbackInput,
   WeeklyClears,
 } from "../../../shared/backend.types";
 import { AppError, fetchWithTimeout } from "../../utils/appError";
@@ -54,6 +55,11 @@ export const backendClient = {
       body: JSON.stringify({ urls, sessionId }),
     });
     return body.results;
+  },
+
+  /** Saved and emailed to the developer, linked to the signed-in account. */
+  async sendFeedback(apiUrl: string, token: string, feedback: FeedbackInput): Promise<void> {
+    await request<unknown>(apiUrl, "/feedback", { method: "POST", token, body: JSON.stringify(feedback) });
   },
 
   weeklyClears: (apiUrl: string, token: string) => request<WeeklyClears>(apiUrl, "/clears/weekly", { token }),

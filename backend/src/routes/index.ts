@@ -2,11 +2,12 @@ import { Router } from "express";
 import { appLoginController } from "../controllers/appLoginController";
 import { authController } from "../controllers/authController";
 import { clearsController } from "../controllers/clearsController";
+import { feedbackController } from "../controllers/feedbackController";
 import { logController } from "../controllers/logController";
 import { profileController } from "../controllers/profileController";
 import { sessionController } from "../controllers/sessionController";
 import { logFileUpload } from "../middleware/logFileUpload";
-import { requireAuth } from "../middleware/requireAuth";
+import { optionalAuth, requireAuth } from "../middleware/requireAuth";
 
 // Express 5 forwards rejected promises from async handlers to the error handler.
 export function createRouter(): Router {
@@ -40,6 +41,10 @@ export function createRouter(): Router {
   router.post("/profile/discord-webhooks/test", requireAuth, profileController.testDiscordWebhook);
   router.put("/profile/dps-report-token", requireAuth, profileController.setDpsReportToken);
   router.put("/profile/skip-empty-logs", requireAuth, profileController.setSkipEmptyLogs);
+
+  // Feedback from the website, the desktop uploader and the Nexus addon, emailed to the developer.
+  // Guests too; a signed-in user's feedback is linked to their account.
+  router.post("/feedback", optionalAuth, feedbackController.send);
 
   router.get("/logs", requireAuth, logController.list);
   router.get("/logs/search", requireAuth, logController.search);

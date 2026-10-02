@@ -81,6 +81,15 @@ export type BackendSubmitResult =
   | { url: string; status: "skipped"; reason: string }
   | { url: string; status: "error"; code: string; message: string };
 
+/** POST /feedback: what it is about (backend FEEDBACK_CATEGORIES). */
+export type FeedbackCategory = "addon" | "uploader" | "website" | "other";
+
+export interface FeedbackInput {
+  category: FeedbackCategory;
+  title: string;
+  description: string;
+}
+
 export interface BackendErrorBody {
   error?: string;
   code?: string;

@@ -33,6 +33,8 @@ export const sessionNotResumable = () =>
   new HttpError(409, "SESSION_NOT_RESUMABLE", "Only a session that ended automatically after 6 hours can be resumed.");
 export const invalidLogFile = () =>
   new HttpError(400, "INVALID_LOG_FILE", "Send one ArcDPS log file (.zevtc, .evtc or .zip) in the \"file\" field.");
+export const feedbackTooSoon = () =>
+  new HttpError(429, "FEEDBACK_TOO_SOON", "You just sent feedback. Wait a minute before sending more.");
 export const fileTooLarge = () => new HttpError(413, "FILE_TOO_LARGE", "The log file is too large.");
 export const discordWebhookFailed = () =>
   new HttpError(502, "DISCORD_WEBHOOK_FAILED", "Discord did not accept the message. Check the webhook URL.");

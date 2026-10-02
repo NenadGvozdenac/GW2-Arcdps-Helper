@@ -21,6 +21,7 @@ import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
 import type { DiscordContent } from "../types/discord.types";
+import type { FeedbackCategory } from "../types/feedback.types";
 import type { SessionEndReason } from "../types/session.types";
 
 export const users = pgTable(
@@ -161,6 +162,28 @@ export const logs = pgTable(
     index("logs_session_idx").on(t.sessionId),
     uniqueIndex("logs_share_token_idx").on(t.shareToken),
   ],
+);
+
+/**
+ * Feedback sent from the website, the desktop uploader or the Nexus addon (also emailed to the developer). Linked to
+ * the user when they were signed in; a guest may leave an email to be answered at.
+ */
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    /** null = sent by a guest (or the account was deleted since). */
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    category: text().$type<FeedbackCategory>().notNull(),
+    title: text().notNull(),
+    description: text().notNull(),
+    /** Where to answer a guest (optional); signed-in users are answered at their account email. */
+    contactEmail: text("contact_email"),
+    /** SHA-256 of the sender's IP (never the IP itself): feedback is throttled per IP. */
+    ipHash: text("ip_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("feedback_user_idx").on(t.userId), index("feedback_ip_idx").on(t.ipHash, t.createdAt)],
 );
 
 /**

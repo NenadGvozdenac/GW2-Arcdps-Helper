@@ -108,6 +108,24 @@ export const sr: Messages = {
     language: "Jezik",
     account: "Prijavljen kao {name} ({email})",
   },
+  feedback: {
+    title: "Feedback",
+    description: "Našao si bag, nešto ti fali ili imaš ideju? Javi mi — stiže direktno developeru.",
+    category: "Kategorija",
+    categories: {
+      addon: "Nexus addon",
+      uploader: "Desktop aplikacija",
+      website: "Sajt",
+      other: "Ostalo",
+    },
+    titleLabel: "Naslov",
+    titlePlaceholder: "Kratak opis",
+    descriptionLabel: "Opis",
+    descriptionPlaceholder: "Šta se desilo, šta si očekivao, ili šta bi voleo da vidiš?",
+    send: "Pošalji feedback",
+    sending: "Šalje se…",
+    sent: "Poslato — hvala!",
+  },
   clears: {
     title: "Nedeljni clear",
     raids: "Raidovi",
@@ -137,6 +155,7 @@ export const sr: Messages = {
     SYNC_FAILED: "Uploadovano na dps.report, ali GW2 ArcDPS Helper ga nije sačuvao.",
     FILE_UNREADABLE: "Log fajl nije mogao da se pročita.",
     SESSION_NOT_FOUND: "Ova sesija više ne postoji (obrisana je na sajtu).",
+    FEEDBACK_TOO_SOON: "Upravo si poslao feedback. Sačekaj minut pre sledećeg.",
     UNKNOWN: "Nešto nije u redu.",
   },
 };

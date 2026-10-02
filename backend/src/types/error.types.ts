@@ -18,6 +18,7 @@ export type ErrorCode =
   | "DISCORD_WEBHOOK_FAILED"
   | "INVALID_LOG_FILE"
   | "FILE_TOO_LARGE"
+  | "FEEDBACK_TOO_SOON"
   | "ROUTE_NOT_FOUND"
   | "INTERNAL_ERROR";
 

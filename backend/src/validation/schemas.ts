@@ -1,11 +1,14 @@
 import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
+import { FEEDBACK_CATEGORIES } from "../types/feedback.types";
 import {
   DISCORD_DEFAULT_MIN_ACCOUNTS,
   DISCORD_MAX_FILTER_ACCOUNTS,
   DISCORD_MAX_WEBHOOKS,
   DISCORD_WEBHOOK_RE,
   DPS_REPORT_TOKEN_RE,
+  FEEDBACK_DESCRIPTION_MAX,
+  FEEDBACK_TITLE_MAX,
   LOGS_PAGE_SIZE,
   LOGS_PAGE_SIZE_MAX,
   MAX_URLS_PER_CALL,
@@ -119,6 +122,21 @@ export const dpsReportTokenSchema = z.object({
     .regex(DPS_REPORT_TOKEN_RE, "Not a dps.report user token (letters and digits only).")
     .or(z.literal(""))
     .nullable()
+    .transform((v) => v || null),
+});
+
+/** POST /feedback */
+export const feedbackSchema = z.object({
+  category: z.enum(FEEDBACK_CATEGORIES),
+  title: z.string().trim().min(1, "Title is required.").max(FEEDBACK_TITLE_MAX),
+  description: z.string().trim().min(1, "Description is required.").max(FEEDBACK_DESCRIPTION_MAX),
+  /** Guests may leave an email to be answered at; "" / null = none. Ignored for signed-in users. */
+  contactEmail: z
+    .email("Invalid email address.")
+    .trim()
+    .max(254)
+    .or(z.literal(""))
+    .nullish()
     .transform((v) => v || null),
 });
 

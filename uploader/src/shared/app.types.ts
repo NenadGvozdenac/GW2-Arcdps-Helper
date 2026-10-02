@@ -1,4 +1,4 @@
-import type { BackendSession, BackendUser, WeeklyClears } from "./backend.types";
+import type { BackendSession, BackendUser, FeedbackInput, WeeklyClears } from "./backend.types";
 import type { AppEnvironment } from "./environment.types";
 import type { Settings } from "./settings.types";
 import type { UpdateState } from "./update.types";
@@ -85,6 +85,9 @@ export interface UploaderApi {
   retryUpload(id: string): Promise<void>;
   clearFinished(): Promise<void>;
   openExternal(url: string): Promise<void>;
+
+  /** Sends feedback to the developer (by email, linked to the signed-in account). */
+  sendFeedback(feedback: FeedbackInput): Promise<IpcResult>;
 
   /** Quits and installs a downloaded update (update.status === "ready"). */
   installUpdate(): Promise<void>;

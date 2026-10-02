@@ -451,6 +451,9 @@ export default function LandingPage() {
             <Link to="/terms" className="hover:text-foreground">
               {t("landing.footer.terms")}
             </Link>
+            <Link to="/feedback" className="hover:text-foreground">
+              {t("landing.footer.feedback")}
+            </Link>
             <a
               href={SOURCE_URL}
               target="_blank"

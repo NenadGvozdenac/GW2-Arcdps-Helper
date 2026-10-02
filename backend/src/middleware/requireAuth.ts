@@ -16,3 +16,12 @@ export async function requireAuth(req: Request, res: Response<unknown, AuthLocal
   res.locals.userId = userId;
   next();
 }
+
+/** Like requireAuth, but lets guests through: res.locals.userId is set only for a valid sign-in. */
+export async function optionalAuth(req: Request, res: Response<unknown, Partial<AuthLocals>>, next: NextFunction) {
+  const header = req.headers.authorization ?? "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
+  const userId = token ? tokenService.verify(token) : null;
+  if (userId && (await userRepository.exists(userId))) res.locals.userId = userId;
+  next();
+}

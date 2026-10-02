@@ -111,6 +111,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/auth/reset-password` | – | `{ token, password }` | `{ token, user }` — also confirms the email |
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
+| POST | `/feedback` | optional | `{ category: "addon" \| "uploader" \| "website" \| "other", title (≤120), description (≤5000), contactEmail? (guests) }` | `204` — saved in `feedback` (linked to the user when signed in) and emailed to the developer (reply-to: the user / the guest's email); `429 FEEDBACK_TOO_SOON` within a minute of the last one from the same IP |
 | PUT | `/profile/skip-empty-logs` | ✓ | `{ enabled: boolean }` — skip empty logs from the ArcDPS bug (default on) | `{ user }` |
 | GET | `/profile/discord-webhooks` | ✓ | — | `{ webhooks: [{ url, content, enabled }] }` |
 | PUT | `/profile/discord-webhooks` | ✓ | `{ webhooks: [{ url, content: "all" \| "logs" \| "sessions", enabled }] }` (at most 2; with 2, one `logs` and one `sessions`; `[]` disconnects) | `{ webhooks }` |
@@ -161,6 +162,7 @@ Errors: `{ "error": "<English message>", "code": "<ERROR_CODE>" }`. Clients tran
 | `INVALID_LOG_FILE` | 400 | `/logs/upload` got no file or not a .zevtc/.evtc/.zip |
 | `FILE_TOO_LARGE` | 413 | Uploaded log file over the size limit |
 | `DISCORD_WEBHOOK_FAILED` | 502 | Discord rejected the test message (wrong or deleted webhook) |
+| `FEEDBACK_TOO_SOON` | 429 | Feedback sent again from the same IP within a minute |
 | `ROUTE_NOT_FOUND` | 404 | Unknown route |
 | `INTERNAL_ERROR` | 500 | Anything unexpected (logged on the server) |
 

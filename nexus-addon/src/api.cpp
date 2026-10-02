@@ -246,4 +246,12 @@ namespace Api
 		}
 		return true;
 	}
+
+	bool SendFeedback(const std::string& token, const std::string& category, const std::string& title,
+		const std::string& description, const std::string& contactEmail, Error& err)
+	{
+		json body = { { "category", category }, { "title", title }, { "description", description } }, out;
+		if (token.empty() && !contactEmail.empty()) body["contactEmail"] = contactEmail;
+		return Backend("POST", "/feedback", token, &body, out, err);
+	}
 }

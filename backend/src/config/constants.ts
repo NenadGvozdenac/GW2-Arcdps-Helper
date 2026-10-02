@@ -72,6 +72,12 @@ export const APP_LOGIN_SECRET_BYTES = 32;
 /** Characters of the code shown in the app and on the website - no 0/O, 1/I that are easy to mix up. */
 export const APP_LOGIN_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const SMTP_TIMEOUT_MS = 15_000;
+/** Where feedback from the website, the desktop uploader and the Nexus addon is emailed. */
+export const FEEDBACK_EMAIL = "nenadgvozdenacsrb@gmail.com";
+/** Feedback is accepted at most this often per IP. */
+export const FEEDBACK_COOLDOWN_MS = 60_000;
+export const FEEDBACK_TITLE_MAX = 120;
+export const FEEDBACK_DESCRIPTION_MAX = 5000;
 /** Name shown as the sender of our emails; the address is SMTP_USER. */
 export const EMAIL_SENDER_NAME = "GW2 ArcDPS Helper";
 export const BCRYPT_ROUNDS = 10;

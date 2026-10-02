@@ -31,6 +31,7 @@ const api: UploaderApi = {
   retryUpload: (id) => ipcRenderer.invoke(IPC.retryUpload, id),
   clearFinished: () => ipcRenderer.invoke(IPC.clearFinished),
   openExternal: (url) => ipcRenderer.invoke(IPC.openExternal, url),
+  sendFeedback: (feedback) => ipcRenderer.invoke(IPC.sendFeedback, feedback),
 
   installUpdate: () => ipcRenderer.invoke(IPC.installUpdate),
 };

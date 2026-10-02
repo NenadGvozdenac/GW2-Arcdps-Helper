@@ -22,6 +22,7 @@ import SessionsGuidePage from "./pages/SessionsGuidePage";
 import SharedSessionPage from "./pages/SharedSessionPage";
 import SharedLogPage from "./pages/SharedLogPage";
 import LegalPage from "./pages/LegalPage";
+import FeedbackPage from "./pages/FeedbackPage";
 import GuestGuideShell from "./components/GuestGuideShell";
 
 /** A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. */
@@ -70,6 +71,8 @@ export default function AppRouter() {
         <Route path="guide/discord" element={guide(<DiscordGuidePage />)} />
         <Route path="privacy" element={guide(<LegalPage key="privacy" kind="privacy" />)} />
         <Route path="terms" element={guide(<LegalPage key="terms" kind="terms" />)} />
+        {/* Anyone can send feedback; signed in, it is linked to the account. */}
+        <Route path="feedback" element={guide(<FeedbackPage />)} />
         <Route path="shared/sessions/:token" element={guide(<SharedSessionPage />)} />
         <Route path="shared/logs/:token" element={guide(<SharedLogPage />)} />
         <Route path="settings/discord" element={<Navigate to="/guide/discord" replace />} />
