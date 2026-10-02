@@ -1,8 +1,8 @@
 import type { MainMessages } from "./en";
 
 export const sr: MainMessages = {
-  appName: "GW2 ArcDPS Helper Uploader",
-  trayShow: "Otvori GW2 ArcDPS Helper Uploader",
+  appName: "GW2 ArcDPS Helper",
+  trayShow: "Otvori GW2 ArcDPS Helper",
   trayStartWatching: "Pokreni praćenje",
   trayStopWatching: "Zaustavi praćenje",
   trayQuit: "Izađi",

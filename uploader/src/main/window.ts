@@ -35,7 +35,7 @@ export function createMainWindow(): void {
     backgroundColor: "#0f1115",
     autoHideMenuBar: true,
     icon: iconPath(),
-    title: "GW2 ArcDPS Helper Uploader",
+    title: "GW2 ArcDPS Helper",
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
       contextIsolation: true,

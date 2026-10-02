@@ -1,5 +1,7 @@
 appId: com.gw2arcdpshelper.uploader
-productName: GW2 ArcDPS Helper Uploader
+productName: GW2 ArcDPS Helper
+# The exe keeps its old name: released Nexus addons find a running desktop uploader by it (desktopUploader.cpp).
+executableName: GW2 ArcDPS Helper Uploader
 directories:
   output: dist
   buildResources: resources

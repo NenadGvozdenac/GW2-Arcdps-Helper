@@ -1,8 +1,8 @@
 import type { MainMessages } from "./en";
 
 export const de: MainMessages = {
-  appName: "GW2 ArcDPS Helper Uploader",
-  trayShow: "GW2 ArcDPS Helper Uploader öffnen",
+  appName: "GW2 ArcDPS Helper",
+  trayShow: "GW2 ArcDPS Helper öffnen",
   trayStartWatching: "Überwachung starten",
   trayStopWatching: "Überwachung stoppen",
   trayQuit: "Beenden",

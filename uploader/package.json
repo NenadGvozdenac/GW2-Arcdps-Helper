@@ -1,6 +1,6 @@
 {
   "name": "gw2-arcdps-helper-uploader",
-  "productName": "GW2 ArcDPS Helper Uploader",
+  "productName": "GW2 ArcDPS Helper",
   "version": "0.1.0",
   "description": "Watches the ArcDPS log folder, uploads new logs to dps.report and saves them to GW2 ArcDPS Helper.",
   "private": true,

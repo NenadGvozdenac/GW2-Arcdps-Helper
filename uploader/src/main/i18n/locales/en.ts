@@ -1,8 +1,8 @@
 // The few strings shown by the main process (tray menu, notifications, dialogs); source of truth for the keys.
 // Everything inside the window is translated in the renderer (src/renderer/src/i18n).
 export const en = {
-  appName: "GW2 ArcDPS Helper Uploader",
-  trayShow: "Open GW2 ArcDPS Helper Uploader",
+  appName: "GW2 ArcDPS Helper",
+  trayShow: "Open GW2 ArcDPS Helper",
   trayStartWatching: "Start watching",
   trayStopWatching: "Stop watching",
   trayQuit: "Quit",

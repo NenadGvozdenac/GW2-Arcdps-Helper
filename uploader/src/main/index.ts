@@ -18,6 +18,9 @@ if (process.env.GW2_UPLOADER_USER_DATA) {
   app.setPath("userData", process.env.GW2_UPLOADER_USER_DATA);
 } else if (environment.name === "development") {
   app.setPath("userData", join(app.getPath("appData"), "gw2-arcdps-helper-uploader-dev"));
+} else {
+  // The folder of the app's old name ("GW2 ArcDPS Helper Uploader"), so settings, sign-in and history survive the rename.
+  app.setPath("userData", join(app.getPath("appData"), "GW2 ArcDPS Helper Uploader"));
 }
 
 // Only one uploader may watch the folder at a time.
@@ -27,7 +30,10 @@ if (!app.requestSingleInstanceLock()) {
   app.on("second-instance", showMainWindow);
 
   app.whenReady().then(() => {
-    app.setAppUserModelId("com.gw2arcdpshelper.uploader"); // required for Windows notifications
+    // Required for Windows notifications. Windows also picks the taskbar icon by this id, and an unpackaged run
+    // (`npm run dev`, electron.exe) registers a Start Menu "Electron.lnk" for it - so it must not share the installed
+    // app's id, or the installed app gets the Electron icon in the taskbar.
+    app.setAppUserModelId(app.isPackaged ? "com.gw2arcdpshelper.uploader" : "com.gw2arcdpshelper.uploader.dev");
     stateStore.init();
     // A session that is still running on the server (e.g. the app was restarted mid-raid) continues here.
     authService.onSignIn(() => {
