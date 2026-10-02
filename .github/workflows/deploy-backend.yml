@@ -65,13 +65,6 @@ jobs:
         env:
           NODE_ENV: production
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
-      # TEMPORARY one-off: deletes empty logs (ArcDPS bug) already saved. Remove this step together with
-      # src/db/deleteEmptyLogs.ts once it ran in production.
-      - name: Delete existing empty logs
-        run: node dist/db/deleteEmptyLogs.js
-        env:
-          NODE_ENV: production
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
 
   deploy:
     name: Deploy to Vercel (production)
