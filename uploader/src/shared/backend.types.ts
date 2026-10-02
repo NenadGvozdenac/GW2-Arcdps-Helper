@@ -77,6 +77,8 @@ export interface BackendLog {
 
 export type BackendSubmitResult =
   | { url: string; status: "ok" | "duplicate"; logId: string; log: BackendLog; group: BackendGroup | null }
+  /** Not saved on purpose (an empty log from the ArcDPS bug, and the user skips those). */
+  | { url: string; status: "skipped"; reason: string }
   | { url: string; status: "error"; code: string; message: string };
 
 export interface BackendErrorBody {

@@ -54,7 +54,8 @@ export const logController = {
     const { urls, sessionId } = validate(submitLogsSchema, req.body);
     // Also checks that the session belongs to this user. A log that arrives after its session ended still joins it.
     const session = sessionId ? await sessionService.get(res.locals.userId, sessionId) : null;
-    const results = await importLogs(res.locals.userId, urls, session?.id ?? null);
+    const { skipEmptyLogs } = await userService.get(res.locals.userId);
+    const results = await importLogs(res.locals.userId, urls, session?.id ?? null, skipEmptyLogs);
     await notifyDiscord(res.locals.userId, results, !!session && !session.endedAt);
     const body: SubmitLogsResponse = { results };
     res.json(body);
@@ -64,8 +65,8 @@ export const logController = {
   async upload(req: Request, res: Response<unknown, AuthLocals>) {
     if (!req.file) throw invalidLogFile();
     const fileName = req.file.originalname;
-    const { dpsReportToken } = await userService.get(res.locals.userId);
-    const result = await importLogFile(res.locals.userId, req.file.buffer, fileName, dpsReportToken);
+    const { dpsReportToken, skipEmptyLogs } = await userService.get(res.locals.userId);
+    const result = await importLogFile(res.locals.userId, req.file.buffer, fileName, dpsReportToken, skipEmptyLogs);
     await notifyDiscord(res.locals.userId, [result]);
     const body: UploadLogFileResponse = { fileName, result };
     res.json(body);

@@ -122,6 +122,9 @@ export const dpsReportTokenSchema = z.object({
     .transform((v) => v || null),
 });
 
+/** PUT /profile/skip-empty-logs */
+export const skipEmptyLogsSchema = z.object({ enabled: z.boolean() });
+
 export const submitLogsSchema = z.object({
   urls: z
     .array(z.string().trim().min(1))

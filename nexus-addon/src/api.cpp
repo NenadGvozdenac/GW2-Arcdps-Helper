@@ -183,6 +183,11 @@ namespace Api
 			err = { "SYNC_FAILED", message.empty() ? "GW2 ArcDPS Helper did not accept the log." : message, 0 };
 			return false;
 		}
+		if (status == "skipped")
+		{
+			result.skipped = true;
+			return true;
+		}
 		const json log = r.value("log", json::object());
 		result.boss = Str(log, "bossName");
 		result.category = Str(log, "category");

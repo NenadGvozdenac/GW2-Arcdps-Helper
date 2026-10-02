@@ -35,6 +35,11 @@ export const users = pgTable(
      * dps.report account. null = anonymous uploads.
      */
     dpsReportToken: text("dps_report_token"),
+    /**
+     * Skip "empty" logs (a wipe with the boss at 100% and 0 DPS from everyone) that an ArcDPS bug sometimes writes:
+     * they are not saved, posted to Discord or shown as uploaded in the uploader / addon.
+     */
+    skipEmptyLogs: boolean("skip_empty_logs").notNull().default(true),
     /** Set when the user clicks the link in the confirmation email; signing in is refused while null. */
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     /** Last confirmation email sent, to throttle "resend" requests. */

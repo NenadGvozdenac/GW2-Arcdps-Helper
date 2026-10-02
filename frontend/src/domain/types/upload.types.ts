@@ -3,6 +3,8 @@ export type SubmitErrorCode = "INVALID_LINK" | "FETCH_FAILED" | "DPS_REPORT_UPLO
 export type SubmitResult =
   | { url: string; status: "ok"; logId: string; bossName: string; success: boolean }
   | { url: string; status: "duplicate"; logId: string }
+  /** Not saved on purpose: an empty log (ArcDPS bug) and the user skips those. */
+  | { url: string; status: "skipped"; reason: "EMPTY_LOG" }
   | { url: string; status: "error"; code: SubmitErrorCode; message: string };
 
 export interface SubmitLogsResponse {
@@ -22,7 +24,7 @@ export interface FileUpload {
   id: string;
   file: File;
   stage: FileUploadStage;
-  /** Import result once the file reached our backend ("ok", "duplicate" or "error"). */
+  /** Import result once the file reached our backend ("ok", "duplicate", "skipped" or "error"). */
   result?: SubmitResult;
   /** Set when stage is "failed". */
   error?: unknown;
@@ -31,5 +33,6 @@ export interface FileUpload {
 export interface UploadSummary {
   added: number;
   duplicates: number;
+  skipped: number;
   failed: number;
 }

@@ -84,7 +84,10 @@ Express 5 forwards errors thrown in async handlers to `errorHandler`, which turn
 4. `logParser` builds a summary (boss, success, CM/LCM, duration, boss HP left, players with DPS/downs/deaths);
    old logs without EI JSON fall back to the metadata.
 5. `encounterClassifier` maps it to an encounter + group (trigger ID first, boss-name aliases as fallback).
-6. `logRepository.create` stores it (`UNIQUE (owner_id, permalink)` makes concurrent submits safe).
+6. If the user has `skipEmptyLogs` on (the default) and the log is empty — a wipe with the boss at 100% and 0 DPS from
+   everyone, which an ArcDPS bug sometimes writes — it is not stored → `skipped` (no Discord post; the desktop uploader
+   and the Nexus addon drop it from their upload list).
+7. `logRepository.create` stores it (`UNIQUE (owner_id, permalink)` makes concurrent submits safe).
 
 Links are processed 4 at a time; at most 10 per request so a request fits a Vercel function's time limit.
 
@@ -108,6 +111,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | POST | `/auth/reset-password` | – | `{ token, password }` | `{ token, user }` — also confirms the email |
 | GET | `/auth/me` | ✓ | – | `{ user }` |
 | PATCH | `/profile` | ✓ | `{ gw2Account }` | `{ user }` |
+| PUT | `/profile/skip-empty-logs` | ✓ | `{ enabled: boolean }` — skip empty logs from the ArcDPS bug (default on) | `{ user }` |
 | GET | `/profile/discord-webhooks` | ✓ | — | `{ webhooks: [{ url, content, enabled }] }` |
 | PUT | `/profile/discord-webhooks` | ✓ | `{ webhooks: [{ url, content: "all" \| "logs" \| "sessions", enabled }] }` (at most 2; with 2, one `logs` and one `sessions`; `[]` disconnects) | `{ webhooks }` |
 | GET | `/sessions` | ✓ | – | `{ sessions }` (newest first; `endedAt` null = active). A session not ended within 6 h is ended automatically (`endReason: "expired"`) |
@@ -140,6 +144,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 ```jsonc
 { "url": "...", "status": "ok" | "duplicate", "logId": "uuid", "bossName": "Cardinal Adina", "success": true,
   "log": { /* full Log */ }, "group": { "id": "w7", "short": "W7", "name": "The Key of Ahdashim", "category": "raid" } }
+{ "url": "...", "status": "skipped", "reason": "EMPTY_LOG" }
 { "url": "...", "status": "error", "code": "INVALID_LINK" | "FETCH_FAILED", "message": "..." }
 ```
 

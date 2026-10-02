@@ -13,9 +13,14 @@ export interface ImportedLog {
   group: EncounterGroup | null;
 }
 
+/** Why a log was deliberately not imported. */
+export type SubmitSkipReason = "EMPTY_LOG";
+
 export type SubmitResult =
   | ({ url: string; status: "ok" } & ImportedLog)
   | ({ url: string; status: "duplicate" } & ImportedLog)
+  /** Not saved on purpose (e.g. an empty log the user chose to skip); the uploader and addon drop it from their list. */
+  | { url: string; status: "skipped"; reason: SubmitSkipReason }
   | { url: string; status: "error"; code: SubmitErrorCode; message: string };
 
 export interface SubmitLogsResponse {

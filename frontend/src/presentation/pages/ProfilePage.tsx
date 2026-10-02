@@ -20,6 +20,7 @@ import { Label } from "@/presentation/components/ui/label";
 import DeleteAccountCard from "../components/DeleteAccountCard";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import DpsReportTokenCard from "../components/DpsReportTokenCard";
+import EmptyLogsCard from "../components/EmptyLogsCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import PageHeader from "../components/PageHeader";
 import { describeError } from "../utils/describeError";
@@ -147,6 +148,7 @@ export default function ProfilePage() {
           </CardFooter>
         </Card>
         <DpsReportTokenCard />
+        <EmptyLogsCard />
       </div>
       <DiscordWebhookCard initialWebhooks={c.webhooks.list} loadError={c.webhooks.error} />
       <DeleteAccountCard />

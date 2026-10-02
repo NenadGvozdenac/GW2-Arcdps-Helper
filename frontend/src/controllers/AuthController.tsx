@@ -18,6 +18,8 @@ interface AuthContextValue {
   updateProfile: (data: ProfileUpdate) => Promise<void>;
   /** Saves the dps.report user token, or removes it when `token` is empty. */
   setDpsReportToken: (token: string) => Promise<void>;
+  /** Whether empty logs (the ArcDPS bug) are skipped on import. */
+  setSkipEmptyLogs: (enabled: boolean) => Promise<void>;
   /** Permanently deletes the account (confirmed with the password), signs out and reloads on the landing page. */
   deleteAccount: (password: string) => Promise<void>;
 }
@@ -66,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await profileService.setDpsReportToken(token));
   }, []);
 
+  const setSkipEmptyLogs = useCallback(async (enabled: boolean) => {
+    setUser(await profileService.setSkipEmptyLogs(enabled));
+  }, []);
+
   const deleteAccount = useCallback(async (password: string) => {
     await profileService.deleteAccount(password);
     authService.logout();
@@ -85,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       updateProfile,
       setDpsReportToken,
+      setSkipEmptyLogs,
       deleteAccount,
     }),
     [
@@ -97,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       updateProfile,
       setDpsReportToken,
+      setSkipEmptyLogs,
       deleteAccount,
     ],
   );

@@ -330,6 +330,8 @@ export const en = {
     duplicates: "{count} already added",
     failed: "{count} failed",
     alreadyAdded: "(already added)",
+    skipped: "{count} skipped",
+    skippedEmpty: "skipped — empty log (ArcDPS bug)",
   },
   allLogs: {
     title: "All logs",
@@ -614,6 +616,14 @@ export const en = {
     remove: "Remove",
     saved: "Saved",
     removed: "Removed",
+  },
+  emptyLogs: {
+    title: "Empty logs",
+    description: "Wipes where the boss is still at 100% and every player did 0 DPS.",
+    label: "Skip empty logs",
+    hint: "Skipped logs are not saved, not posted to Discord and not shown as uploaded in the desktop uploader or the Nexus addon.",
+    why: "Why? ArcDPS has a bug that sometimes writes a log even though the fight never really started. These logs get uploaded by mistake and only clutter your log list and Discord.",
+    saved: "Saved",
   },
   discord: {
     title: "Discord notifications",

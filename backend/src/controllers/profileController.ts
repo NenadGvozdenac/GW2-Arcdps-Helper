@@ -7,6 +7,7 @@ import {
   discordWebhookTestSchema,
   dpsReportTokenSchema,
   profileUpdateSchema,
+  skipEmptyLogsSchema,
 } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
@@ -29,6 +30,12 @@ export const profileController = {
   async setDpsReportToken(req: Request, res: Response<unknown, AuthLocals>) {
     const { token } = validate(dpsReportTokenSchema, req.body);
     res.json({ user: await userService.setDpsReportToken(res.locals.userId, token) });
+  },
+
+  /** PUT /profile/skip-empty-logs `{ enabled }` — whether empty logs from the ArcDPS bug are skipped on import. */
+  async setSkipEmptyLogs(req: Request, res: Response<unknown, AuthLocals>) {
+    const { enabled } = validate(skipEmptyLogsSchema, req.body);
+    res.json({ user: await userService.setSkipEmptyLogs(res.locals.userId, enabled) });
   },
 
   /** DELETE /profile `{ password }` — deletes the account and everything in it. */

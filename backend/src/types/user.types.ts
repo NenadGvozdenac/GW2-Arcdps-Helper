@@ -23,6 +23,7 @@ export type UserPatch = Partial<
     UserRow,
     | "gw2Account"
     | "dpsReportToken"
+    | "skipEmptyLogs"
     | "passwordHash"
     | "emailVerifiedAt"
     | "verificationEmailSentAt"

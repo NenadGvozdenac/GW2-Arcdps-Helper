@@ -48,6 +48,7 @@ export const logService = {
     return {
       added: results.filter((r) => r.status === "ok").length,
       duplicates: results.filter((r) => r.status === "duplicate").length,
+      skipped: results.filter((r) => r.status === "skipped").length,
       failed: results.filter((r) => r.status === "error").length,
     };
   },

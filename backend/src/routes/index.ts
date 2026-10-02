@@ -39,6 +39,7 @@ export function createRouter(): Router {
   router.put("/profile/discord-webhooks", requireAuth, profileController.setDiscordWebhooks);
   router.post("/profile/discord-webhooks/test", requireAuth, profileController.testDiscordWebhook);
   router.put("/profile/dps-report-token", requireAuth, profileController.setDpsReportToken);
+  router.put("/profile/skip-empty-logs", requireAuth, profileController.setSkipEmptyLogs);
 
   router.get("/logs", requireAuth, logController.list);
   router.get("/logs/search", requireAuth, logController.search);

@@ -121,6 +121,13 @@ namespace
 		}
 	}
 
+	void Remove(uint64_t id)
+	{
+		std::lock_guard lock(g_mutex);
+		g_uploads.erase(std::remove_if(g_uploads.begin(), g_uploads.end(), [&](const Upload& u) { return u.id == id; }), g_uploads.end());
+		SaveLocked();
+	}
+
 	void Fail(uint64_t id, const std::string& error)
 	{
 		Modify(id, [&](Upload& u) { u.stage = Stage::Failed; u.error = error; });
@@ -197,7 +204,11 @@ namespace
 		}
 	}
 
-	/** Sends the permalink to GW2 ArcDPS Helper, which fetches the full log and stores it for the web app. */
+	/**
+	 * Sends the permalink to GW2 ArcDPS Helper, which fetches the full log and stores it for the web app.
+	 * Returns false when it failed, or when the backend skipped the log (an empty log from the ArcDPS bug) — that
+	 * entry is removed from the list, so no "uploaded" alert is shown for it.
+	 */
 	bool SyncToWeb(uint64_t id, const std::string& permalink, const std::string& sessionId)
 	{
 		Settings s = Config::Get();
@@ -221,6 +232,12 @@ namespace
 			{
 				Fail(id, err.message);
 			}
+			return false;
+		}
+		if (result.skipped)
+		{
+			LogInfo("Skipped empty log: " + permalink);
+			Remove(id);
 			return false;
 		}
 		Modify(id, [&](Upload& u) {

@@ -5,7 +5,7 @@ import type { Log, LogSummary } from "../types/log.types";
 import type { ImportedLog, SubmitResult } from "../types/submit.types";
 import { parsePermalink } from "../utils/permalink";
 import { fetchEliteInsightsJson, fetchUploadMetadata, logUrl, uploadLogFile } from "./clients/dpsReportClient";
-import { parseFromEliteInsights, parseFromMetadata } from "./misc/logParser";
+import { isEmptyLog, parseFromEliteInsights, parseFromMetadata } from "./misc/logParser";
 
 export async function fetchLogSummary(permalink: string): Promise<LogSummary> {
   const url = logUrl(permalink);
@@ -23,7 +23,13 @@ function toImported(log: Log): ImportedLog {
   };
 }
 
-export async function importLog(ownerId: string, url: string, sessionId: string | null = null): Promise<SubmitResult> {
+/** With `skipEmptyLogs` (the user's setting) an empty log (see isEmptyLog) is reported as skipped and not stored. */
+export async function importLog(
+  ownerId: string,
+  url: string,
+  sessionId: string | null = null,
+  skipEmptyLogs = false,
+): Promise<SubmitResult> {
   const permalink = parsePermalink(url);
   if (!permalink) return { url, status: "error", code: "INVALID_LINK", message: "Not a valid dps.report link." };
 
@@ -39,6 +45,7 @@ export async function importLog(ownerId: string, url: string, sessionId: string 
 
   try {
     const summary = await fetchLogSummary(permalink);
+    if (skipEmptyLogs && isEmptyLog(summary)) return { url, status: "skipped", reason: "EMPTY_LOG" };
     const id = await logRepository.create(ownerId, summary, sessionId);
     // A null id means the same link was stored concurrently — report it as a duplicate.
     const stored = await logRepository.findByPermalink(ownerId, permalink);
@@ -56,6 +63,7 @@ export async function importLogFile(
   content: Buffer,
   fileName: string,
   dpsReportToken: string | null = null,
+  skipEmptyLogs = false,
 ): Promise<SubmitResult> {
   let url: string;
   try {
@@ -65,15 +73,20 @@ export async function importLogFile(
     const message = err instanceof Error ? err.message : String(err);
     return { url: fileName, status: "error", code: "DPS_REPORT_UPLOAD_FAILED", message };
   }
-  return importLog(ownerId, url);
+  return importLog(ownerId, url, null, skipEmptyLogs);
 }
 
 /** Imports links in small parallel batches to stay polite towards dps.report. */
-export async function importLogs(ownerId: string, urls: string[], sessionId: string | null = null): Promise<SubmitResult[]> {
+export async function importLogs(
+  ownerId: string,
+  urls: string[],
+  sessionId: string | null = null,
+  skipEmptyLogs = false,
+): Promise<SubmitResult[]> {
   const results: SubmitResult[] = [];
   for (let i = 0; i < urls.length; i += PARALLEL_FETCHES) {
     const chunk = urls.slice(i, i + PARALLEL_FETCHES);
-    results.push(...(await Promise.all(chunk.map((url) => importLog(ownerId, url, sessionId)))));
+    results.push(...(await Promise.all(chunk.map((url) => importLog(ownerId, url, sessionId, skipEmptyLogs)))));
   }
   return results;
 }

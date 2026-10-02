@@ -7,6 +7,7 @@ import {
   ClockIcon,
   FileIcon,
   Loader2Icon,
+  MinusCircleIcon,
   UploadCloudIcon,
   XCircleIcon,
 } from "lucide-react";
@@ -253,6 +254,13 @@ function FileStatus({ item }: { item: FileUpload }) {
         )}
         <span className="truncate text-foreground">{r.bossName}</span>
       </Link>
+    );
+  if (r?.status === "skipped")
+    return (
+      <span className="inline-flex min-w-0 items-center gap-1">
+        <MinusCircleIcon className="size-3 shrink-0" />
+        <span className="truncate">{t("upload.skippedEmpty")}</span>
+      </span>
     );
   if (r?.status === "duplicate")
     return (

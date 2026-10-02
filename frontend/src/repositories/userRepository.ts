@@ -26,4 +26,8 @@ export const userRepository = {
   async setDpsReportToken(token: string | null): Promise<User> {
     return (await http.put<{ user: User }>("/profile/dps-report-token", { token })).user;
   },
+
+  async setSkipEmptyLogs(enabled: boolean): Promise<User> {
+    return (await http.put<{ user: User }>("/profile/skip-empty-logs", { enabled })).user;
+  },
 };

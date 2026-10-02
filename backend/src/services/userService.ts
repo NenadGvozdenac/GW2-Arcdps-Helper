@@ -47,4 +47,11 @@ export const userService = {
     if (!user) throw userNotFound();
     return user;
   },
+
+  /** Whether empty logs (the ArcDPS bug) are skipped instead of imported. */
+  async setSkipEmptyLogs(id: string, enabled: boolean): Promise<User> {
+    const user = await userRepository.update(id, { skipEmptyLogs: enabled });
+    if (!user) throw userNotFound();
+    return user;
+  },
 };

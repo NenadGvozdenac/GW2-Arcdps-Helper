@@ -113,6 +113,13 @@
       "when": 1790770330043,
       "tag": "0015_discord_webhook_session_filter",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1790931020757,
+      "tag": "0016_skip_empty_logs",
+      "breakpoints": true
     }
   ]
 }

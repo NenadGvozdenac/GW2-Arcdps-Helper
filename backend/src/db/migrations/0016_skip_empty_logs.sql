@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "skip_empty_logs" boolean DEFAULT true NOT NULL;

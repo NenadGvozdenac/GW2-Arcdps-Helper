@@ -54,6 +54,8 @@ export const profileService = {
     return userRepository.setDpsReportToken(trimmed || null);
   },
 
+  setSkipEmptyLogs: (enabled: boolean): Promise<User> => userRepository.setSkipEmptyLogs(enabled),
+
   deleteAccount: (password: string): Promise<void> => userRepository.deleteAccount(password),
 
   isOwnAccount: (user: User | null, account: string) =>

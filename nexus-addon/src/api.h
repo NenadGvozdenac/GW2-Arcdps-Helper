@@ -48,6 +48,7 @@ namespace Api
 		std::optional<bool> success;
 		bool isCM = false;
 		bool duplicate = false;
+		bool skipped = false; // not saved on purpose: an empty log from the ArcDPS bug, and the user skips those
 	};
 
 	struct ClearBoss

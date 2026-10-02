@@ -336,6 +336,8 @@ export const de: Messages = {
     duplicates: "{count} schon vorhanden",
     failed: "{count} fehlgeschlagen",
     alreadyAdded: "(schon vorhanden)",
+    skipped: "{count} übersprungen",
+    skippedEmpty: "übersprungen — leeres Log (ArcDPS-Bug)",
   },
   allLogs: {
     title: "Alle Logs",
@@ -623,6 +625,14 @@ export const de: Messages = {
     remove: "Entfernen",
     saved: "Gespeichert",
     removed: "Entfernt",
+  },
+  emptyLogs: {
+    title: "Leere Logs",
+    description: "Wipes, bei denen der Boss noch auf 100 % ist und alle Spieler 0 DPS gemacht haben.",
+    label: "Leere Logs überspringen",
+    hint: "Übersprungene Logs werden nicht gespeichert, nicht auf Discord gepostet und im Desktop-Uploader und im Nexus-Addon nicht als hochgeladen angezeigt.",
+    why: "Warum? ArcDPS hat einen Bug, durch den manchmal ein Log entsteht, obwohl der Kampf nie wirklich begonnen hat. Diese Logs werden versehentlich hochgeladen und füllen nur deine Log-Liste und Discord.",
+    saved: "Gespeichert",
   },
   discord: {
     title: "Discord-Benachrichtigungen",

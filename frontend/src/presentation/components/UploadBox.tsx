@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { AlertCircleIcon, CheckCircle2Icon, CircleDotIcon, Loader2Icon, XCircleIcon } from "lucide-react";
+import { AlertCircleIcon, CheckCircle2Icon, CircleDotIcon, Loader2Icon, MinusCircleIcon, XCircleIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { logService } from "../../services/logService";
@@ -87,6 +87,7 @@ export default function UploadBox() {
                   {t("upload.added", { count: summary.added })}
                 </Badge>
                 {summary.duplicates > 0 && <Badge variant="secondary">{t("upload.duplicates", { count: summary.duplicates })}</Badge>}
+                {summary.skipped > 0 && <Badge variant="secondary">{t("upload.skipped", { count: summary.skipped })}</Badge>}
                 {summary.failed > 0 && (
                   <Badge variant="outline" className={failBadge}>
                     {t("upload.failed", { count: summary.failed })}
@@ -142,6 +143,15 @@ function ResultLine({ result: r }: { result: SubmitResult }) {
             {r.url}
           </Link>
           <span className="text-muted-foreground">{t("upload.alreadyAdded")}</span>
+        </>
+      );
+    case "skipped":
+      return (
+        <>
+          <MinusCircleIcon className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+          <span>
+            {r.url} <span className="text-muted-foreground">— {t("upload.skippedEmpty")}</span>
+          </span>
         </>
       );
     case "error":

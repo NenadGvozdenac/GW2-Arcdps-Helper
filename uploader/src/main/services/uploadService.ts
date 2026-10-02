@@ -68,8 +68,11 @@ async function uploadToDpsReport(entry: UploadEntry): Promise<void> {
   }
 }
 
-/** Sends the permalink to GW2 ArcDPS Helper, which fetches the full log and stores it for the web app. */
-async function syncToWeb(id: string): Promise<void> {
+/**
+ * Sends the permalink to GW2 ArcDPS Helper, which fetches the full log and stores it for the web app.
+ * Returns false when the backend skipped the log (an empty log from the ArcDPS bug): it was removed from the list.
+ */
+async function syncToWeb(id: string): Promise<boolean> {
   const entry = stateStore.updateUpload(id, { stage: "syncing", errorCode: null, errorDetail: null })!;
   const credentials = authService.getCredentials();
   if (!credentials) throw new AppError("NOT_SIGNED_IN", "Sign in to save logs to GW2 ArcDPS Helper.");
@@ -85,6 +88,11 @@ async function syncToWeb(id: string): Promise<void> {
     if (!result || result.status === "error") {
       throw new AppError("SYNC_FAILED", result?.message ?? "GW2 ArcDPS Helper did not accept the log.");
     }
+    if (result.status === "skipped") {
+      logger.info("Skipped empty log", { file: entry.fileName, permalink: entry.permalink });
+      stateStore.removeUploads((u) => u.id === id);
+      return false;
+    }
     stateStore.updateUpload(id, {
       stage: "done",
       webLogId: result.logId,
@@ -99,6 +107,7 @@ async function syncToWeb(id: string): Promise<void> {
     if (result.log.success && (result.log.category === "raid" || result.log.category === "strike")) {
       void clearsService.refresh();
     }
+    return true;
   } catch (err) {
     if (err instanceof AppError && err.status === 401) {
       authService.handleUnauthorized();
@@ -138,7 +147,8 @@ async function runPipeline(id: string, waitForFile: boolean): Promise<void> {
   }
 
   try {
-    await syncToWeb(id);
+    // A skipped log is gone from the list: no notification for it.
+    if (!(await syncToWeb(id))) return;
   } catch (err) {
     fail(id, err, "SYNC_FAILED");
   }
