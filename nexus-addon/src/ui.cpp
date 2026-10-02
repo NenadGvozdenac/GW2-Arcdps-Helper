@@ -1,7 +1,6 @@
 #include "ui.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstring>
 #include <string>
 #include <utility>
@@ -36,16 +35,6 @@ namespace
 	char g_password[256] = "";
 	char g_logFolder[520] = "";
 	bool g_optionsInit = false;
-
-	// Feedback form (options window); limits match the backend.
-	const char* const FEEDBACK_CATEGORIES[] = { "addon", "uploader", "website", "other" };
-	const char* const FEEDBACK_CATEGORY_LABELS[] = { "Nexus addon", "Desktop app", "Website", "Other" };
-	int g_feedbackCategory = 0; // the addon: sent from here, so the likeliest topic
-	char g_feedbackTitle[121] = "";
-	char g_feedbackDescription[5001] = "";
-	char g_feedbackEmail[255] = "";
-	uint32_t g_feedbackSeen = 0; // AccountState::feedbackSent last handled
-	int64_t g_feedbackSentAt = 0; // when the last one went out, for the "Sent" note
 
 	void BeginDisabled(bool disabled)
 	{
@@ -399,57 +388,6 @@ namespace
 		ImGui::End();
 	}
 
-	bool IsBlank(const char* text)
-	{
-		for (; *text; ++text) if (!isspace((unsigned char)*text)) return false;
-		return true;
-	}
-
-	/** Options: feedback to the developer (category, title, description; an email for guests). */
-	void RenderFeedback(const AccountState& acc)
-	{
-		if (acc.feedbackSent != g_feedbackSeen)
-		{
-			g_feedbackSeen = acc.feedbackSent;
-			g_feedbackTitle[0] = g_feedbackDescription[0] = '\0';
-			g_feedbackSentAt = Util::NowMs();
-		}
-
-		ImGui::TextUnformatted("Feedback");
-		TextWrappedColored(GREY, "Found a bug, missing something or have an idea? It goes straight to the developer.");
-
-		ImGui::SetNextItemWidth(200);
-		ImGui::Combo("Category", &g_feedbackCategory, FEEDBACK_CATEGORY_LABELS, IM_ARRAYSIZE(FEEDBACK_CATEGORY_LABELS));
-		ImGui::SetNextItemWidth(420);
-		ImGui::InputText("Title", g_feedbackTitle, sizeof(g_feedbackTitle));
-		ImGui::InputTextMultiline("Description", g_feedbackDescription, sizeof(g_feedbackDescription), ImVec2(420, 120));
-		if (!acc.signedIn)
-		{
-			ImGui::SetNextItemWidth(260);
-			ImGui::InputText("Your email (optional)", g_feedbackEmail, sizeof(g_feedbackEmail));
-			TextWrappedColored(GREY, "Only so the developer can answer you. Leave it empty to stay anonymous.");
-		}
-
-		bool ready = !IsBlank(g_feedbackTitle) && !IsBlank(g_feedbackDescription);
-		BeginDisabled(acc.feedbackSending || !ready);
-		if (ImGui::Button(acc.feedbackSending ? "Sending..." : "Send feedback") && !acc.feedbackSending && ready)
-		{
-			Account::SendFeedback(FEEDBACK_CATEGORIES[g_feedbackCategory], g_feedbackTitle, g_feedbackDescription,
-				acc.signedIn ? "" : g_feedbackEmail);
-		}
-		EndDisabled();
-		if (!acc.feedbackError.empty())
-		{
-			ImGui::SameLine();
-			ImGui::TextColored(RED, "%s", acc.feedbackError.c_str());
-		}
-		else if (g_feedbackSentAt && Util::NowMs() - g_feedbackSentAt < 5000)
-		{
-			ImGui::SameLine();
-			ImGui::TextColored(GREEN, "Sent - thanks!");
-		}
-	}
-
 	void RenderUploads()
 	{
 		std::vector<Upload> uploads = Uploads::Snapshot();
@@ -676,6 +614,8 @@ namespace UI
 		if (!Util::DirectoryExists(g_logFolder)) ImGui::TextColored(RED, "This folder does not exist.");
 
 		ImGui::Separator();
-		RenderFeedback(acc);
+		ImGui::TextUnformatted("Feedback");
+		TextWrappedColored(GREY, "Found a bug, missing something or have an idea? Tell the developer on the website.");
+		if (ImGui::Button("Send feedback")) Util::OpenUrl(std::string(WEB_URL) + "/feedback?category=addon");
 	}
 }

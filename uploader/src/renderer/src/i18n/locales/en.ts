@@ -110,21 +110,8 @@ export const en = {
   },
   feedback: {
     title: "Feedback",
-    description: "Found a bug, missing something or have an idea? Tell me — it goes straight to the developer.",
-    category: "Category",
-    categories: {
-      addon: "Nexus addon",
-      uploader: "Desktop app",
-      website: "Website",
-      other: "Other",
-    },
-    titleLabel: "Title",
-    titlePlaceholder: "Short summary",
-    descriptionLabel: "Description",
-    descriptionPlaceholder: "What happened, what did you expect, or what would you like to see?",
-    send: "Send feedback",
-    sending: "Sending…",
-    sent: "Sent — thanks!",
+    description: "Found a bug, missing something or have an idea? Tell me on the website.",
+    open: "Send feedback",
   },
   clears: {
     title: "Weekly clear",
@@ -155,7 +142,6 @@ export const en = {
     SYNC_FAILED: "Uploaded to dps.report, but GW2 ArcDPS Helper did not save it.",
     FILE_UNREADABLE: "The log file could not be read.",
     SESSION_NOT_FOUND: "This session no longer exists (it was deleted on the website).",
-    FEEDBACK_TOO_SOON: "You just sent feedback. Wait a minute before sending more.",
     UNKNOWN: "Something went wrong.",
   },
 };

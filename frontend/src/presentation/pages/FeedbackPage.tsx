@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon } from "lucide-react";
 import { FEEDBACK_DESCRIPTION_MAX, FEEDBACK_TITLE_MAX } from "../../config/constants";
 import { useAuth } from "../../controllers/AuthController";
@@ -17,8 +18,12 @@ import { describeError } from "../utils/describeError";
 
 function useFeedbackController() {
   const { user } = useAuth();
-  // Sent from the website, so that is the likeliest topic.
-  const [category, setCategory] = useState<FeedbackCategory>("website");
+  // The desktop app and the addon link here with ?category=uploader / addon; otherwise it's about the website.
+  const [params] = useSearchParams();
+  const [category, setCategory] = useState<FeedbackCategory>(() => {
+    const requested = params.get("category") as FeedbackCategory | null;
+    return requested && FEEDBACK_CATEGORIES.includes(requested) ? requested : "website";
+  });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");

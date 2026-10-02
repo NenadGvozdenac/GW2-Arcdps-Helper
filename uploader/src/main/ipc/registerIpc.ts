@@ -1,11 +1,9 @@
 import { BrowserWindow, dialog, ipcMain, shell } from "electron";
 import { IPC } from "../../shared/ipc";
 import type { IpcResult, LoginRequest } from "../../shared/app.types";
-import type { FeedbackInput } from "../../shared/backend.types";
 import type { Settings } from "../../shared/settings.types";
 import { mainT } from "../i18n/mainMessages";
 import { authService } from "../services/authService";
-import { feedbackService } from "../services/feedbackService";
 import { isLogFile } from "../services/folderWatcher";
 import { sessionService } from "../services/sessionService";
 import { settingsService } from "../services/settingsService";
@@ -72,8 +70,6 @@ export function registerIpc(getWindow: () => BrowserWindow | null): void {
 
   ipcMain.handle(IPC.retryUpload, (_e, id: string) => uploadService.retry(id));
   ipcMain.handle(IPC.clearFinished, () => uploadService.clearFinished());
-
-  ipcMain.handle(IPC.sendFeedback, (_e, feedback: FeedbackInput) => result(() => feedbackService.send(feedback)));
 
   ipcMain.handle(IPC.installUpdate, () => updateService.install());
 

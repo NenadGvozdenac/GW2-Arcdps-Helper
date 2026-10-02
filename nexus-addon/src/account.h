@@ -27,11 +27,6 @@ struct AccountState
 	std::string sessionName;
 	int64_t sessionStartMs = 0;
 
-	// Feedback to the developer (options window).
-	bool feedbackSending = false;
-	uint32_t feedbackSent = 0;   // bumped after every successful send (the UI then clears its fields)
-	std::string feedbackError;   // last send failure; empty = none
-
 	// Weekly raid / strike clear, refreshed every few minutes and after every uploaded raid or strike kill.
 	bool clearsLoaded = false;
 	Api::WeeklyClears clears;
@@ -65,10 +60,6 @@ namespace Account
 	 * Blocking (HTTP): call from worker threads. Offline, the last known one is used; "" when signed out or not set.
 	 */
 	std::string CurrentDpsReportToken();
-
-	/** Sends feedback to the developer; linked to the account when signed in. See AccountState::feedback*. */
-	void SendFeedback(const std::string& category, const std::string& title, const std::string& description,
-		const std::string& contactEmail);
 
 	/** Re-loads the weekly raid clear (call after a raid kill was saved). */
 	void RefreshClears();

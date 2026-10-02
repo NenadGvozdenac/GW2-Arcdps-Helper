@@ -407,34 +407,6 @@ namespace Account
 		});
 	}
 
-	void SendFeedback(const std::string& category, const std::string& title, const std::string& description,
-		const std::string& contactEmail)
-	{
-		{
-			std::lock_guard lock(g_mutex);
-			if (g_state.feedbackSending) return;
-			g_state.feedbackSending = true;
-			g_state.feedbackError.clear();
-		}
-		Post([category, title, description, contactEmail] {
-			Settings cfg = Config::Get();
-			Api::Error err;
-			bool ok = Api::SendFeedback(cfg.token, category, title, description, contactEmail, err);
-			// An expired sign-in: send it as a guest instead of losing it, and sign out.
-			if (!ok && err.code == "UNAUTHORIZED")
-			{
-				SignOutLocal("Your sign-in expired. Sign in again.");
-				ok = Api::SendFeedback("", category, title, description, contactEmail, err);
-			}
-			Set([&](AccountState& s) {
-				s.feedbackSending = false;
-				if (ok) s.feedbackSent++;
-				else s.feedbackError = err.message.empty() ? "Could not send the feedback." : err.message;
-			});
-			if (ok) LogInfo("Feedback sent");
-		});
-	}
-
 	void RefreshClears()
 	{
 		Post(LoadClears);
