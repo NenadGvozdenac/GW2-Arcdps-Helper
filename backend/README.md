@@ -202,6 +202,7 @@ The Docker image runs pending migrations on start. For Vercel, `.github/workflow
 
 - **Docker:** `Dockerfile` (multi-stage, runs as `node`, migrates then starts). Used by `docker-compose.yml`.
 - **Vercel:** separate project with Root Directory `backend`. Vercel detects the Express app from `src/app.ts`;
-  set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` in the project. Pushes to `main` that touch `backend/` are
+  set `DATABASE_URL`, `JWT_SECRET`, `CORS_ORIGIN` (and `ADMIN_*` for the admin area - root README, "Admin area")
+  in the project. Pushes to `main` that touch `backend/` are
   deployed by `.github/workflows/deploy-backend.yml` (build → migrate → deploy); Vercel's own Git deployments are
   disabled in `vercel.json`. See the root README for the one-time setup.

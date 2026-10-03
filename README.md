@@ -89,6 +89,8 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 | `make migrate-status` | List applied migrations |
 | `make migrate-local` | Apply migrations to the local database (`backend/.env.development`) |
 | `make migrate-prod` | Apply migrations to the production database (`backend/.env.production`) |
+| `make admin-dev` | Make the local administrator: sets it in `backend/.env.development` (see [Admin area](#admin-area)) |
+| `make admin-prod` | Make the production administrator: prints the three variables for Vercel (see [Admin area](#admin-area)) |
 | `make uploader-install` | Install the desktop uploader dependencies |
 | `make uploader-dev` | Run the uploader against the local Docker stack (hot reload) |
 | `make uploader-prod` | Run the uploader against production (URLs in `uploader/.env.production`) |
@@ -177,7 +179,8 @@ Two Vercel projects from the same repository:
 
 **Backend** (Root Directory: `backend`)
 1. Create a Postgres database (Neon / Vercel Postgres / Supabase) and copy its connection string with `sslmode=require`.
-2. Environment variables: `DATABASE_URL`, `JWT_SECRET` (at least 32 characters), `CORS_ORIGIN` (the frontend URL).
+2. Environment variables: `DATABASE_URL`, `JWT_SECRET` (at least 32 characters), `CORS_ORIGIN` (the frontend URL),
+   and for the admin area `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET` (see [Admin area](#admin-area)).
 3. Migrations run automatically in `deploy-backend.yml`. To run them by hand, fill `backend/.env.production`
    (copy `.env.production.example`) and run `make migrate-prod`.
 4. Deploy — push to `main`; Vercel detects Express from `src/app.ts` (zero-config, no `api/` folder).
@@ -186,3 +189,48 @@ Two Vercel projects from the same repository:
 1. Set `VITE_API_URL=https://<backend-project>.vercel.app/api` in the Vercel project's Environment Variables
    (`frontend/.env.production` is git-ignored, so Vercel never sees it).
 2. Deploy — push to `main`; `vercel.json` configures the Vite build and the SPA rewrite.
+
+## Admin area
+
+`/admin` is the administrator's part of the website: every user, log, session and Discord webhook, with deleting,
+sharing, blocking accounts and addresses, and the requests refused by rate limits. The administrator is not a user
+account - it is three backend variables: `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH` (scrypt) and `ADMIN_TOTP_SECRET` (the key
+of an authenticator app such as Google Authenticator, Authy or 1Password). When any of them is empty, the admin area is
+off (`404 ADMIN_DISABLED`).
+
+Signing in takes two steps at `/admin/login`: email + password, then the 6-digit code from the authenticator app.
+The admin token lasts 12 hours and ends with the browser tab. Changing the password or the key signs the admin out.
+
+### Locally
+
+1. `make admin-dev` - enter the email (Enter keeps `gw2arcdpshelper@gmail.com`) and a password (at least 12
+   characters). The three variables are written into `backend/.env.development`, and the console shows the key and an
+   `otpauth://` link for the authenticator app. Its entry there is called **GW2 ArcDPS Helper (dev)**.
+2. Restart the backend (`make restart`, or `npm run dev`).
+3. Open `http://localhost:8080/admin/login` (`make up`) or `http://localhost:5173/admin/login` (`npm run dev`).
+
+`backend/.env.development` is in git: use a made-up password there, never a real one, and leave the three variables
+empty if you don't need the admin area locally.
+
+### Production
+
+1. `make admin-prod` - same questions, but nothing is written: it prints the three lines and the key for the
+   authenticator app (the entry is **GW2 ArcDPS Helper**, without "dev"). Use a strong password of its own.
+2. Add the account to the authenticator app (scan the link or type the key).
+3. Put the three lines into the backend's Vercel project: **Settings → Environment Variables → Production**.
+   Optionally also into `backend/.env.production` (git-ignored), next to the other production values.
+4. Push to `main`. `deploy-backend.yml` runs the migrations (the admin tables come with them) and deploys the API;
+   `deploy-web.yml` deploys the website with the `/admin` pages. Variables changed after a deploy only apply to the
+   next one: **Redeploy** the backend in Vercel if you set them later.
+5. Sign in at `https://gw2-arcdps-helper.vercel.app/admin/login`.
+
+### Troubleshooting
+
+- **"The admin area is not set up on this server"** - one of the three variables is missing in Vercel, or the backend
+  was not redeployed after setting them.
+- **"The code is wrong or was already used"** - wait for the next code; the phone's clock must be right (set it to
+  automatic). Each code works once.
+- **"Too many wrong passwords"** - 5 wrong passwords or codes from one address (20 from everywhere) lock the sign-in
+  for 15 minutes.
+- **New password or key** - run `make admin-prod` again, replace all three values in Vercel and redeploy. The old
+  entry in the authenticator app stops working; delete it.
