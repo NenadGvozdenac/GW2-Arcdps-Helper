@@ -69,6 +69,7 @@ export const adminRepository = {
   },
   blockUser: (userId: string, reason: string) => adminHttp.post<void>(`/admin/users/${id(userId)}/block`, { reason }),
   unblockUser: (userId: string) => adminHttp.post<void>(`/admin/users/${id(userId)}/unblock`),
+  verifyUser: (userId: string) => adminHttp.post<void>(`/admin/users/${id(userId)}/verify`),
   signOutUser: (userId: string) => adminHttp.post<void>(`/admin/users/${id(userId)}/sign-out`),
   deleteUser: (userId: string) => adminHttp.delete(`/admin/users/${id(userId)}`),
 
@@ -92,7 +93,8 @@ export const adminRepository = {
     const { ips } = await adminHttp.get<{ ips: Record<string, unknown>[] }>("/admin/blocked-ips");
     return ips.map((ip) => withDates<AdminBlockedIp>(ip, ["blockedAt"]));
   },
-  blockIp: (ipHash: string, note: string) => adminHttp.post<void>("/admin/blocked-ips", { ipHash, note }),
+  /** `address`: an IP address (the server hashes it) or an address hash. */
+  blockIp: (address: string, note: string) => adminHttp.post<void>("/admin/blocked-ips", { address, note }),
   unblockIp: (ipHash: string) => adminHttp.delete(`/admin/blocked-ips/${id(ipHash)}`),
 
   async rateLimits(): Promise<AdminRateLimits> {

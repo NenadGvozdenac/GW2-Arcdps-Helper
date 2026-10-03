@@ -211,7 +211,7 @@ export default function AdminOverviewPage() {
       {c.overview && (
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-medium text-muted-foreground">All time</h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {[
               { to: "/admin/users", value: c.overview.users, label: "Users", detail: `${c.overview.verifiedUsers} verified · ${c.overview.blockedUsers} blocked` },
               { to: "/admin/logs", value: c.overview.logs, label: "Logs" },

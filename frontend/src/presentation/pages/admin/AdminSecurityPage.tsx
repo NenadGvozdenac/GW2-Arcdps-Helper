@@ -49,7 +49,7 @@ function useSecurityController() {
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [newHash, setNewHash] = useState("");
+  const [newAddress, setNewAddress] = useState("");
   const [newNote, setNewNote] = useState("");
 
   const reload = useCallback(async () => {
@@ -94,15 +94,16 @@ function useSecurityController() {
     error,
     reload,
     busy: action.busy,
-    newHash,
-    setNewHash,
+    newAddress,
+    setNewAddress,
     newNote,
     setNewNote,
-    validNewHash: /^[a-f0-9]{64}$/.test(newHash.trim()),
+    // An IPv4 or IPv6 address (the server checks it exactly and stores only its hash).
+    validNewAddress: /^(\d{1,3}(\.\d{1,3}){3}|[0-9a-fA-F:.]*:[0-9a-fA-F:.]*)$/.test(newAddress.trim()),
     blockNew: () =>
       action.run("new", async () => {
-        await adminService.blockIp(newHash.trim(), newNote.trim());
-        setNewHash("");
+        await adminService.blockIp(newAddress.trim(), newNote.trim());
+        setNewAddress("");
         setNewNote("");
       }),
     block: (ipHash: string, note: string) => action.run(ipHash, () => adminService.blockIp(ipHash, note)),
@@ -210,23 +211,24 @@ export default function AdminSecurityPage() {
               className="flex flex-wrap items-end gap-3"
               onSubmit={(e) => {
                 e.preventDefault();
-                if (c.validNewHash) c.blockNew();
+                if (c.validNewAddress) c.blockNew();
               }}
             >
               <div className="flex min-w-72 flex-1 flex-col gap-1.5">
-                <Label htmlFor="new-hash">Address hash</Label>
+                <Label htmlFor="new-hash">IP address</Label>
                 <Input
                   id="new-hash"
+                  placeholder="195.234.32.12"
                   className="font-mono text-xs"
-                  value={c.newHash}
-                  onChange={(e) => c.setNewHash(e.target.value.toLowerCase())}
+                  value={c.newAddress}
+                  onChange={(e) => c.setNewAddress(e.target.value.trim())}
                 />
               </div>
               <div className="flex min-w-48 flex-col gap-1.5">
                 <Label htmlFor="new-note">Note</Label>
                 <Input id="new-note" value={c.newNote} onChange={(e) => c.setNewNote(e.target.value)} maxLength={300} />
               </div>
-              <Button type="submit" variant="outline" disabled={!c.validNewHash || c.busy === "new"}>
+              <Button type="submit" variant="outline" disabled={!c.validNewAddress || c.busy === "new"}>
                 <BanIcon /> Block
               </Button>
             </form>

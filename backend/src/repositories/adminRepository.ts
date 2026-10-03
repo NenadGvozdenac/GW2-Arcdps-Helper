@@ -318,6 +318,16 @@ export const adminRepository = {
     return rows.length > 0;
   },
 
+  /** Confirms the email by hand (an already confirmed one keeps its date). */
+  async verifyEmail(id: string): Promise<boolean> {
+    const rows = await getDb()
+      .update(users)
+      .set({ emailVerifiedAt: sql`coalesce(${users.emailVerifiedAt}, now())` })
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+    return rows.length > 0;
+  },
+
   async signOutEverywhere(id: string): Promise<boolean> {
     const rows = await getDb()
       .update(users)

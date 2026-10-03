@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeftIcon, BanIcon, LogOutIcon, ShieldCheckIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, BanIcon, LogOutIcon, MailCheckIcon, ShieldCheckIcon, Trash2Icon } from "lucide-react";
 import { useAdmin } from "../../../controllers/AdminController";
 import { useI18n } from "../../../controllers/I18nController";
 import type { AdminUserDetail } from "../../../domain/types/admin.types";
@@ -50,6 +50,7 @@ function useUserController(id: string) {
     block: () => action.run("block", () => adminService.blockUser(id, reason)),
     unblock: () => action.run("unblock", () => adminService.unblockUser(id)),
     signOut: () => action.run("signOut", () => adminService.signOutUser(id)),
+    verify: () => action.run("verify", () => adminService.verifyUser(id)),
     remove: () => deleteAction.run("delete", () => adminService.deleteUser(id)),
     blockIp: (ipHash: string) => action.run(ipHash, () => adminService.blockIp(ipHash, `Used by ${user?.email ?? id}`)),
     unblockIp: (ipHash: string) => action.run(ipHash, () => adminService.unblockIp(ipHash)),
@@ -96,6 +97,18 @@ export default function AdminUserPage() {
         }
         actions={
           <div className="flex flex-wrap gap-2">
+            {!u.emailVerifiedAt && (
+              <ConfirmButton
+                label="Verify email"
+                icon={<MailCheckIcon />}
+                title="Verify this email?"
+                description={`${u.email} is marked as confirmed and can sign in without the link from the email.`}
+                confirmLabel="Verify"
+                destructive={false}
+                busy={c.busy === "verify"}
+                onConfirm={c.verify}
+              />
+            )}
             {u.blockedAt ? (
               <ConfirmButton
                 label="Unblock"

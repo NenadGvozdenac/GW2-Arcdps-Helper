@@ -78,6 +78,12 @@ export const adminController = {
     res.status(204).end();
   },
 
+  async verifyUser(req: Request, res: Response) {
+    const { id } = validate(idParamSchema, req.params);
+    await adminService.verifyUser(id);
+    res.status(204).end();
+  },
+
   async signOutUser(req: Request, res: Response) {
     const { id } = validate(idParamSchema, req.params);
     await adminService.signOutUser(id);

@@ -155,6 +155,11 @@ export const adminService = {
     if (!(await adminRepository.setBlocked(id, null))) throw userNotFound();
   },
 
+  /** Marks the email as confirmed, so the user can sign in without the link from the email. */
+  async verifyUser(id: string): Promise<void> {
+    if (!(await adminRepository.verifyEmail(id))) throw userNotFound();
+  },
+
   async signOutUser(id: string): Promise<void> {
     if (!(await adminRepository.signOutEverywhere(id))) throw userNotFound();
   },

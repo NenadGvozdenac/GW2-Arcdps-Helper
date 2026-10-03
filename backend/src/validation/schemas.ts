@@ -1,3 +1,4 @@
+import { isIP } from "node:net";
 import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
 import { FEEDBACK_CATEGORIES } from "../types/feedback.types";
@@ -16,6 +17,7 @@ import {
   SESSIONS_PAGE_SIZE,
   SESSIONS_PAGE_SIZE_MAX,
 } from "../config/constants";
+import { hashIp } from "../utils/clientIp";
 
 /** The GW2 account (Name.1234) is the user's identity — required. */
 const gw2Account = z
@@ -271,10 +273,16 @@ export const adminWebhookPatchSchema = z
 /** SHA-256 of an IP address, as stored in user_ips / blocked_ips. */
 const ipHash = z.string().regex(/^[a-f0-9]{64}$/, "Invalid address hash.");
 
-export const adminBlockIpSchema = z.object({
-  ipHash,
-  note: z.string().trim().max(300).default(""),
-});
+/** POST /admin/blocked-ips: an IP address (hashed here, like every request's) or an address hash from a list. */
+export const adminBlockIpSchema = z
+  .object({
+    address: z
+      .string()
+      .trim()
+      .refine((v) => isIP(v) !== 0 || /^[a-f0-9]{64}$/.test(v), "Enter an IP address (e.g. 195.234.32.12) or an address hash."),
+    note: z.string().trim().max(300).default(""),
+  })
+  .transform(({ address, note }) => ({ ipHash: isIP(address) ? hashIp(address) : address, note }));
 
 export const adminIpParamSchema = z.object({ ipHash });
 

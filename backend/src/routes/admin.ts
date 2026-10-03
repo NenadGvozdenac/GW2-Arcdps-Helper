@@ -18,6 +18,7 @@ export function createAdminRouter(): Router {
   router.get("/users/:id", admin.user);
   router.post("/users/:id/block", admin.blockUser);
   router.post("/users/:id/unblock", admin.unblockUser);
+  router.post("/users/:id/verify", admin.verifyUser);
   router.post("/users/:id/sign-out", admin.signOutUser);
   router.delete("/users/:id", admin.deleteUser);
 
