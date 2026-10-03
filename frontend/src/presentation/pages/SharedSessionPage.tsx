@@ -100,7 +100,8 @@ export default function SharedSessionPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t("sessions.logsTitle")}</CardTitle>
-          {logs.length > 0 && (
+          {/* "Kills, then wipes" only means something when there are both. */}
+          {kills > 0 && wipes > 0 && (
             <CardAction>
               <SessionResultFilterToggle filter={resultFilter.filter} onChange={resultFilter.setFilter} />
             </CardAction>
@@ -108,7 +109,7 @@ export default function SharedSessionPage() {
           <CardDescription>{t("sessions.sharedLogsHint")}</CardDescription>
         </CardHeader>
         <CardContent>
-          <GroupedLogTable logs={logs} filter={resultFilter.filter} openOnDpsReport />
+          <GroupedLogTable logs={logs} filter={kills > 0 && wipes > 0 ? resultFilter.filter : "together"} openOnDpsReport />
         </CardContent>
       </Card>
     </div>

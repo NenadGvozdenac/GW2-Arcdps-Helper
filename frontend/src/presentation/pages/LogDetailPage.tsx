@@ -120,7 +120,7 @@ export default function LogDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       {canGoBack ? (
-        <Button variant="ghost" size="sm" className="self-start" onClick={goBack}>
+        <Button variant="ghost" size="sm" className="cursor-pointer self-start" onClick={goBack}>
           <ArrowLeftIcon /> {t("logDetail.back")}
         </Button>
       ) : (

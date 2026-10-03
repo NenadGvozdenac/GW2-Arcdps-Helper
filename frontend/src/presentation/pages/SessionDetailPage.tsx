@@ -361,7 +361,8 @@ export default function SessionDetailPage() {
       <Card>
         <CardHeader>
           <CardTitle>{t("sessions.logsTitle")}</CardTitle>
-          {logs.length > 0 && (
+          {/* "Kills, then wipes" only means something when there are both. */}
+          {kills > 0 && wipes > 0 && (
             <CardAction>
               <SessionResultFilterToggle filter={resultFilter.filter} onChange={resultFilter.setFilter} />
             </CardAction>
@@ -371,7 +372,7 @@ export default function SessionDetailPage() {
         <CardContent>
           <GroupedLogTable
             logs={logs}
-            filter={resultFilter.filter}
+            filter={kills > 0 && wipes > 0 ? resultFilter.filter : "together"}
             selection={c.organizing ? { selected: c.selected, onToggle: c.toggle } : undefined}
           />
         </CardContent>

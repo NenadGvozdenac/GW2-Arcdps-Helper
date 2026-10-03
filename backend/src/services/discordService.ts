@@ -89,7 +89,8 @@ function toEmbed(log: Log): DiscordEmbed {
 }
 
 /** Session summary: kills per group, failed logs, totals and how long it took. */
-function sessionEmbed(session: Session, logs: Log[], span: LogSpan): DiscordEmbed {
+/** `owner`: the GW2 account of the player whose session it is ("by Name.1234" in the footer); may be empty. */
+function sessionEmbed(session: Session, logs: Log[], span: LogSpan, owner: string): DiscordEmbed {
   const kills = logs.filter((l) => l.success).length;
   const groups = [...new Set(logs.map((l) => GROUPS.find((g) => g.id === l.groupId)?.short).filter(Boolean))];
   return {
@@ -103,7 +104,9 @@ function sessionEmbed(session: Session, logs: Log[], span: LogSpan): DiscordEmbe
       ...(groups.length ? [{ name: "Content", value: groups.join(" · ") }] : []),
     ],
     footer: {
-      text: session.endReason === "expired" ? "Session · ended automatically after 6 hours" : "Session",
+      text: [owner ? `by ${owner}` : "Session", ...(session.endReason === "expired" ? ["ended automatically after 6 hours"] : [])].join(
+        " · ",
+      ),
     },
     timestamp: span.start.toISOString(),
   };
@@ -162,10 +165,16 @@ export const discordService = {
    * One message summarising a finished session; returns its message ID (null when nothing was posted).
    * Never throws, like notifyNewLogs.
    */
-  async notifySession(webhookUrl: string | null, session: Session, logs: Log[], span: LogSpan): Promise<string | null> {
+  async notifySession(
+    webhookUrl: string | null,
+    session: Session,
+    logs: Log[],
+    span: LogSpan,
+    owner: string,
+  ): Promise<string | null> {
     if (!webhookUrl || !logs.length) return null;
     try {
-      return await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [sessionEmbed(session, logs, span)] });
+      return await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [sessionEmbed(session, logs, span, owner)] });
     } catch (err) {
       console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
       return null;
@@ -173,9 +182,16 @@ export const discordService = {
   },
 
   /** Rewrites a session summary posted earlier (e.g. after a rename). Never throws: the message may be deleted. */
-  async updateSession(webhookUrl: string, messageId: string, session: Session, logs: Log[], span: LogSpan): Promise<void> {
+  async updateSession(
+    webhookUrl: string,
+    messageId: string,
+    session: Session,
+    logs: Log[],
+    span: LogSpan,
+    owner: string,
+  ): Promise<void> {
     try {
-      await editWebhookMessage(webhookUrl, messageId, { embeds: [sessionEmbed(session, logs, span)] });
+      await editWebhookMessage(webhookUrl, messageId, { embeds: [sessionEmbed(session, logs, span, owner)] });
     } catch (err) {
       console.warn("Discord message edit failed:", err instanceof Error ? err.message : err);
     }

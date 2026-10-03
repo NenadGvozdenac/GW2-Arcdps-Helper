@@ -40,7 +40,8 @@ async function endAndNotify(ownerId: string, id: string, reason: SessionEndReaso
   if (logs.length) {
     const webhook = discordService.webhookFor(await userService.getDiscordWebhooks(ownerId), "sessions");
     const webhookUrl = webhook && discordService.passesSessionFilter(webhook, logs) ? webhook.url : null;
-    const messageId = await discordService.notifySession(webhookUrl, session, logs, logSpan(logs)!);
+    const { gw2Account } = await userService.get(ownerId);
+    const messageId = await discordService.notifySession(webhookUrl, session, logs, logSpan(logs)!, gw2Account);
     if (webhookUrl && messageId) await sessionRepository.saveDiscordMessage(id, webhookUrl, messageId);
   }
   return session;
@@ -60,7 +61,8 @@ async function refreshDiscordMessage(ownerId: string, session: Session): Promise
     await sessionRepository.deleteDiscordMessage(session.id);
     return;
   }
-  await discordService.updateSession(message.webhookUrl, message.messageId, session, logs, logSpan(logs)!);
+  const { gw2Account } = await userService.get(ownerId);
+  await discordService.updateSession(message.webhookUrl, message.messageId, session, logs, logSpan(logs)!, gw2Account);
 }
 
 /**
