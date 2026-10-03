@@ -214,10 +214,15 @@ export const idParamSchema = z.object({
 
 // ---------- admin area
 
-/** POST /admin/auth/login: all three every time. */
+/** POST /admin/auth/login: step 1 of the admin sign-in. */
 export const adminLoginSchema = z.object({
   email: z.string().trim().min(1, "Email is required.").max(254),
   password: z.string().min(1, "Password is required.").max(200),
+});
+
+/** POST /admin/auth/verify: step 2, the challenge from step 1 and the authenticator code. */
+export const adminVerifySchema = z.object({
+  challenge: z.string().min(1).max(2000),
   code: z
     .string()
     .trim()

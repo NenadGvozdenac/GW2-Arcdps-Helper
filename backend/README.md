@@ -39,7 +39,7 @@ Or run everything (db + backend + frontend) with `make up` from the repo root.
 | `CORS_ORIGIN` | Allowed frontend origins, comma-separated (empty = `APP_URL` in production, any origin in development) |
 | `APP_URL` | Frontend URL used in the confirmation-email link; **required in production** (dev default `http://localhost:5173`) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP server for confirmation and password-reset emails (port `465` = TLS, otherwise STARTTLS; default `587`). Emails are sent from `SMTP_USER` (required with `SMTP_HOST`) as "GW2 ArcDPS Helper". **`SMTP_HOST` is required in production**; without it in development the email is printed to the console |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET` | The administrator (not a row in `users`), made by `npm run admin:setup`. Signing in to `/admin` needs the email, the password and a code from the authenticator app. Without all three the admin area is off (`404 ADMIN_DISABLED`). Locally `make admin-dev` fills them in `.env.development` |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET` | The administrator (not a row in `users`), made by `npm run admin:setup`. Signing in to `/admin` takes two steps: email + password, then a code from the authenticator app. Without all three the admin area is off (`404 ADMIN_DISABLED`). Locally `make admin-dev` fills them in `.env.development` |
 | `PORT` | Port of the Node server (default `3000`; not used on Vercel) |
 | `NODE_ENV` | `production` enables the strict `JWT_SECRET` checks (also implied on Vercel) |
 

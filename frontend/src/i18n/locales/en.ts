@@ -791,6 +791,8 @@ export const en = {
     ACCOUNT_BLOCKED: "This account has been blocked. Contact us through the feedback page.",
     IP_BLOCKED: "Requests from your network have been blocked.",
     ADMIN_DISABLED: "The admin area is not set up on this server.",
+    INVALID_OTP_CODE: "The code is wrong or was already used. Wait for the next one.",
+    OTP_CHALLENGE_EXPIRED: "The sign-in took too long. Enter your email and password again.",
     WEBHOOK_NOT_FOUND: "Webhook not found.",
     WRONG_PASSWORD: "The password is not correct.",
     APP_LOGIN_NOT_FOUND: "This sign-in request has expired or was already used. Start it again in the app.",

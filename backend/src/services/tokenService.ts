@@ -2,15 +2,25 @@ import { createHash } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import {
+  ADMIN_CHALLENGE_EXPIRES_IN,
   ADMIN_TOKEN_EXPIRES_IN,
   EMAIL_VERIFICATION_EXPIRES_IN,
   JWT_EXPIRES_IN,
   PASSWORD_RESET_EXPIRES_IN,
 } from "../config/constants";
-import type { AdminTokenPayload, EmailTokenPayload, EmailTokenPurpose, TokenPayload } from "../types/auth.types";
+import type {
+  AdminChallengePayload,
+  AdminTokenPayload,
+  EmailTokenPayload,
+  EmailTokenPurpose,
+  TokenPayload,
+} from "../types/auth.types";
 
-/** Any of our tokens, decoded: a sign-in, an email link (`purpose`) or the administrator's (`role`). */
-type AnyPayload = Partial<EmailTokenPayload & AdminTokenPayload> & { iat?: number };
+/**
+ * Any of our tokens, decoded: a sign-in, an email link or the admin's step-1 challenge (`purpose`), or the
+ * administrator's sign-in (`role`).
+ */
+type AnyPayload = { sub?: unknown; purpose?: string; role?: string; pwd?: string; iat?: number };
 
 function decode(token: string): AnyPayload | null {
   try {
@@ -54,6 +64,17 @@ export const tokenService = {
   signAdmin(admin: { passwordHash: string; totpSecret: string }): string {
     const payload: AdminTokenPayload = { sub: "admin", role: "admin", pwd: adminFingerprint(admin) };
     return jwt.sign(payload, env.jwtSecret, { expiresIn: ADMIN_TOKEN_EXPIRES_IN, algorithm: "HS256" });
+  },
+
+  /** Proof that the admin's email and password were right (ADMIN_CHALLENGE_EXPIRES_IN), for the code step. */
+  signAdminChallenge(admin: { passwordHash: string; totpSecret: string }): string {
+    const payload: AdminChallengePayload = { sub: "admin", purpose: "admin-otp", pwd: adminFingerprint(admin) };
+    return jwt.sign(payload, env.jwtSecret, { expiresIn: ADMIN_CHALLENGE_EXPIRES_IN, algorithm: "HS256" });
+  },
+
+  verifyAdminChallenge(token: string, admin: { passwordHash: string; totpSecret: string }): boolean {
+    const payload = decode(token);
+    return payload?.purpose === "admin-otp" && payload.sub === "admin" && payload.pwd === adminFingerprint(admin);
   },
 
   /** True for a valid administrator token issued for the credentials configured now. */

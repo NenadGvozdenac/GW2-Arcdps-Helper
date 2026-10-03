@@ -801,6 +801,8 @@ export const de: Messages = {
     ACCOUNT_BLOCKED: "Dieses Konto wurde gesperrt. Melde dich über die Feedback-Seite bei uns.",
     IP_BLOCKED: "Anfragen aus deinem Netzwerk wurden gesperrt.",
     ADMIN_DISABLED: "Der Admin-Bereich ist auf diesem Server nicht eingerichtet.",
+    INVALID_OTP_CODE: "Der Code ist falsch oder wurde schon benutzt. Warte auf den nächsten.",
+    OTP_CHALLENGE_EXPIRED: "Die Anmeldung hat zu lange gedauert. Gib E-Mail und Passwort erneut ein.",
     WEBHOOK_NOT_FOUND: "Webhook nicht gefunden.",
     WRONG_PASSWORD: "Das Passwort ist nicht korrekt.",
     APP_LOGIN_NOT_FOUND: "Diese Anmeldeanfrage ist abgelaufen oder wurde schon verwendet. Starte sie in der App neu.",

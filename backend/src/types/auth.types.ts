@@ -22,6 +22,13 @@ export interface AdminTokenPayload {
   pwd: string;
 }
 
+/** Step 1 of the admin sign-in passed (email + password): only good for step 2, the authenticator code. */
+export interface AdminChallengePayload {
+  sub: "admin";
+  purpose: "admin-otp";
+  pwd: string;
+}
+
 /** Language of the emails we send; the list lives in src/i18n/languages.ts. */
 export type EmailLanguage = Language;
 

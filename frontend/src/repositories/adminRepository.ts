@@ -45,8 +45,10 @@ async function page<T>(path: string, q: AdminListQuery, dates: string[]): Promis
 const id = (value: string) => encodeURIComponent(value);
 
 export const adminRepository = {
-  login: (email: string, password: string, code: string) =>
-    adminHttp.post<{ token: string }>("/admin/auth/login", { email, password, code }),
+  /** Step 1: email + password -> a short-lived challenge for step 2. */
+  login: (email: string, password: string) => adminHttp.post<{ challenge: string }>("/admin/auth/login", { email, password }),
+  /** Step 2: the challenge + the authenticator code -> the admin token. */
+  verify: (challenge: string, code: string) => adminHttp.post<{ token: string }>("/admin/auth/verify", { challenge, code }),
   me: () => adminHttp.get<{ email: string }>("/admin/auth/me"),
   overview: () => adminHttp.get<AdminOverview>("/admin/overview"),
 

@@ -790,6 +790,8 @@ export const sr: Messages = {
     ACCOUNT_BLOCKED: "Ovaj nalog je blokiran. Javi nam se preko stranice za feedback.",
     IP_BLOCKED: "Zahtevi sa tvoje mreže su blokirani.",
     ADMIN_DISABLED: "Admin deo nije podešen na ovom serveru.",
+    INVALID_OTP_CODE: "Kod je pogrešan ili je već iskorišćen. Sačekaj sledeći.",
+    OTP_CHALLENGE_EXPIRED: "Prijava je trajala predugo. Unesi ponovo email i lozinku.",
     WEBHOOK_NOT_FOUND: "Webhook nije pronađen.",
     WRONG_PASSWORD: "Lozinka nije tačna.",
     APP_LOGIN_NOT_FOUND: "Ovaj zahtev za prijavu je istekao ili je već iskorišćen. Pokreni ga ponovo u aplikaciji.",

@@ -8,7 +8,10 @@ interface AdminContextValue {
   status: AdminStatus;
   /** The configured administrator's email, once signed in. */
   email: string | null;
-  login: (email: string, password: string, code: string) => Promise<void>;
+  /** Step 1 of the sign-in: email + password -> a challenge for `verify`. */
+  login: (email: string, password: string) => Promise<string>;
+  /** Step 2: the challenge + the authenticator code; signs in. */
+  verify: (challenge: string, code: string) => Promise<void>;
   logout: () => void;
   /** Turns an error from an admin call into a message; a rejected token (401) signs out. */
   handleError: (err: unknown) => string;
@@ -43,9 +46,11 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     if (adminService.hasToken()) loadMe();
   }, [loadMe]);
 
-  const login = useCallback(
-    async (email: string, password: string, code: string) => {
-      await adminService.login(email, password, code);
+  const login = useCallback((email: string, password: string) => adminService.login(email, password), []);
+
+  const verify = useCallback(
+    async (challenge: string, code: string) => {
+      await adminService.verify(challenge, code);
       await loadMe();
     },
     [loadMe],
@@ -62,7 +67,10 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     [logout],
   );
 
-  const value = useMemo(() => ({ status, email, login, logout, handleError }), [status, email, login, logout, handleError]);
+  const value = useMemo(
+    () => ({ status, email, login, verify, logout, handleError }),
+    [status, email, login, verify, logout, handleError],
+  );
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
 }
 

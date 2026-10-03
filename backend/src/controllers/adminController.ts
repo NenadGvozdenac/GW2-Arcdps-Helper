@@ -12,6 +12,7 @@ import {
   adminLoginSchema,
   adminRateLimitEventsSchema,
   adminSharedSchema,
+  adminVerifySchema,
   adminWebhookPatchSchema,
   idParamSchema,
 } from "../validation/schemas";
@@ -25,10 +26,16 @@ function listQuery(req: Request) {
 
 /** The administrator's API (/api/admin/*). Everything but `login` sits behind requireAdmin. */
 export const adminController = {
-  /** POST /admin/auth/login `{ email, password, code }` -> `{ token }` */
+  /** POST /admin/auth/login `{ email, password }` -> `{ challenge }` (step 1) */
   async login(req: Request, res: Response) {
-    const { email, password, code } = validate(adminLoginSchema, req.body);
-    res.json(await adminAuthService.login(email, password, code, clientIpHash(req)));
+    const { email, password } = validate(adminLoginSchema, req.body);
+    res.json(await adminAuthService.login(email, password, clientIpHash(req)));
+  },
+
+  /** POST /admin/auth/verify `{ challenge, code }` -> `{ token }` (step 2) */
+  async verify(req: Request, res: Response) {
+    const { challenge, code } = validate(adminVerifySchema, req.body);
+    res.json(await adminAuthService.verify(challenge, code, clientIpHash(req)));
   },
 
   me(_req: Request, res: Response) {

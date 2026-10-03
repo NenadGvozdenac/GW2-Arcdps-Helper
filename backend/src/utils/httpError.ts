@@ -17,6 +17,10 @@ export const accountBlocked = () =>
   new HttpError(403, "ACCOUNT_BLOCKED", "This account has been blocked. Contact us through the feedback page.");
 export const ipBlocked = () => new HttpError(403, "IP_BLOCKED", "Requests from your network have been blocked.");
 export const adminDisabled = () => new HttpError(404, "ADMIN_DISABLED", "The admin area is not set up on this server.");
+export const invalidOtpCode = () =>
+  new HttpError(401, "INVALID_OTP_CODE", "The code is wrong or was already used. Wait for the next one.");
+export const otpChallengeExpired = () =>
+  new HttpError(401, "OTP_CHALLENGE_EXPIRED", "The sign-in took too long. Enter your email and password again.");
 export const webhookNotFound = () => new HttpError(404, "WEBHOOK_NOT_FOUND", "Webhook not found.");
 export const tooManyLoginAttempts = () =>
   new HttpError(

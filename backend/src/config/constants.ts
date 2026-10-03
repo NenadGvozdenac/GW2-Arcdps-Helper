@@ -61,6 +61,8 @@ export const SHARE_TOKEN_BYTES = 18;
 export const JWT_EXPIRES_IN = "30d";
 /** The administrator signs in again (password + authenticator code) after this. */
 export const ADMIN_TOKEN_EXPIRES_IN = "12h";
+/** Between the admin's password (step 1) and the authenticator code (step 2) at most this much time may pass. */
+export const ADMIN_CHALLENGE_EXPIRES_IN = "5m";
 /** Sign-in addresses (hashed) of a user are kept this long after they were last seen. */
 export const USER_IP_RETENTION_MS = 90 * 24 * 60 * 60_000;
 /** Refused requests (rate limits) shown to the administrator are kept this long. */

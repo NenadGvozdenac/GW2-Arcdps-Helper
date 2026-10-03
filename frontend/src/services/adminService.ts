@@ -5,8 +5,11 @@ import { adminTokenStorage } from "../storage/adminTokenStorage";
 export const adminService = {
   ...adminRepository,
 
-  async login(email: string, password: string, code: string): Promise<void> {
-    const { token } = await adminRepository.login(email, password, code);
+  /** Step 1 of the sign-in; the challenge is kept in memory only, for step 2. */
+  login: async (email: string, password: string): Promise<string> => (await adminRepository.login(email, password)).challenge,
+
+  async verify(challenge: string, code: string): Promise<void> {
+    const { token } = await adminRepository.verify(challenge, code);
     adminTokenStorage.set(token);
   },
 

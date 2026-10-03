@@ -2,11 +2,12 @@ import { Router } from "express";
 import { adminController as admin } from "../controllers/adminController";
 import { requireAdmin } from "../middleware/requireAdmin";
 
-/** /api/admin/* - the administrator's area. Only the sign-in itself is reachable without the admin token. */
+/** /api/admin/* - the administrator's area. Only the two sign-in steps are reachable without the admin token. */
 export function createAdminRouter(): Router {
   const router = Router();
 
   router.post("/auth/login", admin.login);
+  router.post("/auth/verify", admin.verify);
   router.use(requireAdmin);
 
   router.get("/auth/me", admin.me);
