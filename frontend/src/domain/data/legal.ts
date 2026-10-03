@@ -40,7 +40,7 @@ const en: Record<LegalDocumentKind, LegalDocument> = {
           "Feedback: what you send on the Feedback page (category, title, description), linked to your account if you are signed in, or — as a guest — the email you choose to leave. Feedback is emailed to the developer.",
           "Logs and sessions: for every log you upload we store the dps.report link and data read from it — boss, result, duration, date, game build, who recorded it and the character names, account names and professions of the players in the squad. We also store the sessions you create and any share links you turn on.",
           "Browser storage: the website keeps your sign-in token, language and a few display preferences in your browser’s localStorage. We use no tracking cookies, no analytics and no advertising.",
-          "Technical data: our hosting providers process IP addresses and request metadata as part of serving the website and API and protecting it against abuse. To limit wrong passwords and how often feedback can be sent, we keep a one-way hash of your IP address (never the address itself) for at most 15 minutes.",
+          "Technical data: our hosting providers process IP addresses and request metadata as part of serving the website and API and protecting it against abuse. To limit wrong passwords and how often feedback can be sent, we keep a one-way hash of your IP address (never the address itself) for at most 15 minutes. When you sign in (on the website, in the desktop uploader or the Nexus addon), we store a one-way hash of the address you signed in from, with your account, for 90 days after you last used it, so abuse from an address can be blocked.",
         ],
       },
       {
@@ -190,7 +190,7 @@ const sr: Record<LegalDocumentKind, LegalDocument> = {
           "Feedback: ono što pošaljete na stranici Feedback (kategorija, naslov, opis), povezano sa vašim nalogom ako ste prijavljeni, ili — kao gost — mejl koji odlučite da ostavite. Feedback se šalje mejlom developeru.",
           "Logovi i sesije: za svaki log koji otpremite čuvamo dps.report link i podatke pročitane iz njega — boss, ishod, trajanje, datum, verziju igre, ko ga je snimio i imena likova, naloge i profesije igrača u skvadu. Čuvamo i sesije koje napravite i linkove za deljenje koje uključite.",
           "Skladište pregledača: sajt u localStorage-u vašeg pregledača čuva token prijave, jezik i nekoliko podešavanja prikaza. Ne koristimo kolačiće za praćenje, analitiku ni reklame.",
-          "Tehnički podaci: naši hosting provajderi obrađuju IP adrese i metapodatke zahteva kao deo rada sajta i API-ja i zaštite od zloupotrebe. Da bismo ograničili pogrešne lozinke i koliko često se feedback može slati, čuvamo jednosmerni heš vaše IP adrese (nikad samu adresu) najviše 15 minuta.",
+          "Tehnički podaci: naši hosting provajderi obrađuju IP adrese i metapodatke zahteva kao deo rada sajta i API-ja i zaštite od zloupotrebe. Da bismo ograničili pogrešne lozinke i koliko često se feedback može slati, čuvamo jednosmerni heš vaše IP adrese (nikad samu adresu) najviše 15 minuta. Kada se prijavite (na sajtu, u desktop uploaderu ili Nexus addonu), uz vaš nalog čuvamo jednosmerni heš adrese sa koje ste se prijavili, 90 dana od poslednje upotrebe, kako bismo mogli da blokiramo zloupotrebu sa neke adrese.",
         ],
       },
       {
@@ -340,7 +340,7 @@ const de: Record<LegalDocumentKind, LegalDocument> = {
           "Feedback: was du auf der Feedback-Seite sendest (Kategorie, Titel, Beschreibung), verknüpft mit deinem Konto, wenn du angemeldet bist, oder — als Gast — die E-Mail, die du freiwillig angibst. Feedback wird per E-Mail an den Entwickler geschickt.",
           "Logs und Sessions: Zu jedem hochgeladenen Log speichern wir den dps.report-Link und daraus gelesene Daten — Boss, Ergebnis, Dauer, Datum, Spiel-Build, wer es aufgezeichnet hat sowie Charakternamen, Accountnamen und Klassen der Spieler im Squad. Außerdem speichern wir deine Sessions und aktivierte Freigabelinks.",
           "Browserspeicher: Die Website legt dein Anmeldetoken, die Sprache und einige Anzeigeeinstellungen im localStorage deines Browsers ab. Wir verwenden keine Tracking-Cookies, keine Analyse-Tools und keine Werbung.",
-          "Technische Daten: Unsere Hosting-Anbieter verarbeiten IP-Adressen und Anfrage-Metadaten, um Website und API bereitzustellen und vor Missbrauch zu schützen. Um falsche Passwörter und die Häufigkeit von Feedback zu begrenzen, speichern wir einen Einweg-Hash deiner IP-Adresse (nie die Adresse selbst) höchstens 15 Minuten lang.",
+          "Technische Daten: Unsere Hosting-Anbieter verarbeiten IP-Adressen und Anfrage-Metadaten, um Website und API bereitzustellen und vor Missbrauch zu schützen. Um falsche Passwörter und die Häufigkeit von Feedback zu begrenzen, speichern wir einen Einweg-Hash deiner IP-Adresse (nie die Adresse selbst) höchstens 15 Minuten lang. Wenn du dich anmeldest (auf der Website, im Desktop-Uploader oder im Nexus-Addon), speichern wir zu deinem Konto einen Einweg-Hash der Adresse, von der du dich angemeldet hast – 90 Tage ab der letzten Nutzung –, damit Missbrauch von einer Adresse gesperrt werden kann.",
         ],
       },
       {

@@ -13,7 +13,8 @@
     "migrate": "tsx --env-file=.env.development src/db/migrate.ts",
     "migration:new": "drizzle-kit generate --name",
     "migrate:production": "tsx --env-file=.env.production src/db/migrate.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "admin:setup": "tsx src/scripts/adminSetup.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.2",

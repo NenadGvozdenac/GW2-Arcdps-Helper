@@ -9,6 +9,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  primaryKey,
   real,
   text,
   timestamp,
@@ -47,6 +48,10 @@ export const users = pgTable(
     termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
     /** Sign-in tokens issued before this are rejected (set when the password is reset). null = all valid. */
     tokensValidAfter: timestamp("tokens_valid_after", { withTimezone: true }),
+    /** Set by the administrator: signing in is refused and every token of the account is rejected. null = not blocked. */
+    blockedAt: timestamp("blocked_at", { withTimezone: true }),
+    /** Why the account was blocked (for the administrator only). */
+    blockedReason: text("blocked_reason"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
@@ -213,4 +218,48 @@ export const rateLimits = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   },
   (t) => [index("rate_limits_expires_idx").on(t.expiresAt)],
+);
+
+/**
+ * The addresses a user signed in from, as SHA-256 hashes (never the IP itself), so the administrator can block one.
+ * Recorded whenever a sign-in token is issued; rows not seen for USER_IP_RETENTION_MS are deleted.
+ */
+export const userIps = pgTable(
+  "user_ips",
+  {
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    ipHash: text("ip_hash").notNull(),
+    firstSeenAt: timestamp("first_seen_at", { withTimezone: true }).notNull().defaultNow(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.ipHash] }),
+    index("user_ips_ip_idx").on(t.ipHash),
+    index("user_ips_last_seen_idx").on(t.lastSeenAt),
+  ],
+);
+
+/** Addresses (SHA-256 hashes) the administrator blocked: every API request from them is refused. */
+export const blockedIps = pgTable("blocked_ips", {
+  ipHash: text("ip_hash").primaryKey(),
+  /** The administrator's note, e.g. whose address it was. */
+  note: text().notNull().default(""),
+  blockedAt: timestamp("blocked_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Every request refused by a rate limit (see rateLimitService), for the administrator's overview. `kind` is the key's
+ * prefix ("login", "login-ip", "discord-test", …). Rows older than RATE_LIMIT_EVENT_RETENTION_MS are deleted.
+ */
+export const rateLimitEvents = pgTable(
+  "rate_limit_events",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    key: text().notNull(),
+    kind: text().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("rate_limit_events_created_idx").on(t.createdAt), index("rate_limit_events_kind_idx").on(t.kind, t.createdAt)],
 );

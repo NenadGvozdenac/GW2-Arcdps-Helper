@@ -141,6 +141,13 @@
       "when": 1791047397556,
       "tag": "0019_drop_old_throttle_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791049268623,
+      "tag": "0020_admin_area",
+      "breakpoints": true
     }
   ]
 }

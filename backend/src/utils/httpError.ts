@@ -13,6 +13,11 @@ export class HttpError extends Error {
 export const validationError = (message: string) => new HttpError(400, "VALIDATION_ERROR", message);
 export const unauthenticated = () => new HttpError(401, "UNAUTHENTICATED", "You must be signed in.");
 export const invalidCredentials = () => new HttpError(401, "INVALID_CREDENTIALS", "Invalid email or password.");
+export const accountBlocked = () =>
+  new HttpError(403, "ACCOUNT_BLOCKED", "This account has been blocked. Contact us through the feedback page.");
+export const ipBlocked = () => new HttpError(403, "IP_BLOCKED", "Requests from your network have been blocked.");
+export const adminDisabled = () => new HttpError(404, "ADMIN_DISABLED", "The admin area is not set up on this server.");
+export const webhookNotFound = () => new HttpError(404, "WEBHOOK_NOT_FOUND", "Webhook not found.");
 export const tooManyLoginAttempts = () =>
   new HttpError(
     429,

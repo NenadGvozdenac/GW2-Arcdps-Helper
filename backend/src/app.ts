@@ -1,6 +1,7 @@
 import cors from "cors";
 import express from "express";
 import { env } from "./config/env";
+import { blockedIpGuard } from "./middleware/blockedIpGuard";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { createRouter } from "./routes";
 
@@ -25,7 +26,7 @@ export function createApp() {
   app.use(cors({ origin: origins }));
   app.use(express.json({ limit: "100kb" }));
 
-  app.use("/api", createRouter());
+  app.use("/api", blockedIpGuard, createRouter());
 
   app.use(notFoundHandler);
   app.use(errorHandler);

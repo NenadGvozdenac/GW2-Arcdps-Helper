@@ -15,6 +15,13 @@ export interface EmailTokenPayload {
   pwd?: string;
 }
 
+/** The administrator's sign-in; `pwd` fingerprints their credentials, so changing them signs the admin out. */
+export interface AdminTokenPayload {
+  sub: "admin";
+  role: "admin";
+  pwd: string;
+}
+
 /** Language of the emails we send; the list lives in src/i18n/languages.ts. */
 export type EmailLanguage = Language;
 

@@ -19,6 +19,10 @@ export const POLL_INTERVAL_MS = 30_000;
 export const FRESH_HIGHLIGHT_MS = 8_000;
 
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
+/** The administrator's sign-in, in sessionStorage (ends with the tab). */
+export const ADMIN_TOKEN_STORAGE_KEY = "gw2arcdpshelper.adminToken";
+/** Rows per page in the admin area's lists. */
+export const ADMIN_PAGE_SIZE = 25;
 export const LANGUAGE_STORAGE_KEY = "gw2arcdpshelper.lang";
 export const LOGS_PAGE_SIZE_STORAGE_KEY = "gw2arcdpshelper.logsPageSize";
 /** How the log page's players table is sorted (e.g. "bossDps-desc"). */

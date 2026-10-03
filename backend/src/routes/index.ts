@@ -8,6 +8,7 @@ import { profileController } from "../controllers/profileController";
 import { sessionController } from "../controllers/sessionController";
 import { logFileUpload } from "../middleware/logFileUpload";
 import { optionalAuth, requireAuth } from "../middleware/requireAuth";
+import { createAdminRouter } from "./admin";
 
 // Express 5 forwards rejected promises from async handlers to the error handler.
 export function createRouter(): Router {
@@ -74,6 +75,9 @@ export function createRouter(): Router {
   // Public: anyone with the link can view a shared session.
   router.get("/shared/sessions/:token", sessionController.shared);
   router.delete("/sessions/:id", requireAuth, sessionController.remove);
+
+  // Administrator only (requireAdmin inside); separate sign-in with an authenticator code.
+  router.use("/admin", createAdminRouter());
 
   return router;
 }

@@ -39,6 +39,16 @@ export const env = {
       pass: process.env.SMTP_PASS ?? "",
     };
   },
+  /**
+   * The administrator - not a row in `users`: their email, scrypt hash of the password and the base32 TOTP secret of
+   * their authenticator app, all made by `npm run admin:setup`. Without all three the admin area is switched off.
+   */
+  get admin(): { email: string; passwordHash: string; totpSecret: string } | null {
+    const email = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    const passwordHash = process.env.ADMIN_PASSWORD_HASH?.trim();
+    const totpSecret = process.env.ADMIN_TOTP_SECRET?.trim();
+    return email && passwordHash && totpSecret ? { email, passwordHash, totpSecret } : null;
+  },
   /** Comma-separated list of allowed web origins; empty = allow any. */
   corsOrigins: (process.env.CORS_ORIGIN ?? "")
     .split(",")

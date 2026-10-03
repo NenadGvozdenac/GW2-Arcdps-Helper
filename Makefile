@@ -7,7 +7,7 @@ DB_NAME := gw2arcdpshelper
 
 .DEFAULT_GOAL := help
 .PHONY: help up down restart build rebuild logs ps clean db-up db-shell \
-        migrate migrate-status migration migrate-local migrate-prod \
+        migrate migrate-status migration migrate-local migrate-prod admin-dev admin-prod \
         uploader-install uploader-dev uploader-prod uploader-build uploader-dist \
         addon-build addon-zig release-uploader release-addon
 
@@ -30,6 +30,9 @@ help:
 	@echo     make migration name=add_something   Generate a migration from changes in backend/src/db/schema.ts
 	@echo     make migrate-local   Apply migrations to the local database - backend/.env.development
 	@echo     make migrate-prod    Apply migrations to the production database - backend/.env.production
+	@echo   Admin area - /admin, password + authenticator code
+	@echo     make admin-dev       Make the local admin: sets it in backend/.env.development, app entry "GW2 ArcDPS Helper (dev)"
+	@echo     make admin-prod      Make the production admin: prints the three variables for .env.production / Vercel
 	@echo   Desktop uploader
 	@echo     make uploader-install  Install uploader dependencies
 	@echo     make uploader-dev      Run the uploader against the local Docker stack - http://localhost:8080
@@ -96,6 +99,15 @@ migrate-local:
 
 migrate-prod:
 	npm --prefix backend run migrate:production
+
+# ---------- admin area ----------
+
+# Both ask for the password and make a new authenticator key (the previous one stops working).
+admin-dev:
+	npm --prefix backend run admin:setup -- dev
+
+admin-prod:
+	npm --prefix backend run admin:setup -- prod
 
 # ---------- desktop uploader ----------
 

@@ -211,3 +211,64 @@ export const shareTokenParamSchema = z.object({
 export const idParamSchema = z.object({
   id: z.uuid("Invalid ID."),
 });
+
+// ---------- admin area
+
+/** POST /admin/auth/login: all three every time. */
+export const adminLoginSchema = z.object({
+  email: z.string().trim().min(1, "Email is required.").max(254),
+  password: z.string().min(1, "Password is required.").max(200),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "Enter the 6-digit code from your authenticator app."),
+});
+
+/** Query of the admin lists: text search, optional user / session filter and a 1-based page. */
+export const adminListSchema = z.object({
+  search: z.string().trim().max(100).default(""),
+  userId: z.uuid("Invalid user ID.").optional(),
+  sessionId: z.uuid("Invalid session ID.").optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(25),
+});
+
+export const adminIdsSchema = z.object({
+  ids: z.array(z.uuid("Invalid ID.")).min(1).max(1000),
+});
+
+export const adminBlockUserSchema = z.object({
+  reason: z.string().trim().max(300).default(""),
+});
+
+/** PUT …/shared: create (or keep) the public link, or revoke it. */
+export const adminSharedSchema = z.object({ shared: z.boolean() });
+
+/** PUT /admin/logs/:id/session: a session of the same user, or null to take the log out of its session. */
+export const adminLogSessionSchema = z.object({
+  sessionId: z.uuid("Invalid session ID.").nullable(),
+});
+
+export const adminWebhookPatchSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    content: z.enum(["all", "logs", "sessions"]).optional(),
+  })
+  .refine((v) => v.enabled !== undefined || v.content !== undefined, "Nothing to update.");
+
+/** SHA-256 of an IP address, as stored in user_ips / blocked_ips. */
+const ipHash = z.string().regex(/^[a-f0-9]{64}$/, "Invalid address hash.");
+
+export const adminBlockIpSchema = z.object({
+  ipHash,
+  note: z.string().trim().max(300).default(""),
+});
+
+export const adminIpParamSchema = z.object({ ipHash });
+
+/** Query of GET /admin/rate-limits/events. */
+export const adminRateLimitEventsSchema = z.object({
+  kind: z.string().trim().max(40).optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+});

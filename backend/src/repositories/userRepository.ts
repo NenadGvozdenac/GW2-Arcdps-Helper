@@ -3,7 +3,14 @@ import { getDb } from "../db/pool";
 import { users } from "../db/schema";
 import type { NewUser, User, UserPatch, UserRow } from "../types/user.types";
 
-const toUser = ({ passwordHash: _, termsAcceptedAt: __, tokensValidAfter: ___, ...user }: UserRow): User => user;
+const toUser = ({
+  passwordHash: _,
+  termsAcceptedAt: __,
+  tokensValidAfter: ___,
+  blockedAt: ____,
+  blockedReason: _____,
+  ...user
+}: UserRow): User => user;
 
 // Matches the case-insensitive unique index users_email_lower_idx.
 const emailEquals = (email: string) => eq(sql`lower(${users.email})`, email.toLowerCase());
@@ -21,9 +28,9 @@ export const userRepository = {
   },
 
   /** What a sign-in token is checked against; null when the account no longer exists. */
-  async findTokenState(id: string): Promise<{ tokensValidAfter: Date | null } | null> {
+  async findTokenState(id: string): Promise<{ tokensValidAfter: Date | null; blockedAt: Date | null } | null> {
     const [row] = await getDb()
-      .select({ tokensValidAfter: users.tokensValidAfter })
+      .select({ tokensValidAfter: users.tokensValidAfter, blockedAt: users.blockedAt })
       .from(users)
       .where(eq(users.id, id))
       .limit(1);

@@ -5,8 +5,9 @@ import type { AuthLocals } from "../types/auth.types";
 import { unauthenticated } from "../utils/httpError";
 
 /**
- * The user id of a valid `Authorization: Bearer <jwt>`, or null. A valid token of a deleted account is rejected too,
- * and so is one issued before the account's password was reset (tokensValidAfter; `iat` has whole seconds).
+ * The user id of a valid `Authorization: Bearer <jwt>`, or null. A valid token of a deleted or blocked account is
+ * rejected too, and so is one issued before the account's password was reset (tokensValidAfter; `iat` has whole
+ * seconds).
  */
 async function authenticate(req: Request): Promise<string | null> {
   const header = req.headers.authorization ?? "";
@@ -14,7 +15,7 @@ async function authenticate(req: Request): Promise<string | null> {
   const verified = token ? tokenService.verify(token) : null;
   if (!verified) return null;
   const state = await userRepository.findTokenState(verified.userId);
-  if (!state) return null;
+  if (!state || state.blockedAt) return null;
   const validAfter = state.tokensValidAfter ? Math.floor(state.tokensValidAfter.getTime() / 1000) * 1000 : 0;
   return verified.issuedAt.getTime() >= validAfter ? verified.userId : null;
 }

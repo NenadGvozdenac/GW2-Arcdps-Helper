@@ -3,6 +3,7 @@ import { appLoginService } from "../services/appLoginService";
 import type { AuthLocals } from "../types/auth.types";
 import { appLoginCreateSchema, appLoginPollSchema, idParamSchema } from "../validation/schemas";
 import { validate } from "../validation/validate";
+import { clientIpHash } from "../utils/clientIp";
 
 /** "Sign in with the browser" for the desktop uploader and the Nexus addon (see appLoginService). */
 export const appLoginController = {
@@ -16,7 +17,7 @@ export const appLoginController = {
   async poll(req: Request, res: Response) {
     const { id } = validate(idParamSchema, req.params);
     const { secret } = validate(appLoginPollSchema, req.body);
-    res.json(await appLoginService.poll(id, secret));
+    res.json(await appLoginService.poll(id, secret, clientIpHash(req)));
   },
 
   /** Signed in: what the website's confirmation page shows (the code and which app). */

@@ -10,6 +10,7 @@ import type {
 } from "../types/appLogin.types";
 import { appLoginNotFound } from "../utils/httpError";
 import { tokenService } from "./tokenService";
+import { userIpService } from "./userIpService";
 import { userService } from "./userService";
 
 const sha256 = (value: string) => createHash("sha256").update(value).digest();
@@ -57,7 +58,7 @@ export const appLoginService = {
   },
 
   /** The app asks how its request is doing; an approved request hands out the sign-in once and is then removed. */
-  async poll(id: string, secret: string): Promise<AppLoginPollResult> {
+  async poll(id: string, secret: string, ipHash: string): Promise<AppLoginPollResult> {
     const row = await appLoginRepository.findById(id);
     // A wrong secret looks like a missing request: nothing to learn from guessing.
     const secretOk = !!row && timingSafeEqual(sha256(secret), Buffer.from(row.secretHash, "hex"));
@@ -70,6 +71,8 @@ export const appLoginService = {
     await appLoginRepository.delete(id);
     if (row.status === "denied" || !row.userId) return { status: "denied" };
     const user = await userService.get(row.userId);
+    // The app's address, not the browser's that approved it.
+    await userIpService.record(user.id, ipHash);
     return { status: "approved", token: tokenService.sign(user.id), user };
   },
 };

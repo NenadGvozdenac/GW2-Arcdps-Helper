@@ -5,6 +5,7 @@ import { userRepository } from "../repositories/userRepository";
 import type { AuthResponse, EmailLanguage, RegisterInput, RegisterResponse } from "../types/auth.types";
 import type { User } from "../types/user.types";
 import {
+  accountBlocked,
   emailNotVerified,
   emailTaken,
   invalidCredentials,
@@ -15,6 +16,7 @@ import {
 import { emailService } from "./emailService";
 import { rateLimitService } from "./rateLimitService";
 import { tokenService } from "./tokenService";
+import { userIpService } from "./userIpService";
 
 // Compared against when the email doesn't exist, so response time doesn't reveal registered emails.
 const DUMMY_HASH = bcrypt.hashSync("not-a-real-password", BCRYPT_ROUNDS);
@@ -28,6 +30,12 @@ const loginKeyPrefix = (email: string) =>
 /** Wrong passwords from one IP across all emails (guessing many accounts). */
 const loginIpKey = (ipHash: string) => `login-ip:${ipHash}`;
 const verificationEmailKey = (userId: string) => `verification-email:${userId}`;
+
+/** Issues a sign-in token and remembers the address it went to (for the administrator's IP blocking). */
+async function signIn(user: User, ipHash: string): Promise<AuthResponse> {
+  await userIpService.record(user.id, ipHash);
+  return { token: tokenService.sign(user.id), user };
+}
 
 /** Sends the confirmation link; false (nothing sent) when one went out less than a minute ago. */
 async function sendVerificationEmail(user: User, language: EmailLanguage): Promise<boolean> {
@@ -55,7 +63,7 @@ export const authService = {
   /**
    * Too many wrong passwords (RATE_LIMITS.loginAccount for this email from this IP, or RATE_LIMITS.loginIp from this
    * IP overall) lock signing in until the window ends - even with the right password, so guessing on can't tell when
-   * it hit. Resetting the password lifts the per-email lock.
+   * it hit. Resetting the password lifts the per-email lock. A blocked account is refused once the password is right.
    */
   async login(email: string, password: string, ipHash: string): Promise<AuthResponse> {
     const accountKey = loginKeyPrefix(email) + ipHash;
@@ -75,21 +83,22 @@ export const authService = {
       ]);
       throw invalidCredentials();
     }
+    if (row.blockedAt) throw accountBlocked();
     if (!row.emailVerifiedAt) throw emailNotVerified();
     await rateLimitService.clear(accountKey);
-    const user = (await userRepository.findById(row.id))!;
-    return { token: tokenService.sign(user.id), user };
+    return signIn((await userRepository.findById(row.id))!, ipHash);
   },
 
   /** Confirms the address from the emailed link and signs the user in. Opening the link again just signs in. */
-  async verifyEmail(token: string): Promise<AuthResponse> {
+  async verifyEmail(token: string, ipHash: string): Promise<AuthResponse> {
     const payload = tokenService.verifyEmailToken(token, "verify-email");
-    const existing = payload ? await userRepository.findById(payload.sub) : null;
-    if (!existing) throw invalidVerificationLink();
-    const user = existing.emailVerifiedAt
-      ? existing
-      : ((await userRepository.update(existing.id, { emailVerifiedAt: new Date() })) ?? existing);
-    return { token: tokenService.sign(user.id), user };
+    const row = payload ? await userRepository.findRowById(payload.sub) : null;
+    if (!row) throw invalidVerificationLink();
+    if (row.blockedAt) throw accountBlocked();
+    const user = row.emailVerifiedAt
+      ? (await userRepository.findById(row.id))!
+      : (await userRepository.update(row.id, { emailVerifiedAt: new Date() }))!;
+    return signIn(user, ipHash);
   },
 
   /**
@@ -117,10 +126,11 @@ export const authService = {
    * also confirms the email. It works once: the new password invalidates it. Every earlier sign-in (website, desktop
    * uploader, Nexus addon) is signed out, and a login lock is lifted.
    */
-  async resetPassword(token: string, password: string): Promise<AuthResponse> {
+  async resetPassword(token: string, password: string, ipHash: string): Promise<AuthResponse> {
     const payload = tokenService.verifyEmailToken(token, "reset-password");
     const row = payload ? await userRepository.findRowById(payload.sub) : null;
     if (!payload || !row || !tokenService.matchesPassword(payload, row.passwordHash)) throw invalidResetLink();
+    if (row.blockedAt) throw accountBlocked();
     const user = await userRepository.update(row.id, {
       passwordHash: await bcrypt.hash(password, BCRYPT_ROUNDS),
       emailVerifiedAt: row.emailVerifiedAt ?? new Date(),
@@ -128,6 +138,6 @@ export const authService = {
     });
     if (!user) throw invalidResetLink();
     await rateLimitService.clearPrefix(loginKeyPrefix(row.email));
-    return { token: tokenService.sign(user.id), user };
+    return signIn(user, ipHash);
   },
 };

@@ -132,6 +132,8 @@ export const en = {
     NETWORK_ERROR: "Could not reach the server. Check your internet connection.",
     INVALID_CREDENTIALS: "Invalid email or password.",
     TOO_MANY_LOGIN_ATTEMPTS: "Too many wrong passwords. Try again in 15 minutes or reset your password.",
+    ACCOUNT_BLOCKED: "This account has been blocked. Contact us through the feedback page.",
+    IP_BLOCKED: "Requests from your network have been blocked.",
     EMAIL_NOT_VERIFIED: "Confirm your email address first — click the link we emailed you.",
     UNAUTHENTICATED: "Your session expired. Sign in again.",
     VALIDATION_ERROR: "Some of the entered data is invalid.",

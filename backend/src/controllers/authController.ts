@@ -25,7 +25,7 @@ export const authController = {
 
   async verifyEmail(req: Request, res: Response) {
     const { token } = validate(verifyEmailSchema, req.body);
-    res.json(await authService.verifyEmail(token));
+    res.json(await authService.verifyEmail(token, clientIpHash(req)));
   },
 
   async resendVerification(req: Request, res: Response) {
@@ -42,7 +42,7 @@ export const authController = {
 
   async resetPassword(req: Request, res: Response) {
     const { token, password } = validate(resetPasswordSchema, req.body);
-    res.json(await authService.resetPassword(token, password));
+    res.json(await authService.resetPassword(token, password, clientIpHash(req)));
   },
 
   async me(_req: Request, res: Response<unknown, AuthLocals>) {

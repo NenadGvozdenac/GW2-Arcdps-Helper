@@ -79,6 +79,12 @@ async function endActive(ownerId: string): Promise<void> {
 export const sessionService = {
   expireOverdue,
 
+  /** Rewrites the Discord summary of an ended session after its logs changed (admin area). */
+  async refreshDiscord(ownerId: string, id: string): Promise<void> {
+    const session = await sessionRepository.findById(ownerId, id);
+    if (session) await refreshDiscordMessage(ownerId, session);
+  },
+
   async list(ownerId: string): Promise<Session[]> {
     await expireOverdue(ownerId);
     return sessionRepository.listByOwner(ownerId);

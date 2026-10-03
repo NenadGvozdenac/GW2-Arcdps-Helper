@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes, useLocation } from "react-router-dom";
+import { AdminProvider } from "../controllers/AdminController";
 import Layout from "./components/Layout";
 import { HomeRoute, PublicRoute, RequireAuth, RequireGuest } from "./components/RouteGuards";
 import LandingPage from "./pages/LandingPage";
@@ -24,6 +25,15 @@ import SharedLogPage from "./pages/SharedLogPage";
 import LegalPage from "./pages/LegalPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import AdminShell from "./components/admin/AdminShell";
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminOverviewPage from "./pages/admin/AdminOverviewPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminUserPage from "./pages/admin/AdminUserPage";
+import AdminLogsPage from "./pages/admin/AdminLogsPage";
+import AdminSessionsPage from "./pages/admin/AdminSessionsPage";
+import AdminWebhooksPage from "./pages/admin/AdminWebhooksPage";
+import AdminSecurityPage from "./pages/admin/AdminSecurityPage";
 import GuestGuideShell from "./components/GuestGuideShell";
 
 /** A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. */
@@ -90,6 +100,26 @@ export default function AppRouter() {
             <Route path="logs" element={<AllLogsPage />} />
             <Route path="logs/:id" element={<LogDetailPage />} />
             <Route path="profile" element={<ProfilePage />} />
+          </Route>
+        </Route>
+        {/* The administrator's area: its own sign-in (password + authenticator code), independent of a user's. */}
+        <Route
+          path="admin"
+          element={
+            <AdminProvider>
+              <Outlet />
+            </AdminProvider>
+          }
+        >
+          <Route path="login" element={<AdminLoginPage />} />
+          <Route element={<AdminShell />}>
+            <Route index element={<AdminOverviewPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
+            <Route path="users/:id" element={<AdminUserPage />} />
+            <Route path="logs" element={<AdminLogsPage />} />
+            <Route path="sessions" element={<AdminSessionsPage />} />
+            <Route path="webhooks" element={<AdminWebhooksPage />} />
+            <Route path="security" element={<AdminSecurityPage />} />
           </Route>
         </Route>
         <Route path="*" element={guide(<NotFoundPage />)} />

@@ -59,6 +59,14 @@ export const SESSION_TTL_MS = 6 * 60 * 60 * 1000;
 export const SHARE_TOKEN_BYTES = 18;
 
 export const JWT_EXPIRES_IN = "30d";
+/** The administrator signs in again (password + authenticator code) after this. */
+export const ADMIN_TOKEN_EXPIRES_IN = "12h";
+/** Sign-in addresses (hashed) of a user are kept this long after they were last seen. */
+export const USER_IP_RETENTION_MS = 90 * 24 * 60 * 60_000;
+/** Refused requests (rate limits) shown to the administrator are kept this long. */
+export const RATE_LIMIT_EVENT_RETENTION_MS = 30 * 24 * 60 * 60_000;
+/** Blocked addresses are cached per server instance this long, so a block takes effect within it everywhere. */
+export const BLOCKED_IP_CACHE_MS = 30_000;
 /** Lifetime of the link in the confirmation email. */
 export const EMAIL_VERIFICATION_EXPIRES_IN = "24h";
 /** Lifetime of the link in the password-reset email. */
@@ -96,4 +104,9 @@ export const RATE_LIMITS = {
   discordTest: { max: 5, windowMs: 10 * 60_000 },
   /** Feedback per IP (signed in or not). */
   feedback: { max: 1, windowMs: 60_000 },
+  /** Administrator sign-in attempts per IP, and from everywhere together. */
+  adminLoginIp: { max: 5, windowMs: 15 * 60_000 },
+  adminLogin: { max: 20, windowMs: 15 * 60_000 },
+  /** One use per authenticator code: a code seen once (its 30-second step) is refused for 2 minutes. */
+  adminTotpStep: { max: 1, windowMs: 2 * 60_000 },
 } satisfies Record<string, RateLimit>;
