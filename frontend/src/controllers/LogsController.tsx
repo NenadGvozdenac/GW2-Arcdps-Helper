@@ -20,6 +20,8 @@ interface LogsContextValue {
   setLogShared: (id: string, shared: boolean) => Promise<void>;
   /** After sessions were deleted (their logs are kept): their logs no longer belong to a session. */
   detachSessions: (sessionIds: string[]) => void;
+  /** After logs were taken out of their session: they no longer belong to it, or with `deleted` are gone. */
+  detachLogs: (ids: string[], deleted: boolean) => void;
 }
 
 const LogsContext = createContext<LogsContextValue | null>(null);
@@ -78,6 +80,16 @@ export function LogsProvider({ children }: { children: ReactNode }) {
     setLogs((prev) => prev.map((l) => (l.sessionId && gone.has(l.sessionId) ? { ...l, sessionId: null } : l)));
   }, []);
 
+  const detachLogs = useCallback((ids: string[], deleted: boolean) => {
+    const gone = new Set(ids);
+    if (deleted) for (const id of ids) knownIds.current?.delete(id);
+    setLogs((prev) =>
+      deleted
+        ? prev.filter((l) => !gone.has(l.id))
+        : prev.map((l) => (gone.has(l.id) ? { ...l, sessionId: null } : l)),
+    );
+  }, []);
+
   const setLogShared = useCallback(async (id: string, shared: boolean) => {
     const updated = shared ? await logService.share(id) : await logService.unshare(id);
     setLogs((prev) => prev.map((l) => (l.id === id ? updated : l)));
@@ -108,8 +120,9 @@ export function LogsProvider({ children }: { children: ReactNode }) {
       removeMany,
       setLogShared,
       detachSessions,
+      detachLogs,
     }),
-    [logs, authLoading, loading, error, freshIds, refresh, remove, removeMany, setLogShared, detachSessions],
+    [logs, authLoading, loading, error, freshIds, refresh, remove, removeMany, setLogShared, detachSessions, detachLogs],
   );
   return <LogsContext.Provider value={value}>{children}</LogsContext.Provider>;
 }

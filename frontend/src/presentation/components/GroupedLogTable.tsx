@@ -7,7 +7,7 @@ import { sessionResultFilterStorage, type SessionResultFilter } from "../../stor
 import { Badge } from "@/presentation/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { cn } from "@/presentation/lib/utils";
-import LogTable from "./LogTable";
+import LogTable, { type LogSelection } from "./LogTable";
 import { failBadge, successBadge } from "./ResultBadge";
 
 /** The kills / wipes filter, remembered in this browser. */
@@ -56,19 +56,23 @@ interface Props {
   filter: SessionResultFilter;
   /** Rows open the log on dps.report instead of the (sign-in only) log page — for shared sessions. */
   openOnDpsReport?: boolean;
+  /** Selection mode: a checkbox per row (see LogTable). */
+  selection?: LogSelection;
 }
 
 /**
  * A session's logs split by wing / fractal / strike (W1, W2, …), each with its own kills / wipes. The filter
  * (SessionResultFilterToggle, in the page) shows kills and wipes together, or kills first and all wipes at the end.
  */
-export default function GroupedLogTable({ logs, filter, openOnDpsReport = false }: Props) {
+export default function GroupedLogTable({ logs, filter, openOnDpsReport = false, selection }: Props) {
   const c = useGroupedLogTableController(logs);
   const { t } = useI18n();
   if (!logs.length) return <LogTable logs={logs} />;
 
   const sections = (list: SessionGroupLogs[]) =>
-    list.map((s) => <GroupSection key={s.group?.id ?? "other"} section={s} openOnDpsReport={openOnDpsReport} />);
+    list.map((s) => (
+      <GroupSection key={s.group?.id ?? "other"} section={s} openOnDpsReport={openOnDpsReport} selection={selection} />
+    ));
 
   return (
     <div className="flex flex-col gap-6">
@@ -125,9 +129,11 @@ function ResultPart({
 function GroupSection({
   section: { group, logs, kills, wipes },
   openOnDpsReport,
+  selection,
 }: {
   section: SessionGroupLogs;
   openOnDpsReport: boolean;
+  selection?: LogSelection;
 }) {
   const { t } = useI18n();
   return (
@@ -151,7 +157,7 @@ function GroupSection({
           </Badge>
         )}
       </div>
-      <LogTable logs={logs} openOnDpsReport={openOnDpsReport} />
+      <LogTable logs={logs} openOnDpsReport={openOnDpsReport} selection={selection} />
     </section>
   );
 }

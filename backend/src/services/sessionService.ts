@@ -46,13 +46,20 @@ async function endAndNotify(ownerId: string, id: string, reason: SessionEndReaso
   return session;
 }
 
-/** Rewrites the session's Discord summary, if one was posted, so it shows the current name. */
+/**
+ * Rewrites the session's Discord summary, if one was posted, so it shows the current name and logs. Once the session
+ * has no logs left, the summary is deleted.
+ */
 async function refreshDiscordMessage(ownerId: string, session: Session): Promise<void> {
   if (!session.endedAt) return;
   const message = await sessionRepository.findDiscordMessage(session.id);
   if (!message) return;
   const logs = await sessionRepository.logsOf(ownerId, session.id);
-  if (!logs.length) return;
+  if (!logs.length) {
+    await discordService.deleteSession(message.webhookUrl, message.messageId);
+    await sessionRepository.deleteDiscordMessage(session.id);
+    return;
+  }
   await discordService.updateSession(message.webhookUrl, message.messageId, session, logs, logSpan(logs)!);
 }
 
@@ -156,6 +163,18 @@ export const sessionService = {
     const resumed = await sessionRepository.resume(ownerId, id, newExpiry());
     if (!resumed) throw sessionNotResumable();
     return resumed;
+  },
+
+  /**
+   * Takes logs out of an ended session (they stay in the user's logs), or with `deleteLogs` deletes them altogether.
+   * The session's Discord summary is rewritten without them (deleted when no logs are left). Returns how many logs were affected.
+   */
+  async removeLogs(ownerId: string, id: string, logIds: string[], deleteLogs: boolean): Promise<number> {
+    const session = await sessionService.get(ownerId, id);
+    if (!session.endedAt) throw validationError("Logs can only be removed once the session has ended.");
+    const removed = await sessionRepository.removeLogs(ownerId, id, [...new Set(logIds)], deleteLogs);
+    if (removed) await refreshDiscordMessage(ownerId, session);
+    return removed;
   },
 
   /** Creates the public read-only link for the session (or returns the existing one). */

@@ -1,11 +1,10 @@
 import { DISCORD_TIMEOUT_MS } from "../../config/constants";
 import type { DiscordWebhookPayload } from "../../types/discord.types";
 
-async function send(url: string, method: "POST" | "PATCH", payload: DiscordWebhookPayload): Promise<Response> {
+async function send(url: string, method: "POST" | "PATCH" | "DELETE", payload?: DiscordWebhookPayload): Promise<Response> {
   const res = await fetch(url, {
     method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    ...(payload ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) } : {}),
     signal: AbortSignal.timeout(DISCORD_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Discord returned ${res.status}`);
@@ -29,4 +28,9 @@ export async function editWebhookMessage(
   payload: DiscordWebhookPayload,
 ): Promise<void> {
   await send(`${webhookUrl}/messages/${messageId}`, "PATCH", payload);
+}
+
+/** Deletes a message this webhook posted earlier; throws like postToWebhook (404 when it was deleted already). */
+export async function deleteWebhookMessage(webhookUrl: string, messageId: string): Promise<void> {
+  await send(`${webhookUrl}/messages/${messageId}`, "DELETE");
 }

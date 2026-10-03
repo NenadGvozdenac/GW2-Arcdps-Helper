@@ -64,6 +64,10 @@ export const sessionRepository = {
   /** Deletes several sessions at once (their logs are kept). */
   deleteMany: (ids: string[]) => http.post<{ deleted: number }>("/sessions/bulk-delete", { ids }),
 
+  /** Takes logs out of an ended session; with `deleteLogs` they are deleted altogether. */
+  removeLogs: (id: string, ids: string[], deleteLogs: boolean) =>
+    http.post<{ removed: number }>(`${sessionPath(id)}/remove-logs`, { ids, deleteLogs }),
+
   /** Drag & drop: the session takes the place of `overId`. */
   move: (id: string, overId: string) => http.post<void>(`${sessionPath(id)}/move`, { overId }),
 

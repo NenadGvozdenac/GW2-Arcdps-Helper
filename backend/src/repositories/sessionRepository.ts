@@ -195,6 +195,19 @@ export const sessionRepository = {
     return deleted.length > 0;
   },
 
+  /**
+   * Detaches the given logs from the session (or deletes them); returns how many were affected. Logs of other users
+   * or other sessions are ignored.
+   */
+  async removeLogs(ownerId: string, id: string, logIds: string[], deleteLogs: boolean): Promise<number> {
+    if (!logIds.length) return 0;
+    const where = and(eq(logs.ownerId, ownerId), eq(logs.sessionId, id), inArray(logs.id, logIds));
+    const rows = deleteLogs
+      ? await getDb().delete(logs).where(where).returning({ id: logs.id })
+      : await getDb().update(logs).set({ sessionId: null }).where(where).returning({ id: logs.id });
+    return rows.length;
+  },
+
   /** The session's logs, oldest first. */
   logsOf(ownerId: string, id: string): Promise<Log[]> {
     return getDb()
@@ -210,6 +223,10 @@ export const sessionRepository = {
       .insert(sessionDiscordMessages)
       .values({ sessionId, webhookUrl, messageId })
       .onConflictDoUpdate({ target: sessionDiscordMessages.sessionId, set: { webhookUrl, messageId } });
+  },
+
+  async deleteDiscordMessage(sessionId: string): Promise<void> {
+    await getDb().delete(sessionDiscordMessages).where(eq(sessionDiscordMessages.sessionId, sessionId));
   },
 
   async findDiscordMessage(sessionId: string): Promise<{ webhookUrl: string; messageId: string } | null> {

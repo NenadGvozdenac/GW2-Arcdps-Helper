@@ -5,6 +5,7 @@ import {
   deleteSessionsSchema,
   idParamSchema,
   moveSessionSchema,
+  removeSessionLogsSchema,
   sessionPageSchema,
   shareTokenParamSchema,
   startSessionSchema,
@@ -63,6 +64,13 @@ export const sessionController = {
     const { overId } = validate(moveSessionSchema, req.body);
     await sessionService.move(res.locals.userId, id, overId);
     res.status(204).end();
+  },
+
+  /** `{ ids, deleteLogs? }`: takes logs out of an ended session; with `deleteLogs` they are deleted altogether. */
+  async removeLogs(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    const { ids, deleteLogs } = validate(removeSessionLogsSchema, req.body);
+    res.json({ removed: await sessionService.removeLogs(res.locals.userId, id, ids, deleteLogs) });
   },
 
   async share(req: Request, res: Response<unknown, AuthLocals>) {

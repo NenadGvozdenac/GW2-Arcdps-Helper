@@ -194,6 +194,12 @@ export const deleteSessionsSchema = z.object({
   ids: z.array(z.uuid("Invalid session ID.")).min(1).max(1000),
 });
 
+/** Body of POST /sessions/:id/remove-logs: takes the logs out of the session, or with `deleteLogs` deletes them. */
+export const removeSessionLogsSchema = z.object({
+  ids: z.array(z.uuid("Invalid log ID.")).min(1).max(1000),
+  deleteLogs: z.boolean().default(false),
+});
+
 export const deleteLogsSchema = z.object({
   ids: z.array(z.uuid("Invalid log ID.")).min(1).max(1000),
 });

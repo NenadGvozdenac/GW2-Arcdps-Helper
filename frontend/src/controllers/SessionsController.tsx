@@ -16,6 +16,8 @@ interface SessionsContextValue {
   removeSession: (id: string) => Promise<void>;
   /** Deletes several sessions at once; their logs stay. */
   removeSessions: (ids: string[]) => Promise<void>;
+  /** Takes logs out of an ended session; with `deleteLogs` they are deleted altogether. */
+  removeSessionLogs: (id: string, logIds: string[], deleteLogs: boolean) => Promise<void>;
   /** Re-opens a session that ended automatically; another active session is ended by the server. */
   resumeSession: (id: string) => Promise<void>;
   /** Creates (or with false, revokes) the session's public link. */
@@ -34,7 +36,7 @@ const SessionsContext = createContext<SessionsContextValue | null>(null);
  */
 export function SessionsProvider({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth();
-  const { detachSessions } = useLogs();
+  const { detachSessions, detachLogs } = useLogs();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<unknown>(null);
@@ -67,6 +69,14 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
       detachSessions(ids);
     },
     [detachSessions],
+  );
+
+  const removeSessionLogs = useCallback(
+    async (id: string, logIds: string[], deleteLogs: boolean) => {
+      await sessionService.removeLogs(id, logIds, deleteLogs);
+      detachLogs(logIds, deleteLogs);
+    },
+    [detachLogs],
   );
 
   const resumeSession = useCallback(async (id: string) => {
@@ -116,6 +126,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
       refresh,
       removeSession,
       removeSessions,
+      removeSessionLogs,
       resumeSession,
       setSessionShared,
       updateSession,
@@ -129,6 +140,7 @@ export function SessionsProvider({ children }: { children: ReactNode }) {
       refresh,
       removeSession,
       removeSessions,
+      removeSessionLogs,
       resumeSession,
       setSessionShared,
       updateSession,

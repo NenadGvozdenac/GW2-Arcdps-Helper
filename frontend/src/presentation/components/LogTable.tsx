@@ -21,13 +21,18 @@ function useLogTableController() {
   };
 }
 
+export interface LogSelection {
+  selected: ReadonlySet<string>;
+  onToggle: (id: string) => void;
+}
+
 interface Props {
   logs: Log[];
   showGroup?: boolean;
   /** Rows open the log on dps.report instead of the (sign-in only) log page — for shared sessions. */
   openOnDpsReport?: boolean;
   /** Selection mode (organizing): a checkbox per row, and clicking a row toggles it instead of opening the log. */
-  selection?: { selected: ReadonlySet<string>; onToggle: (id: string) => void };
+  selection?: LogSelection;
 }
 
 export default function LogTable({ logs, showGroup = false, openOnDpsReport = false, selection }: Props) {

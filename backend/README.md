@@ -123,6 +123,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | GET | `/sessions/page?page=&pageSize=` | ✓ | – | `{ sessions: { session, logCount, kills, wipes, groupIds, span }[], total, page, pageSize }` — one page in display order (pinned first), 10 per page by default; one database query. Doesn't auto-end expired sessions (`GET /sessions` does) |
 | POST | `/sessions/:id/move` | ✓ | `{ overId }` | `204` — drag & drop: the session takes `overId`'s place (both pinned or both not) |
 | POST | `/sessions/:id/end` | ✓ | – | `{ session }` — posts one Discord message with all its logs |
+| POST | `/sessions/:id/remove-logs` | ✓ | `{ ids, deleteLogs? }` | `{ removed }` — only for ended sessions: takes the logs out of the session (they stay in the user's logs), or with `deleteLogs: true` deletes them. The Discord summary is rewritten without them (deleted when no logs are left) |
 | POST | `/sessions/:id/resume` | ✓ | – | `{ session }` — only for sessions that expired (`409 SESSION_NOT_RESUMABLE` otherwise) |
 | POST | `/sessions/:id/share` | ✓ | – | `{ session }` with `shareToken` — creates the public link (idempotent) |
 | DELETE | `/sessions/:id/share` | ✓ | – | `{ session }` — revokes the link |

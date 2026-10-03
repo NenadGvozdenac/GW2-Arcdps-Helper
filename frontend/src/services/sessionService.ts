@@ -40,6 +40,7 @@ export const sessionService = {
   delete: (id: string) => sessionRepository.delete(id),
   deleteMany: (ids: string[]) => sessionRepository.deleteMany(ids),
   resume: (id: string) => sessionRepository.resume(id),
+  removeLogs: (id: string, ids: string[], deleteLogs: boolean) => sessionRepository.removeLogs(id, ids, deleteLogs),
 
   /** Only sessions that ended by themselves after 6 hours can be resumed. */
   canResume: (session: Session) => session.endReason === "expired",

@@ -4,7 +4,7 @@ import type { DiscordContent, DiscordEmbed, DiscordWebhook } from "../types/disc
 import type { Log } from "../types/log.types";
 import type { LogSpan, Session } from "../types/session.types";
 import { discordWebhookFailed } from "../utils/httpError";
-import { editWebhookMessage, postToWebhook } from "./clients/discordClient";
+import { deleteWebhookMessage, editWebhookMessage, postToWebhook } from "./clients/discordClient";
 
 const GREEN = 0x22c55e;
 const RED = 0xef4444;
@@ -178,6 +178,15 @@ export const discordService = {
       await editWebhookMessage(webhookUrl, messageId, { embeds: [sessionEmbed(session, logs, span)] });
     } catch (err) {
       console.warn("Discord message edit failed:", err instanceof Error ? err.message : err);
+    }
+  },
+
+  /** Deletes a session summary posted earlier (its session has no logs left). Never throws, like updateSession. */
+  async deleteSession(webhookUrl: string, messageId: string): Promise<void> {
+    try {
+      await deleteWebhookMessage(webhookUrl, messageId);
+    } catch (err) {
+      console.warn("Discord message delete failed:", err instanceof Error ? err.message : err);
     }
   },
 
