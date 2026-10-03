@@ -399,9 +399,12 @@ export const sr: Messages = {
     removeLogs: "Ukloni logove",
     removeLogsHint: "Označi logove (ili klikni na red) da ih izbaciš iz ove sesije.",
     removeSelected: "Ukloni izabrane ({count})",
-    confirmRemoveLogs: "Ukloniti logove ({count}) iz ove sesije?",
-    removeLogsBody: "Ostaju među tvojim logovima — samo više ne pripadaju ovoj sesiji.",
-    deleteLogsBody: "Biće obrisani i iz tvojih logova. Ovo ne može da se poništi.",
+    confirmRemoveLogs:
+      "Ukloniti {count} log iz ove sesije?|Ukloniti {count} loga iz ove sesije?|Ukloniti {count} logova iz ove sesije?",
+    removeLogsBody:
+      "Ostaje među tvojim logovima — samo više ne pripada ovoj sesiji.|Ostaju među tvojim logovima — samo više ne pripadaju ovoj sesiji.|Ostaju među tvojim logovima — samo više ne pripadaju ovoj sesiji.",
+    deleteLogsBody:
+      "Biće obrisan i iz tvojih logova. Ovo ne može da se poništi.|Biće obrisani i iz tvojih logova. Ovo ne može da se poništi.|Biće obrisani i iz tvojih logova. Ovo ne može da se poništi.",
     alsoDeleteLogs: "Obriši i same logove skroz",
     rename: "Preimenuj",
     namePlaceholder: "Naziv sesije",

@@ -249,7 +249,7 @@ export default function SessionDetailPage() {
                       })}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      {t(c.alsoDelete ? "sessions.deleteLogsBody" : "sessions.removeLogsBody")}
+                      {t(c.alsoDelete ? "sessions.deleteLogsBody" : "sessions.removeLogsBody", { count: c.selected.size })}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <label className="flex cursor-pointer items-center gap-2 text-sm font-medium">

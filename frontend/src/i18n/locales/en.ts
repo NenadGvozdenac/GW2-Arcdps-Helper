@@ -398,9 +398,11 @@ export const en = {
     removeLogs: "Remove logs",
     removeLogsHint: "Tick logs (or click a row) to take them out of this session.",
     removeSelected: "Remove selected ({count})",
-    confirmRemoveLogs: "Remove {count} logs from this session?",
-    removeLogsBody: "They stay in your logs — they just no longer belong to this session.",
-    deleteLogsBody: "They are deleted from your logs too. This can't be undone.",
+    confirmRemoveLogs: "Remove {count} log from this session?|Remove {count} logs from this session?",
+    removeLogsBody:
+      "It stays in your logs — it just no longer belongs to this session.|They stay in your logs — they just no longer belong to this session.",
+    deleteLogsBody:
+      "It is deleted from your logs too. This can't be undone.|They are deleted from your logs too. This can't be undone.",
     alsoDeleteLogs: "Also delete these logs completely",
     rename: "Rename",
     namePlaceholder: "Session name",

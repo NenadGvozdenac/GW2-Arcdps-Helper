@@ -405,9 +405,11 @@ export const de: Messages = {
     removeLogs: "Logs entfernen",
     removeLogsHint: "Hake Logs an (oder klick auf eine Zeile), um sie aus dieser Session zu nehmen.",
     removeSelected: "Auswahl entfernen ({count})",
-    confirmRemoveLogs: "{count} Logs aus dieser Session entfernen?",
-    removeLogsBody: "Sie bleiben in deinen Logs — sie gehören nur nicht mehr zu dieser Session.",
-    deleteLogsBody: "Sie werden auch aus deinen Logs gelöscht. Das kann nicht rückgängig gemacht werden.",
+    confirmRemoveLogs: "{count} Log aus dieser Session entfernen?|{count} Logs aus dieser Session entfernen?",
+    removeLogsBody:
+      "Es bleibt in deinen Logs — es gehört nur nicht mehr zu dieser Session.|Sie bleiben in deinen Logs — sie gehören nur nicht mehr zu dieser Session.",
+    deleteLogsBody:
+      "Es wird auch aus deinen Logs gelöscht. Das kann nicht rückgängig gemacht werden.|Sie werden auch aus deinen Logs gelöscht. Das kann nicht rückgängig gemacht werden.",
     alsoDeleteLogs: "Diese Logs auch komplett löschen",
     rename: "Umbenennen",
     namePlaceholder: "Name der Session",
