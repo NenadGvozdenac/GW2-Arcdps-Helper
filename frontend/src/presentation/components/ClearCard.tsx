@@ -11,10 +11,11 @@ interface Props {
   progress: GroupClearProgress[];
 }
 
+/** A clear's progress per wing / fractal / strike group; fills the height it is given (cards in a row end level). */
 export default function ClearCard({ label, to, resetLabel, progress }: Props) {
   return (
     <Link to={to} className="group block">
-      <Card className="gap-3 transition-colors group-hover:border-foreground/20">
+      <Card className="h-full gap-3 transition-colors group-hover:border-foreground/20">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle>{label}</CardTitle>
