@@ -19,6 +19,7 @@ export function useAdminList<T>(
   const [page, setPage] = useState(1);
   const [data, setData] = useState<AdminPage<T>>({ rows: [], total: 0 });
   const [loading, setLoading] = useState(true);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const latest = useRef(0);
   const { userId, sessionId } = filters;
@@ -44,7 +45,10 @@ export function useAdminList<T>(
     } catch (err) {
       if (request === latest.current) setError(handleError(err));
     } finally {
-      if (request === latest.current) setLoading(false);
+      if (request === latest.current) {
+        setLoading(false);
+        setLoaded(true);
+      }
     }
   }, [load, search, page, userId, sessionId, handleError]);
 
@@ -58,5 +62,7 @@ export function useAdminList<T>(
     if (!loading && page > lastPage) setPage(lastPage);
   }, [loading, page, lastPage]);
 
-  return { searchInput, setSearchInput, page, setPage, ...data, loading, error, setError, reload };
+  /** True until the first answer (then the page shows its content and dims it on reloads). */
+  const firstLoad = loading && !loaded;
+  return { searchInput, setSearchInput, page, setPage, ...data, loading, firstLoad, error, setError, reload };
 }

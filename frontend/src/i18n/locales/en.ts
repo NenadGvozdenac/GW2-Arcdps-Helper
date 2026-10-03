@@ -269,6 +269,18 @@ export const en = {
     todayLogs: "Today's logs",
     todayLogsHint: "Since the daily reset (00:00 UTC) · {count} logs",
     allLogsLink: "All logs",
+    activityTitle: "Your activity",
+    activityHint: "Logs per day, the last 30 days.",
+    bossesTitle: "Most played bosses",
+    bossesHint: "Logs in the last 30 days.",
+    bossKills: "{count} kill|{count} kills",
+  },
+  charts: {
+    showTable: "Show as table",
+    day: "Day",
+    total: "Total",
+    keyboardHint: "{label}. Use the left and right arrow keys to read each day.",
+    empty: "Nothing in this period.",
   },
   categories: {
     raid: { title: "Raids", subtitle: "Every wing, from Spirit Vale to Visions of Eternity." },

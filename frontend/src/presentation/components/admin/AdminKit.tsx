@@ -30,11 +30,57 @@ export function ErrorAlert({ message }: { message: string | null }) {
   );
 }
 
-export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
+/** The list's search field; `busy` shows a small spinner in it while results load. */
+export function SearchBox({
+  value,
+  onChange,
+  placeholder,
+  busy = false,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  busy?: boolean;
+}) {
   return (
     <div className="relative w-full max-w-sm">
       <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="pl-8" aria-label={placeholder} />
+      <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className="pr-8 pl-8" aria-label={placeholder} />
+      {busy && (
+        <Loader2Icon
+          className="absolute top-1/2 right-2.5 size-4 -translate-y-1/2 animate-spin text-muted-foreground"
+          aria-label="Loading"
+        />
+      )}
+    </div>
+  );
+}
+
+/** Stands in for a page's content until its first data arrives. */
+export function LoadingBlock({ label = "Loading…" }: { label?: string }) {
+  return (
+    <div role="status" className="flex items-center justify-center gap-2 py-20 text-sm text-muted-foreground">
+      <Loader2Icon className="size-5 animate-spin" aria-hidden="true" />
+      {label}
+    </div>
+  );
+}
+
+/** A small spinner next to controls while data reloads (the old data stays on screen, dimmed). */
+export function InlineSpinner({ show }: { show: boolean }) {
+  if (!show) return null;
+  return <Loader2Icon role="status" aria-label="Loading" className="size-4 animate-spin text-muted-foreground" />;
+}
+
+/**
+ * Content that loads: a spinner instead of it the first time, then the content itself - dimmed while it reloads, so
+ * nothing jumps.
+ */
+export function Loadable({ firstLoad, loading, children }: { firstLoad: boolean; loading: boolean; children: ReactNode }) {
+  if (firstLoad) return <LoadingBlock />;
+  return (
+    <div className={cn("flex flex-col gap-6 transition-opacity", loading && "pointer-events-none opacity-60")} aria-busy={loading}>
+      {children}
     </div>
   );
 }
@@ -135,3 +181,17 @@ export function ShortHash({ value }: { value: string }) {
 export function shareUrl(kind: "logs" | "sessions", token: string) {
   return `${window.location.origin}/shared/${kind}/${token}`;
 }
+
+/** What each rate limit guards (the key prefixes of the backend's RATE_LIMITS). */
+export const RATE_LIMIT_KIND_LABELS: Record<string, string> = {
+  login: "Wrong passwords — one email from one address",
+  "login-ip": "Wrong passwords — one address, any email",
+  "verification-email": "Confirmation emails",
+  "password-reset-email": "Password-reset emails",
+  "discord-test": "Discord test messages",
+  feedback: "Feedback",
+  "admin-login-ip": "Admin sign-in — one address",
+  "admin-login": "Admin sign-in — everywhere",
+  "admin-totp": "Admin code used twice",
+};
+export const rateLimitKindLabel = (kind: string) => RATE_LIMIT_KIND_LABELS[kind] ?? kind;

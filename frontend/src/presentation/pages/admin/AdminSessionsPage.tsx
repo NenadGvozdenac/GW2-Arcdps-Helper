@@ -10,7 +10,7 @@ import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Checkbox } from "@/presentation/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { ConfirmButton, ErrorAlert, SearchBox, shareUrl, useAdminAction } from "../../components/admin/AdminKit";
+import { ConfirmButton, ErrorAlert, Loadable, SearchBox, shareUrl, useAdminAction } from "../../components/admin/AdminKit";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 
@@ -56,7 +56,7 @@ export default function AdminSessionsPage() {
     <>
       <PageHeader
         title="Sessions"
-        description={`${list.total} sessions`}
+        description={list.firstLoad ? "Loading…" : `${list.total} sessions`}
         actions={
           <ConfirmButton
             label={`Delete selected (${c.selected.size})`}
@@ -70,7 +70,7 @@ export default function AdminSessionsPage() {
         }
       />
       <div className="flex flex-wrap items-center gap-3">
-        <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Session name, email or GW2 account" />
+        <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Session name, email or GW2 account" busy={list.loading && !list.firstLoad} />
         {c.userId && (
           <Button variant="secondary" size="sm" onClick={c.clearFilter}>
             Only one user <XIcon />
@@ -79,6 +79,7 @@ export default function AdminSessionsPage() {
       </div>
       <ErrorAlert message={list.error} />
 
+      <Loadable firstLoad={list.firstLoad} loading={list.loading}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -161,6 +162,7 @@ export default function AdminSessionsPage() {
       </Table>
       {!list.loading && !list.rows.length && <p className="text-center text-sm text-muted-foreground">No sessions found.</p>}
       <Pagination page={list.page} pageSize={ADMIN_PAGE_SIZE} total={list.total} onPageChange={list.setPage} />
+      </Loadable>
     </>
   );
 }

@@ -270,6 +270,18 @@ export const sr: Messages = {
     todayLogs: "Današnji logovi",
     todayLogsHint: "Od dnevnog reseta (00:00 UTC) · logova: {count}",
     allLogsLink: "Svi logovi",
+    activityTitle: "Tvoja aktivnost",
+    activityHint: "Logovi po danu, poslednjih 30 dana.",
+    bossesTitle: "Najčešći bossovi",
+    bossesHint: "Logovi u poslednjih 30 dana.",
+    bossKills: "{count} kill|{count} killa|{count} killova",
+  },
+  charts: {
+    showTable: "Prikaži kao tabelu",
+    day: "Dan",
+    total: "Ukupno",
+    keyboardHint: "{label}. Strelicama levo i desno čitaš dan po dan.",
+    empty: "Ništa u ovom periodu.",
   },
   categories: {
     raid: { title: "Raidovi", subtitle: "Svi wingovi, od Spirit Vale do Visions of Eternity." },

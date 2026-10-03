@@ -277,3 +277,8 @@ export const adminRateLimitEventsSchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(50),
 });
+
+/** Query of GET /admin/stats: how many days back (7, 30 or 90). */
+export const adminStatsSchema = z.object({
+  days: z.coerce.number().pipe(z.union([z.literal(7), z.literal(30), z.literal(90)])).default(30),
+});

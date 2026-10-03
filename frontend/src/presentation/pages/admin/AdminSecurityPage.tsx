@@ -4,31 +4,40 @@ import { BanIcon, RefreshCwIcon } from "lucide-react";
 import { ADMIN_PAGE_SIZE } from "../../../config/constants";
 import { useAdmin } from "../../../controllers/AdminController";
 import { useI18n } from "../../../controllers/I18nController";
-import type { AdminBlockedIp, AdminPage, AdminRateLimitEvent, AdminRateLimitKey, AdminRateLimits } from "../../../domain/types/admin.types";
+import type {
+  AdminBlockedIp,
+  AdminPage,
+  AdminRateLimitEvent,
+  AdminRateLimitKey,
+  AdminRateLimits,
+} from "../../../domain/types/admin.types";
 import { adminService } from "../../../services/adminService";
 import { Button } from "@/presentation/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
+import { cn } from "@/presentation/lib/utils";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { ConfirmButton, ErrorAlert, ShortHash, useAdminAction } from "../../components/admin/AdminKit";
+import {
+  ConfirmButton,
+  ErrorAlert,
+  Loadable,
+  RATE_LIMIT_KIND_LABELS as KIND_LABELS,
+  rateLimitKindLabel as kindLabel,
+  ShortHash,
+  useAdminAction,
+} from "../../components/admin/AdminKit";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 
-/** What each rate limit guards (the key prefixes from the backend's RATE_LIMITS users). */
-const KIND_LABELS: Record<string, string> = {
-  login: "Wrong passwords — one email from one address",
-  "login-ip": "Wrong passwords — one address, any email",
-  "verification-email": "Confirmation emails",
-  "password-reset-email": "Password-reset emails",
-  "discord-test": "Discord test messages",
-  feedback: "Feedback",
-  "admin-login-ip": "Admin sign-in — one address",
-  "admin-login": "Admin sign-in — everywhere",
-  "admin-totp": "Admin code used twice",
-};
-const kindLabel = (kind: string) => KIND_LABELS[kind] ?? kind;
 const ALL_KINDS = "__all";
 
 function useSecurityController() {
@@ -39,18 +48,26 @@ function useSecurityController() {
   const [kind, setKind] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [newHash, setNewHash] = useState("");
   const [newNote, setNewNote] = useState("");
 
   const reload = useCallback(async () => {
+    setLoading(true);
     try {
-      const [b, l, e] = await Promise.all([adminService.blockedIps(), adminService.rateLimits(), adminService.rateLimitEvents(kind, page)]);
+      const [b, l, e] = await Promise.all([
+        adminService.blockedIps(),
+        adminService.rateLimits(),
+        adminService.rateLimitEvents(kind, page),
+      ]);
       setBlocked(b);
       setLimits(l);
       setEvents(e);
       setError(null);
     } catch (err) {
       setError(handleError(err));
+    } finally {
+      setLoading(false);
     }
   }, [kind, page, handleError]);
 
@@ -62,6 +79,7 @@ function useSecurityController() {
   const blockedSet = new Set(blocked.map((b) => b.ipHash));
 
   return {
+    loading,
     blocked,
     blockedSet,
     limits,
@@ -137,227 +155,239 @@ export default function AdminSecurityPage() {
         title="Security"
         description="Blocked addresses and requests refused by rate limits. Addresses are SHA-256 hashes, never the IPs themselves."
         actions={
-          <Button variant="outline" size="sm" onClick={c.reload}>
-            <RefreshCwIcon /> Refresh
+          <Button variant="outline" size="sm" onClick={c.reload} disabled={c.loading}>
+            <RefreshCwIcon className={cn(c.loading && "animate-spin")} /> Refresh
           </Button>
         }
       />
       <ErrorAlert message={c.error} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Blocked addresses</CardTitle>
-          <CardDescription>Every API request from these is refused (the admin area stays reachable).</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {c.blocked.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Address (hash)</TableHead>
-                  <TableHead>Note</TableHead>
-                  <TableHead>Used by</TableHead>
-                  <TableHead>Blocked</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {c.blocked.map((b) => (
-                  <TableRow key={b.ipHash}>
-                    <TableCell>
-                      <ShortHash value={b.ipHash} />
-                    </TableCell>
-                    <TableCell>{b.note || "—"}</TableCell>
-                    <TableCell className="text-sm">{b.users.length ? b.users.join(", ") : "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{fmt.dateTime(b.blockedAt)}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" disabled={c.busy === b.ipHash} onClick={() => c.unblock(b.ipHash)}>
-                        Unblock
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-sm text-muted-foreground">No blocked addresses.</p>
-          )}
-          <form
-            className="flex flex-wrap items-end gap-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (c.validNewHash) c.blockNew();
-            }}
-          >
-            <div className="flex min-w-72 flex-1 flex-col gap-1.5">
-              <Label htmlFor="new-hash">Address hash</Label>
-              <Input id="new-hash" className="font-mono text-xs" value={c.newHash} onChange={(e) => c.setNewHash(e.target.value.toLowerCase())} />
-            </div>
-            <div className="flex min-w-48 flex-col gap-1.5">
-              <Label htmlFor="new-note">Note</Label>
-              <Input id="new-note" value={c.newNote} onChange={(e) => c.setNewNote(e.target.value)} maxLength={300} />
-            </div>
-            <Button type="submit" variant="outline" disabled={!c.validNewHash || c.busy === "new"}>
-              <BanIcon /> Block
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Refused requests by limit</CardTitle>
-          <CardDescription>Click a row to see its requests below.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {c.limits?.byKind.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Limit</TableHead>
-                  <TableHead className="text-right">Last 24 h</TableHead>
-                  <TableHead className="text-right">Last 7 days</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {c.limits.byKind.map((k) => (
-                  <TableRow key={k.kind} className="cursor-pointer" onClick={() => c.setKind(k.kind)}>
-                    <TableCell>
-                      <button type="button" className="text-left hover:underline" onClick={() => c.setKind(k.kind)}>
-                        {kindLabel(k.kind)}
-                      </button>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">{k.last24h}</TableCell>
-                    <TableCell className="text-right tabular-nums">{k.last7d}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-sm text-muted-foreground">Nothing refused in the last 7 days.</p>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 xl:grid-cols-2">
+      <Loadable firstLoad={c.loading && !c.limits} loading={c.loading}>
         <Card>
           <CardHeader>
-            <CardTitle>Refused most (24 h)</CardTitle>
+            <CardTitle>Blocked addresses</CardTitle>
+            <CardDescription>Every API request from these is refused (the admin area stays reachable).</CardDescription>
           </CardHeader>
-          <CardContent>
-            {c.limits?.topKeys.length ? (
+          <CardContent className="flex flex-col gap-4">
+            {c.blocked.length ? (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Limit</TableHead>
-                    <TableHead>Who / where</TableHead>
-                    <TableHead className="text-right">Refused</TableHead>
-                    <TableHead>Last</TableHead>
+                    <TableHead>Address (hash)</TableHead>
+                    <TableHead>Note</TableHead>
+                    <TableHead>Used by</TableHead>
+                    <TableHead>Blocked</TableHead>
+                    <TableHead />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {c.limits.topKeys.map((k) => (
-                    <TableRow key={k.key}>
-                      <TableCell className="text-sm">{kindLabel(k.kind)}</TableCell>
+                  {c.blocked.map((b) => (
+                    <TableRow key={b.ipHash}>
                       <TableCell>
-                        <KeyTarget k={k} c={c} />
+                        <ShortHash value={b.ipHash} />
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{k.refused}</TableCell>
-                      <TableCell className="text-muted-foreground">{fmt.dateTime(k.lastAt)}</TableCell>
+                      <TableCell>{b.note || "—"}</TableCell>
+                      <TableCell className="text-sm">{b.users.length ? b.users.join(", ") : "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{fmt.dateTime(b.blockedAt)}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={c.busy === b.ipHash}
+                          onClick={() => c.unblock(b.ipHash)}
+                        >
+                          Unblock
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-sm text-muted-foreground">Nothing refused in the last 24 hours.</p>
+              <p className="text-sm text-muted-foreground">No blocked addresses.</p>
             )}
+            <form
+              className="flex flex-wrap items-end gap-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (c.validNewHash) c.blockNew();
+              }}
+            >
+              <div className="flex min-w-72 flex-1 flex-col gap-1.5">
+                <Label htmlFor="new-hash">Address hash</Label>
+                <Input
+                  id="new-hash"
+                  className="font-mono text-xs"
+                  value={c.newHash}
+                  onChange={(e) => c.setNewHash(e.target.value.toLowerCase())}
+                />
+              </div>
+              <div className="flex min-w-48 flex-col gap-1.5">
+                <Label htmlFor="new-note">Note</Label>
+                <Input id="new-note" value={c.newNote} onChange={(e) => c.setNewNote(e.target.value)} maxLength={300} />
+              </div>
+              <Button type="submit" variant="outline" disabled={!c.validNewHash || c.busy === "new"}>
+                <BanIcon /> Block
+              </Button>
+            </form>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Counters running now</CardTitle>
-            <CardDescription>Limits being counted at the moment, fullest first.</CardDescription>
+            <CardTitle>Refused requests by limit</CardTitle>
+            <CardDescription>Click a row to see its requests below.</CardDescription>
           </CardHeader>
           <CardContent>
-            {c.limits?.active.length ? (
+            {c.limits?.byKind.length ? (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Limit</TableHead>
-                    <TableHead>Who / where</TableHead>
-                    <TableHead className="text-right">Count</TableHead>
-                    <TableHead>Resets</TableHead>
+                    <TableHead className="text-right">Last 24 h</TableHead>
+                    <TableHead className="text-right">Last 7 days</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {c.limits.active.map((k) => (
-                    <TableRow key={k.key}>
-                      <TableCell className="text-sm">{kindLabel(k.kind)}</TableCell>
+                  {c.limits.byKind.map((k) => (
+                    <TableRow key={k.kind} className="cursor-pointer" onClick={() => c.setKind(k.kind)}>
                       <TableCell>
-                        <KeyTarget k={k} c={c} />
+                        <button type="button" className="text-left hover:underline" onClick={() => c.setKind(k.kind)}>
+                          {kindLabel(k.kind)}
+                        </button>
                       </TableCell>
-                      <TableCell className="text-right tabular-nums">{k.count}</TableCell>
-                      <TableCell className="text-muted-foreground">{fmt.dateTime(k.expiresAt)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{k.last24h}</TableCell>
+                      <TableCell className="text-right tabular-nums">{k.last7d}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-sm text-muted-foreground">No counters running.</p>
+              <p className="text-sm text-muted-foreground">Nothing refused in the last 7 days.</p>
             )}
           </CardContent>
         </Card>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Refused requests</CardTitle>
-          <CardDescription>{c.events.total} in the last 30 days</CardDescription>
-          <CardAction>
-            <Select value={c.kind ?? ALL_KINDS} onValueChange={(v) => c.setKind(v === ALL_KINDS ? null : v)}>
-              <SelectTrigger size="sm" aria-label="Limit">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent position="popper" align="end">
-                <SelectItem value={ALL_KINDS}>All limits</SelectItem>
-                {Object.keys(KIND_LABELS).map((k) => (
-                  <SelectItem key={k} value={k}>
-                    {kindLabel(k)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </CardAction>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          {c.events.rows.length ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>When</TableHead>
-                  <TableHead>Limit</TableHead>
-                  <TableHead>Who / where</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {c.events.rows.map((e) => (
-                  <TableRow key={e.id}>
-                    <TableCell className="text-muted-foreground">{fmt.dateTime(e.createdAt)}</TableCell>
-                    <TableCell className="text-sm">{kindLabel(e.kind)}</TableCell>
-                    <TableCell>
-                      <KeyTarget k={e} c={c} />
-                    </TableCell>
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Refused most (24 h)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {c.limits?.topKeys.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Limit</TableHead>
+                      <TableHead>Who / where</TableHead>
+                      <TableHead className="text-right">Refused</TableHead>
+                      <TableHead>Last</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {c.limits.topKeys.map((k) => (
+                      <TableRow key={`${k.kind}:${k.key}`}>
+                        <TableCell className="text-sm">{kindLabel(k.kind)}</TableCell>
+                        <TableCell>
+                          <KeyTarget k={k} c={c} />
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{k.refused}</TableCell>
+                        <TableCell className="text-muted-foreground">{fmt.dateTime(k.lastAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">Nothing refused in the last 24 hours.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Counters running now</CardTitle>
+              <CardDescription>Limits being counted at the moment, fullest first.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {c.limits?.active.length ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Limit</TableHead>
+                      <TableHead>Who / where</TableHead>
+                      <TableHead className="text-right">Count</TableHead>
+                      <TableHead>Resets</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {c.limits.active.map((k) => (
+                      <TableRow key={`${k.kind}:${k.key}`}>
+                        <TableCell className="text-sm">{kindLabel(k.kind)}</TableCell>
+                        <TableCell>
+                          <KeyTarget k={k} c={c} />
+                        </TableCell>
+                        <TableCell className="text-right tabular-nums">{k.count}</TableCell>
+                        <TableCell className="text-muted-foreground">{fmt.dateTime(k.expiresAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <p className="text-sm text-muted-foreground">No counters running.</p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Refused requests</CardTitle>
+            <CardDescription>{c.events.total} in the last 30 days</CardDescription>
+            <CardAction>
+              <Select value={c.kind ?? ALL_KINDS} onValueChange={(v) => c.setKind(v === ALL_KINDS ? null : v)}>
+                <SelectTrigger size="sm" aria-label="Limit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper" align="end">
+                  <SelectItem value={ALL_KINDS}>All limits</SelectItem>
+                  {Object.keys(KIND_LABELS).map((k) => (
+                    <SelectItem key={k} value={k}>
+                      {kindLabel(k)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardAction>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            {c.events.rows.length ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>When</TableHead>
+                    <TableHead>Limit</TableHead>
+                    <TableHead>Who / where</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <p className="text-sm text-muted-foreground">No refused requests.</p>
-          )}
-          <Pagination page={c.page} pageSize={ADMIN_PAGE_SIZE} total={c.events.total} onPageChange={c.setPage} />
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {c.events.rows.map((e) => (
+                    <TableRow key={e.id}>
+                      <TableCell className="text-muted-foreground">{fmt.dateTime(e.createdAt)}</TableCell>
+                      <TableCell className="text-sm">{kindLabel(e.kind)}</TableCell>
+                      <TableCell>
+                        <KeyTarget k={e} c={c} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-sm text-muted-foreground">No refused requests.</p>
+            )}
+            <Pagination page={c.page} pageSize={ADMIN_PAGE_SIZE} total={c.events.total} onPageChange={c.setPage} />
+          </CardContent>
+        </Card>
+      </Loadable>
     </>
   );
 }

@@ -100,3 +100,44 @@ export interface AdminListFilter {
   userId?: string;
   sessionId?: string;
 }
+
+/** Periods the overview can show. */
+export const ADMIN_STATS_DAYS = [7, 30, 90] as const;
+export type AdminStatsDays = (typeof ADMIN_STATS_DAYS)[number];
+
+/** A count in the chosen period and in the period of the same length before it. */
+export interface AdminPeriodCount {
+  now: number;
+  prev: number;
+}
+
+/** One UTC day of the overview's charts. */
+export interface AdminStatsDay {
+  date: string;
+  logs: number;
+  kills: number;
+  wipes: number;
+  /** Users who uploaded at least one log that day. */
+  activeUsers: number;
+  newUsers: number;
+  sessions: number;
+  /** Refused requests per rate-limit kind. */
+  refused: Record<string, number>;
+}
+
+export interface AdminStats {
+  days: AdminStatsDays;
+  from: Date;
+  totals: {
+    newUsers: AdminPeriodCount;
+    logs: AdminPeriodCount;
+    activeUsers: AdminPeriodCount;
+    sessions: AdminPeriodCount;
+    refused: AdminPeriodCount;
+    kills: number;
+  };
+  daily: AdminStatsDay[];
+  byCategory: { category: string; logs: number; kills: number }[];
+  topBosses: { boss: string; logs: number; kills: number }[];
+  topUploaders: { userId: string; email: string; gw2Account: string; logs: number; sessions: number }[];
+}

@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/presentation/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { ConfirmButton, ErrorAlert, SearchBox, shareUrl, useAdminAction } from "../../components/admin/AdminKit";
+import { ConfirmButton, ErrorAlert, Loadable, SearchBox, shareUrl, useAdminAction } from "../../components/admin/AdminKit";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 
@@ -131,7 +131,7 @@ export default function AdminLogsPage() {
     <>
       <PageHeader
         title="Logs"
-        description={`${list.total} logs`}
+        description={list.firstLoad ? "Loading…" : `${list.total} logs`}
         actions={
           <ConfirmButton
             label={`Delete selected (${c.selected.size})`}
@@ -145,7 +145,7 @@ export default function AdminLogsPage() {
         }
       />
       <div className="flex flex-wrap items-center gap-3">
-        <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Boss, email or GW2 account" />
+        <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Boss, email or GW2 account" busy={list.loading && !list.firstLoad} />
         {(c.userId || c.sessionId) && (
           <Button variant="secondary" size="sm" onClick={c.clearFilter}>
             {c.sessionId ? "Only one session" : "Only one user"} <XIcon />
@@ -154,6 +154,7 @@ export default function AdminLogsPage() {
       </div>
       <ErrorAlert message={list.error} />
 
+      <Loadable firstLoad={list.firstLoad} loading={list.loading}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -248,6 +249,7 @@ export default function AdminLogsPage() {
       </Table>
       {!list.loading && !list.rows.length && <p className="text-center text-sm text-muted-foreground">No logs found.</p>}
       <Pagination page={list.page} pageSize={ADMIN_PAGE_SIZE} total={list.total} onPageChange={list.setPage} />
+      </Loadable>
       {c.moving && <SessionPicker log={c.moving} onClose={() => c.setMoving(null)} onPick={c.move} />}
     </>
   );

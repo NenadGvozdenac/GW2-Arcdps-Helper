@@ -12,6 +12,7 @@ export function createAdminRouter(): Router {
 
   router.get("/auth/me", admin.me);
   router.get("/overview", admin.overview);
+  router.get("/stats", admin.stats);
 
   router.get("/users", admin.users);
   router.get("/users/:id", admin.user);

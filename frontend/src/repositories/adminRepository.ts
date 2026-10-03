@@ -8,6 +8,8 @@ import type {
   AdminRateLimitEvent,
   AdminRateLimits,
   AdminSession,
+  AdminStats,
+  AdminStatsDays,
   AdminUser,
   AdminUserDetail,
   AdminWebhook,
@@ -51,6 +53,8 @@ export const adminRepository = {
   verify: (challenge: string, code: string) => adminHttp.post<{ token: string }>("/admin/auth/verify", { challenge, code }),
   me: () => adminHttp.get<{ email: string }>("/admin/auth/me"),
   overview: () => adminHttp.get<AdminOverview>("/admin/overview"),
+  /** The overview's charts for the last `days` days. */
+  stats: (days: AdminStatsDays) => adminHttp.get<AdminStats>(`/admin/stats?days=${days}`),
 
   users: (q: AdminListQuery) => page<AdminUser>("/admin/users", q, USER_DATES),
   async user(userId: string): Promise<AdminUserDetail> {

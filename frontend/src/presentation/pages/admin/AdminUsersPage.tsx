@@ -4,7 +4,7 @@ import { useI18n } from "../../../controllers/I18nController";
 import { useAdminList } from "../../../hooks/useAdminList";
 import { adminService } from "../../../services/adminService";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { ErrorAlert, SearchBox, YesNo } from "../../components/admin/AdminKit";
+import { ErrorAlert, Loadable, SearchBox, YesNo } from "../../components/admin/AdminKit";
 import PageHeader from "../../components/PageHeader";
 import Pagination from "../../components/Pagination";
 
@@ -15,9 +15,10 @@ export default function AdminUsersPage() {
 
   return (
     <>
-      <PageHeader title="Users" description={`${list.total} accounts`} />
-      <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Email or GW2 account" />
+      <PageHeader title="Users" description={list.firstLoad ? "Loading…" : `${list.total} accounts`} />
+      <SearchBox value={list.searchInput} onChange={list.setSearchInput} placeholder="Email or GW2 account" busy={list.loading && !list.firstLoad} />
       <ErrorAlert message={list.error} />
+      <Loadable firstLoad={list.firstLoad} loading={list.loading}>
       <Table>
         <TableHeader>
           <TableRow>
@@ -58,6 +59,7 @@ export default function AdminUsersPage() {
       </Table>
       {!list.loading && !list.rows.length && <p className="text-center text-sm text-muted-foreground">No users found.</p>}
       <Pagination page={list.page} pageSize={ADMIN_PAGE_SIZE} total={list.total} onPageChange={list.setPage} />
+      </Loadable>
     </>
   );
 }

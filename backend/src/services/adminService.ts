@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { SHARE_TOKEN_BYTES } from "../config/constants";
 import { adminRepository, type AdminWebhookRow } from "../repositories/adminRepository";
+import { adminStatsRepository as stats } from "../repositories/adminStatsRepository";
 import { rateLimitEventRepository } from "../repositories/rateLimitEventRepository";
 import { userRepository } from "../repositories/userRepository";
 import type {
@@ -9,6 +10,9 @@ import type {
   AdminOverview,
   AdminPage,
   AdminSession,
+  AdminStats,
+  AdminStatsDay,
+  AdminStatsDays,
   AdminUser,
   AdminUserDetail,
   AdminWebhook,
@@ -69,6 +73,57 @@ export const adminService = {
       rateLimitEventRepository.countSince(DAY_MS),
     ]);
     return { ...totals, rateLimitEventsLast24h };
+  },
+
+  /**
+   * The overview's charts for the last `days` UTC days (today included): per day, totals against the period before,
+   * and the leaders of the period. Days without activity are in the list with zeros.
+   */
+  async stats(days: AdminStatsDays): Promise<AdminStats> {
+    const todayStart = new Date(new Date().toISOString().slice(0, 10) + "T00:00:00Z");
+    const from = new Date(todayStart.getTime() - (days - 1) * DAY_MS);
+    const to = new Date(todayStart.getTime() + DAY_MS);
+    const prevFrom = new Date(from.getTime() - days * DAY_MS);
+
+    const [logsDaily, usersDaily, sessionsDaily, refusedDaily, newUsers, logs, kills, activeUsers, sessions, refused, byCategory, topBosses, topUploaders] =
+      await Promise.all([
+        stats.logsPerDay(from),
+        stats.perDay("users", "created_at", from),
+        stats.perDay("sessions", "started_at", from),
+        stats.refusedPerDay(from),
+        stats.newUsers(from, to, prevFrom),
+        stats.logs(from, to, prevFrom),
+        stats.kills(from, to),
+        stats.activeUsers(from, to, prevFrom),
+        stats.sessions(from, to, prevFrom),
+        stats.refused(from, to, prevFrom),
+        stats.logsByCategory(from),
+        stats.topBosses(from, 10),
+        stats.topUploaders(from, 10),
+      ]);
+
+    const daily = new Map<string, AdminStatsDay>();
+    for (let i = 0; i < days; i++) {
+      const date = new Date(from.getTime() + i * DAY_MS).toISOString().slice(0, 10);
+      daily.set(date, { date, logs: 0, kills: 0, wipes: 0, activeUsers: 0, newUsers: 0, sessions: 0, refused: {} });
+    }
+    for (const r of logsDaily) {
+      const d = daily.get(r.day);
+      if (d) Object.assign(d, { logs: r.logs, kills: r.kills, wipes: r.logs - r.kills, activeUsers: r.uploaders });
+    }
+    for (const r of usersDaily) if (daily.has(r.day)) daily.get(r.day)!.newUsers = r.n;
+    for (const r of sessionsDaily) if (daily.has(r.day)) daily.get(r.day)!.sessions = r.n;
+    for (const r of refusedDaily) if (daily.has(r.day)) daily.get(r.day)!.refused[r.kind] = r.n;
+
+    return {
+      days,
+      from,
+      totals: { newUsers, logs, activeUsers, sessions, refused, kills: kills.kills },
+      daily: [...daily.values()],
+      byCategory,
+      topBosses,
+      topUploaders,
+    };
   },
 
   // ---------- users

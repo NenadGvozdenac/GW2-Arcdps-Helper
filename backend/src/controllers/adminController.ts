@@ -12,6 +12,7 @@ import {
   adminLoginSchema,
   adminRateLimitEventsSchema,
   adminSharedSchema,
+  adminStatsSchema,
   adminVerifySchema,
   adminWebhookPatchSchema,
   idParamSchema,
@@ -44,6 +45,12 @@ export const adminController = {
 
   async overview(_req: Request, res: Response) {
     res.json(await adminService.overview());
+  },
+
+  /** GET /admin/stats?days=7|30|90 - the overview's charts. */
+  async stats(req: Request, res: Response) {
+    const { days } = validate(adminStatsSchema, req.query);
+    res.json(await adminService.stats(days));
   },
 
   // ---------- users

@@ -275,6 +275,18 @@ export const de: Messages = {
     todayLogs: "Heutige Logs",
     todayLogsHint: "Seit dem täglichen Reset (00:00 UTC) · {count} Logs",
     allLogsLink: "Alle Logs",
+    activityTitle: "Deine Aktivität",
+    activityHint: "Logs pro Tag, die letzten 30 Tage.",
+    bossesTitle: "Meistgespielte Bosse",
+    bossesHint: "Logs der letzten 30 Tage.",
+    bossKills: "{count} Kill|{count} Kills",
+  },
+  charts: {
+    showTable: "Als Tabelle anzeigen",
+    day: "Tag",
+    total: "Gesamt",
+    keyboardHint: "{label}. Mit den Pfeiltasten links und rechts liest du Tag für Tag.",
+    empty: "Nichts in diesem Zeitraum.",
   },
   categories: {
     raid: { title: "Raids", subtitle: "Jeder Flügel, von Spirit Vale bis Visions of Eternity." },

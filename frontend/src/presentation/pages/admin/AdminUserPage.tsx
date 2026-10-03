@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/pre
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
-import { ConfirmButton, ErrorAlert, ShortHash, useAdminAction } from "../../components/admin/AdminKit";
+import { ConfirmButton, ErrorAlert, LoadingBlock, ShortHash, useAdminAction } from "../../components/admin/AdminKit";
 import WebhookTable from "../../components/admin/WebhookTable";
 import PageHeader from "../../components/PageHeader";
 import StatCard from "../../components/StatCard";
@@ -72,7 +72,7 @@ export default function AdminUserPage() {
   if (!u) return (
     <>
       {back}
-      <ErrorAlert message={c.error} />
+      {c.error ? <ErrorAlert message={c.error} /> : <LoadingBlock />}
     </>
   );
 
