@@ -22,13 +22,9 @@ export function StatTile({
   let delta: ReactNode = detail ? <span className="text-muted-foreground">{detail}</span> : null;
   if (previous) {
     const { now, prev } = previous;
+    // Nothing to compare with (e.g. the site is younger than the period before): no comparison at all.
     if (prev === 0) {
-      delta = (
-        <span className="flex flex-col text-muted-foreground">
-          <span>—</span>
-          <span>{now ? "none in the previous" : "none in either"} {period}</span>
-        </span>
-      );
+      delta = null;
     } else {
       const pct = Math.round(((now - prev) / prev) * 100);
       const good = pct === 0 ? null : pct > 0 === upIsGood;

@@ -69,7 +69,7 @@ export default function AdminShell() {
         </nav>
 
         <div className="hidden border-t pt-4 md:block">
-          <Button variant="ghost" size="sm" className="w-full justify-start" onClick={logout}>
+          <Button variant="ghost" size="sm" className="w-full cursor-pointer justify-start" onClick={logout}>
             <LogOutIcon /> Sign out
           </Button>
         </div>
@@ -78,7 +78,7 @@ export default function AdminShell() {
       <main className="mx-auto flex w-full min-w-0 max-w-7xl flex-1 flex-col gap-6 px-4 py-6 md:px-8">
         {/* On a phone the sidebar's footer is hidden: sign out from here. */}
         <div className="flex justify-end md:hidden">
-          <Button variant="ghost" size="sm" onClick={logout}>
+          <Button variant="ghost" size="sm" className="cursor-pointer" onClick={logout}>
             <LogOutIcon /> Sign out
           </Button>
         </div>
