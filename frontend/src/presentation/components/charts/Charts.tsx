@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { useI18n } from "../../../controllers/I18nController";
 import { localeFor } from "../../../i18n/translate";
+import { cn } from "@/presentation/lib/utils";
 
 /**
  * Charts of the dashboard and the admin overview, drawn as plain SVG. Colors are the dataviz categorical slots for the app's dark card
@@ -81,40 +82,40 @@ function Legend({ series, kind }: { series: ChartSeries[]; kind: "columns" | "li
   );
 }
 
-/** The same numbers as the chart, as a table (the accessible twin; tooltips never gate a value). */
-function TableView({ data, series }: { data: ChartPoint[]; series: ChartSeries[] }) {
+/**
+ * The same numbers as the chart, as a table (the accessible twin; tooltips never gate a value). It takes the chart's
+ * place at the chart's height, scrolling inside, so the card doesn't change size.
+ */
+function TableView({ data, series, height }: { data: ChartPoint[]; series: ChartSeries[]; height: number }) {
   const { t } = useI18n();
   const f = useChartFormat();
   return (
-    <details className="text-sm">
-      <summary className="cursor-pointer text-xs text-muted-foreground hover:text-foreground">{t("charts.showTable")}</summary>
-      <div className="mt-2 max-h-64 overflow-auto rounded-md border">
-        <table className="w-full text-xs">
-          <thead className="sticky top-0 bg-card">
-            <tr className="border-b">
-              <th className="px-2 py-1.5 text-left font-medium">{t("charts.day")}</th>
-              {series.map((s) => (
-                <th key={s.name} className="px-2 py-1.5 text-right font-medium">
-                  {s.name}
-                </th>
+    <div className="overflow-auto rounded-md border" style={{ height }}>
+      <table className="w-full text-xs">
+        <thead className="sticky top-0 bg-card">
+          <tr className="border-b">
+            <th className="px-2 py-1.5 text-left font-medium">{t("charts.day")}</th>
+            {series.map((s) => (
+              <th key={s.name} className="px-2 py-1.5 text-right font-medium">
+                {s.name}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((p) => (
+            <tr key={p.date} className="border-b last:border-0">
+              <td className="px-2 py-1">{f.day(p.date, true)}</td>
+              {p.values.map((v, i) => (
+                <td key={series[i].name} className="px-2 py-1 text-right tabular-nums">
+                  {f.number(v)}
+                </td>
               ))}
             </tr>
-          </thead>
-          <tbody>
-            {data.map((p) => (
-              <tr key={p.date} className="border-b last:border-0">
-                <td className="px-2 py-1">{f.day(p.date, true)}</td>
-                {p.values.map((v, i) => (
-                  <td key={series[i].name} className="px-2 py-1 text-right tabular-nums">
-                    {f.number(v)}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </details>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -122,7 +123,8 @@ const MARGIN = { top: 10, right: 12, bottom: 24, left: 40 };
 
 /**
  * A per-day chart: stacked columns (series = parts of each day) or one line with a light area wash. Hover, or focus
- * and the arrow keys, show every series of that day in a tooltip; the table view below has all values.
+ * and the arrow keys, show every series of that day in a tooltip. A button switches between the chart and a table of
+ * all values, in the same place.
  */
 export function TimeChart({
   kind,
@@ -142,6 +144,7 @@ export function TimeChart({
   const f = useChartFormat();
   const { ref, width } = useWidth();
   const [active, setActive] = useState<number | null>(null);
+  const [asTable, setAsTable] = useState(false);
   const right = kind === "line" ? 44 : MARGIN.right;
   const plotW = Math.max(0, width - MARGIN.left - right);
   const plotH = height - MARGIN.top - MARGIN.bottom;
@@ -175,7 +178,11 @@ export function TimeChart({
       <Legend series={series} kind={kind} />
       <div
         ref={ref}
-        className="relative rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        // Hidden, not removed, while the table shows: it keeps its measured width for switching back.
+        className={cn(
+          "relative rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          asTable && "hidden",
+        )}
         tabIndex={0}
         role="group"
         aria-label={t("charts.keyboardHint", { label })}
@@ -194,8 +201,23 @@ export function TimeChart({
           >
             {ticks.map((tick) => (
               <g key={tick}>
-                <line x1={MARGIN.left} x2={MARGIN.left + plotW} y1={y(tick)} y2={y(tick)} stroke={tick === 0 ? INK.axis : INK.grid} strokeWidth={1} />
-                <text x={MARGIN.left - 8} y={y(tick)} dy="0.32em" textAnchor="end" fontSize={11} fill={INK.muted} style={{ fontVariantNumeric: "tabular-nums" }}>
+                <line
+                  x1={MARGIN.left}
+                  x2={MARGIN.left + plotW}
+                  y1={y(tick)}
+                  y2={y(tick)}
+                  stroke={tick === 0 ? INK.axis : INK.grid}
+                  strokeWidth={1}
+                />
+                <text
+                  x={MARGIN.left - 8}
+                  y={y(tick)}
+                  dy="0.32em"
+                  textAnchor="end"
+                  fontSize={11}
+                  fill={INK.muted}
+                  style={{ fontVariantNumeric: "tabular-nums" }}
+                >
                   {f.number(tick)}
                 </text>
               </g>
@@ -234,14 +256,36 @@ export function TimeChart({
             {kind === "line" && n > 0 && (
               <>
                 <path d={`${linePath}L${x(last)},${y(0)}L${x(0)},${y(0)}Z`} fill={series[0].color} opacity={0.1} />
-                <path d={linePath} fill="none" stroke={series[0].color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+                <path
+                  d={linePath}
+                  fill="none"
+                  stroke={series[0].color}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
                 {active !== null && (
                   <line x1={x(active)} x2={x(active)} y1={MARGIN.top} y2={y(0)} stroke={INK.muted} strokeWidth={1} />
                 )}
                 {[active ?? last].map((i) => (
-                  <circle key={i} cx={x(i)} cy={y(data[i].values[0])} r={4} fill={series[0].color} stroke={INK.surface} strokeWidth={2} />
+                  <circle
+                    key={i}
+                    cx={x(i)}
+                    cy={y(data[i].values[0])}
+                    r={4}
+                    fill={series[0].color}
+                    stroke={INK.surface}
+                    strokeWidth={2}
+                  />
                 ))}
-                <text x={x(last) + 8} y={y(data[last].values[0])} dy="0.32em" fontSize={12} fontWeight={600} fill="currentColor">
+                <text
+                  x={x(last) + 8}
+                  y={y(data[last].values[0])}
+                  dy="0.32em"
+                  fontSize={12}
+                  fontWeight={600}
+                  fill="currentColor"
+                >
                   {f.number(data[last].values[0])}
                 </text>
               </>
@@ -275,7 +319,18 @@ export function TimeChart({
           </div>
         )}
       </div>
-      <TableView data={data} series={series} />
+      {asTable && <TableView data={data} series={series} height={height} />}
+      <button
+        type="button"
+        className="self-start text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        aria-pressed={asTable}
+        onClick={() => {
+          setActive(null);
+          setAsTable(!asTable);
+        }}
+      >
+        {asTable ? t("charts.showChart") : t("charts.showTable")}
+      </button>
     </div>
   );
 }
@@ -293,12 +348,17 @@ export function BarList({
 }) {
   const { t } = useI18n();
   const f = useChartFormat();
-  if (!rows.length) return <p className="py-6 text-center text-sm text-muted-foreground">{empty ?? t("charts.empty")}</p>;
+  if (!rows.length)
+    return <p className="py-6 text-center text-sm text-muted-foreground">{empty ?? t("charts.empty")}</p>;
   const max = Math.max(...rows.map((r) => r.value));
   return (
     <ul className="flex flex-col gap-2.5">
       {rows.map((r) => (
-        <li key={r.key} className="group grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 text-sm" title={r.detail}>
+        <li
+          key={r.key}
+          className="group grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 text-sm"
+          title={r.detail}
+        >
           <span className="truncate">{r.label}</span>
           <span className="flex items-center gap-2">
             <span className="h-3 flex-1">

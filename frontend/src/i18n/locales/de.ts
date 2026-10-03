@@ -286,6 +286,7 @@ export const de: Messages = {
   },
   charts: {
     showTable: "Als Tabelle anzeigen",
+    showChart: "Als Diagramm anzeigen",
     day: "Tag",
     total: "Gesamt",
     keyboardHint: "{label}. Mit den Pfeiltasten links und rechts liest du Tag für Tag.",

@@ -281,6 +281,7 @@ export const sr: Messages = {
   },
   charts: {
     showTable: "Prikaži kao tabelu",
+    showChart: "Prikaži kao grafikon",
     day: "Dan",
     total: "Ukupno",
     keyboardHint: "{label}. Strelicama levo i desno čitaš dan po dan.",

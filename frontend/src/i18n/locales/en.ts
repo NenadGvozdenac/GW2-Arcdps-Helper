@@ -280,6 +280,7 @@ export const en = {
   },
   charts: {
     showTable: "Show as table",
+    showChart: "Show as chart",
     day: "Day",
     total: "Total",
     keyboardHint: "{label}. Use the left and right arrow keys to read each day.",
