@@ -159,6 +159,13 @@ export const searchLogsSchema = z.object({
   category: z.enum(["all", "raid", "fractal", "strike", "other"]).default("all"),
   groupId: z.string().trim().max(40).default("all"),
   result: z.enum(["all", "kill", "wipe"]).default("all"),
+  /** A UTC day ("2026-10-03"): only fights of that day. */
+  day: z
+    .string()
+    .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Invalid day.")
+    .default(""),
+  /** An exact boss name (from the dashboard's "most played bosses"). */
+  boss: z.string().trim().max(200).default(""),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(LOGS_PAGE_SIZE_MAX).default(LOGS_PAGE_SIZE),
   /** Only the ids of every matching log (no paging) — for "select all". */

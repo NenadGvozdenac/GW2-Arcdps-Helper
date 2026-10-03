@@ -199,7 +199,7 @@ of an authenticator app such as Google Authenticator, Authy or 1Password). When 
 off (`404 ADMIN_DISABLED`).
 
 Signing in takes two steps at `/admin/login`: email + password, then the 6-digit code from the authenticator app.
-The admin token lasts 12 hours and ends with the browser tab. Changing the password or the key signs the admin out.
+The admin token lasts 12 hours (closing the tab keeps you signed in; "Sign out" ends it). Changing the password or the key signs the admin out.
 
 ### Locally
 

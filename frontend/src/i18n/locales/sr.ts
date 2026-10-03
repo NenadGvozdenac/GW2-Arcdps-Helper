@@ -274,9 +274,9 @@ export const sr: Messages = {
     hideCharts: "Sakrij grafikone",
     showCharts: "Prikaži grafikone",
     activityTitle: "Tvoja aktivnost",
-    activityHint: "Logovi po danu, poslednjih 30 dana.",
+    activityHint: "Logovi po danu, poslednjih 30 dana. Klikni na dan da vidiš njegove logove.",
     bossesTitle: "Najčešći bossovi",
-    bossesHint: "Logovi u poslednjih 30 dana.",
+    bossesHint: "Logovi u poslednjih 30 dana. Klikni na bossa da vidiš njegove logove.",
     bossKills: "{count} kill|{count} killa|{count} killova",
   },
   charts: {
@@ -368,6 +368,9 @@ export const sr: Messages = {
     organizeHint: "Označi logove (ili klikni na red) da ih obrišeš.",
     deleteSelected: "Obriši izabrane ({count})",
     confirmDeleteMany: "Obrisati logove ({count})?",
+    filterDay: "Dan: {day}",
+    filterBoss: "Boss: {boss}",
+    removeFilter: "Ukloni ovaj filter",
   },
   share: {
     title: "Podeli",

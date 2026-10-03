@@ -1,7 +1,7 @@
 import { adminRepository } from "../repositories/adminRepository";
 import { adminTokenStorage } from "../storage/adminTokenStorage";
 
-/** The admin area: signing in keeps the administrator's token for this tab; everything else is the repository. */
+/** The admin area: signing in keeps the administrator's token in this browser; everything else is the repository. */
 export const adminService = {
   ...adminRepository,
 

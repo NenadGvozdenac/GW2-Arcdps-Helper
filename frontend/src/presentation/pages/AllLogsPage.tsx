@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircleIcon, CheckIcon, ListChecksIcon, Loader2Icon, SearchIcon, Trash2Icon } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { AlertCircleIcon, CheckIcon, ListChecksIcon, Loader2Icon, SearchIcon, Trash2Icon, XIcon } from "lucide-react";
 import { LOGS_PAGE_SIZE_OPTIONS, SEARCH_DEBOUNCE_MS } from "../../config/constants";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
@@ -24,12 +25,13 @@ import { Card, CardContent } from "@/presentation/components/ui/card";
 import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { cn } from "@/presentation/lib/utils";
+import { useChartFormat } from "../components/charts/Charts";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
 import { describeError } from "../utils/describeError";
 
-const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all" };
+const INITIAL_FILTER: LogFilter = { search: "", category: "all", groupId: "all", result: "all", day: "", boss: "" };
 
 /** Fetches one page at a time from the server; re-fetches when the filter or page changes, or logs come and go. */
 function useLogPage(filter: LogFilter, page: number, pageSize: number) {
@@ -61,14 +63,22 @@ function useLogPage(filter: LogFilter, page: number, pageSize: number) {
       .catch((err) => request === latest.current && setError(err))
       .finally(() => request === latest.current && setLoading(false));
     // filter.search is left out on purpose: it reaches the server through the debounced `search`.
-  }, [filter.category, filter.groupId, filter.result, search, page, pageSize, logCount]);
+  }, [filter.category, filter.groupId, filter.result, filter.day, filter.boss, search, page, pageSize, logCount]);
 
   return { ...result, loading, error };
 }
 
 function useAllLogsController() {
   const { removeMany } = useLogs();
-  const [filter, setFilter] = useState<LogFilter>(INITIAL_FILTER);
+  // ?day= and ?boss= come from the dashboard's charts; removing the filter removes it from the address too.
+  const [params, setParams] = useSearchParams();
+  const urlDay = /^\d{4}-\d{2}-\d{2}$/.test(params.get("day") ?? "") ? params.get("day")! : "";
+  const urlBoss = params.get("boss") ?? "";
+  const [filter, setFilter] = useState<LogFilter>({ ...INITIAL_FILTER, day: urlDay, boss: urlBoss });
+  useEffect(() => {
+    setFilter((f) => (f.day === urlDay && f.boss === urlBoss ? f : { ...f, day: urlDay, boss: urlBoss }));
+    setPage(1);
+  }, [urlDay, urlBoss]);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(logService.savedPageSize);
   const [organizing, setOrganizing] = useState(false);
@@ -137,9 +147,18 @@ function useAllLogsController() {
     }
   }
 
+  /** Removes the dashboard's day or boss filter (from the address, which updates the filter). */
+  function clearUrlFilter(key: "day" | "boss") {
+    const next = new URLSearchParams(params);
+    next.delete(key);
+    setParams(next, { replace: true });
+    setSelected(new Set());
+  }
+
   return {
     filter,
     updateFilter,
+    clearUrlFilter,
     groupOptions,
     total: result.total,
     page,
@@ -176,6 +195,7 @@ function useAllLogsController() {
 export default function AllLogsPage() {
   const c = useAllLogsController();
   const { t } = useI18n();
+  const chartFormat = useChartFormat();
 
   return (
     <div className="flex flex-col gap-6">
@@ -284,6 +304,21 @@ export default function AllLogsPage() {
           </SelectContent>
         </Select>
       </div>
+
+      {(c.filter.day || c.filter.boss) && (
+        <div className="flex flex-wrap gap-2">
+          {c.filter.day && (
+            <Button variant="secondary" size="sm" onClick={() => c.clearUrlFilter("day")} aria-label={t("allLogs.removeFilter")}>
+              {t("allLogs.filterDay", { day: chartFormat.day(c.filter.day, true) })} <XIcon />
+            </Button>
+          )}
+          {c.filter.boss && (
+            <Button variant="secondary" size="sm" onClick={() => c.clearUrlFilter("boss")} aria-label={t("allLogs.removeFilter")}>
+              {t("allLogs.filterBoss", { boss: c.filter.boss })} <XIcon />
+            </Button>
+          )}
+        </div>
+      )}
 
       <Card>
         <CardContent className="relative" aria-busy={c.loading}>

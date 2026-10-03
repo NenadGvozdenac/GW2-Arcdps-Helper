@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, gte, inArray, isNotNull, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, gte, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
 import type { Category } from "../types/encounter.types";
@@ -15,6 +15,11 @@ function matching(ownerId: string, f: LogFilter): SQL | undefined {
   if (f.category !== "all") conditions.push(eq(logs.category, f.category));
   if (f.groupId !== "all") conditions.push(eq(logs.groupId, f.groupId));
   if (f.result !== "all") conditions.push(eq(logs.success, f.result === "kill"));
+  if (f.boss) conditions.push(eq(logs.bossName, f.boss));
+  if (f.day) {
+    const start = new Date(`${f.day}T00:00:00Z`);
+    conditions.push(gte(logs.encounterTime, start), lt(logs.encounterTime, new Date(start.getTime() + 24 * 60 * 60_000)));
+  }
   if (f.search) {
     const pattern = `%${f.search.replace(/[\\%_]/g, "\\$&")}%`;
     conditions.push(

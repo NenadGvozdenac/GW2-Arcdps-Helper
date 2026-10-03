@@ -20,7 +20,7 @@ interface AdminContextValue {
 const AdminContext = createContext<AdminContextValue | null>(null);
 
 /**
- * The administrator's sign-in, separate from a user's: its own token (sessionStorage, so it ends with the tab) and
+ * The administrator's sign-in, separate from a user's: its own token (kept until it expires or "Sign out") and
  * its own pages under /admin. A token is checked against the server on load.
  */
 export function AdminProvider({ children }: { children: ReactNode }) {

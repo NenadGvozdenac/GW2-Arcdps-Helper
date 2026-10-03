@@ -279,9 +279,9 @@ export const de: Messages = {
     hideCharts: "Diagramme ausblenden",
     showCharts: "Diagramme anzeigen",
     activityTitle: "Deine Aktivität",
-    activityHint: "Logs pro Tag, die letzten 30 Tage.",
+    activityHint: "Logs pro Tag, die letzten 30 Tage. Klick auf einen Tag, um seine Logs zu sehen.",
     bossesTitle: "Meistgespielte Bosse",
-    bossesHint: "Logs der letzten 30 Tage.",
+    bossesHint: "Logs der letzten 30 Tage. Klick auf einen Boss, um seine Logs zu sehen.",
     bossKills: "{count} Kill|{count} Kills",
   },
   charts: {
@@ -373,6 +373,9 @@ export const de: Messages = {
     organizeHint: "Hake Logs an (oder klick auf eine Zeile), um sie zu löschen.",
     deleteSelected: "Auswahl löschen ({count})",
     confirmDeleteMany: "{count} Logs löschen?",
+    filterDay: "Tag: {day}",
+    filterBoss: "Boss: {boss}",
+    removeFilter: "Diesen Filter entfernen",
   },
   share: {
     title: "Teilen",

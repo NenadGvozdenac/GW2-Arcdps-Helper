@@ -23,7 +23,7 @@ export interface ChartPoint {
 }
 
 /** Day and number formats in the reader's language ("3 Oct" / "3. okt"). Days are UTC, like the resets. */
-function useChartFormat() {
+export function useChartFormat() {
   const { lang } = useI18n();
   return useMemo(() => {
     const locale = localeFor(lang);
@@ -132,6 +132,7 @@ export function TimeChart({
   series,
   label,
   height = 200,
+  onSelect,
 }: {
   kind: "columns" | "line";
   data: ChartPoint[];
@@ -139,6 +140,8 @@ export function TimeChart({
   /** What the chart shows, for screen readers. */
   label: string;
   height?: number;
+  /** Clicking a day (or Enter on it) opens it, e.g. its logs. */
+  onSelect?: (date: string) => void;
 }) {
   const { t } = useI18n();
   const f = useChartFormat();
@@ -164,6 +167,11 @@ export function TimeChart({
     setActive(i >= 0 && i < n ? i : null);
   }
   function onKey(e: KeyboardEvent) {
+    if (e.key === "Enter" && onSelect && active !== null) {
+      e.preventDefault();
+      onSelect(data[active].date);
+      return;
+    }
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
     e.preventDefault();
     setActive((a) => Math.min(n - 1, Math.max(0, (a ?? n - 1) + (e.key === "ArrowRight" ? 1 : -1))));
@@ -194,8 +202,9 @@ export function TimeChart({
           <svg
             width={width}
             height={height}
-            className="block touch-none select-none"
+            className={cn("block touch-none select-none", onSelect && active !== null && "cursor-pointer")}
             onPointerMove={(e) => onPointer(e.clientX, e.currentTarget)}
+            onClick={() => onSelect && active !== null && onSelect(data[active].date)}
             onPointerLeave={() => setActive(null)}
             aria-hidden="true"
           >
@@ -340,11 +349,14 @@ export function BarList({
   rows,
   color = SERIES.s1,
   empty,
+  onSelect,
 }: {
   rows: { key: string; label: ReactNode; value: number; detail?: string }[];
   color?: string;
   /** Shown when there are no rows (default: "Nothing in this period."). */
   empty?: string;
+  /** Makes each row a button that opens it (by its key). */
+  onSelect?: (key: string) => void;
 }) {
   const { t } = useI18n();
   const f = useChartFormat();
@@ -354,23 +366,37 @@ export function BarList({
   return (
     <ul className="flex flex-col gap-2.5">
       {rows.map((r) => (
-        <li
-          key={r.key}
-          className="group grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 text-sm"
-          title={r.detail}
-        >
-          <span className="truncate">{r.label}</span>
-          <span className="flex items-center gap-2">
-            <span className="h-3 flex-1">
-              <span
-                className="block h-full rounded-r-[4px] transition-opacity group-hover:opacity-80"
-                style={{ width: `${max ? Math.max(2, (r.value / max) * 100) : 0}%`, background: color }}
-              />
-            </span>
-            <span className="w-14 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-              {f.number(r.value)}
-            </span>
-          </span>
+        <li key={r.key} title={r.detail}>
+          {(() => {
+            const content = (
+              <>
+                <span className="truncate text-left">{r.label}</span>
+                <span className="flex items-center gap-2">
+                  <span className="h-3 flex-1">
+                    <span
+                      className="block h-full rounded-r-[4px] transition-opacity group-hover:opacity-80"
+                      style={{ width: `${max ? Math.max(2, (r.value / max) * 100) : 0}%`, background: color }}
+                    />
+                  </span>
+                  <span className="w-14 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
+                    {f.number(r.value)}
+                  </span>
+                </span>
+              </>
+            );
+            const layout = "group grid w-full grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 text-sm";
+            return onSelect ? (
+              <button
+                type="button"
+                className={cn(layout, "-mx-2 cursor-pointer rounded-md px-2 py-0.5 hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none")}
+                onClick={() => onSelect(r.key)}
+              >
+                {content}
+              </button>
+            ) : (
+              <div className={layout}>{content}</div>
+            );
+          })()}
         </li>
       ))}
     </ul>

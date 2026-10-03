@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AlertCircleIcon, ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
@@ -94,6 +94,7 @@ function useDashboardController() {
 export default function DashboardPage() {
   const { accountLabel, error, totals, clearCards, today, activity, chartsCollapsed, toggleCharts } = useDashboardController();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col gap-6">
@@ -147,6 +148,7 @@ export default function DashboardPage() {
                   kind="columns"
                   label={t("dashboard.activityTitle")}
                   data={activity.perDay}
+                  onSelect={(day) => navigate(`/logs?day=${day}`)}
                   series={[
                     { name: t("dashboard.kills"), color: SERIES.s1 },
                     { name: t("dashboard.wipes"), color: SERIES.s2 },
@@ -161,6 +163,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <BarList
+                  onSelect={(boss) => navigate(`/logs?boss=${encodeURIComponent(boss)}`)}
                   rows={activity.topBosses.map((b) => ({
                     key: b.name,
                     label: b.name,

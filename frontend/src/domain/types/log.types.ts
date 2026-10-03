@@ -80,6 +80,10 @@ export interface LogFilter {
   category: Category | "all";
   groupId: string | "all";
   result: ResultFilter;
+  /** One UTC day ("2026-10-03") of the fight; "" = any. Set from the dashboard's activity chart. */
+  day: string;
+  /** Exactly this boss name; "" = any. Set from the dashboard's "most played bosses". */
+  boss: string;
 }
 
 /** One page of logs matching a filter (GET /logs/search), newest first. */

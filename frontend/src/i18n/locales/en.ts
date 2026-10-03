@@ -273,9 +273,9 @@ export const en = {
     hideCharts: "Hide charts",
     showCharts: "Show charts",
     activityTitle: "Your activity",
-    activityHint: "Logs per day, the last 30 days.",
+    activityHint: "Logs per day, the last 30 days. Click a day to see its logs.",
     bossesTitle: "Most played bosses",
-    bossesHint: "Logs in the last 30 days.",
+    bossesHint: "Logs in the last 30 days. Click a boss to see its logs.",
     bossKills: "{count} kill|{count} kills",
   },
   charts: {
@@ -367,6 +367,9 @@ export const en = {
     organizeHint: "Tick logs (or click a row) to delete them.",
     deleteSelected: "Delete selected ({count})",
     confirmDeleteMany: "Delete {count} logs?",
+    filterDay: "Day: {day}",
+    filterBoss: "Boss: {boss}",
+    removeFilter: "Remove this filter",
   },
   share: {
     title: "Share",

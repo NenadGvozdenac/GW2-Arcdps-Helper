@@ -19,7 +19,7 @@ export const POLL_INTERVAL_MS = 30_000;
 export const FRESH_HIGHLIGHT_MS = 8_000;
 
 export const TOKEN_STORAGE_KEY = "gw2arcdpshelper.token";
-/** The administrator's sign-in, in sessionStorage (ends with the tab). */
+/** The administrator's sign-in (localStorage; lasts until it expires after 12 h or "Sign out"). */
 export const ADMIN_TOKEN_STORAGE_KEY = "gw2arcdpshelper.adminToken";
 /** Rows per page in the admin area's lists. */
 export const ADMIN_PAGE_SIZE = 25;

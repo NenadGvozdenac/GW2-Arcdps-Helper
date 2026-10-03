@@ -88,6 +88,10 @@ export interface LogFilter {
   category: Category | "all";
   groupId: string | "all";
   result: "all" | "kill" | "wipe";
+  /** One UTC day ("2026-10-03") of the fight; "" = any. */
+  day: string;
+  /** Exactly this boss name; "" = any. */
+  boss: string;
 }
 
 /** One page of the owner's logs matching a filter, newest first. */
