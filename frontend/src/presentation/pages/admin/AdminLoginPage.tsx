@@ -1,12 +1,14 @@
 import { useState, type ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { ArrowLeftIcon, KeyRoundIcon, Loader2Icon, ShieldIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, ShieldIcon } from "lucide-react";
 import { useAdmin } from "../../../controllers/AdminController";
 import { ApiError } from "../../../domain/types/api.types";
+import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Label } from "@/presentation/components/ui/label";
 import { ErrorAlert } from "../../components/admin/AdminKit";
+import Brand from "../../components/Brand";
 import { FullPageSpinner } from "../../components/Spinner";
 
 /**
@@ -70,7 +72,18 @@ function useAdminLoginController() {
   };
 }
 
-function LoginCard({ title, icon, onSubmit, children }: { title: string; icon: ReactNode; onSubmit: () => void; children: ReactNode }) {
+/** The dragon on the left, "Admin" with the shield on the right; `title` is visible or, with `hideTitle`, for screen readers only. */
+function LoginCard({
+  title,
+  hideTitle = false,
+  onSubmit,
+  children,
+}: {
+  title: string;
+  hideTitle?: boolean;
+  onSubmit: () => void;
+  children: ReactNode;
+}) {
   return (
     <div className="grid min-h-svh place-items-center p-4">
       <form
@@ -80,10 +93,13 @@ function LoginCard({ title, icon, onSubmit, children }: { title: string; icon: R
           onSubmit();
         }}
       >
-        <div className="flex items-center gap-2">
-          {icon}
-          <h1 className="text-lg font-semibold">{title}</h1>
+        <div className="flex items-center justify-between gap-3">
+          <Brand />
+          <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
+            <ShieldIcon className="size-3" /> Admin
+          </Badge>
         </div>
+        <h1 className={hideTitle ? "sr-only" : "text-lg font-semibold"}>{title}</h1>
         {children}
       </form>
     </div>
@@ -97,7 +113,7 @@ export default function AdminLoginPage() {
 
   if (c.step === "code") {
     return (
-      <LoginCard title="Authenticator code" icon={<KeyRoundIcon className="size-5 text-destructive" />} onSubmit={c.submitCode}>
+      <LoginCard title="Authenticator code" onSubmit={c.submitCode}>
         <p className="text-sm text-muted-foreground">
           Open your authenticator app and enter the 6-digit code of <span className="font-medium text-foreground">GW2 ArcDPS Helper</span>.
         </p>
@@ -130,7 +146,7 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <LoginCard title="Admin sign-in" icon={<ShieldIcon className="size-5 text-destructive" />} onSubmit={c.submitPassword}>
+    <LoginCard title="Admin sign-in" hideTitle onSubmit={c.submitPassword}>
       <ErrorAlert message={c.error} />
       <div className="flex flex-col gap-2">
         <Label htmlFor="admin-email">Email</Label>
