@@ -3,13 +3,7 @@ import { getDb } from "../db/pool";
 import { users } from "../db/schema";
 import type { NewUser, User, UserPatch, UserRow } from "../types/user.types";
 
-const toUser = ({
-  passwordHash: _,
-  verificationEmailSentAt: __,
-  passwordResetSentAt: ___,
-  termsAcceptedAt: ____,
-  ...user
-}: UserRow): User => user;
+const toUser = ({ passwordHash: _, termsAcceptedAt: __, tokensValidAfter: ___, ...user }: UserRow): User => user;
 
 // Matches the case-insensitive unique index users_email_lower_idx.
 const emailEquals = (email: string) => eq(sql`lower(${users.email})`, email.toLowerCase());
@@ -24,6 +18,16 @@ export const userRepository = {
   async exists(id: string): Promise<boolean> {
     const [row] = await getDb().select({ id: users.id }).from(users).where(eq(users.id, id)).limit(1);
     return !!row;
+  },
+
+  /** What a sign-in token is checked against; null when the account no longer exists. */
+  async findTokenState(id: string): Promise<{ tokensValidAfter: Date | null } | null> {
+    const [row] = await getDb()
+      .select({ tokensValidAfter: users.tokensValidAfter })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+    return row ?? null;
   },
 
   async findById(id: string): Promise<User | null> {

@@ -26,10 +26,14 @@ export const tokenService = {
     return jwt.sign(payload, env.jwtSecret, { expiresIn: JWT_EXPIRES_IN, algorithm: "HS256" });
   },
 
-  /** Returns the user id, or null for a missing/invalid/expired token (or a token from an email link). */
-  verify(token: string): string | null {
-    const payload = decode(token);
-    return payload && !payload.purpose && typeof payload.sub === "string" ? payload.sub : null;
+  /**
+   * Returns the user id and when the token was issued, or null for a missing/invalid/expired token (or a token from
+   * an email link).
+   */
+  verify(token: string): { userId: string; issuedAt: Date } | null {
+    const payload = decode(token) as (Partial<EmailTokenPayload> & { iat?: number }) | null;
+    if (!payload || payload.purpose || typeof payload.sub !== "string" || typeof payload.iat !== "number") return null;
+    return { userId: payload.sub, issuedAt: new Date(payload.iat * 1000) };
   },
 
   /** Token for the link in the confirmation email. */

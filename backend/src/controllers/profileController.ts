@@ -46,9 +46,9 @@ export const profileController = {
   },
 
   /** Sends a test message to the given URL, so it can be checked before saving. */
-  async testDiscordWebhook(req: Request, res: Response) {
+  async testDiscordWebhook(req: Request, res: Response<unknown, AuthLocals>) {
     const { url, content } = validate(discordWebhookTestSchema, req.body);
-    await userService.testDiscordWebhook(url, content);
+    await userService.testDiscordWebhook(res.locals.userId, url, content);
     res.status(204).end();
   },
 };

@@ -133,6 +133,7 @@ export const de: Messages = {
     LOG_FOLDER_MISSING: "Der Log-Ordner existiert nicht. Wähl ihn zuerst aus.",
     NETWORK_ERROR: "Der Server ist nicht erreichbar. Prüfe deine Internetverbindung.",
     INVALID_CREDENTIALS: "E-Mail oder Passwort falsch.",
+    TOO_MANY_LOGIN_ATTEMPTS: "Zu viele falsche Passwörter. Versuch es in 15 Minuten erneut oder setz dein Passwort zurück.",
     EMAIL_NOT_VERIFIED: "Bestätige zuerst deine E-Mail-Adresse — klick auf den Link, den wir dir geschickt haben.",
     UNAUTHENTICATED: "Deine Sitzung ist abgelaufen. Melde dich erneut an.",
     VALIDATION_ERROR: "Einige der eingegebenen Daten sind ungültig.",

@@ -35,7 +35,7 @@ Or run everything (db + backend + frontend) with `make up` from the repo root.
 |---|---|
 | `DATABASE_URL` | Postgres connection string (`?sslmode=require` for Neon / Vercel Postgres / Supabase) |
 | `JWT_SECRET` | Secret for signing tokens; **required and ≥ 32 characters in production** |
-| `CORS_ORIGIN` | Allowed frontend origins, comma-separated (empty = any origin) |
+| `CORS_ORIGIN` | Allowed frontend origins, comma-separated (empty = `APP_URL` in production, any origin in development) |
 | `APP_URL` | Frontend URL used in the confirmation-email link; **required in production** (dev default `http://localhost:5173`) |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | SMTP server for confirmation and password-reset emails (port `465` = TLS, otherwise STARTTLS; default `587`). Emails are sent from `SMTP_USER` (required with `SMTP_HOST`) as "GW2 ArcDPS Helper". **`SMTP_HOST` is required in production**; without it in development the email is printed to the console |
 | `PORT` | Port of the Node server (default `3000`; not used on Vercel) |
@@ -134,7 +134,7 @@ All routes are under `/api`. Authenticated routes need `Authorization: Bearer <t
 | DELETE | `/sessions/:id` | ✓ | – | `204` (its logs are kept) |
 | POST | `/logs/bulk-delete` | ✓ | `{ ids }` | `{ deleted }` |
 | POST | `/logs/upload` | ✓ | multipart, one ArcDPS log in field `file` (.zevtc/.evtc/.zip) | `{ fileName, result }` — uploaded to dps.report, then imported like a link |
-| POST | `/profile/discord-webhooks/test` | ✓ | `{ url, content }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`) |
+| POST | `/profile/discord-webhooks/test` | ✓ | `{ url, content }` | `204` (or `502 DISCORD_WEBHOOK_FAILED`; `429 DISCORD_TEST_TOO_SOON` after 5 tests in 10 minutes) |
 | GET | `/logs` | ✓ | – | `{ logs: Log[] }` (newest first) |
 | GET | `/logs/search?search=&category=&groupId=&result=&page=&pageSize=` | ✓ | – | `{ logs, total, page, pageSize }` — one page (20 by default) of matching logs, newest first; with `idsOnly=true` `{ ids }` of every match |
 | POST | `/logs` | ✓ | `{ urls: string[] (1–10), sessionId? }` — logs of an active session are posted to Discord when it ends | `{ results: SubmitResult[] }` |

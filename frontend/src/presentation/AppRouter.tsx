@@ -23,6 +23,7 @@ import SharedSessionPage from "./pages/SharedSessionPage";
 import SharedLogPage from "./pages/SharedLogPage";
 import LegalPage from "./pages/LegalPage";
 import FeedbackPage from "./pages/FeedbackPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import GuestGuideShell from "./components/GuestGuideShell";
 
 /** A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. */
@@ -91,7 +92,7 @@ export default function AppRouter() {
             <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={guide(<NotFoundPage />)} />
       </Routes>
     </>
   );

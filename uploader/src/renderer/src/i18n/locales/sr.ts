@@ -131,6 +131,7 @@ export const sr: Messages = {
     LOG_FOLDER_MISSING: "Folder sa logovima ne postoji. Prvo ga izaberi.",
     NETWORK_ERROR: "Server nije dostupan. Proveri internet vezu.",
     INVALID_CREDENTIALS: "Pogrešan email ili lozinka.",
+    TOO_MANY_LOGIN_ATTEMPTS: "Previše pogrešnih lozinki. Pokušaj ponovo za 15 minuta ili resetuj lozinku.",
     EMAIL_NOT_VERIFIED: "Prvo potvrdi email adresu — klikni na link koji smo ti poslali.",
     UNAUTHENTICATED: "Sesija je istekla. Prijavi se ponovo.",
     VALIDATION_ERROR: "Neki od unetih podataka nisu ispravni.",

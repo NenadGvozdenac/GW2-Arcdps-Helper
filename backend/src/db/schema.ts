@@ -43,12 +43,10 @@ export const users = pgTable(
     skipEmptyLogs: boolean("skip_empty_logs").notNull().default(true),
     /** Set when the user clicks the link in the confirmation email; signing in is refused while null. */
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
-    /** Last confirmation email sent, to throttle "resend" requests. */
-    verificationEmailSentAt: timestamp("verification_email_sent_at", { withTimezone: true }),
-    /** Last password-reset email sent, to throttle "forgot password" requests. */
-    passwordResetSentAt: timestamp("password_reset_sent_at", { withTimezone: true }),
     /** When the user accepted the Terms of Service and Privacy Policy at registration; null = registered before they existed. */
     termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true }),
+    /** Sign-in tokens issued before this are rejected (set when the password is reset). null = all valid. */
+    tokensValidAfter: timestamp("tokens_valid_after", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("users_email_lower_idx").on(sql`lower(${t.email})`)],
@@ -179,11 +177,9 @@ export const feedback = pgTable(
     description: text().notNull(),
     /** Where to answer a guest (optional); signed-in users are answered at their account email. */
     contactEmail: text("contact_email"),
-    /** SHA-256 of the sender's IP (never the IP itself): feedback is throttled per IP. */
-    ipHash: text("ip_hash").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("feedback_user_idx").on(t.userId), index("feedback_ip_idx").on(t.ipHash, t.createdAt)],
+  (t) => [index("feedback_user_idx").on(t.userId)],
 );
 
 /**
@@ -203,3 +199,18 @@ export const appLoginRequests = pgTable("app_login_requests", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
+
+/**
+ * Throttling counters (wrong passwords, emails, Discord tests, feedback), one row per key such as
+ * "discord-test:<userId>" (see rateLimitService). A row counts hits until `expiresAt`; the next hit after that starts
+ * a new window. Expired rows are deleted now and then.
+ */
+export const rateLimits = pgTable(
+  "rate_limits",
+  {
+    key: text().primaryKey(),
+    count: integer().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("rate_limits_expires_idx").on(t.expiresAt)],
+);

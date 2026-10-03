@@ -11,7 +11,7 @@ export interface FeedbackInput {
   contactEmail?: string | null;
 }
 
-/** Who sent it: the signed-in user (null for guests) and a hash of their IP (throttling). */
+/** Who sent it: the signed-in user (null for guests) and a hash of their IP (throttling; not stored with it). */
 export interface FeedbackSender {
   userId: string | null;
   ipHash: string;

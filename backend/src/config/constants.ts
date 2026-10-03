@@ -63,8 +63,6 @@ export const JWT_EXPIRES_IN = "30d";
 export const EMAIL_VERIFICATION_EXPIRES_IN = "24h";
 /** Lifetime of the link in the password-reset email. */
 export const PASSWORD_RESET_EXPIRES_IN = "1h";
-/** A new confirmation / password-reset email is sent at most this often per account. */
-export const EMAIL_COOLDOWN_MS = 60_000;
 /** How long an app has to be approved on the website ("Sign in with the browser"). */
 export const APP_LOGIN_TTL_MS = 5 * 60_000;
 /** Random bytes of the secret an app keeps to collect its sign-in. */
@@ -74,10 +72,28 @@ export const APP_LOGIN_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const SMTP_TIMEOUT_MS = 15_000;
 /** Where feedback from the website, the desktop uploader and the Nexus addon is emailed. */
 export const FEEDBACK_EMAIL = "nenadgvozdenacsrb@gmail.com";
-/** Feedback is accepted at most this often per IP. */
-export const FEEDBACK_COOLDOWN_MS = 60_000;
 export const FEEDBACK_TITLE_MAX = 120;
 export const FEEDBACK_DESCRIPTION_MAX = 5000;
 /** Name shown as the sender of our emails; the address is SMTP_USER. */
 export const EMAIL_SENDER_NAME = "GW2 ArcDPS Helper";
 export const BCRYPT_ROUNDS = 10;
+
+/** At most `max` hits per `windowMs` (see rateLimitService). */
+export interface RateLimit {
+  max: number;
+  windowMs: number;
+}
+
+export const RATE_LIMITS = {
+  /** Wrong passwords for one email from one IP; then that IP can't sign in to it until the window ends. */
+  loginAccount: { max: 10, windowMs: 15 * 60_000 },
+  /** Wrong passwords from one IP over all emails (trying many accounts). */
+  loginIp: { max: 50, windowMs: 15 * 60_000 },
+  /** Confirmation / password-reset emails per account. */
+  verificationEmail: { max: 1, windowMs: 60_000 },
+  passwordResetEmail: { max: 1, windowMs: 60_000 },
+  /** Discord test messages per user - the URL can be any webhook, so it must not be a spam relay. */
+  discordTest: { max: 5, windowMs: 10 * 60_000 },
+  /** Feedback per IP (signed in or not). */
+  feedback: { max: 1, windowMs: 60_000 },
+} satisfies Record<string, RateLimit>;

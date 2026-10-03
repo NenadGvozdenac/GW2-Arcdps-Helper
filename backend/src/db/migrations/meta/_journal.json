@@ -127,6 +127,20 @@
       "when": 1790936326052,
       "tag": "0017_feedback",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791047396449,
+      "tag": "0018_auth_and_rate_limits",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1791047397556,
+      "tag": "0019_drop_old_throttle_columns",
+      "breakpoints": true
     }
   ]
 }

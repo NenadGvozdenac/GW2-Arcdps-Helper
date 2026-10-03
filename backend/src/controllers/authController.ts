@@ -10,6 +10,7 @@ import {
   verifyEmailSchema,
 } from "../validation/schemas";
 import { validate } from "../validation/validate";
+import { clientIpHash } from "../utils/clientIp";
 
 export const authController = {
   async register(req: Request, res: Response) {
@@ -19,7 +20,7 @@ export const authController = {
 
   async login(req: Request, res: Response) {
     const { email, password } = validate(loginSchema, req.body);
-    res.json(await authService.login(email, password));
+    res.json(await authService.login(email, password, clientIpHash(req)));
   },
 
   async verifyEmail(req: Request, res: Response) {

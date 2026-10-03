@@ -4,7 +4,9 @@ import type { ProfileUpdate, User } from "../types/user.types";
 import { discordWebhookRepository } from "../repositories/discordWebhookRepository";
 import type { DiscordContent, DiscordWebhook } from "../types/discord.types";
 import { discordService } from "./discordService";
-import { userNotFound, wrongPassword } from "../utils/httpError";
+import { rateLimitService } from "./rateLimitService";
+import { RATE_LIMITS } from "../config/constants";
+import { discordTestTooSoon, userNotFound, wrongPassword } from "../utils/httpError";
 
 export const userService = {
   async get(id: string): Promise<User> {
@@ -39,7 +41,11 @@ export const userService = {
     return discordWebhookRepository.replace(id, webhooks);
   },
 
-  testDiscordWebhook: (url: string, content: DiscordContent) => discordService.sendTest(url, content),
+  /** Sends a test message to any Discord webhook URL - at most RATE_LIMITS.discordTest per user. */
+  async testDiscordWebhook(id: string, url: string, content: DiscordContent): Promise<void> {
+    if (!(await rateLimitService.take(`discord-test:${id}`, RATE_LIMITS.discordTest))) throw discordTestTooSoon();
+    await discordService.sendTest(url, content);
+  },
 
   /** Saves (or with null, removes) the dps.report user token used for this user's uploads. */
   async setDpsReportToken(id: string, token: string | null): Promise<User> {

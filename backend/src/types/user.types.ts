@@ -4,7 +4,7 @@ import type { users } from "../db/schema";
 export type UserRow = typeof users.$inferSelect;
 
 /** Public user shape returned by the API (never contains the password hash). */
-export type User = Omit<UserRow, "passwordHash" | "verificationEmailSentAt" | "passwordResetSentAt" | "termsAcceptedAt">;
+export type User = Omit<UserRow, "passwordHash" | "termsAcceptedAt" | "tokensValidAfter">;
 
 export interface NewUser {
   email: string;
@@ -26,7 +26,6 @@ export type UserPatch = Partial<
     | "skipEmptyLogs"
     | "passwordHash"
     | "emailVerifiedAt"
-    | "verificationEmailSentAt"
-    | "passwordResetSentAt"
+    | "tokensValidAfter"
   >
 >;

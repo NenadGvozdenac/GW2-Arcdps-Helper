@@ -131,6 +131,7 @@ export const en = {
     LOG_FOLDER_MISSING: "The log folder does not exist. Choose it first.",
     NETWORK_ERROR: "Could not reach the server. Check your internet connection.",
     INVALID_CREDENTIALS: "Invalid email or password.",
+    TOO_MANY_LOGIN_ATTEMPTS: "Too many wrong passwords. Try again in 15 minutes or reset your password.",
     EMAIL_NOT_VERIFIED: "Confirm your email address first — click the link we emailed you.",
     UNAUTHENTICATED: "Your session expired. Sign in again.",
     VALIDATION_ERROR: "Some of the entered data is invalid.",

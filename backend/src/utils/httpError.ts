@@ -13,6 +13,12 @@ export class HttpError extends Error {
 export const validationError = (message: string) => new HttpError(400, "VALIDATION_ERROR", message);
 export const unauthenticated = () => new HttpError(401, "UNAUTHENTICATED", "You must be signed in.");
 export const invalidCredentials = () => new HttpError(401, "INVALID_CREDENTIALS", "Invalid email or password.");
+export const tooManyLoginAttempts = () =>
+  new HttpError(
+    429,
+    "TOO_MANY_LOGIN_ATTEMPTS",
+    "Too many wrong passwords. Try again in 15 minutes or reset your password.",
+  );
 /** 403, not 401: the user is signed in, only the password they typed to confirm an action is wrong. */
 export const wrongPassword = () => new HttpError(403, "WRONG_PASSWORD", "The password is not correct.");
 export const appLoginNotFound = () =>
@@ -36,5 +42,7 @@ export const invalidLogFile = () =>
 export const feedbackTooSoon = () =>
   new HttpError(429, "FEEDBACK_TOO_SOON", "You just sent feedback. Wait a minute before sending more.");
 export const fileTooLarge = () => new HttpError(413, "FILE_TOO_LARGE", "The log file is too large.");
+export const discordTestTooSoon = () =>
+  new HttpError(429, "DISCORD_TEST_TOO_SOON", "Too many test messages. Wait a few minutes before sending another.");
 export const discordWebhookFailed = () =>
   new HttpError(502, "DISCORD_WEBHOOK_FAILED", "Discord did not accept the message. Check the webhook URL.");
