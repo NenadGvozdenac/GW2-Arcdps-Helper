@@ -31,7 +31,7 @@ help:
 	@echo     make migrate-local   Apply migrations to the local database - backend/.env.development
 	@echo     make migrate-prod    Apply migrations to the production database - backend/.env.production
 	@echo   Admin area - /admin, password + authenticator code
-	@echo     make admin-dev       Make the local admin: sets it in backend/.env.development, app entry "GW2 ArcDPS Helper (dev)"
+	@echo     make admin-dev       Make the local admin admin@gmail.com / Admin123 in backend/.env.development, app entry "GW2 ArcDPS Helper (dev)"
 	@echo     make admin-prod      Make the production admin: prints the three variables for .env.production / Vercel
 	@echo   Desktop uploader
 	@echo     make uploader-install  Install uploader dependencies
@@ -102,7 +102,8 @@ migrate-prod:
 
 # ---------- admin area ----------
 
-# Both ask for the password and make a new authenticator key (the previous one stops working).
+# Both make a new authenticator key (the previous one stops working). admin-dev always uses admin@gmail.com / Admin123;
+# admin-prod asks for the email and password.
 admin-dev:
 	npm --prefix backend run admin:setup -- dev
 

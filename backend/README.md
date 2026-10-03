@@ -28,7 +28,7 @@ Or run everything (db + backend + frontend) with `make up` from the repo root.
 | `npm run migrate:production` | Apply pending migrations to the production database (`.env.production`) |
 | `npm run migration:new -- <name>` | Generate a migration from changes in `src/db/schema.ts` (drizzle-kit) |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run admin:setup -- dev\|prod` | `make admin-dev` / `make admin-prod`: asks for the admin password and makes a new authenticator key. `dev` sets `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET` in `.env.development` (the app entry is named "GW2 ArcDPS Helper (dev)"); `prod` prints them for `.env.production` and the hosting dashboard |
+| `npm run admin:setup -- dev\|prod` | `make admin-dev` / `make admin-prod`: makes a new authenticator key. `dev` sets `ADMIN_EMAIL`, `ADMIN_PASSWORD_HASH`, `ADMIN_TOTP_SECRET` in `.env.development` for `admin@gmail.com` / `Admin123` (the app entry is named "GW2 ArcDPS Helper (dev)"); `prod` asks for the credentials and prints them for `.env.production` and the hosting dashboard |
 
 ## Environment
 

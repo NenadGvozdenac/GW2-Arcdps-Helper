@@ -89,7 +89,7 @@ Run `make` (or `make help`) to list them. On Windows install make first, e.g. `w
 | `make migrate-status` | List applied migrations |
 | `make migrate-local` | Apply migrations to the local database (`backend/.env.development`) |
 | `make migrate-prod` | Apply migrations to the production database (`backend/.env.production`) |
-| `make admin-dev` | Make the local administrator: sets it in `backend/.env.development` (see [Admin area](#admin-area)) |
+| `make admin-dev` | Make the local administrator `admin@gmail.com` / `Admin123` in `backend/.env.development` (see [Admin area](#admin-area)) |
 | `make admin-prod` | Make the production administrator: prints the three variables for Vercel (see [Admin area](#admin-area)) |
 | `make uploader-install` | Install the desktop uploader dependencies |
 | `make uploader-dev` | Run the uploader against the local Docker stack (hot reload) |
@@ -203,19 +203,20 @@ The admin token lasts 12 hours and ends with the browser tab. Changing the passw
 
 ### Locally
 
-1. `make admin-dev` - enter the email (Enter keeps `gw2arcdpshelper@gmail.com`) and a password (at least 12
-   characters). The three variables are written into `backend/.env.development`, and the console shows the key and an
-   `otpauth://` link for the authenticator app. Its entry there is called **GW2 ArcDPS Helper (dev)**.
+1. `make admin-dev` - no questions: the local administrator is always **`admin@gmail.com` / `Admin123`**. The three
+   variables are written into `backend/.env.development`, and the console shows the key and an `otpauth://` link for
+   the authenticator app. Its entry there is called **GW2 ArcDPS Helper (dev)**. Each run makes a new key.
 2. Restart the backend (`make restart`, or `npm run dev`).
 3. Open `http://localhost:8080/admin/login` (`make up`) or `http://localhost:5173/admin/login` (`npm run dev`).
 
-`backend/.env.development` is in git: use a made-up password there, never a real one, and leave the three variables
-empty if you don't need the admin area locally.
+`backend/.env.development` is in git and the dev login is public on purpose: it only opens your own dev server. Never
+put production values there.
 
 ### Production
 
-1. `make admin-prod` - same questions, but nothing is written: it prints the three lines and the key for the
-   authenticator app (the entry is **GW2 ArcDPS Helper**, without "dev"). Use a strong password of its own.
+1. `make admin-prod` - asks for the email (Enter keeps `gw2arcdpshelper@gmail.com`) and a strong password (at least
+   12 characters, not the dev one). Nothing is written: it prints the three lines and the key for the authenticator
+   app (the entry is **GW2 ArcDPS Helper**, without "dev").
 2. Add the account to the authenticator app (scan the link or type the key).
 3. Put the three lines into the backend's Vercel project: **Settings → Environment Variables → Production**.
    Optionally also into `backend/.env.production` (git-ignored), next to the other production values.
