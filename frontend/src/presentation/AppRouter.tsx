@@ -24,6 +24,7 @@ import SharedSessionPage from "./pages/SharedSessionPage";
 import SharedLogPage from "./pages/SharedLogPage";
 import LegalPage from "./pages/LegalPage";
 import FeedbackPage from "./pages/FeedbackPage";
+import BuildsPage from "./pages/BuildsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import AdminShell from "./components/admin/AdminShell";
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
@@ -99,6 +100,7 @@ export default function AppRouter() {
             <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="logs" element={<AllLogsPage />} />
             <Route path="logs/:id" element={<LogDetailPage />} />
+            <Route path="builds" element={<BuildsPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Route>

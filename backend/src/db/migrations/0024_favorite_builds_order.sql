@@ -1,0 +1,1 @@
+ALTER TABLE "favorite_builds" ADD COLUMN "sort_order" integer DEFAULT 0 NOT NULL;

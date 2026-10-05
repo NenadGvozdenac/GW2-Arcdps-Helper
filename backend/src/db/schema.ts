@@ -21,6 +21,7 @@ import { DISCORD_DEFAULT_MIN_ACCOUNTS } from "../config/constants";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
+import type { BuildCategory, BuildGear } from "../types/build.types";
 import type { DiscordContent } from "../types/discord.types";
 import type { FeedbackCategory } from "../types/feedback.types";
 import type { SessionEndReason } from "../types/session.types";
@@ -199,6 +200,40 @@ export const feedback = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("feedback_user_idx").on(t.userId)],
+);
+
+/**
+ * A user's favorite Snow Crows builds: a snapshot of the build page (refreshed on request) and the user's own
+ * categories for it. One row per build page per user.
+ */
+export const favoriteBuilds = pgTable(
+  "favorite_builds",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** The build page on snowcrows.com. */
+    url: text().notNull(),
+    name: text().notNull(),
+    weapons: text().notNull().default(""),
+    profession: text().notNull(),
+    specialization: text().notNull(),
+    /** In-game build template chat code; null if the page had none. */
+    template: text(),
+    /** When Snow Crows last updated the build, as they write it ("May 29, 2026"). */
+    updated: text(),
+    gear: jsonb().$type<BuildGear>().notNull(),
+    categories: text().array().$type<BuildCategory[]>().notNull().default([]),
+    /** Manual order (drag & drop on the website), ascending; new favorites get the lowest value so they come first. */
+    sortOrder: integer("sort_order").notNull().default(0),
+    /** When the snapshot was taken from Snow Crows. */
+    fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
+    /** The last refresh that found the build changed on Snow Crows (= fetchedAt when the latest one did); null = never. */
+    changedAt: timestamp("changed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("favorite_builds_user_url_idx").on(t.userId, t.url)],
 );
 
 /**

@@ -162,6 +162,20 @@
       "when": 1791222026296,
       "tag": "0022_discord_webhook_name",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1791235012827,
+      "tag": "0023_favorite_builds",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791236350882,
+      "tag": "0024_favorite_builds_order",
+      "breakpoints": true
     }
   ]
 }

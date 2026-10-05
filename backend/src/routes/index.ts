@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { appLoginController } from "../controllers/appLoginController";
 import { authController } from "../controllers/authController";
+import { buildController } from "../controllers/buildController";
 import { clearsController } from "../controllers/clearsController";
 import { feedbackController } from "../controllers/feedbackController";
 import { logController } from "../controllers/logController";
@@ -46,6 +47,15 @@ export function createRouter(): Router {
   // Feedback from the website, the desktop uploader and the Nexus addon, emailed to the developer.
   // Guests too; a signed-in user's feedback is linked to their account.
   router.post("/feedback", optionalAuth, feedbackController.send);
+
+  // Snow Crows builds: search, a build's template and gear, and the user's favorites.
+  router.get("/builds/search", requireAuth, buildController.search);
+  router.get("/builds/details", requireAuth, buildController.details);
+  router.get("/builds/favorites", requireAuth, buildController.listFavorites);
+  router.post("/builds/favorites", requireAuth, buildController.addFavorite);
+  router.post("/builds/favorites/refresh", requireAuth, buildController.refreshFavorites);
+  router.post("/builds/favorites/:id/move", requireAuth, buildController.moveFavorite);
+  router.delete("/builds/favorites/:id", requireAuth, buildController.removeFavorite);
 
   router.get("/logs", requireAuth, logController.list);
   router.get("/logs/search", requireAuth, logController.search);

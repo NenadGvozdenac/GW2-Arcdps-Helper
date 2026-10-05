@@ -114,3 +114,15 @@ export const RATE_LIMITS = {
   /** One use per authenticator code: a code seen once (its 30-second step) is refused for 2 minutes. */
   adminTotpStep: { max: 1, windowMs: 2 * 60_000 },
 } satisfies Record<string, RateLimit>;
+
+export const SNOW_CROWS_BASE_URL = "https://snowcrows.com";
+/** Only build pages of Snow Crows are fetched (the server requests the URL, so nothing else is accepted). */
+export const SNOW_CROWS_BUILD_URL_RE = /^https:\/\/snowcrows\.com\/builds\/[a-z-]+\/[a-z]+\/[a-z0-9-]+$/;
+/** Raid builds also cover fractals and strikes (Snow Crows' fractal section links to them). */
+export const SNOW_CROWS_SEARCH_SECTION = "raids";
+export const SNOW_CROWS_TIMEOUT_MS = 10_000;
+export const GW2_API_BASE_URL = "https://api.guildwars2.com";
+/** Longest text accepted by GET /builds/search. */
+export const BUILD_QUERY_MAX = 80;
+/** Most builds a user can keep in their favorites. */
+export const FAVORITE_BUILDS_MAX = 100;

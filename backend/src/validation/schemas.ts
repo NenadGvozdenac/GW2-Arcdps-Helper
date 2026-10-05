@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
 import { FEEDBACK_CATEGORIES } from "../types/feedback.types";
 import {
+  BUILD_QUERY_MAX,
   DISCORD_DEFAULT_MIN_ACCOUNTS,
   DISCORD_MAX_FILTER_ACCOUNTS,
   DISCORD_MAX_WEBHOOKS,
@@ -17,6 +18,7 @@ import {
   SESSION_NAME_MAX,
   SESSIONS_PAGE_SIZE,
   SESSIONS_PAGE_SIZE_MAX,
+  SNOW_CROWS_BUILD_URL_RE,
 } from "../config/constants";
 import { hashIp } from "../utils/clientIp";
 
@@ -311,4 +313,37 @@ export const adminRateLimitEventsSchema = z.object({
 /** Query of GET /admin/stats: how many days back (7, 30 or 90). */
 export const adminStatsSchema = z.object({
   days: z.coerce.number().pipe(z.union([z.literal(7), z.literal(30), z.literal(90)])).default(30),
+});
+
+/** Query of GET /builds/search. */
+export const buildSearchSchema = z.object({
+  q: z
+    .string({ error: "Enter a build to search for." })
+    .trim()
+    .min(1, "Enter a build to search for.")
+    .max(BUILD_QUERY_MAX),
+});
+
+/** A Snow Crows build page — the server fetches it, so nothing else is accepted. Pasted links are normalized. */
+const snowCrowsBuildUrl = z
+  .string()
+  .trim()
+  .transform((v) =>
+    v
+      .replace(/^http:\/\//, "https://")
+      .replace(/^https:\/\/www\./, "https://")
+      .replace(/[?#].*$/, "")
+      .replace(/\/$/, ""),
+  )
+  .pipe(z.string().regex(SNOW_CROWS_BUILD_URL_RE, "Not a Snow Crows build link."));
+
+/** Query of GET /builds/details. */
+export const buildDetailsSchema = z.object({ url: snowCrowsBuildUrl });
+
+/** POST /builds/favorites */
+export const favoriteBuildSchema = z.object({ url: snowCrowsBuildUrl });
+
+/** Body of POST /builds/favorites/:id/move: the favorite takes the place of `overId` (drag & drop). */
+export const moveFavoriteBuildSchema = z.object({
+  overId: z.uuid("Invalid build ID."),
 });

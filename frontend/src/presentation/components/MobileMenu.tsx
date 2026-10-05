@@ -14,7 +14,7 @@ import {
   SheetTrigger,
 } from "@/presentation/components/ui/sheet";
 import { cn } from "@/presentation/lib/utils";
-import { NAV } from "./navigation";
+import { NAV_SECTIONS } from "./navigation";
 
 const itemClass = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -45,20 +45,24 @@ export default function MobileMenu() {
           )}
         </SheetHeader>
 
-        <nav className="flex flex-col gap-1 p-3">
-          {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} end={n.end} className={itemClass} onClick={close}>
-              <n.icon /> {t(n.label)}
-            </NavLink>
-          ))}
-        </nav>
+        {NAV_SECTIONS.map((section, i) => (
+          <nav key={i} className={cn("flex flex-col gap-1 p-3", i > 0 && "border-t")}>
+            {section.map((n) => (
+              <NavLink key={n.to} to={n.to} end={n.end} className={itemClass} onClick={close}>
+                <n.icon /> {t(n.label)}
+              </NavLink>
+            ))}
+            {i === 0 && (
+              <Button asChild className="mt-2 justify-start">
+                <Link to="/upload" onClick={close}>
+                  <UploadIcon /> {t("nav.upload")}
+                </Link>
+              </Button>
+            )}
+          </nav>
+        ))}
 
         <div className="flex flex-col gap-1 border-t p-3">
-          <Button asChild className="mb-2 justify-start">
-            <Link to="/upload" onClick={close}>
-              <UploadIcon /> {t("nav.upload")}
-            </Link>
-          </Button>
           <NavLink to="/profile" className={itemClass} onClick={close}>
             <SettingsIcon /> {t("nav.settings")}
           </NavLink>

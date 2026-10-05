@@ -55,3 +55,10 @@ export const discordTestTooSoon = () =>
   new HttpError(429, "DISCORD_TEST_TOO_SOON", "Too many test messages. Wait a few minutes before sending another.");
 export const discordWebhookFailed = () =>
   new HttpError(502, "DISCORD_WEBHOOK_FAILED", "Discord did not accept the message. Check the webhook URL.");
+export const buildSpecUnknown = () =>
+  new HttpError(400, "BUILD_SPEC_UNKNOWN", "Name a specialization, e.g. \"Power Virtuoso\" or \"Heal Firebrand\".");
+export const buildNotFound = () => new HttpError(404, "BUILD_NOT_FOUND", "Build not found.");
+export const favoriteBuildsLimit = () =>
+  new HttpError(409, "FAVORITE_BUILDS_LIMIT", "You have the maximum number of favorite builds. Remove one first.");
+export const snowCrowsUnavailable = () =>
+  new HttpError(502, "SNOW_CROWS_UNAVAILABLE", "Snow Crows could not be reached. Try again in a minute.");

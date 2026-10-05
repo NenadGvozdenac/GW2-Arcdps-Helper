@@ -31,6 +31,8 @@ export const DOWNLOADS_STORAGE_KEY = "gw2arcdpshelper.downloads";
 export const SESSION_RESULT_FILTER_STORAGE_KEY = "gw2arcdpshelper.sessionResultFilter";
 /** Whether the dashboard's charts are collapsed ("collapsed" or nothing). */
 export const DASHBOARD_CHARTS_STORAGE_KEY = "gw2arcdpshelper.dashboardCharts";
+/** Whether the app's sidebar is collapsed to icons. */
+export const SIDEBAR_STORAGE_KEY = "gw2arcdpshelper.sidebar";
 /** + ".<userId>": the overview's "finish your setup" tip was closed for that account. */
 export const SETUP_TIP_DISMISSED_STORAGE_KEY = "gw2arcdpshelper.setupTipDismissed";
 /**
