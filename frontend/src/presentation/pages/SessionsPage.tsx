@@ -14,7 +14,7 @@ import {
   arrayMove,
   sortableKeyboardCoordinates,
   useSortable,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import {
@@ -295,8 +295,9 @@ function SessionSection({ title, views, c }: { title: string | null; views: Sess
     if (over) c.move(String(active.id), String(over.id));
   };
 
+  // Two columns on wide screens; drag & drop works across them.
   const cards = (
-    <div className="flex flex-col gap-3">
+    <div className="grid items-start gap-3 xl:grid-cols-2">
       {views.map((v) => (
         <SessionCard key={v.session.id} view={v} c={c} />
       ))}
@@ -308,7 +309,7 @@ function SessionSection({ title, views, c }: { title: string | null; views: Sess
       {title && <h2 className="text-sm font-medium text-muted-foreground">{title}</h2>}
       {c.organizing ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-          <SortableContext items={views.map((v) => v.session.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext items={views.map((v) => v.session.id)} strategy={rectSortingStrategy}>
             {cards}
           </SortableContext>
         </DndContext>

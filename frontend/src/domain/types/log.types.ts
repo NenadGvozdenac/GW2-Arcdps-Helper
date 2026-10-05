@@ -86,9 +86,23 @@ export interface LogFilter {
   boss: string;
 }
 
+/** The squad of a log at a glance (GET /logs/search): the "All logs" table's extra columns. */
+export interface SquadSummary {
+  size: number;
+  /** The squad's DPS against the boss target(s), summed. */
+  dps: number;
+  /** DPS of the user's own GW2 account; null when they weren't in the squad. */
+  ownDps: number | null;
+  downs: number;
+  deaths: number;
+}
+
+/** A log in a search page: with its squad at a glance. */
+export type LogSearchItem = Log & { squad: SquadSummary };
+
 /** One page of logs matching a filter (GET /logs/search), newest first. */
 export interface LogPage {
-  logs: Log[];
+  logs: LogSearchItem[];
   /** How many logs match the filter in total. */
   total: number;
 }

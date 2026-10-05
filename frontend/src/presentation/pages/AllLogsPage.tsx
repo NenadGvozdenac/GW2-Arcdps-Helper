@@ -332,6 +332,7 @@ export default function AllLogsPage() {
               <LogTable
                 logs={c.visible}
                 showGroup
+                detailed
                 selection={c.organizing ? { selected: c.selected, onToggle: c.toggle } : undefined}
               />
             </div>

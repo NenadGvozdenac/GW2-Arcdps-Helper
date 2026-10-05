@@ -12,7 +12,7 @@ import AppLoginPage from "./pages/AppLoginPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import DashboardPage from "./pages/DashboardPage";
 import UploadPage from "./pages/UploadPage";
-import CategoryPage from "./pages/CategoryPage";
+import CategoryPage, { RaidsStrikesPage } from "./pages/CategoryPage";
 import AllLogsPage from "./pages/AllLogsPage";
 import LogDetailPage from "./pages/LogDetailPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -41,6 +41,12 @@ import GuestGuideShell from "./components/GuestGuideShell";
 const guide = (page: ReactNode) => (
   <PublicRoute signedIn={<Layout>{page}</Layout>} guest={<GuestGuideShell>{page}</GuestGuideShell>} />
 );
+
+/** Sends an old address to its new one, keeping the query (e.g. ?boss= from a log's "back" link). */
+function MovedTo({ to }: { to: string }) {
+  const { search } = useLocation();
+  return <Navigate to={`${to}${search}`} replace />;
+}
 
 /** A new page starts at the top (the SPA would otherwise keep the previous page's scroll position). */
 function ScrollToTop() {
@@ -93,19 +99,21 @@ export default function AppRouter() {
           <Route path="app-login/:id" element={<AppLoginPage />} />
           <Route element={<Layout />}>
             <Route path="upload" element={<UploadPage />} />
-            <Route path="raids" element={<CategoryPage key="raid" category="raid" />} />
-            <Route path="fractals" element={<CategoryPage key="fractal" category="fractal" />} />
-            <Route path="strikes" element={<CategoryPage key="strike" category="strike" />} />
-            <Route path="sessions" element={<SessionsPage />} />
             <Route path="sessions/:id" element={<SessionDetailPage />} />
-            <Route path="logs" element={<AllLogsPage />} />
             <Route path="logs/:id" element={<LogDetailPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
           {/* Pages that use all the room beside the sidebar. */}
           <Route element={<Layout wide />}>
+            <Route path="raids-strikes" element={<RaidsStrikesPage />} />
+            <Route path="fractals" element={<CategoryPage key="fractal" category="fractal" />} />
+            <Route path="logs" element={<AllLogsPage />} />
+            <Route path="sessions" element={<SessionsPage />} />
             <Route path="builds" element={<BuildsPage />} />
           </Route>
+          {/* Raids and strikes used to be pages of their own. */}
+          <Route path="raids" element={<MovedTo to="/raids-strikes" />} />
+          <Route path="strikes" element={<MovedTo to="/raids-strikes" />} />
         </Route>
         {/* The administrator's area: its own sign-in (password + authenticator code), independent of a user's. */}
         <Route

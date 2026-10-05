@@ -1,7 +1,14 @@
 import type { Log, LogDetail, LogFilter, LogPage, SharedLog } from "../domain/types/log.types";
 import type { SubmitLogsResponse, SubmitResult, UploadLogFileResponse } from "../domain/types/upload.types";
 import { http } from "./httpClient";
-import { fromSharedLogDto, toLog, type LogDetailDto, type LogDto, type SharedLogDto } from "./logMapper";
+import {
+  fromSharedLogDto,
+  toLog,
+  type LogDetailDto,
+  type LogDto,
+  type LogSearchItemDto,
+  type SharedLogDto,
+} from "./logMapper";
 
 const searchQuery = (filter: LogFilter, extra: Record<string, string>) =>
   new URLSearchParams({ ...filter, ...extra }).toString();
@@ -19,7 +26,7 @@ export const logRepository = {
   /** One page of logs matching the filter, searched on the server. */
   async search(filter: LogFilter, page: number, pageSize: number): Promise<LogPage> {
     const query = searchQuery(filter, { page: String(page), pageSize: String(pageSize) });
-    const body = await http.get<{ logs: LogDto[]; total: number }>(`/logs/search?${query}`);
+    const body = await http.get<{ logs: LogSearchItemDto[]; total: number }>(`/logs/search?${query}`);
     return { logs: body.logs.map((l) => toLog(l)), total: body.total };
   },
 

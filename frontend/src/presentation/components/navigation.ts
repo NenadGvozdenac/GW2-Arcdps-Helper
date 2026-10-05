@@ -5,7 +5,6 @@ import {
   LayoutDashboardIcon,
   ListIcon,
   SwordsIcon,
-  TargetIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { TranslationKey } from "../../i18n/i18n.types";
@@ -24,9 +23,8 @@ export interface NavItem {
 export const NAV_SECTIONS: NavItem[][] = [
   [
     { to: "/", label: "nav.overview", icon: LayoutDashboardIcon, end: true },
-    { to: "/raids", label: "nav.raids", icon: SwordsIcon },
+    { to: "/raids-strikes", label: "nav.raidsStrikes", icon: SwordsIcon },
     { to: "/fractals", label: "nav.fractals", icon: GemIcon },
-    { to: "/strikes", label: "nav.strikes", icon: TargetIcon },
     { to: "/sessions", label: "nav.sessions", icon: CalendarClockIcon },
     { to: "/logs", label: "nav.allLogs", icon: ListIcon },
   ],

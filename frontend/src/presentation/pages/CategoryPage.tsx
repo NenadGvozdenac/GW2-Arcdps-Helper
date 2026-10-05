@@ -11,7 +11,7 @@ import type { TranslationKey } from "../../i18n/i18n.types";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
-import { ToggleGroup, ToggleGroupItem } from "@/presentation/components/ui/toggle-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import BossRow from "../components/BossRow";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
@@ -38,15 +38,39 @@ const MODES: { value: CmMode; label: TranslationKey }[] = [
   { value: "cm", label: "categories.modeCm" },
 ];
 
-function useCategoryController(category: PageCategory) {
-  const { logs } = useLogs();
+/** The page's controls, shared by every category it shows: CM mode, the previous period, the open boss (?boss=). */
+function usePageState() {
   const [params, setParams] = useSearchParams();
   const [mode, setMode] = useState<CmMode>("all");
   const [showPrevious, setShowPrevious] = useState(false);
   const selectedBoss = params.get("boss");
   const now = useNow();
 
-  const view = useMemo(() => {
+  function toggleBoss(key: string) {
+    const next = new URLSearchParams(params);
+    if (selectedBoss === key) next.delete("boss");
+    else next.set("boss", key);
+    setParams(next, { replace: true });
+  }
+
+  return {
+    mode,
+    setMode,
+    showPrevious,
+    togglePrevious: () => setShowPrevious((v) => !v),
+    selectedBoss,
+    toggleBoss,
+    now,
+  };
+}
+
+type PageState = ReturnType<typeof usePageState>;
+
+/** One category's numbers since its reset, its previous period's logs and its groups with their bosses. */
+function useCategoryView(category: PageCategory, mode: CmMode, now: Date) {
+  const { logs } = useLogs();
+
+  return useMemo(() => {
     // Everything — the cards and each boss's row — counts from the last reset: daily for fractals, weekly for raids
     // and strikes. Older logs are under "Yesterday" / "Last week".
     const resetAt = statsService.resetFor(category, now);
@@ -89,85 +113,71 @@ function useCategoryController(category: PageCategory) {
         wipes: sinceReset.wipes,
         resetInMs: nextResetAt.getTime() - now.getTime(),
       },
+      labels: (category === "fractal"
+        ? {
+            cleared: "categories.clearedToday",
+            kills: "categories.killsToday",
+            wipes: "categories.wipesToday",
+            noLogs: "boss.noLogsToday",
+          }
+        : {
+            cleared: "categories.clearedThisWeek",
+            kills: "categories.killsThisWeek",
+            wipes: "categories.wipesThisWeek",
+            noLogs: "boss.noLogsThisWeek",
+          }) satisfies Record<string, TranslationKey>,
     };
   }, [logs, category, mode, now]);
-
-  function toggleBoss(key: string) {
-    const next = new URLSearchParams(params);
-    if (selectedBoss === key) next.delete("boss");
-    else next.set("boss", key);
-    setParams(next, { replace: true });
-  }
-
-  return {
-    ...view,
-    mode,
-    setMode,
-    showPrevious,
-    togglePrevious: () => setShowPrevious((v) => !v),
-    previousLabel: (category === "fractal" ? "categories.showYesterday" : "categories.showLastWeek") as TranslationKey,
-    selectedBoss,
-    toggleBoss,
-    labels: (category === "fractal"
-      ? {
-          cleared: "categories.clearedToday",
-          kills: "categories.killsToday",
-          wipes: "categories.wipesToday",
-          noLogs: "boss.noLogsToday",
-        }
-      : {
-          cleared: "categories.clearedThisWeek",
-          kills: "categories.killsThisWeek",
-          wipes: "categories.wipesThisWeek",
-          noLogs: "boss.noLogsThisWeek",
-        }) satisfies Record<string, TranslationKey>,
-  };
 }
 
-export default function CategoryPage({ category }: { category: PageCategory }) {
-  const c = useCategoryController(category);
-  const { t, fmt } = useI18n();
-  const { summary, previous } = c;
+const previousLabelFor = (category: PageCategory): TranslationKey =>
+  category === "fractal" ? "categories.showYesterday" : "categories.showLastWeek";
 
+/** The header's controls: the previous period (yesterday / last week) and the CM mode. */
+function PageActions({ state, previousLabel }: { state: PageState; previousLabel: TranslationKey }) {
+  const { t } = useI18n();
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Button variant={state.showPrevious ? "secondary" : "outline"} onClick={state.togglePrevious}>
+        <HistoryIcon /> {t(previousLabel)}
+      </Button>
+      <Select value={state.mode} onValueChange={(v) => state.setMode(v as CmMode)}>
+        <SelectTrigger className="w-36" aria-label={t("categories.modeLabel")}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {MODES.map((m) => (
+            <SelectItem key={m.value} value={m.value}>
+              {t(m.label)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+/** One category: its numbers, the previous period's logs (when shown) and its groups; `title` when the page has more. */
+function CategorySection({ category, state, title }: { category: PageCategory; state: PageState; title?: string }) {
+  const { t, fmt } = useI18n();
+  const { groups, summary, previous, labels } = useCategoryView(category, state.mode, state.now);
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t(`categories.${category}.title`)}
-        description={t(`categories.${category}.subtitle`)}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant={c.showPrevious ? "secondary" : "outline"} onClick={c.togglePrevious}>
-              <HistoryIcon /> {t(c.previousLabel)}
-            </Button>
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={c.mode}
-              onValueChange={(v) => v && c.setMode(v as CmMode)}
-            >
-              {MODES.map((m) => (
-                <ToggleGroupItem key={m.value} value={m.value} className="px-4">
-                  {t(m.label)}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          </div>
-        }
-      />
+    <section className="flex min-w-0 flex-col gap-6">
+      {title && <h2 className="text-lg font-semibold">{title}</h2>}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label={t(c.labels.cleared)} value={`${summary.cleared}/${summary.total}`} />
-        <StatCard label={t(c.labels.kills)} value={summary.kills} tone="success" />
-        <StatCard label={t(c.labels.wipes)} value={summary.wipes} tone="fail" />
+        <StatCard label={t(labels.cleared)} value={`${summary.cleared}/${summary.total}`} />
+        <StatCard label={t(labels.kills)} value={summary.kills} tone="success" />
+        <StatCard label={t(labels.wipes)} value={summary.wipes} tone="fail" />
         <StatCard label={t("categories.nextReset")} value={fmt.countdown(summary.resetInMs)} mono />
       </div>
 
-      {c.showPrevious && (
+      {state.showPrevious && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="space-y-1.5">
-              <CardTitle>{t(c.previousLabel)}</CardTitle>
+              <CardTitle>{t(previousLabelFor(category))}</CardTitle>
               <CardDescription>
                 {t("categories.previousRange", {
                   from: fmt.dateTime(previous.from),
@@ -176,7 +186,7 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
                 })}
               </CardDescription>
             </div>
-            <Button variant="ghost" size="sm" onClick={c.togglePrevious}>
+            <Button variant="ghost" size="sm" onClick={state.togglePrevious}>
               <XIcon /> {t("categories.hidePrevious")}
             </Button>
           </CardHeader>
@@ -187,7 +197,7 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
       )}
 
       <div className="flex flex-col gap-4">
-        {c.groups.map(({ group, bosses }) => (
+        {groups.map(({ group, bosses }) => (
           <Card key={group.id} className="gap-0 overflow-hidden py-0">
             <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
               <Badge variant="secondary" className="font-mono">
@@ -200,14 +210,54 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
                 <BossRow
                   key={b.encounter.key}
                   {...b}
-                  emptyLabel={t(c.labels.noLogs)}
-                  open={c.selectedBoss === b.encounter.key}
-                  onToggle={() => c.toggleBoss(b.encounter.key)}
+                  emptyLabel={t(labels.noLogs)}
+                  open={state.selectedBoss === b.encounter.key}
+                  onToggle={() => state.toggleBoss(b.encounter.key)}
                 />
               ))}
             </ul>
           </Card>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/** One category on its own page (fractals). */
+export default function CategoryPage({ category }: { category: PageCategory }) {
+  const state = usePageState();
+  const { t } = useI18n();
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t(`categories.${category}.title`)}
+        description={t(`categories.${category}.subtitle`)}
+        actions={<PageActions state={state} previousLabel={previousLabelFor(category)} />}
+      />
+      <CategorySection category={category} state={state} />
+    </div>
+  );
+}
+
+/**
+ * Raids and strikes on one page (both reset weekly), each with its own numbers: raids on the left, strikes on the
+ * right on wide screens, one under the other otherwise. The header's controls apply to both.
+ */
+export function RaidsStrikesPage() {
+  const state = usePageState();
+  const { t } = useI18n();
+
+  return (
+    <div className="flex flex-col gap-6">
+      <PageHeader
+        title={t("categories.raidsStrikes.title")}
+        description={t("categories.raidsStrikes.subtitle")}
+        actions={<PageActions state={state} previousLabel={previousLabelFor("raid")} />}
+      />
+      <div className="grid items-start gap-8 xl:grid-cols-2">
+        <CategorySection category="raid" state={state} title={t("categories.raid.title")} />
+        <CategorySection category="strike" state={state} title={t("categories.strike.title")} />
       </div>
     </div>
   );

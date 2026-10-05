@@ -28,9 +28,9 @@ const DAY_MS = 24 * 60 * 60_000;
 const TOP_BOSSES = 8;
 
 const SECTIONS: { category: Exclude<Category, "other">; label: TranslationKey; to: string }[] = [
-  { category: "raid", label: "nav.raids", to: "/raids" },
+  { category: "raid", label: "nav.raids", to: "/raids-strikes" },
   { category: "fractal", label: "nav.fractals", to: "/fractals" },
-  { category: "strike", label: "nav.strikes", to: "/strikes" },
+  { category: "strike", label: "nav.strikes", to: "/raids-strikes" },
 ];
 
 /**

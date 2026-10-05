@@ -26,9 +26,9 @@ import ShareButton from "../components/ShareButton";
 import { describeError } from "../utils/describeError";
 
 const CATEGORY_PATH: Record<Category, string> = {
-  raid: "/raids",
+  raid: "/raids-strikes",
   fractal: "/fractals",
-  strike: "/strikes",
+  strike: "/raids-strikes",
   other: "/logs",
 };
 

@@ -2,12 +2,29 @@ import { and, count, desc, eq, getTableColumns, gte, inArray, isNotNull, lt, or,
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
 import type { Category } from "../types/encounter.types";
-import type { Log, LogFilter, LogListItem, LogPage, LogSummary } from "../types/log.types";
+import type { Log, LogFilter, LogListItem, LogPage, LogSummary, SquadSummary } from "../types/log.types";
 
 const ownedBy = (ownerId: string) => eq(logs.ownerId, ownerId);
 
 // Every column except the squad (players / accounts): what lists need. See LogListItem.
 const { players: _players, accounts: _accounts, ...listColumns } = getTableColumns(logs);
+
+/**
+ * The squad at a glance, computed in the database from the stored squad (so the page doesn't carry it): size, summed
+ * boss DPS / downs / deaths, and the DPS of the owner's own GW2 account.
+ */
+const squadSummary = sql<SquadSummary>`(
+  SELECT json_build_object(
+    'size', count(p),
+    'dps', coalesce(round(sum((p->>'dps')::numeric)), 0)::int,
+    'downs', coalesce(sum((p->>'downs')::int), 0)::int,
+    'deaths', coalesce(sum((p->>'deaths')::int), 0)::int,
+    'ownDps', round(max(CASE WHEN u.gw2_account <> '' AND lower(p->>'account') = lower(u.gw2_account)
+                             THEN (p->>'dps')::numeric END))::int
+  )
+  FROM users u LEFT JOIN jsonb_array_elements(${logs.players}) AS p ON true
+  WHERE u.id = ${logs.ownerId}
+)`;
 
 /** Same matching as the website's filter bar: boss name, or any account / character name containing the text. */
 function matching(ownerId: string, f: LogFilter): SQL | undefined {
@@ -59,7 +76,7 @@ export const logRepository = {
     const where = matching(ownerId, filter);
     const [rows, [{ total }]] = await Promise.all([
       getDb()
-        .select(listColumns)
+        .select({ ...listColumns, squad: squadSummary })
         .from(logs)
         .where(where)
         .orderBy(desc(logs.encounterTime), desc(logs.id))
