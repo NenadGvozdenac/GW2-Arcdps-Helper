@@ -1,18 +1,22 @@
-/** What the first Discord webhook posts; a second webhook, when connected, posts the rest. */
+/** What a Discord webhook posts; with two webhooks, each posts "logs" or "sessions" (not "all"). */
 export type DiscordContent = "all" | "logs" | "sessions";
 
-/** One of the user's Discord webhooks (at most two; with two, one posts logs and the other sessions). */
+/** One of the user's Discord webhooks (at most two; with two, each posts only logs or only sessions). */
 export interface DiscordWebhook {
+  /** The user's own label, to tell the webhooks apart; empty = none. */
+  name: string;
   url: string;
   content: DiscordContent;
   /** false = paused: nothing is posted to it. */
   enabled: boolean;
   /**
-   * Session filter (webhook that posts sessions): a session summary is posted only when one of its logs has
-   * `minAccounts` of these GW2 accounts. Empty = every session.
+   * Group filter: a log is posted only when it has `minAccounts` of these GW2 accounts, a session summary only when
+   * one of its logs does. Empty = everything.
    */
   accounts: string[];
   minAccounts: number;
+  /** A log with any of these GW2 accounts is not posted, nor a session summary when any of its logs has one. */
+  excludedAccounts: string[];
 }
 
 export interface User {

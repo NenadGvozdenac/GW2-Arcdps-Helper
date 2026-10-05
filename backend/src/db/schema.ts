@@ -59,7 +59,7 @@ export const users = pgTable(
 
 /**
  * A user's Discord webhooks: at most two. One posts new logs and / or session summaries ("all", "logs", "sessions");
- * with two, each posts one of them.
+ * with two, each posts either logs or sessions (both may post the same kind, e.g. to two channels).
  */
 export const discordWebhooks = pgTable(
   "discord_webhooks",
@@ -70,16 +70,23 @@ export const discordWebhooks = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     /** 0 = first, 1 = second (the order on the settings page). */
     position: integer().notNull(),
+    /** The user's own label for the webhook, to tell the two apart; empty = none. */
+    name: text().notNull().default(""),
     url: text().notNull(),
     content: text().$type<DiscordContent>().notNull().default("all"),
     /** Unchecking "Active" pauses the webhook without forgetting its URL: nothing is posted to it until re-enabled. */
     enabled: boolean().notNull().default(true),
     /**
-     * Session filter (only for a webhook that posts sessions): a session summary is posted only when at least one of
-     * its logs has minAccounts of these GW2 accounts in the squad. Empty = every session is posted.
+     * Group filter: a log is posted only when minAccounts of these GW2 accounts are in its squad, a session summary
+     * only when at least one of its logs is. Empty = everything is posted.
      */
     accounts: text().array().notNull().default([]),
     minAccounts: integer("min_accounts").notNull().default(DISCORD_DEFAULT_MIN_ACCOUNTS),
+    /**
+     * Excluded GW2 accounts: a log with any of them in the squad is not posted, nor is a session summary when any of
+     * its logs has one. Empty = nobody is excluded.
+     */
+    excludedAccounts: text("excluded_accounts").array().notNull().default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("discord_webhooks_user_position_idx").on(t.userId, t.position)],
@@ -117,15 +124,22 @@ export const sessions = pgTable(
   ],
 );
 
-/** The Discord summary posted when a session ended, so renaming the session can edit that message. */
-export const sessionDiscordMessages = pgTable("session_discord_messages", {
-  sessionId: uuid("session_id")
-    .primaryKey()
-    .references(() => sessions.id, { onDelete: "cascade" }),
-  /** Webhook that posted the message — only it can edit the message, and the user may connect another one since. */
-  webhookUrl: text("webhook_url").notNull(),
-  messageId: text("message_id").notNull(),
-});
+/**
+ * The Discord summaries posted when a session ended (one per webhook that posts sessions), so renaming the session
+ * can edit those messages.
+ */
+export const sessionDiscordMessages = pgTable(
+  "session_discord_messages",
+  {
+    sessionId: uuid("session_id")
+      .notNull()
+      .references(() => sessions.id, { onDelete: "cascade" }),
+    /** Webhook that posted the message — only it can edit the message, and the user may connect another one since. */
+    webhookUrl: text("webhook_url").notNull(),
+    messageId: text("message_id").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.sessionId, t.webhookUrl] })],
+);
 
 export const logs = pgTable(
   "logs",

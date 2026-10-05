@@ -6,6 +6,7 @@ import {
   PauseIcon,
   ShieldAlertIcon,
   SplitIcon,
+  UserXIcon,
   UsersIcon,
 } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
@@ -63,8 +64,8 @@ function StepList({ steps }: { steps: Step[] }) {
 }
 
 /**
- * How to create a Discord webhook and connect it in Settings, plus the optional second channel, session filter and
- * pausing (public page at /guide/discord).
+ * How to create a Discord webhook and connect it in Settings, plus the optional second channel, filters and pausing
+ * (public page at /guide/discord).
  */
 export default function DiscordGuidePage() {
   const { user } = useAuth();
@@ -120,6 +121,12 @@ export default function DiscordGuidePage() {
           <StepList steps={FILTER_STEPS} />
         </CardContent>
       </Card>
+
+      <Alert>
+        <UserXIcon />
+        <AlertTitle>{t("discordGuide.excludeTitle")}</AlertTitle>
+        <AlertDescription>{t("discordGuide.excludeBody")}</AlertDescription>
+      </Alert>
 
       <Alert>
         <PauseIcon />

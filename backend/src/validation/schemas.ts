@@ -6,6 +6,7 @@ import {
   DISCORD_DEFAULT_MIN_ACCOUNTS,
   DISCORD_MAX_FILTER_ACCOUNTS,
   DISCORD_MAX_WEBHOOKS,
+  DISCORD_WEBHOOK_NAME_MAX,
   DISCORD_WEBHOOK_RE,
   DPS_REPORT_TOKEN_RE,
   FEEDBACK_DESCRIPTION_MAX,
@@ -86,31 +87,45 @@ const discordWebhookUrl = z
   .trim()
   .regex(DISCORD_WEBHOOK_RE, "Not a Discord webhook URL (https://discord.com/api/webhooks/…).");
 
+/** Up to DISCORD_MAX_FILTER_ACCOUNTS GW2 accounts; the same account twice (in any case) is kept once. */
+const filterAccounts = z
+  .array(gw2Account)
+  .max(DISCORD_MAX_FILTER_ACCOUNTS, `At most ${DISCORD_MAX_FILTER_ACCOUNTS} accounts.`)
+  .default([])
+  .transform((list) => [...new Map(list.map((a) => [a.toLowerCase(), a])).values()]);
+
 /**
- * PUT /profile/discord-webhooks: the whole list, in order (empty disconnects). With two webhooks one posts only logs
- * and the other only sessions.
+ * PUT /profile/discord-webhooks: the whole list, in order (empty disconnects). With two webhooks each posts only logs
+ * or only sessions (both may post the same kind), and they need different URLs.
  */
 export const discordWebhooksSchema = z.object({
   webhooks: z
     .array(
-      z.object({
-        url: discordWebhookUrl,
-        content: discordContent,
-        enabled: z.boolean().default(true),
-        accounts: z
-          .array(gw2Account)
-          .max(DISCORD_MAX_FILTER_ACCOUNTS, `At most ${DISCORD_MAX_FILTER_ACCOUNTS} accounts.`)
-          .default([])
-          // Same account twice (in any case) would count twice.
-          .transform((list) => [...new Map(list.map((a) => [a.toLowerCase(), a])).values()]),
-        minAccounts: z.number().int().min(1).max(DISCORD_MAX_FILTER_ACCOUNTS).default(DISCORD_DEFAULT_MIN_ACCOUNTS),
-      }),
+      z
+        .object({
+          name: z
+            .string()
+            .trim()
+            .max(DISCORD_WEBHOOK_NAME_MAX, `At most ${DISCORD_WEBHOOK_NAME_MAX} characters.`)
+            .default(""),
+          url: discordWebhookUrl,
+          content: discordContent,
+          enabled: z.boolean().default(true),
+          accounts: filterAccounts,
+          minAccounts: z.number().int().min(1).max(DISCORD_MAX_FILTER_ACCOUNTS).default(DISCORD_DEFAULT_MIN_ACCOUNTS),
+          excludedAccounts: filterAccounts,
+        })
+        .refine(
+          (w) => !w.excludedAccounts.some((x) => w.accounts.some((a) => a.toLowerCase() === x.toLowerCase())),
+          "An account can't be both in the group and excluded.",
+        ),
     )
     .max(DISCORD_MAX_WEBHOOKS, `At most ${DISCORD_MAX_WEBHOOKS} webhooks.`)
     .refine(
-      (w) => w.length < 2 || (new Set(w.map((x) => x.content)).size === 2 && w.every((x) => x.content !== "all")),
-      "With two webhooks, one posts only logs and the other only sessions.",
-    ),
+      (w) => w.length < 2 || w.every((x) => x.content !== "all"),
+      "With two webhooks, each posts only logs or only sessions.",
+    )
+    .refine((w) => new Set(w.map((x) => x.url)).size === w.length, "The two webhooks need different URLs."),
 });
 
 /** `content` is what the webhook will post, so the test message can say so. */

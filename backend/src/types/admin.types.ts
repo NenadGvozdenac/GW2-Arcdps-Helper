@@ -72,12 +72,14 @@ export interface AdminWebhook {
   userId: string;
   ownerEmail: string;
   position: number;
+  name: string;
   /** The URL with its secret part cut short - enough to recognise it, not to post to it. */
   urlMasked: string;
   content: DiscordContent;
   enabled: boolean;
   accounts: string[];
   minAccounts: number;
+  excludedAccounts: string[];
   createdAt: Date;
 }
 

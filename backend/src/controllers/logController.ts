@@ -17,7 +17,7 @@ import {
 import { validate } from "../validation/validate";
 
 /**
- * Posts newly added logs to the user's Discord webhook before responding (serverless functions may be frozen
+ * Posts newly added logs to the user's Discord webhooks before responding (serverless functions may be frozen
  * right after the response, so this can't run in the background).
  */
 async function notifyDiscord(userId: string, results: SubmitResult[], sessionActive = false) {
@@ -25,8 +25,7 @@ async function notifyDiscord(userId: string, results: SubmitResult[], sessionAct
   if (sessionActive) return;
   const added = results.flatMap((r) => (r.status === "ok" ? [r.log] : []));
   if (!added.length) return;
-  const webhooks = await userService.getDiscordWebhooks(userId);
-  await discordService.notifyNewLogs(discordService.webhookFor(webhooks, "logs")?.url ?? null, added);
+  await discordService.notifyNewLogs(await userService.getDiscordWebhooks(userId), added);
 }
 
 export const logController = {

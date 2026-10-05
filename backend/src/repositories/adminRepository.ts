@@ -66,11 +66,13 @@ const webhookColumns = {
   userId: discordWebhooks.userId,
   ownerEmail: users.email,
   position: discordWebhooks.position,
+  name: discordWebhooks.name,
   url: discordWebhooks.url,
   content: discordWebhooks.content,
   enabled: discordWebhooks.enabled,
   accounts: discordWebhooks.accounts,
   minAccounts: discordWebhooks.minAccounts,
+  excludedAccounts: discordWebhooks.excludedAccounts,
   createdAt: discordWebhooks.createdAt,
 };
 export type AdminWebhookRow = Awaited<ReturnType<typeof adminRepository.webhooks>>["rows"][number];

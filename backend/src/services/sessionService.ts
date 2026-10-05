@@ -38,31 +38,38 @@ async function endAndNotify(ownerId: string, id: string, reason: SessionEndReaso
   if (!session) return null;
   const logs = await sessionRepository.logsOf(ownerId, id);
   if (logs.length) {
-    const webhook = discordService.webhookFor(await userService.getDiscordWebhooks(ownerId), "sessions");
-    const webhookUrl = webhook && discordService.passesSessionFilter(webhook, logs) ? webhook.url : null;
-    const { gw2Account } = await userService.get(ownerId);
-    const messageId = await discordService.notifySession(webhookUrl, session, logs, logSpan(logs)!, gw2Account);
-    if (webhookUrl && messageId) await sessionRepository.saveDiscordMessage(id, webhookUrl, messageId);
+    const webhooks = discordService
+      .webhooksFor(await userService.getDiscordWebhooks(ownerId), "sessions")
+      .filter((w) => discordService.passesSessionFilter(w, logs));
+    if (webhooks.length) {
+      const { gw2Account } = await userService.get(ownerId);
+      for (const { url } of webhooks) {
+        const messageId = await discordService.notifySession(url, session, logs, logSpan(logs)!, gw2Account);
+        if (messageId) await sessionRepository.saveDiscordMessage(id, url, messageId);
+      }
+    }
   }
   return session;
 }
 
 /**
- * Rewrites the session's Discord summary, if one was posted, so it shows the current name and logs. Once the session
- * has no logs left, the summary is deleted.
+ * Rewrites the session's Discord summaries, if any were posted, so they show the current name and logs. Once the
+ * session has no logs left, the summaries are deleted.
  */
 async function refreshDiscordMessage(ownerId: string, session: Session): Promise<void> {
   if (!session.endedAt) return;
-  const message = await sessionRepository.findDiscordMessage(session.id);
-  if (!message) return;
+  const messages = await sessionRepository.findDiscordMessages(session.id);
+  if (!messages.length) return;
   const logs = await sessionRepository.logsOf(ownerId, session.id);
   if (!logs.length) {
-    await discordService.deleteSession(message.webhookUrl, message.messageId);
-    await sessionRepository.deleteDiscordMessage(session.id);
+    for (const m of messages) await discordService.deleteSession(m.webhookUrl, m.messageId);
+    await sessionRepository.deleteDiscordMessages(session.id);
     return;
   }
   const { gw2Account } = await userService.get(ownerId);
-  await discordService.updateSession(message.webhookUrl, message.messageId, session, logs, logSpan(logs)!, gw2Account);
+  for (const m of messages) {
+    await discordService.updateSession(m.webhookUrl, m.messageId, session, logs, logSpan(logs)!, gw2Account);
+  }
 }
 
 /**

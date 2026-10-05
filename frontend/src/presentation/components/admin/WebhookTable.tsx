@@ -35,7 +35,7 @@ export default function WebhookTable({
           <TableHead>URL</TableHead>
           <TableHead>Posts</TableHead>
           <TableHead>Active</TableHead>
-          <TableHead>Session filter</TableHead>
+          <TableHead>Filters</TableHead>
           <TableHead>Added</TableHead>
           <TableHead />
         </TableRow>
@@ -51,8 +51,9 @@ export default function WebhookTable({
               </TableCell>
             )}
             <TableCell className="tabular-nums">{w.position + 1}</TableCell>
-            <TableCell className="max-w-72 truncate font-mono text-xs" title={w.urlMasked}>
-              {w.urlMasked}
+            <TableCell className="max-w-72" title={w.urlMasked}>
+              {w.name && <div className="truncate text-sm font-medium">{w.name}</div>}
+              <div className="truncate font-mono text-xs">{w.urlMasked}</div>
             </TableCell>
             <TableCell>
               <Select
@@ -81,7 +82,14 @@ export default function WebhookTable({
               />
             </TableCell>
             <TableCell className="text-xs text-muted-foreground">
-              {w.accounts.length ? `${w.minAccounts} of ${w.accounts.join(", ")}` : "—"}
+              {w.accounts.length || w.excludedAccounts.length ? (
+                <>
+                  {w.accounts.length > 0 && <div>{`${w.minAccounts} of ${w.accounts.join(", ")}`}</div>}
+                  {w.excludedAccounts.length > 0 && <div>{`Not with ${w.excludedAccounts.join(", ")}`}</div>}
+                </>
+              ) : (
+                "—"
+              )}
             </TableCell>
             <TableCell className="text-xs text-muted-foreground">{fmt.date(w.createdAt)}</TableCell>
             <TableCell className="text-right">

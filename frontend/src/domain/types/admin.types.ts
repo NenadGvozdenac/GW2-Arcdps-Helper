@@ -90,11 +90,13 @@ export interface AdminWebhook {
   userId: string;
   ownerEmail: string;
   position: number;
+  name: string;
   urlMasked: string;
   content: AdminWebhookContent;
   enabled: boolean;
   accounts: string[];
   minAccounts: number;
+  excludedAccounts: string[];
   createdAt: Date;
 }
 

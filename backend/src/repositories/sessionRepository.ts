@@ -217,24 +217,30 @@ export const sessionRepository = {
       .orderBy(asc(logs.encounterTime));
   },
 
-  /** Remembers the Discord summary of a session; a resumed session that ends again replaces the old one. */
+  /**
+   * Remembers a Discord summary of a session (one per webhook); a resumed session that ends again replaces the old
+   * one of that webhook.
+   */
   async saveDiscordMessage(sessionId: string, webhookUrl: string, messageId: string): Promise<void> {
     await getDb()
       .insert(sessionDiscordMessages)
       .values({ sessionId, webhookUrl, messageId })
-      .onConflictDoUpdate({ target: sessionDiscordMessages.sessionId, set: { webhookUrl, messageId } });
+      .onConflictDoUpdate({
+        target: [sessionDiscordMessages.sessionId, sessionDiscordMessages.webhookUrl],
+        set: { messageId },
+      });
   },
 
-  async deleteDiscordMessage(sessionId: string): Promise<void> {
+  /** Forgets every Discord summary of the session. */
+  async deleteDiscordMessages(sessionId: string): Promise<void> {
     await getDb().delete(sessionDiscordMessages).where(eq(sessionDiscordMessages.sessionId, sessionId));
   },
 
-  async findDiscordMessage(sessionId: string): Promise<{ webhookUrl: string; messageId: string } | null> {
-    const [row] = await getDb()
+  /** The session's Discord summaries, one per webhook that posted it. */
+  findDiscordMessages(sessionId: string): Promise<{ webhookUrl: string; messageId: string }[]> {
+    return getDb()
       .select({ webhookUrl: sessionDiscordMessages.webhookUrl, messageId: sessionDiscordMessages.messageId })
       .from(sessionDiscordMessages)
-      .where(eq(sessionDiscordMessages.sessionId, sessionId))
-      .limit(1);
-    return row ?? null;
+      .where(eq(sessionDiscordMessages.sessionId, sessionId));
   },
 };

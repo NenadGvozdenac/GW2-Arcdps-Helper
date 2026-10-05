@@ -15,13 +15,16 @@ export const profileService = {
 
   getDiscordWebhooks: (): Promise<DiscordWebhook[]> => userRepository.getDiscordWebhooks(),
 
-  /** Adds a GW2 account to a session filter; throws when it isn't one, is already listed or the list is full. */
-  addFilterAccount(accounts: string[], account: string): string[] {
+  /**
+   * Adds a GW2 account to a webhook filter (its group or its excluded accounts); throws when it isn't one, is already
+   * listed, is on the webhook's other list (`other`) or the list is full.
+   */
+  addFilterAccount(accounts: string[], account: string, other: string[] = []): string[] {
     const trimmed = account.trim();
+    const same = (a: string) => a.toLowerCase() === trimmed.toLowerCase();
     if (!authService.isValidGw2Account(trimmed)) throw new ValidationError("validation.invalidGw2Account");
-    if (accounts.some((a) => a.toLowerCase() === trimmed.toLowerCase())) {
-      throw new ValidationError("validation.filterAccountExists");
-    }
+    if (accounts.some(same)) throw new ValidationError("validation.filterAccountExists");
+    if (other.some(same)) throw new ValidationError("validation.filterAccountOtherList");
     if (accounts.length >= DISCORD_MAX_FILTER_ACCOUNTS) throw new ValidationError("validation.tooManyFilterAccounts");
     return [...accounts, trimmed];
   },
@@ -32,10 +35,14 @@ export const profileService = {
     if (trimmed.some((w) => !profileService.isValidDiscordWebhook(w.url))) {
       throw new ValidationError("validation.invalidDiscordWebhook");
     }
-    if (trimmed.some((w) => w.accounts.some((a) => !authService.isValidGw2Account(a)))) {
+    if (new Set(trimmed.map((w) => w.url)).size !== trimmed.length) {
+      throw new ValidationError("validation.duplicateDiscordWebhook");
+    }
+    const lists = trimmed.flatMap((w) => [w.accounts, w.excludedAccounts]);
+    if (lists.some((list) => list.some((a) => !authService.isValidGw2Account(a)))) {
       throw new ValidationError("validation.invalidGw2Account");
     }
-    if (trimmed.some((w) => w.accounts.length > DISCORD_MAX_FILTER_ACCOUNTS)) {
+    if (lists.some((list) => list.length > DISCORD_MAX_FILTER_ACCOUNTS)) {
       throw new ValidationError("validation.tooManyFilterAccounts");
     }
     return userRepository.setDiscordWebhooks(trimmed);

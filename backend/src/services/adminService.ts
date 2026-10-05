@@ -220,17 +220,14 @@ export const adminService = {
   },
 
   /**
-   * Pauses / resumes a webhook or changes what it posts. A user with two webhooks must keep one for logs and one for
-   * sessions (the same rule as the settings page).
+   * Pauses / resumes a webhook or changes what it posts. With two webhooks, each posts only logs or only sessions
+   * (the same rule as the settings page).
    */
   async updateWebhook(id: string, patch: { enabled?: boolean; content?: DiscordContent }): Promise<void> {
     const hook = await adminRepository.webhookWithSiblings(id);
     if (!hook) throw webhookNotFound();
-    if (patch.content && hook.all.length > 1) {
-      const contents = hook.all.map((w) => (w.id === id ? patch.content : w.content));
-      if (new Set(contents).size !== 2 || contents.includes("all")) {
-        throw validationError("With two webhooks, one posts only logs and the other only sessions.");
-      }
+    if (patch.content === "all" && hook.all.length > 1) {
+      throw validationError("With two webhooks, each posts only logs or only sessions.");
     }
     await adminRepository.updateWebhook(id, patch);
   },

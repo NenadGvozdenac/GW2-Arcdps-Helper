@@ -112,6 +112,20 @@ function sessionEmbed(session: Session, logs: Log[], span: LogSpan, owner: strin
   };
 }
 
+/** Posts logs to one webhook, oldest first, up to 10 per message; stops (without throwing) when Discord fails. */
+async function postLogs(webhookUrl: string, logs: Log[]): Promise<void> {
+  const sorted = [...logs].sort((a, b) => a.encounterTime.getTime() - b.encounterTime.getTime());
+  for (let i = 0; i < sorted.length; i += DISCORD_MAX_EMBEDS) {
+    const embeds = sorted.slice(i, i + DISCORD_MAX_EMBEDS).map(toEmbed);
+    try {
+      await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds });
+    } catch (err) {
+      console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
+      return;
+    }
+  }
+}
+
 /** Test message per webhook content, so the channel knows what it will get. */
 const TEST_MESSAGES: Record<DiscordContent, string> = {
   all: "✅ GW2 ArcDPS Helper is connected — new logs and session summaries will be posted in this channel.",
@@ -120,44 +134,48 @@ const TEST_MESSAGES: Record<DiscordContent, string> = {
 };
 
 export const discordService = {
-  /**
-   * The webhook that posts new logs or session summaries; null when none of them does, or the one that would is
-   * paused ("Active" unchecked).
-   */
-  webhookFor(webhooks: DiscordWebhook[], kind: "logs" | "sessions"): DiscordWebhook | null {
-    const webhook = webhooks.find((w) => w.content === "all" || w.content === kind);
-    return webhook?.enabled ? webhook : null;
+  /** The active ("Active" checked) webhooks that post new logs or session summaries, in order; may be empty. */
+  webhooksFor(webhooks: DiscordWebhook[], kind: "logs" | "sessions"): DiscordWebhook[] {
+    return webhooks.filter((w) => w.enabled && (w.content === "all" || w.content === kind));
   },
 
   /**
-   * The webhook's session filter: true when it has none, or when at least one log has `minAccounts` of its accounts
-   * (all of them, if it lists fewer) in the squad. Then the whole summary is posted.
+   * The webhook's filters for one log: none of its excluded accounts is in the squad, and — when it lists a group —
+   * at least `minAccounts` of the group (all of them, if it lists fewer) are.
    */
-  passesSessionFilter(webhook: Pick<DiscordWebhook, "accounts" | "minAccounts">, logs: Pick<Log, "accounts">[]) {
+  passesLogFilter(
+    webhook: Pick<DiscordWebhook, "accounts" | "minAccounts" | "excludedAccounts">,
+    log: Pick<Log, "accounts">,
+  ): boolean {
+    const squad = new Set(log.accounts.map((a) => a.toLowerCase()));
+    if (webhook.excludedAccounts.some((a) => squad.has(a.toLowerCase()))) return false;
     if (!webhook.accounts.length) return true;
-    const wanted = new Set(webhook.accounts.map((a) => a.toLowerCase()));
-    const needed = Math.min(webhook.minAccounts, wanted.size);
-    return logs.some((log) => {
-      const squad = new Set(log.accounts.map((a) => a.toLowerCase()));
-      return [...wanted].filter((a) => squad.has(a)).length >= needed;
-    });
+    const needed = Math.min(webhook.minAccounts, webhook.accounts.length);
+    return webhook.accounts.filter((a) => squad.has(a.toLowerCase())).length >= needed;
   },
 
   /**
-   * Posts newly imported logs to the user's webhook (up to 10 per message).
-   * Never throws: a broken webhook must not make the import itself fail.
+   * The webhook's filters for a session: no log has an excluded account, and — when it lists a group — at least one
+   * log has enough of the group. Then the whole summary is posted.
    */
-  async notifyNewLogs(webhookUrl: string | null, logs: Log[]): Promise<void> {
-    if (!webhookUrl || !logs.length) return;
-    const sorted = [...logs].sort((a, b) => a.encounterTime.getTime() - b.encounterTime.getTime());
-    for (let i = 0; i < sorted.length; i += DISCORD_MAX_EMBEDS) {
-      const embeds = sorted.slice(i, i + DISCORD_MAX_EMBEDS).map(toEmbed);
-      try {
-        await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds });
-      } catch (err) {
-        console.warn("Discord webhook failed:", err instanceof Error ? err.message : err);
-        return;
-      }
+  passesSessionFilter(
+    webhook: Pick<DiscordWebhook, "accounts" | "minAccounts" | "excludedAccounts">,
+    logs: Pick<Log, "accounts">[],
+  ): boolean {
+    const excluded = new Set(webhook.excludedAccounts.map((a) => a.toLowerCase()));
+    if (logs.some((log) => log.accounts.some((a) => excluded.has(a.toLowerCase())))) return false;
+    if (!webhook.accounts.length) return true;
+    const groupOnly = { ...webhook, excludedAccounts: [] };
+    return logs.some((log) => discordService.passesLogFilter(groupOnly, log));
+  },
+
+  /**
+   * Posts newly imported logs to every webhook that posts logs (up to 10 per message), each getting only the logs
+   * its filters let through. Never throws: a broken webhook must not make the import itself fail.
+   */
+  async notifyNewLogs(webhooks: DiscordWebhook[], logs: Log[]): Promise<void> {
+    for (const webhook of discordService.webhooksFor(webhooks, "logs")) {
+      await postLogs(webhook.url, logs.filter((log) => discordService.passesLogFilter(webhook, log)));
     }
   },
 
@@ -166,13 +184,13 @@ export const discordService = {
    * Never throws, like notifyNewLogs.
    */
   async notifySession(
-    webhookUrl: string | null,
+    webhookUrl: string,
     session: Session,
     logs: Log[],
     span: LogSpan,
     owner: string,
   ): Promise<string | null> {
-    if (!webhookUrl || !logs.length) return null;
+    if (!logs.length) return null;
     try {
       return await postToWebhook(webhookUrl, { username: DISCORD_USERNAME, embeds: [sessionEmbed(session, logs, span, owner)] });
     } catch (err) {

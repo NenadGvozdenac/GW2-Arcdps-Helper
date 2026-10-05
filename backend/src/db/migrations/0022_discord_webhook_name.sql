@@ -1,0 +1,1 @@
+ALTER TABLE "discord_webhooks" ADD COLUMN "name" text DEFAULT '' NOT NULL;

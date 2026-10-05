@@ -4,11 +4,13 @@ import { discordWebhooks } from "../db/schema";
 import type { DiscordWebhook } from "../types/discord.types";
 
 const columns = {
+  name: discordWebhooks.name,
   url: discordWebhooks.url,
   content: discordWebhooks.content,
   enabled: discordWebhooks.enabled,
   accounts: discordWebhooks.accounts,
   minAccounts: discordWebhooks.minAccounts,
+  excludedAccounts: discordWebhooks.excludedAccounts,
 };
 
 export const discordWebhookRepository = {

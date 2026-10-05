@@ -41,9 +41,11 @@ export const BOON_IDS = {
 export const DPS_REPORT_TOKEN_RE = /^[A-Za-z0-9]{8,64}$/;
 export const DISCORD_WEBHOOK_RE = /^https:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api\/webhooks\/\d+\/[\w-]+$/;
 export const DISCORD_TIMEOUT_MS = 5_000;
-/** A user can connect a second webhook, so logs and session summaries go to different channels. */
+/** A user can connect a second webhook, e.g. to split logs and sessions or post the same kind to two channels. */
 export const DISCORD_MAX_WEBHOOKS = 2;
-/** Session filter of a webhook: how many accounts it may list, and how many of them a log needs by default. */
+/** Longest label a user can give a webhook. */
+export const DISCORD_WEBHOOK_NAME_MAX = 50;
+/** Filters of a webhook: how many accounts each list (group, excluded) may hold, and how many of the group a log needs by default. */
 export const DISCORD_MAX_FILTER_ACCOUNTS = 10;
 export const DISCORD_DEFAULT_MIN_ACCOUNTS = 3;
 /** Discord allows at most 10 embeds per message. */
