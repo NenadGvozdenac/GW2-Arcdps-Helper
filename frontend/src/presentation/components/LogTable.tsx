@@ -68,8 +68,8 @@ export default function LogTable({ logs, showGroup = false, openOnDpsReport = fa
             {selection && <TableHead className="w-10" />}
             <TableHead>{t("logTable.boss")}</TableHead>
             {showGroup && <TableHead className={cn(groupCol, "w-16")}>{t("logTable.group")}</TableHead>}
-            <TableHead className="w-28 @xl:w-44">{t("logTable.result")}</TableHead>
-            <TableHead className="w-24 text-right">{t("logTable.duration")}</TableHead>
+            <TableHead className="w-24 @xl:w-44">{t("logTable.result")}</TableHead>
+            <TableHead className="w-16 text-right @sm:w-24">{t("logTable.duration")}</TableHead>
             {detailed && (
               <>
                 <TableHead className={cn(wide, "w-20 text-right")}>{t("logTable.bossHp")}</TableHead>

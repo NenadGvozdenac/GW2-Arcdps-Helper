@@ -50,6 +50,12 @@ const SORT_DIRECTION_LABEL: Record<PlayerSort["direction"], TranslationKey> = {
 };
 
 /** Sort menu of the players table; the choice is remembered in this browser. */
+// The players table's columns by its own width: account, group, total DPS and downs / deaths come with room.
+const downsCol = "hidden @md:table-cell";
+const groupCol = "hidden @lg:table-cell";
+const accountCol = "hidden @2xl:table-cell";
+const totalDpsCol = "hidden @3xl:table-cell";
+
 function PlayerSortSelect({ sort, onChange }: { sort: PlayerSort; onChange: (sort: PlayerSort) => void }) {
   const { t } = useI18n();
   return (
@@ -146,17 +152,19 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                   <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
                 </div>
               ) : (
+              // Columns show by the table's own width (container queries): on a phone, the player and their boss DPS.
+              <div className="@container">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8">#</TableHead>
                     <TableHead>{t("logDetail.colCharacter")}</TableHead>
-                    <TableHead>{t("logDetail.colAccount")}</TableHead>
-                    <TableHead className="text-right">{t("logDetail.colGroup")}</TableHead>
+                    <TableHead className={accountCol}>{t("logDetail.colAccount")}</TableHead>
+                    <TableHead className={cn(groupCol, "text-right")}>{t("logDetail.colGroup")}</TableHead>
                     <TableHead className="text-right">{t("logDetail.colBossDps")}</TableHead>
-                    <TableHead className="text-right">{t("logDetail.colTotalDps")}</TableHead>
-                    <TableHead className="text-right">{t("logDetail.colDowns")}</TableHead>
-                    <TableHead className="text-right">{t("logDetail.colDeaths")}</TableHead>
+                    <TableHead className={cn(totalDpsCol, "text-right")}>{t("logDetail.colTotalDps")}</TableHead>
+                    <TableHead className={cn(downsCol, "text-right")}>{t("logDetail.colDowns")}</TableHead>
+                    <TableHead className={cn(downsCol, "text-right")}>{t("logDetail.colDeaths")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -167,16 +175,18 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                     >
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-medium">
-                        <span className="inline-flex items-center gap-2">
+                        <span className="inline-flex max-w-32 items-center gap-2 @md:max-w-40 @2xl:max-w-none">
                           <ProfessionIcon profession={p.profession} />
-                          {p.name}
+                          <span className="truncate" title={p.name}>
+                            {p.name}
+                          </span>
                           {p.commander && <CommanderIcon label={t("logDetail.commander")} />}
                         </span>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{p.account}</TableCell>
-                      <TableCell className="text-right text-muted-foreground">{p.group || "—"}</TableCell>
+                      <TableCell className={cn(accountCol, "text-muted-foreground")}>{p.account}</TableCell>
+                      <TableCell className={cn(groupCol, "text-right text-muted-foreground")}>{p.group || "—"}</TableCell>
                       <TableCell className="text-right">
-                        <div className="relative ml-auto h-6 min-w-32 overflow-hidden rounded bg-muted">
+                        <div className="relative ml-auto h-6 min-w-24 overflow-hidden rounded bg-muted @md:min-w-32">
                           <div
                             className="absolute inset-y-0 left-0 opacity-40"
                             style={{
@@ -189,15 +199,16 @@ export default function LogView({ log, players, actions, meta, isOwnAccount, chi
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-mono text-muted-foreground tabular-nums">
+                      <TableCell className={cn(totalDpsCol, "text-right font-mono text-muted-foreground tabular-nums")}>
                         {fmt.number(p.totalDps)}
                       </TableCell>
-                      <TableCell className="text-right">{p.downs || ""}</TableCell>
-                      <TableCell className="text-right">{p.deaths || ""}</TableCell>
+                      <TableCell className={cn(downsCol, "text-right")}>{p.downs || ""}</TableCell>
+                      <TableCell className={cn(downsCol, "text-right")}>{p.deaths || ""}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
+              </div>
               )}
             </CardContent>
           </Card>

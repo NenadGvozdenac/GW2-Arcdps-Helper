@@ -355,7 +355,7 @@ function SortableBuildCard({ build, c }: { build: FavoriteBuild; c: Controller }
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
-      className={cn("relative", isDragging && "z-10")}
+      className={cn("relative min-w-0", isDragging && "z-10")}
     >
       <BuildCard
         build={build}
@@ -396,9 +396,9 @@ function FavoritesSection({ c }: { c: Controller }) {
         <h2 className="text-lg font-semibold">
           {t("builds.myBuilds")} <span className="text-muted-foreground tabular-nums">({c.favorites.length})</span>
         </h2>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
           <Select value={c.profession ?? "all"} onValueChange={(v) => c.setProfession(v === "all" ? null : v)}>
-            <SelectTrigger size="sm" className="w-44" aria-label={t("builds.classFilter")}>
+            <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t("builds.classFilter")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -412,7 +412,7 @@ function FavoritesSection({ c }: { c: Controller }) {
             </SelectContent>
           </Select>
           <Select value={c.filter} onValueChange={(v) => c.setFilter(v as Filter)}>
-            <SelectTrigger size="sm" className="w-44" aria-label={t("builds.categoryFilter")}>
+            <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t("builds.categoryFilter")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -438,7 +438,7 @@ function FavoritesSection({ c }: { c: Controller }) {
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={c.visibleFavorites.map((f) => f.id)} strategy={rectSortingStrategy}>
-            <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
               {c.visibleFavorites.map((f) => (
                 <SortableBuildCard key={f.id} build={f} c={c} />
               ))}

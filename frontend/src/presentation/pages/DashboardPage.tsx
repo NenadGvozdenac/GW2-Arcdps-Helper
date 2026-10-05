@@ -187,7 +187,7 @@ export default function DashboardPage() {
                     {t("dashboard.lastDays", { days: d })}
                   </Button>
                 ))}
-                <span aria-hidden className="mx-1 h-5 w-px bg-border" />
+                <span aria-hidden className="mx-1 hidden h-5 w-px bg-border sm:block" />
                 <Button
                   variant="ghost"
                   size="sm"
