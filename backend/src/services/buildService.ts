@@ -43,7 +43,10 @@ function professionOf(url: string): string {
   return slug.charAt(0).toUpperCase() + slug.slice(1);
 }
 
-/** Our categories from the Snow Crows roles and the build name ("heal" / "quickness" / "alacrity" / "boon" in it). */
+/**
+ * Our categories from the Snow Crows roles and the build name ("heal" / "quickness" / "alacrity" / "boon" in it): the
+ * role, the boons given and the damage type (power / condition).
+ */
 function suggestCategories(roles: string[], name: string): BuildCategory[] {
   const n = name.toLowerCase();
   const healer = roles.includes("Healer") || /\bheal\b/.test(n);
@@ -52,6 +55,8 @@ function suggestCategories(roles: string[], name: string): BuildCategory[] {
   const categories: BuildCategory[] = [healer ? "healer" : quickness || alac || /\bboon\b/.test(n) ? "bdps" : "dps"];
   if (alac) categories.push("alac");
   if (quickness) categories.push("quickness");
+  if (roles.includes("Power DPS") || /^power\b/.test(n)) categories.push("power");
+  else if (roles.includes("Condition DPS") || /^condi(tion)?\b/.test(n)) categories.push("condition");
   return categories;
 }
 
@@ -110,6 +115,7 @@ async function toDetails(pages: { url: string; page: BuildPage }[]): Promise<Bui
       specialization: specializationOf(page.name),
       template: page.template,
       updated: page.updated,
+      benchmark: page.benchmark,
       gear,
     };
   });
@@ -150,7 +156,7 @@ async function snowCrowsRoles(specializations: string[]): Promise<Map<string, st
  * Object keys are sorted, since jsonb doesn't keep the order the gear was saved in.
  */
 const fingerprint = (b: BuildDetails): string =>
-  JSON.stringify([b.name, b.weapons, b.template, b.updated, b.gear], (_key, value: unknown) => {
+  JSON.stringify([b.name, b.weapons, b.template, b.updated, b.benchmark ?? null, b.gear], (_key, value: unknown) => {
     if (!value || typeof value !== "object" || Array.isArray(value)) return value;
     if ("id" in value && "icon" in value) return (value as GearItem).id;
     return Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)));

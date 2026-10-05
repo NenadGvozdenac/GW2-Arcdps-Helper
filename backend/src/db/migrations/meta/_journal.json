@@ -176,6 +176,13 @@
       "when": 1791236350882,
       "tag": "0024_favorite_builds_order",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791239530279,
+      "tag": "0025_favorite_builds_benchmark",
+      "breakpoints": true
     }
   ]
 }

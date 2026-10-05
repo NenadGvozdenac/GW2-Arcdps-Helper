@@ -1,7 +1,14 @@
 /** Categories of a build, from its Snow Crows roles (backend: BUILD_CATEGORIES). */
-export type BuildCategory = "healer" | "dps" | "bdps" | "alac" | "quickness";
+export type BuildCategory = "healer" | "dps" | "bdps" | "alac" | "quickness" | "power" | "condition";
 
-export const BUILD_CATEGORIES: BuildCategory[] = ["healer", "dps", "bdps", "alac", "quickness"];
+export const BUILD_CATEGORIES: BuildCategory[] = ["healer", "dps", "bdps", "alac", "quickness", "power", "condition"];
+
+/** The role categories (the role filter); the boon given and the damage type are filters of their own. */
+export const ROLE_CATEGORIES: BuildCategory[] = ["healer", "dps", "bdps"];
+export const BOON_TYPES = ["alac", "quickness"] as const satisfies BuildCategory[];
+export type BoonType = (typeof BOON_TYPES)[number];
+export const DAMAGE_TYPES = ["power", "condition"] as const satisfies BuildCategory[];
+export type DamageType = (typeof DAMAGE_TYPES)[number];
 
 /** A GW2 item (rune, sigil, infusion, food…) with its name and icon from the GW2 API. */
 export interface GearItem {
@@ -51,6 +58,12 @@ export interface BuildSearchResult {
   categories: BuildCategory[];
 }
 
+/** Snow Crows' last golem benchmark of a build (DPS); builds without one (most healers) have none. */
+export interface BuildBenchmark {
+  max: number;
+  average: number;
+}
+
 /** A Snow Crows build page: template and gear. */
 export interface BuildDetails {
   url: string;
@@ -62,6 +75,8 @@ export interface BuildDetails {
   template: string | null;
   /** When Snow Crows last updated the build, as they write it ("May 29, 2026"). */
   updated: string | null;
+  /** Null when the build has no benchmark (or the favorite was saved before benchmarks were read). */
+  benchmark: BuildBenchmark | null;
   gear: BuildGear;
 }
 

@@ -1,0 +1,1 @@
+ALTER TABLE "favorite_builds" ADD COLUMN "benchmark" jsonb;

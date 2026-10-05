@@ -107,6 +107,18 @@ export default function BuildCard({ build, favorite, onToggleFavorite, busy, dra
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h3 className="font-semibold">{build.name}</h3>
+              {build.benchmark && (
+                <Badge
+                  variant="outline"
+                  className="font-mono tabular-nums"
+                  title={t("builds.benchmarkTitle", {
+                    max: fmt.number(build.benchmark.max),
+                    average: fmt.number(build.benchmark.average),
+                  })}
+                >
+                  {t("builds.dps", { dps: fmt.number(build.benchmark.max) })}
+                </Badge>
+              )}
               {changed && (
                 <Badge title={t("builds.changedTitle", { time: fmt.dateTime(favorite.fetchedAt) })}>
                   <SparklesIcon /> {t("builds.changed")}

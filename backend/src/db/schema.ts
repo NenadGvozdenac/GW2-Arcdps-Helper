@@ -21,7 +21,7 @@ import { DISCORD_DEFAULT_MIN_ACCOUNTS } from "../config/constants";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
-import type { BuildCategory, BuildGear } from "../types/build.types";
+import type { BuildBenchmark, BuildCategory, BuildGear } from "../types/build.types";
 import type { DiscordContent } from "../types/discord.types";
 import type { FeedbackCategory } from "../types/feedback.types";
 import type { SessionEndReason } from "../types/session.types";
@@ -223,6 +223,8 @@ export const favoriteBuilds = pgTable(
     template: text(),
     /** When Snow Crows last updated the build, as they write it ("May 29, 2026"). */
     updated: text(),
+    /** Snow Crows' last benchmark (DPS); null when the build has none. */
+    benchmark: jsonb().$type<BuildBenchmark>(),
     gear: jsonb().$type<BuildGear>().notNull(),
     categories: text().array().$type<BuildCategory[]>().notNull().default([]),
     /** Manual order (drag & drop on the website), ascending; new favorites get the lowest value so they come first. */

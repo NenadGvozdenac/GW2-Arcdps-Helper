@@ -12,6 +12,7 @@ const columns = {
   specialization: favoriteBuilds.specialization,
   template: favoriteBuilds.template,
   updated: favoriteBuilds.updated,
+  benchmark: favoriteBuilds.benchmark,
   gear: favoriteBuilds.gear,
   categories: favoriteBuilds.categories,
   fetchedAt: favoriteBuilds.fetchedAt,
@@ -32,6 +33,7 @@ const snapshot = (build: BuildDetails, fetchedAt = new Date()) => ({
   specialization: build.specialization,
   template: build.template,
   updated: build.updated,
+  benchmark: build.benchmark,
   gear: build.gear,
   fetchedAt,
 });

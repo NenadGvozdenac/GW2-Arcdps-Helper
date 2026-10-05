@@ -16,10 +16,23 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { AlertCircleIcon, GripVerticalIcon, Loader2Icon, RefreshCwIcon, SearchIcon, SparklesIcon, XIcon } from "lucide-react";
+import {
+  AlertCircleIcon,
+  FilterXIcon,
+  GripVerticalIcon,
+  Loader2Icon,
+  RefreshCwIcon,
+  SearchIcon,
+  SparklesIcon,
+  XIcon,
+} from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import {
-  BUILD_CATEGORIES,
+  BOON_TYPES,
+  DAMAGE_TYPES,
+  ROLE_CATEGORIES,
+  type BoonType,
+  type DamageType,
   type BuildCategory,
   type BuildDetails,
   type BuildSearchResult,
@@ -40,6 +53,15 @@ import { describeError } from "../utils/describeError";
 
 type Filter = BuildCategory | "all";
 
+/** With DPS or boon DPS builds shown, they can be narrowed to power / condition and sorted by their benchmark DPS. */
+const dpsFiltersOffered = (filter: Filter) => filter === "dps" || filter === "bdps";
+/** Healers and boon DPS give boons: they can be narrowed to alacrity or quickness. */
+const boonFilterOffered = (filter: Filter) => filter === "healer" || filter === "bdps";
+
+/** Highest benchmark first, builds without one last (in their order); `sort` false keeps the user's order. */
+const byDps = (builds: FavoriteBuild[], sort: boolean): FavoriteBuild[] =>
+  sort ? [...builds].sort((a, b) => (b.benchmark?.max ?? -1) - (a.benchmark?.max ?? -1)) : builds;
+
 function useBuildsController() {
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -52,6 +74,11 @@ function useBuildsController() {
   const [favorites, setFavorites] = useState<FavoriteBuild[]>([]);
   const [favoritesLoading, setFavoritesLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
+  /** Only power or condition builds, and sorted by benchmark DPS instead of the user's order (DPS / boon DPS only). */
+  const [damage, setDamage] = useState<DamageType | "all">("all");
+  /** Only builds giving alacrity or quickness (healers / boon DPS only). */
+  const [boon, setBoon] = useState<BoonType | "all">("all");
+  const [sortByDps, setSortByDps] = useState(false);
   /** Profession ("Mesmer"…) to show; null = all. */
   const [profession, setProfession] = useState<string | null>(null);
   /** Url of the build being added to / removed from the favorites. */
@@ -111,6 +138,11 @@ function useBuildsController() {
     }
   }
 
+  // The damage type and DPS sort apply only while DPS or boon DPS builds are shown.
+  const activeDamage = dpsFiltersOffered(filter) ? damage : "all";
+  const activeBoon = boonFilterOffered(filter) ? boon : "all";
+  const sortingByDps = dpsFiltersOffered(filter) && sortByDps;
+
   /** Professions of the favorites, alphabetically (the class filter offers only these). */
   const professions = [...new Set(favorites.map((f) => f.profession))].sort();
   // A filter for a class that has no favorites left (the last one was removed) shows everything again.
@@ -131,16 +163,38 @@ function useBuildsController() {
     select,
     favorites,
     favoritesLoading,
-    visibleFavorites: favorites.filter(
-      (f) =>
-        (filter === "all" || f.categories.includes(filter)) &&
-        (!activeProfession || f.profession === activeProfession),
+    visibleFavorites: byDps(
+      favorites.filter(
+        (f) =>
+          (filter === "all" || f.categories.includes(filter)) &&
+          (activeBoon === "all" || f.categories.includes(activeBoon)) &&
+          (activeDamage === "all" || f.categories.includes(activeDamage)) &&
+          (!activeProfession || f.profession === activeProfession),
+      ),
+      sortingByDps,
     ),
     filter,
     setFilter,
+    dpsFiltersOffered: dpsFiltersOffered(filter),
+    boonFilterOffered: boonFilterOffered(filter),
+    boon: activeBoon,
+    setBoon,
+    damage: activeDamage,
+    setDamage,
+    sortingByDps,
+    setSortByDps,
     professions,
     profession: activeProfession,
     setProfession,
+    /** Whether any filter or the DPS sort is set (the clear button). */
+    filtered: profession !== null || filter !== "all" || boon !== "all" || damage !== "all" || sortByDps,
+    clearFilters() {
+      setProfession(null);
+      setFilter("all");
+      setBoon("all");
+      setDamage("all");
+      setSortByDps(false);
+    },
 
     /** Empties the search box and its results. */
     clearSearch() {
@@ -345,11 +399,13 @@ function SearchSection({ c }: { c: Controller }) {
   );
 }
 
-/** A favorite's card, sortable by its grip handle. */
+/** A favorite's card, sortable by its grip handle (not while sorted by DPS). */
 function SortableBuildCard({ build, c }: { build: FavoriteBuild; c: Controller }) {
   const { t } = useI18n();
+  // Sorted by DPS, the order isn't the user's: no dragging (and no handle).
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: build.id,
+    disabled: c.sortingByDps,
   });
   return (
     <div
@@ -364,16 +420,18 @@ function SortableBuildCard({ build, c }: { build: FavoriteBuild; c: Controller }
         busy={c.busyUrl === build.url}
         className={cn(isDragging && "shadow-lg shadow-black/40 ring-1 ring-foreground/20")}
         dragHandle={
-          <button
-            ref={setActivatorNodeRef}
-            {...attributes}
-            {...listeners}
-            className="-ml-1 mt-1.5 flex shrink-0 cursor-grab touch-none items-center rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground active:cursor-grabbing"
-            aria-label={t("builds.dragHandle")}
-            title={t("builds.dragHandle")}
-          >
-            <GripVerticalIcon className="size-4" />
-          </button>
+          !c.sortingByDps && (
+            <button
+              ref={setActivatorNodeRef}
+              {...attributes}
+              {...listeners}
+              className="-ml-1 mt-1.5 flex shrink-0 cursor-grab touch-none items-center rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground active:cursor-grabbing"
+              aria-label={t("builds.dragHandle")}
+              title={t("builds.dragHandle")}
+            >
+              <GripVerticalIcon className="size-4" />
+            </button>
+          )
         }
       />
     </div>
@@ -396,9 +454,10 @@ function FavoritesSection({ c }: { c: Controller }) {
         <h2 className="text-lg font-semibold">
           {t("builds.myBuilds")} <span className="text-muted-foreground tabular-nums">({c.favorites.length})</span>
         </h2>
-        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center">
+        {/* Class → role → boon → damage type → sort. On a phone the class on its own row, then two per row. */}
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-end">
           <Select value={c.profession ?? "all"} onValueChange={(v) => c.setProfession(v === "all" ? null : v)}>
-            <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t("builds.classFilter")}>
+            <SelectTrigger size="sm" className="col-span-2 w-full sm:w-44" aria-label={t("builds.classFilter")}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -417,13 +476,70 @@ function FavoritesSection({ c }: { c: Controller }) {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("builds.all")}</SelectItem>
-              {BUILD_CATEGORIES.map((cat) => (
+              {ROLE_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>
                   {t(`builds.categories.${cat}`)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
+          {/* Always shown (the bar doesn't jump); usable only for the roles they apply to. */}
+          <Select
+            value={c.boon}
+            disabled={!c.boonFilterOffered}
+            onValueChange={(v) => c.setBoon(v as BoonType | "all")}
+          >
+            <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t("builds.boonFilter")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("builds.allBoons")}</SelectItem>
+              {BOON_TYPES.map((b) => (
+                <SelectItem key={b} value={b}>
+                  {t(`builds.categories.${b}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={c.damage}
+            disabled={!c.dpsFiltersOffered}
+            onValueChange={(v) => c.setDamage(v as DamageType | "all")}
+          >
+            <SelectTrigger size="sm" className="w-full sm:w-44" aria-label={t("builds.damageFilter")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("builds.allDamage")}</SelectItem>
+              {DAMAGE_TYPES.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {t(`builds.categories.${d}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={c.sortingByDps ? "dps" : "own"}
+            disabled={!c.dpsFiltersOffered}
+            onValueChange={(v) => c.setSortByDps(v === "dps")}
+          >
+            <SelectTrigger size="sm" className="w-full sm:w-48" aria-label={t("builds.sortLabel")}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="own">{t("builds.sortOwn")}</SelectItem>
+              <SelectItem value="dps">{t("builds.sortDps")}</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="col-span-2 sm:col-span-1"
+            disabled={!c.filtered}
+            onClick={c.clearFilters}
+          >
+            <FilterXIcon /> {t("builds.clearFilters")}
+          </Button>
         </div>
       </div>
 

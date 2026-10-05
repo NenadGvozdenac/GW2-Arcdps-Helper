@@ -1,6 +1,6 @@
 // Reads builds out of Snow Crows' server-rendered HTML (they have no API). Gear items are left as GW2 item ids; the
 // page only has their ids (its tooltips are loaded by a script from the GW2 API).
-import type { BuildGear, GearPiece } from "../../types/build.types";
+import type { BuildBenchmark, BuildGear, GearPiece } from "../../types/build.types";
 
 /** One row of a Snow Crows build list. */
 export interface BuildListCard {
@@ -18,6 +18,7 @@ export interface BuildPage {
   weapons: string;
   template: string | null;
   updated: string | null;
+  benchmark: BuildBenchmark | null;
   gear: BuildGear<number>;
 }
 
@@ -132,6 +133,23 @@ function parseGear(html: string): BuildGear<number> {
   return gear;
 }
 
+/**
+ * A stat box of the benchmark: `<div … stat="Last Benchmark Max"> … <div class="text-lg"><i …></i>39346</div>`; null
+ * when the build has no benchmark.
+ */
+function benchmarkStat(html: string, stat: string): number | null {
+  const box = new RegExp(`stat="${stat}"[\\s\\S]*?<div class="text-lg">[\\s\\S]*?</i>\\s*([\\d,.]+)\\s*</div>`);
+  const value = html.match(box)?.[1];
+  const n = value ? Number(value.replace(/,/g, "")) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+function parseBenchmark(html: string): BuildBenchmark | null {
+  const max = benchmarkStat(html, "Last Benchmark Max");
+  const average = benchmarkStat(html, "Last Benchmark Average");
+  return max === null ? null : { max, average: average ?? max };
+}
+
 /** A build page; null when the HTML is not one (no build title). */
 export function parseBuildPage(html: string): BuildPage | null {
   const name = text(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] ?? "");
@@ -142,6 +160,7 @@ export function parseBuildPage(html: string): BuildPage | null {
     weapons: text(html.match(/<\/h1>[\s\S]*?<div class="text-xl mt-2 mb-1">([\s\S]*?)<\/div>/)?.[1] ?? ""),
     template: template ? decodeEntities(template) : null,
     updated: html.match(/Updated\s*<span[^>]*>([^<]+)<\/span>/)?.[1]?.trim() ?? null,
+    benchmark: parseBenchmark(html),
     gear: parseGear(html),
   };
 }

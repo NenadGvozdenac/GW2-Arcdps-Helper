@@ -1,5 +1,5 @@
 /** Categories of a build, from its Snow Crows roles (and name). */
-export const BUILD_CATEGORIES = ["healer", "dps", "bdps", "alac", "quickness"] as const;
+export const BUILD_CATEGORIES = ["healer", "dps", "bdps", "alac", "quickness", "power", "condition"] as const;
 export type BuildCategory = (typeof BUILD_CATEGORIES)[number];
 
 /** A GW2 item (rune, sigil, infusion, food…) with its name and icon from the official GW2 API. */
@@ -56,6 +56,12 @@ export interface BuildSearchResult {
   categories: BuildCategory[];
 }
 
+/** Snow Crows' last golem benchmark of a build (DPS); builds without one (most healers) have none. */
+export interface BuildBenchmark {
+  max: number;
+  average: number;
+}
+
 /** A build page of Snow Crows: GET /builds/details. */
 export interface BuildDetails {
   url: string;
@@ -67,6 +73,7 @@ export interface BuildDetails {
   template: string | null;
   /** When Snow Crows last updated the build, as they write it ("May 29, 2026"). */
   updated: string | null;
+  benchmark: BuildBenchmark | null;
   gear: BuildGear;
 }
 
