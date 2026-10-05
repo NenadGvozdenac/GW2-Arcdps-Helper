@@ -72,7 +72,7 @@ export default function AppRouter() {
             <HomeRoute
               guest={<LandingPage />}
               signedIn={
-                <Layout>
+                <Layout wide>
                   <DashboardPage />
                 </Layout>
               }
@@ -100,8 +100,11 @@ export default function AppRouter() {
             <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="logs" element={<AllLogsPage />} />
             <Route path="logs/:id" element={<LogDetailPage />} />
-            <Route path="builds" element={<BuildsPage />} />
             <Route path="profile" element={<ProfilePage />} />
+          </Route>
+          {/* Pages that use all the room beside the sidebar. */}
+          <Route element={<Layout wide />}>
+            <Route path="builds" element={<BuildsPage />} />
           </Route>
         </Route>
         {/* The administrator's area: its own sign-in (password + authenticator code), independent of a user's. */}

@@ -438,7 +438,7 @@ function FavoritesSection({ c }: { c: Controller }) {
       ) : (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={c.visibleFavorites.map((f) => f.id)} strategy={rectSortingStrategy}>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
               {c.visibleFavorites.map((f) => (
                 <SortableBuildCard key={f.id} build={f} c={c} />
               ))}

@@ -25,9 +25,10 @@ const itemClass = (collapsed: boolean, isActive = false) =>
  * App shell for signed-in pages: a sidebar on the left (brand, the logs section with upload, the builds section; the
  * account, settings and sign-out at the bottom), the page on the right. The sidebar collapses to the logo and icons
  * (remembered in this browser). On a phone it is a bar on top with the hamburger menu instead. Renders `children` when
- * given (the "/" route), otherwise the nested route.
+ * given (the "/" route), otherwise the nested route. `wide`: the page takes all the room beside the sidebar instead of
+ * the usual reading width (the dashboard).
  */
-export default function Layout({ children }: { children?: ReactNode }) {
+export default function Layout({ children, wide = false }: { children?: ReactNode; wide?: boolean }) {
   const { user, accountLabel, logout } = useAuth();
   const { loading: logsLoading } = useLogs();
   const { loading: sessionsLoading } = useSessions();
@@ -138,7 +139,9 @@ export default function Layout({ children }: { children?: ReactNode }) {
         </div>
       </aside>
 
-      <main className="mx-auto w-full min-w-0 max-w-6xl flex-1 px-4 py-6 md:px-8">{children ?? <Outlet />}</main>
+      <main className={cn("mx-auto w-full min-w-0 flex-1 px-4 py-6 md:px-8", !wide && "max-w-6xl")}>
+        {children ?? <Outlet />}
+      </main>
     </div>
   );
 }
