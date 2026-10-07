@@ -106,6 +106,26 @@ async function main() {
     }
   }
 
+  // An icon per slot, to show in the editor: an ascended item's (the classic look; legendary ones as a fallback).
+  const iconOf = (match: (i: ApiItem) => boolean) =>
+    (items.find((i) => i.rarity === "Ascended" && match(i)) ?? items.find((i) => ascended(i) && match(i)))?.icon ??
+    null;
+  for (const [weight, slots] of Object.entries(armor)) {
+    for (const [slot, entry] of Object.entries(slots)) {
+      Object.assign(entry, {
+        icon: iconOf((i) => i.type === "Armor" && i.details?.weight_class === weight && i.details?.type === slot),
+      });
+    }
+  }
+  for (const [type, entry] of Object.entries(weapons)) {
+    Object.assign(entry, { icon: iconOf((i) => i.type === "Weapon" && i.details?.type === type) });
+  }
+  for (const [type, entry] of Object.entries(trinkets)) {
+    Object.assign(entry, {
+      icon: iconOf((i) => (type === "Back" ? i.type === "Back" : i.type === "Trinket" && i.details?.type === type)),
+    });
+  }
+
   const statIds = [...new Set([...choices.gear, ...choices.trinket])];
   const stats: ApiItemStat[] = [];
   for (let i = 0; i < statIds.length; i += PAGE_SIZE) {

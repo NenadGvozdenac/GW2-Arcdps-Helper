@@ -32,11 +32,11 @@ export interface Gw2Catalog {
   stats: Record<string, { gear: StatAttribute[]; trinket: StatAttribute[] }>;
   slots: {
     /** By weight class ("Heavy"), then slot ("Helm"): the stat scaling and the armor's defense. */
-    armor: Record<string, Record<string, { adjustment: number; defense: number }>>;
+    armor: Record<string, Record<string, { adjustment: number; defense: number; icon: string | null }>>;
     /** By weapon type as the item API names it ("Greatsword", "LongBow"). */
-    weapons: Record<string, { adjustment: number }>;
+    weapons: Record<string, { adjustment: number; icon: string | null }>;
     /** "Amulet", "Ring", "Accessory", "Back". */
-    trinkets: Record<string, { adjustment: number }>;
+    trinkets: Record<string, { adjustment: number; icon: string | null }>;
   };
   runes: (CatalogItem & { bonuses: string[] })[];
   sigils: (CatalogItem & { description: string })[];

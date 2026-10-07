@@ -6,14 +6,17 @@ import {
   INFUSION_SLOTS,
   TRINKET_SLOTS,
   type CustomBuildData,
+  type TrinketSlot,
   type WeaponPick,
 } from "../../../domain/types/customBuild.types";
 import type { ProfessionData } from "../../../domain/types/gw2.types";
-import { catalog } from "../../../services/attributeService";
+import { PROFESSION_INFO } from "../../../domain/data/professions";
+import { attributeService, catalog } from "../../../services/attributeService";
 import { customBuildService } from "../../../services/customBuildService";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
+import { cn } from "@/presentation/lib/utils";
 import CatalogPicker, { type PickerOption } from "./CatalogPicker";
 
 const STATS = Object.keys(catalog.stats);
@@ -34,11 +37,22 @@ const infusionOptions: PickerOption[] = catalog.infusions.map((i) => ({
   detail: i.attributes.map((a) => `+${a.value} ${a.attribute}`).join(" · "),
 }));
 
-function StatSelect({ value, onChange, label }: { value: string; onChange: (stat: string) => void; label: string }) {
+/** A stat combination; `value` "" shows `placeholder` (e.g. "Mixed" when pieces differ). */
+function StatSelect({
+  value,
+  onChange,
+  label,
+  placeholder,
+}: {
+  value: string;
+  onChange: (stat: string) => void;
+  label: string;
+  placeholder?: string;
+}) {
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger size="sm" className="w-full min-w-0" aria-label={label}>
-        <SelectValue />
+        <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="max-h-80">
         {STATS.map((s) => (
@@ -60,16 +74,54 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
-/** A labelled row of the gear tables: the slot, then its pickers. */
-function Row({ label, children }: { label: string; children: ReactNode }) {
+/** The value every entry has; undefined when they differ. */
+function same<T>(values: T[]): T | undefined {
+  return values.every((v) => v === values[0]) ? values[0] : undefined;
+}
+
+/** An item type's icon (a weapon type, an armor piece, a trinket), or nothing when there is none. */
+function SlotIcon({ src }: { src: string | null | undefined }) {
+  return src ? <img src={src} alt="" className="size-6 shrink-0 rounded-sm" loading="lazy" /> : null;
+}
+
+/** A labelled row of the gear tables: the slot (with its icon), then its pickers. */
+function Row({
+  label,
+  icon,
+  single = false,
+  children,
+}: {
+  label: string;
+  icon?: string | null;
+  /** One picker (trinkets), stretching to the end of the row. */
+  single?: boolean;
+  children: ReactNode;
+}) {
   return (
     // Capped widths: on a wide editor the pickers don't stretch across it.
-    <div className="grid grid-cols-[5.5rem_minmax(0,10rem)_minmax(0,13rem)] items-center gap-2 text-sm">
-      <span className="truncate text-muted-foreground">{label}</span>
+    <div
+      className={cn(
+        "grid items-center gap-2 text-sm",
+        single ? "grid-cols-[7.5rem_minmax(0,1fr)]" : "grid-cols-[7.5rem_minmax(0,10rem)_minmax(0,17rem)]",
+      )}
+    >
+      <span className="flex min-w-0 items-center gap-2 text-muted-foreground">
+        <SlotIcon src={icon} />
+        <span className="truncate">{label}</span>
+      </span>
       {children}
     </div>
   );
 }
+
+const TRINKET_TYPE: Record<TrinketSlot, string> = {
+  Back: "Back",
+  Accessory1: "Accessory",
+  Accessory2: "Accessory",
+  Amulet: "Amulet",
+  Ring1: "Ring",
+  Ring2: "Ring",
+};
 
 /**
  * The gear: two weapon sets (type, stats and sigils per hand; a two-handed weapon takes both), armor (stats and rune
@@ -88,6 +140,12 @@ export default function GearEditor({
   // Weapon mastery: every specialization of a profession wields its elite specializations' weapons too.
   const weapons = customBuildService.weaponOptions(pd);
   const infusionCount = data.infusions.reduce((n, i) => n + i.count, 0);
+  // "All at once" shows a value only when every piece has it (otherwise "Mixed"); picking one sets all.
+  const armorStat = same(ARMOR_SLOTS.map((s) => data.armor[s].stat));
+  const armorRune = same(ARMOR_SLOTS.map((s) => data.armor[s].rune));
+  const trinketStat = same(TRINKET_SLOTS.map((s) => data.trinkets[s].stat));
+  /** The profession's armor pieces (their icons by weight). */
+  const armorIcons = catalog.slots.armor[PROFESSION_INFO[data.profession].weight] ?? {};
 
   function setWeapon(setIndex: number, hand: "main" | "off", pick: WeaponPick | null) {
     const sets = data.weapons.map((s) => ({ ...s }));
@@ -130,6 +188,7 @@ export default function GearEditor({
             </SelectItem>
             {options.map((w) => (
               <SelectItem key={w.type} value={w.type}>
+                <SlotIcon src={catalog.slots.weapons[attributeService.weaponItemType(w.type)]?.icon} />
                 {w.type}
                 {w.twoHanded && <span className="text-muted-foreground">({t("builds.editor.twoHanded")})</span>}
               </SelectItem>
@@ -182,11 +241,12 @@ export default function GearEditor({
       </Section>
 
       {/* Armor and trinkets side by side, then upgrades and infusions. */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-8">
         <Section title={t("builds.gear.armor")}>
           <Row label={t("builds.editor.allPieces")}>
             <StatSelect
-              value={data.armor.Helm.stat}
+              value={armorStat ?? ""}
+              placeholder={t("builds.editor.mixed")}
               label={t("builds.editor.stats")}
               onChange={(stat) =>
                 onChange({
@@ -196,8 +256,8 @@ export default function GearEditor({
             />
             <CatalogPicker
               options={runeOptions}
-              value={data.armor.Helm.rune}
-              placeholder={t("builds.editor.rune")}
+              value={armorRune ?? null}
+              placeholder={armorRune === undefined ? t("builds.editor.mixed") : t("builds.editor.rune")}
               onChange={(rune) =>
                 onChange({
                   armor: Object.fromEntries(ARMOR_SLOTS.map((s) => [s, { ...data.armor[s], rune }])) as CustomBuildData["armor"],
@@ -206,7 +266,7 @@ export default function GearEditor({
             />
           </Row>
           {ARMOR_SLOTS.map((slot) => (
-            <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+            <Row key={slot} label={t(`builds.editor.slots.${slot}`)} icon={armorIcons[slot]?.icon}>
               <StatSelect
                 value={data.armor[slot].stat}
                 label={t("builds.editor.stats")}
@@ -223,9 +283,10 @@ export default function GearEditor({
         </Section>
 
         <Section title={t("builds.gear.trinkets")}>
-          <Row label={t("builds.editor.allPieces")}>
+          <Row label={t("builds.editor.allPieces")} single>
             <StatSelect
-              value={data.trinkets.Amulet.stat}
+              value={trinketStat ?? ""}
+              placeholder={t("builds.editor.mixed")}
               label={t("builds.editor.stats")}
               onChange={(stat) =>
                 onChange({
@@ -233,23 +294,26 @@ export default function GearEditor({
                 })
               }
             />
-            <span />
           </Row>
           {TRINKET_SLOTS.map((slot) => (
-            <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+            <Row
+              key={slot}
+              label={t(`builds.editor.slots.${slot}`)}
+              icon={catalog.slots.trinkets[TRINKET_TYPE[slot]]?.icon}
+              single
+            >
               <StatSelect
                 value={data.trinkets[slot].stat}
                 label={t("builds.editor.stats")}
                 onChange={(stat) => onChange({ trinkets: { ...data.trinkets, [slot]: { stat } } })}
               />
-              <span />
-            </Row>
+              </Row>
           ))}
         </Section>
 
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-8">
         <Section title={t("builds.editor.upgrades")}>
           <Row label={t("builds.gear.relic")}>
             <CatalogPicker
