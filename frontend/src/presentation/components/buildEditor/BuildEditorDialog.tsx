@@ -181,13 +181,13 @@ export default function BuildEditorDialog({
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex h-[92svh] max-w-[calc(100%-1rem)] flex-col gap-4 sm:max-w-6xl">
+      <DialogContent className="flex h-[92svh] max-w-[calc(100%-1rem)] flex-col gap-4 sm:max-w-[calc(100%-2rem)]">
         <DialogHeader>
           <DialogTitle>{target.id ? t("builds.editor.editTitle") : t("builds.editor.newTitle")}</DialogTitle>
           <DialogDescription>{t("builds.editor.description")}</DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-wrap items-end gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Input
             value={c.draft.name}
             onChange={(e) => c.setName(e.target.value)}
@@ -222,7 +222,7 @@ export default function BuildEditorDialog({
         </div>
 
         <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="min-h-0 overflow-y-auto pr-1">
+          <div className="@container min-h-0 overflow-y-auto pr-1">
             {c.loadError != null ? (
               <Alert variant="destructive">
                 <AlertCircleIcon />
@@ -233,10 +233,12 @@ export default function BuildEditorDialog({
                 <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              // Everything on one page: traits & skills, then the gear.
-              <div className="flex flex-col gap-8">
+              // Everything on one page: the build (traits & skills) and the gear side by side when there's room for the
+              // trait lines' fixed width next to the gear, otherwise the gear below.
+              <div className="grid items-start gap-8 @[64rem]:grid-cols-[auto_minmax(0,1fr)]">
                 <section className="flex flex-col gap-4">
                   <h3 className="text-base font-semibold">{t("builds.editor.tabTraits")}</h3>
+                  <SkillBar data={data} pd={c.pd} weaponSet={c.weaponSet} onChange={c.update} />
                   {data.specializations.map((line, i) => (
                     <SpecializationLine
                       key={i}
@@ -250,9 +252,8 @@ export default function BuildEditorDialog({
                       }}
                     />
                   ))}
-                  <SkillBar data={data} pd={c.pd} weaponSet={c.weaponSet} onChange={c.update} />
                 </section>
-                <section className="flex flex-col gap-4 border-t pt-6">
+                <section className="flex min-w-0 flex-col gap-4 border-t pt-6 @[64rem]:border-t-0 @[64rem]:border-l @[64rem]:pt-0 @[64rem]:pl-6">
                   <h3 className="text-base font-semibold">{t("builds.editor.tabGear")}</h3>
                   <GearEditor data={data} pd={c.pd} onChange={c.update} />
                 </section>

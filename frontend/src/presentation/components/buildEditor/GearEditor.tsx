@@ -63,7 +63,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 /** A labelled row of the gear tables: the slot, then its pickers. */
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 text-sm">
+    // Capped widths: on a wide editor the pickers don't stretch across it.
+    <div className="grid grid-cols-[5.5rem_minmax(0,10rem)_minmax(0,13rem)] items-center gap-2 text-sm">
       <span className="truncate text-muted-foreground">{label}</span>
       {children}
     </div>
@@ -162,9 +163,10 @@ export default function GearEditor({
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    // Sized by its own width (container queries): the weapon sets side by side only when there's room.
+    <div className="@container flex flex-col gap-6">
       <Section title={t("builds.gear.weapons")}>
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid max-w-[64rem] gap-3 @2xl:grid-cols-2">
           {[0, 1].map((setIndex) => (
             <div key={setIndex} className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">
@@ -179,156 +181,162 @@ export default function GearEditor({
         </div>
       </Section>
 
-      <Section title={t("builds.gear.armor")}>
-        <Row label={t("builds.editor.allPieces")}>
-          <StatSelect
-            value={data.armor.Helm.stat}
-            label={t("builds.editor.stats")}
-            onChange={(stat) =>
-              onChange({
-                armor: Object.fromEntries(ARMOR_SLOTS.map((s) => [s, { ...data.armor[s], stat }])) as CustomBuildData["armor"],
-              })
-            }
-          />
-          <CatalogPicker
-            options={runeOptions}
-            value={data.armor.Helm.rune}
-            placeholder={t("builds.editor.rune")}
-            onChange={(rune) =>
-              onChange({
-                armor: Object.fromEntries(ARMOR_SLOTS.map((s) => [s, { ...data.armor[s], rune }])) as CustomBuildData["armor"],
-              })
-            }
-          />
-        </Row>
-        {ARMOR_SLOTS.map((slot) => (
-          <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+      {/* Armor and trinkets side by side, then upgrades and infusions. */}
+      <div className="grid grid-cols-2 gap-6">
+        <Section title={t("builds.gear.armor")}>
+          <Row label={t("builds.editor.allPieces")}>
             <StatSelect
-              value={data.armor[slot].stat}
+              value={data.armor.Helm.stat}
               label={t("builds.editor.stats")}
-              onChange={(stat) => onChange({ armor: { ...data.armor, [slot]: { ...data.armor[slot], stat } } })}
+              onChange={(stat) =>
+                onChange({
+                  armor: Object.fromEntries(ARMOR_SLOTS.map((s) => [s, { ...data.armor[s], stat }])) as CustomBuildData["armor"],
+                })
+              }
             />
             <CatalogPicker
               options={runeOptions}
-              value={data.armor[slot].rune}
+              value={data.armor.Helm.rune}
               placeholder={t("builds.editor.rune")}
-              onChange={(rune) => onChange({ armor: { ...data.armor, [slot]: { ...data.armor[slot], rune } } })}
+              onChange={(rune) =>
+                onChange({
+                  armor: Object.fromEntries(ARMOR_SLOTS.map((s) => [s, { ...data.armor[s], rune }])) as CustomBuildData["armor"],
+                })
+              }
             />
           </Row>
-        ))}
-      </Section>
+          {ARMOR_SLOTS.map((slot) => (
+            <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+              <StatSelect
+                value={data.armor[slot].stat}
+                label={t("builds.editor.stats")}
+                onChange={(stat) => onChange({ armor: { ...data.armor, [slot]: { ...data.armor[slot], stat } } })}
+              />
+              <CatalogPicker
+                options={runeOptions}
+                value={data.armor[slot].rune}
+                placeholder={t("builds.editor.rune")}
+                onChange={(rune) => onChange({ armor: { ...data.armor, [slot]: { ...data.armor[slot], rune } } })}
+              />
+            </Row>
+          ))}
+        </Section>
 
-      <Section title={t("builds.gear.trinkets")}>
-        <Row label={t("builds.editor.allPieces")}>
-          <StatSelect
-            value={data.trinkets.Amulet.stat}
-            label={t("builds.editor.stats")}
-            onChange={(stat) =>
-              onChange({
-                trinkets: Object.fromEntries(TRINKET_SLOTS.map((s) => [s, { stat }])) as CustomBuildData["trinkets"],
-              })
-            }
-          />
-          <span />
-        </Row>
-        {TRINKET_SLOTS.map((slot) => (
-          <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+        <Section title={t("builds.gear.trinkets")}>
+          <Row label={t("builds.editor.allPieces")}>
             <StatSelect
-              value={data.trinkets[slot].stat}
+              value={data.trinkets.Amulet.stat}
               label={t("builds.editor.stats")}
-              onChange={(stat) => onChange({ trinkets: { ...data.trinkets, [slot]: { stat } } })}
+              onChange={(stat) =>
+                onChange({
+                  trinkets: Object.fromEntries(TRINKET_SLOTS.map((s) => [s, { stat }])) as CustomBuildData["trinkets"],
+                })
+              }
             />
             <span />
           </Row>
-        ))}
-      </Section>
+          {TRINKET_SLOTS.map((slot) => (
+            <Row key={slot} label={t(`builds.editor.slots.${slot}`)}>
+              <StatSelect
+                value={data.trinkets[slot].stat}
+                label={t("builds.editor.stats")}
+                onChange={(stat) => onChange({ trinkets: { ...data.trinkets, [slot]: { stat } } })}
+              />
+              <span />
+            </Row>
+          ))}
+        </Section>
 
-      <Section title={t("builds.editor.upgrades")}>
-        <Row label={t("builds.gear.relic")}>
-          <CatalogPicker
-            className="col-span-2"
-            options={relicOptions}
-            value={data.relic}
-            placeholder={t("builds.gear.relic")}
-            onChange={(relic) => onChange({ relic })}
-          />
-        </Row>
-        <Row label={t("builds.gear.food")}>
-          <CatalogPicker
-            className="col-span-2"
-            options={foodOptions}
-            value={data.food}
-            placeholder={t("builds.gear.food")}
-            onChange={(food) => onChange({ food })}
-          />
-        </Row>
-        <Row label={t("builds.gear.utility")}>
-          <CatalogPicker
-            className="col-span-2"
-            options={utilityOptions}
-            value={data.utility}
-            placeholder={t("builds.gear.utility")}
-            onChange={(utility) => onChange({ utility })}
-          />
-        </Row>
-      </Section>
+      </div>
 
-      <Section title={t("builds.editor.infusionsCount", { count: infusionCount, max: INFUSION_SLOTS })}>
-        {data.infusions.map((inf, i) => (
-          <div key={i} className="grid grid-cols-[minmax(0,1fr)_5rem_auto] items-center gap-2">
+      <div className="grid grid-cols-2 gap-6">
+        <Section title={t("builds.editor.upgrades")}>
+          <Row label={t("builds.gear.relic")}>
             <CatalogPicker
-              options={infusionOptions}
-              value={inf.id}
-              allowNone={false}
-              placeholder={t("builds.gear.infusions")}
-              onChange={(id) => {
-                const infusions = [...data.infusions];
-                infusions[i] = { ...inf, id: id ?? inf.id };
-                onChange({ infusions });
-              }}
+              className="col-span-2"
+              options={relicOptions}
+              value={data.relic}
+              placeholder={t("builds.gear.relic")}
+              onChange={(relic) => onChange({ relic })}
             />
-            <Input
-              type="number"
-              min={1}
-              max={INFUSION_SLOTS}
-              value={inf.count}
-              aria-label={t("builds.editor.count")}
-              className="h-8"
-              onChange={(e) => {
-                const infusions = [...data.infusions];
-                infusions[i] = { ...inf, count: Math.max(0, Math.min(INFUSION_SLOTS, Number(e.target.value) || 0)) };
-                onChange({ infusions });
-              }}
+          </Row>
+          <Row label={t("builds.gear.food")}>
+            <CatalogPicker
+              className="col-span-2"
+              options={foodOptions}
+              value={data.food}
+              placeholder={t("builds.gear.food")}
+              onChange={(food) => onChange({ food })}
             />
-            <Button
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              aria-label={t("builds.editor.remove")}
-              title={t("builds.editor.remove")}
-              onClick={() => onChange({ infusions: data.infusions.filter((_, j) => j !== i) })}
-            >
-              <Trash2Icon />
-            </Button>
-          </div>
-        ))}
-        <Button
-          variant="outline"
-          size="sm"
-          className="self-start"
-          disabled={infusionCount >= INFUSION_SLOTS}
-          onClick={() =>
-            onChange({
-              infusions: [
-                ...data.infusions,
-                { id: infusionOptions[0].id, count: Math.max(1, INFUSION_SLOTS - infusionCount) },
-              ],
-            })
-          }
-        >
-          <PlusIcon /> {t("builds.editor.addInfusion")}
-        </Button>
-      </Section>
+          </Row>
+          <Row label={t("builds.gear.utility")}>
+            <CatalogPicker
+              className="col-span-2"
+              options={utilityOptions}
+              value={data.utility}
+              placeholder={t("builds.gear.utility")}
+              onChange={(utility) => onChange({ utility })}
+            />
+          </Row>
+        </Section>
+
+        <Section title={t("builds.editor.infusionsCount", { count: infusionCount, max: INFUSION_SLOTS })}>
+          {data.infusions.map((inf, i) => (
+            <div key={i} className="grid grid-cols-[minmax(0,18rem)_5rem_auto] items-center gap-2">
+              <CatalogPicker
+                options={infusionOptions}
+                value={inf.id}
+                allowNone={false}
+                placeholder={t("builds.gear.infusions")}
+                onChange={(id) => {
+                  const infusions = [...data.infusions];
+                  infusions[i] = { ...inf, id: id ?? inf.id };
+                  onChange({ infusions });
+                }}
+              />
+              <Input
+                type="number"
+                min={1}
+                max={INFUSION_SLOTS}
+                value={inf.count}
+                aria-label={t("builds.editor.count")}
+                className="h-8"
+                onChange={(e) => {
+                  const infusions = [...data.infusions];
+                  infusions[i] = { ...inf, count: Math.max(0, Math.min(INFUSION_SLOTS, Number(e.target.value) || 0)) };
+                  onChange({ infusions });
+                }}
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-8"
+                aria-label={t("builds.editor.remove")}
+                title={t("builds.editor.remove")}
+                onClick={() => onChange({ infusions: data.infusions.filter((_, j) => j !== i) })}
+              >
+                <Trash2Icon />
+              </Button>
+            </div>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            className="self-start"
+            disabled={infusionCount >= INFUSION_SLOTS}
+            onClick={() =>
+              onChange({
+                infusions: [
+                  ...data.infusions,
+                  { id: infusionOptions[0].id, count: Math.max(1, INFUSION_SLOTS - infusionCount) },
+                ],
+              })
+            }
+          >
+            <PlusIcon /> {t("builds.editor.addInfusion")}
+          </Button>
+        </Section>
+      </div>
     </div>
   );
 }

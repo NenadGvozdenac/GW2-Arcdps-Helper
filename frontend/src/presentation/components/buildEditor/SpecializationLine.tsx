@@ -99,11 +99,12 @@ function SpecializationHex({
           style={{ left: HEX.x, top: MID - HEX.height / 2, width: HEX.width, height: HEX.height, clipPath: HEXAGON }}
         >
           <span
-            className="grid place-items-center bg-neutral-950/90"
+            className="grid place-items-center overflow-hidden bg-neutral-950/90"
             style={{ width: HEX.width - 4, height: HEX.height - 4, clipPath: HEXAGON }}
           >
             {spec ? (
-              <img src={spec.icon} alt="" className="size-14" />
+              // The emblem fills the hexagon (cut to its shape by the frame).
+              <img src={spec.icon} alt="" className="size-full object-cover" />
             ) : (
               <PlusIcon className="size-8 text-muted-foreground" />
             )}
@@ -191,8 +192,8 @@ export default function SpecializationLine({
           }}
         />
       )}
-      {/* The layout keeps its size (like the game's); a narrow screen scrolls it sideways. */}
-      <div className="relative" style={{ width: WIDTH, height: HEIGHT }}>
+      {/* The layout keeps its size (like the game's), centered; a narrow screen scrolls it sideways. */}
+      <div className="relative mx-auto" style={{ width: WIDTH, height: HEIGHT }}>
         <span
           aria-hidden
           className="absolute size-0 border-y-[6px] border-l-[8px] border-y-transparent border-l-amber-200/80"

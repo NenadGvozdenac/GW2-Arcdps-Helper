@@ -105,7 +105,8 @@ export default function SkillBar({
   const firstLegend = pd.legends.find((l) => l.id === data.legends[0]);
 
   return (
-    <div className="flex flex-wrap items-end gap-x-6 gap-y-4">
+    // A bar across the column, like the game's: weapon skills on the left, heal / utilities / elite on the right.
+    <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4 rounded-md border bg-neutral-950/60 p-3">
       <Group label={t("builds.editor.weaponSkills", { set: weaponSet + 1 })}>
         {weaponSkills.map((id, i) => (
           <SkillIcon key={i} skill={id ? pd.skills[id] : undefined} />
