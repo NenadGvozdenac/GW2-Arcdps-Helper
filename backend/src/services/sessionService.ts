@@ -1,7 +1,8 @@
 import { randomBytes } from "node:crypto";
 import { SESSION_TTL_MS, SHARE_TOKEN_BYTES } from "../config/constants";
+import { logRepository } from "../repositories/logRepository";
 import { sessionRepository, type SessionWithStats } from "../repositories/sessionRepository";
-import type { Log } from "../types/log.types";
+import type { Log, LogListItem } from "../types/log.types";
 import type {
   LogSpan,
   Session,
@@ -33,24 +34,32 @@ function toListItem({ logCount, kills, groupIds, spanStart, spanEnd, ...session 
 
 const newExpiry = () => new Date(Date.now() + SESSION_TTL_MS);
 
+/** Posts the ended session's summary to the user's session webhooks (those its logs pass the filter of). */
+async function postDiscordSummary(ownerId: string, session: Session, logs: Log[]): Promise<void> {
+  if (!logs.length) return;
+  const webhooks = discordService
+    .webhooksFor(await userService.getDiscordWebhooks(ownerId), "sessions")
+    .filter((w) => discordService.passesSessionFilter(w, logs));
+  if (!webhooks.length) return;
+  const { gw2Account } = await userService.get(ownerId);
+  for (const { url } of webhooks) {
+    const messageId = await discordService.notifySession(url, session, logs, logSpan(logs)!, gw2Account);
+    if (messageId) await sessionRepository.saveDiscordMessage(session.id, url, messageId);
+  }
+}
+
 async function endAndNotify(ownerId: string, id: string, reason: SessionEndReason, at?: Date): Promise<Session | null> {
   const session = await sessionRepository.end(ownerId, id, reason, at);
   if (!session) return null;
-  const logs = await sessionRepository.logsOf(ownerId, id);
-  if (logs.length) {
-    const webhooks = discordService
-      .webhooksFor(await userService.getDiscordWebhooks(ownerId), "sessions")
-      .filter((w) => discordService.passesSessionFilter(w, logs));
-    if (webhooks.length) {
-      const { gw2Account } = await userService.get(ownerId);
-      for (const { url } of webhooks) {
-        const messageId = await discordService.notifySession(url, session, logs, logSpan(logs)!, gw2Account);
-        if (messageId) await sessionRepository.saveDiscordMessage(id, url, messageId);
-      }
-    }
-  }
+  await postDiscordSummary(ownerId, session, await sessionRepository.logsOf(ownerId, id));
   return session;
 }
+
+/** After an ended session, how long its logs can still be added to it ("Add logs"): as long as a session runs. */
+const addLogsWindow = (session: Session) => ({
+  from: session.endedAt!,
+  to: new Date(session.endedAt!.getTime() + SESSION_TTL_MS),
+});
 
 /**
  * Rewrites the session's Discord summaries, if any were posted, so they show the current name and logs. Once the
@@ -190,6 +199,34 @@ export const sessionService = {
     const removed = await sessionRepository.removeLogs(ownerId, id, [...new Set(logIds)], deleteLogs);
     if (removed) await refreshDiscordMessage(ownerId, session);
     return removed;
+  },
+
+  /**
+   * Logs that can be added to an ended session (e.g. it was ended too early): those recorded up to SESSION_TTL_MS
+   * after it ended that aren't in it — in no session or in another one — oldest first.
+   */
+  async addableLogs(ownerId: string, id: string): Promise<LogListItem[]> {
+    const session = await sessionService.get(ownerId, id);
+    if (!session.endedAt) return [];
+    const { from, to } = addLogsWindow(session);
+    return (await logRepository.listBetween(ownerId, from, to)).filter((l) => l.sessionId !== id);
+  },
+
+  /**
+   * Adds logs recorded after the session ended (within the window) to it. Its Discord summary is rewritten with them —
+   * or posted, if none was (the session had ended without logs); summaries of sessions they came from are rewritten
+   * too. Returns how many logs were added.
+   */
+  async addLogs(ownerId: string, id: string, logIds: string[]): Promise<number> {
+    const session = await sessionService.get(ownerId, id);
+    if (!session.endedAt) throw validationError("Logs can only be added once the session has ended.");
+    const { from, to } = addLogsWindow(session);
+    const { added, previousSessionIds } = await sessionRepository.addLogs(ownerId, id, [...new Set(logIds)], from, to);
+    if (!added) return 0;
+    if ((await sessionRepository.findDiscordMessages(id)).length) await refreshDiscordMessage(ownerId, session);
+    else await postDiscordSummary(ownerId, session, await sessionRepository.logsOf(ownerId, id));
+    for (const previousId of previousSessionIds) await sessionService.refreshDiscord(ownerId, previousId);
+    return added;
   },
 
   /** Creates the public read-only link for the session (or returns the existing one). */

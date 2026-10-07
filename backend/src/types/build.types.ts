@@ -77,13 +77,39 @@ export interface BuildDetails {
   gear: BuildGear;
 }
 
-/** A build in the user's favorites: a snapshot of the Snow Crows page and its categories. */
-export interface FavoriteBuild extends BuildDetails {
+/** "snowcrows": a favorite Snow Crows build (a snapshot of its page); "custom": one the user made in the build editor. */
+export const BUILD_KINDS = ["snowcrows", "custom"] as const;
+export type BuildKind = (typeof BUILD_KINDS)[number];
+
+/**
+ * A build in the user's "My builds": a favorite Snow Crows build (a snapshot of its page) or one the user made.
+ * A custom build has no url; `custom` holds its editor state (opaque to the server).
+ */
+export interface FavoriteBuild extends Omit<BuildDetails, "url"> {
   id: string;
+  kind: BuildKind;
+  url: string | null;
+  custom: unknown;
   categories: BuildCategory[];
   /** When the snapshot was taken from Snow Crows. */
   fetchedAt: Date;
   /** The last refresh that found the build changed (equal to fetchedAt when the latest refresh did); null = never. */
   changedAt: Date | null;
   createdAt: Date;
+}
+
+/**
+ * POST / PUT /builds/custom: a build made in the website's editor. The client renders its gear (in BuildGear's shape,
+ * so it shows like any other build) and template; the server stores them as they come.
+ */
+export interface CustomBuildInput {
+  name: string;
+  profession: string;
+  specialization: string;
+  weapons: string;
+  template: string | null;
+  gear: Record<string, unknown>;
+  categories: BuildCategory[];
+  /** The editor's state, to edit the build again. */
+  custom: Record<string, unknown>;
 }

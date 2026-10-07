@@ -1,4 +1,4 @@
-import { and, count, desc, eq, getTableColumns, gte, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, getTableColumns, gte, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { logs } from "../db/schema";
 import type { Category } from "../types/encounter.types";
@@ -70,6 +70,15 @@ export const logRepository = {
 
   listByOwner(ownerId: string): Promise<LogListItem[]> {
     return getDb().select(listColumns).from(logs).where(ownedBy(ownerId)).orderBy(desc(logs.encounterTime));
+  },
+
+  /** The owner's logs whose fight started after `from` and at or before `to`, oldest first. */
+  listBetween(ownerId: string, from: Date, to: Date): Promise<LogListItem[]> {
+    return getDb()
+      .select(listColumns)
+      .from(logs)
+      .where(and(ownedBy(ownerId), sql`${logs.encounterTime} > ${from}`, sql`${logs.encounterTime} <= ${to}`))
+      .orderBy(asc(logs.encounterTime));
   },
 
   async search(ownerId: string, filter: LogFilter, page: number, pageSize: number): Promise<LogPage> {

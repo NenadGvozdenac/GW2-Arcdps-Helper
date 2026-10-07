@@ -40,6 +40,7 @@ import GroupedLogTable, { SessionResultFilterToggle, useSessionResultFilter } fr
 import PracticeRunCard from "../components/PracticeRunCard";
 import SessionTitle from "../components/SessionTitle";
 import ShareButton from "../components/ShareButton";
+import AddSessionLogsDialog from "../components/AddSessionLogsDialog";
 import PageHeader from "../components/PageHeader";
 import { successBadge } from "../components/ResultBadge";
 import StatCard from "../components/StatCard";
@@ -270,6 +271,7 @@ export default function SessionDetailPage() {
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
+              {session.endedAt && <AddSessionLogsDialog session={session} />}
               {session.endedAt && logs.length > 0 && (
                 <Button variant="outline" onClick={c.startOrganizing}>
                   <ListChecksIcon /> {t("sessions.removeLogs")}

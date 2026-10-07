@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { sessionService } from "../services/sessionService";
 import type { AuthLocals } from "../types/auth.types";
 import {
+  addSessionLogsSchema,
   deleteSessionsSchema,
   idParamSchema,
   moveSessionSchema,
@@ -67,6 +68,19 @@ export const sessionController = {
   },
 
   /** `{ ids, deleteLogs? }`: takes logs out of an ended session; with `deleteLogs` they are deleted altogether. */
+  /** GET /sessions/:id/addable-logs — logs recorded up to 6 hours after the session ended that aren't in it. */
+  async addableLogs(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ logs: await sessionService.addableLogs(res.locals.userId, id) });
+  },
+
+  /** POST /sessions/:id/add-logs `{ ids }` — adds them to the ended session (and its Discord summary). */
+  async addLogs(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    const { ids } = validate(addSessionLogsSchema, req.body);
+    res.json({ added: await sessionService.addLogs(res.locals.userId, id, ids) });
+  },
+
   async removeLogs(req: Request, res: Response<unknown, AuthLocals>) {
     const { id } = validate(idParamSchema, req.params);
     const { ids, deleteLogs } = validate(removeSessionLogsSchema, req.body);

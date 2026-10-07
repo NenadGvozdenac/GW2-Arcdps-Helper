@@ -183,6 +183,13 @@
       "when": 1791239530279,
       "tag": "0025_favorite_builds_benchmark",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791368136160,
+      "tag": "0026_custom_builds",
+      "breakpoints": true
     }
   ]
 }

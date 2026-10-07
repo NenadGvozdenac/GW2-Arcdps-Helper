@@ -21,7 +21,7 @@ import { DISCORD_DEFAULT_MIN_ACCOUNTS } from "../config/constants";
 import type { Category } from "../types/encounter.types";
 import type { PlayerSummary } from "../types/log.types";
 import type { AppLoginClient, AppLoginStatus } from "../types/appLogin.types";
-import type { BuildBenchmark, BuildCategory, BuildGear } from "../types/build.types";
+import type { BuildBenchmark, BuildCategory, BuildGear, BuildKind } from "../types/build.types";
 import type { DiscordContent } from "../types/discord.types";
 import type { FeedbackCategory } from "../types/feedback.types";
 import type { SessionEndReason } from "../types/session.types";
@@ -213,8 +213,12 @@ export const favoriteBuilds = pgTable(
     userId: uuid("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    /** The build page on snowcrows.com. */
-    url: text().notNull(),
+    /** "snowcrows" (a favorite Snow Crows build) or "custom" (made in the website's build editor). */
+    kind: text().$type<BuildKind>().notNull().default("snowcrows"),
+    /** The build page on snowcrows.com; null for a custom build. */
+    url: text(),
+    /** A custom build's editor state (to edit it again); null for Snow Crows builds. */
+    custom: jsonb().$type<Record<string, unknown>>(),
     name: text().notNull(),
     weapons: text().notNull().default(""),
     profession: text().notNull(),

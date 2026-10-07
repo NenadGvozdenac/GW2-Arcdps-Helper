@@ -1,6 +1,6 @@
 import type { Session, SessionListItem, SessionPatch, SharedSession } from "../domain/types/session.types";
-import type { LogDetail } from "../domain/types/log.types";
-import { fromSharedLogDto, toLog, type LogDetailDto, type SharedLogDto } from "./logMapper";
+import type { Log, LogDetail } from "../domain/types/log.types";
+import { fromSharedLogDto, toLog, type LogDetailDto, type LogDto, type SharedLogDto } from "./logMapper";
 import { http } from "./httpClient";
 
 /** Session as serialized over JSON (dates are ISO strings). */
@@ -65,6 +65,15 @@ export const sessionRepository = {
   deleteMany: (ids: string[]) => http.post<{ deleted: number }>("/sessions/bulk-delete", { ids }),
 
   /** Takes logs out of an ended session; with `deleteLogs` they are deleted altogether. */
+  /** Logs recorded in the 6 hours after the (ended) session that aren't in it, oldest first. */
+  async addableLogs(id: string): Promise<Log[]> {
+    const body = await http.get<{ logs: LogDto[] }>(`${sessionPath(id)}/addable-logs`);
+    return body.logs.map((l) => toLog(l));
+  },
+
+  /** Adds them to the ended session (the server rewrites or posts its Discord summary). */
+  addLogs: (id: string, ids: string[]) => http.post<{ added: number }>(`${sessionPath(id)}/add-logs`, { ids }),
+
   removeLogs: (id: string, ids: string[], deleteLogs: boolean) =>
     http.post<{ removed: number }>(`${sessionPath(id)}/remove-logs`, { ids, deleteLogs }),
 

@@ -80,9 +80,18 @@ export interface BuildDetails {
   gear: BuildGear;
 }
 
-/** A build in the user's favorites (a snapshot of the page, refreshed on request); categories from its roles. */
-export interface FavoriteBuild extends BuildDetails {
+/** "snowcrows": a favorite Snow Crows build; "custom": one the user made in the build editor. */
+export type BuildKind = "snowcrows" | "custom";
+
+/**
+ * A build in "My builds": a favorite Snow Crows build (a snapshot of its page, refreshed on request; categories from
+ * its roles) or one the user made (no url; `custom` is its editor state, a CustomBuildData).
+ */
+export interface FavoriteBuild extends Omit<BuildDetails, "url"> {
   id: string;
+  kind: BuildKind;
+  url: string | null;
+  custom: unknown;
   categories: BuildCategory[];
   fetchedAt: Date;
   /** The last refresh that found the build changed; equal to fetchedAt when the latest refresh did. */

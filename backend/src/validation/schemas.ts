@@ -1,9 +1,12 @@
 import { isIP } from "node:net";
 import { z } from "zod";
 import { DEFAULT_LANGUAGE, LANGUAGES } from "../i18n/languages";
+import { BUILD_CATEGORIES } from "../types/build.types";
 import { FEEDBACK_CATEGORIES } from "../types/feedback.types";
 import {
   BUILD_QUERY_MAX,
+  CUSTOM_BUILD_JSON_MAX,
+  CUSTOM_BUILD_NAME_MAX,
   DISCORD_DEFAULT_MIN_ACCOUNTS,
   DISCORD_MAX_FILTER_ACCOUNTS,
   DISCORD_MAX_WEBHOOKS,
@@ -221,6 +224,11 @@ export const deleteSessionsSchema = z.object({
 });
 
 /** Body of POST /sessions/:id/remove-logs: takes the logs out of the session, or with `deleteLogs` deletes them. */
+/** Body of POST /sessions/:id/add-logs: logs recorded after the session ended, to add to it. */
+export const addSessionLogsSchema = z.object({
+  ids: z.array(z.uuid("Invalid log ID.")).min(1).max(1000),
+});
+
 export const removeSessionLogsSchema = z.object({
   ids: z.array(z.uuid("Invalid log ID.")).min(1).max(1000),
   deleteLogs: z.boolean().default(false),
@@ -342,6 +350,31 @@ export const buildDetailsSchema = z.object({ url: snowCrowsBuildUrl });
 
 /** POST /builds/favorites */
 export const favoriteBuildSchema = z.object({ url: snowCrowsBuildUrl });
+
+/** JSON the client renders (a custom build's gear / editor state): any object, within a size limit. */
+const boundedObject = (maxChars: number) =>
+  z
+    .record(z.string(), z.unknown())
+    .refine((v) => JSON.stringify(v).length <= maxChars, "The build is too large.");
+
+/** POST /builds/custom, PUT /builds/custom/:id — a build made in the website's editor. */
+export const customBuildSchema = z.object({
+  name: z.string().trim().min(1, "Give the build a name.").max(CUSTOM_BUILD_NAME_MAX),
+  profession: z.string().trim().min(1).max(40),
+  specialization: z.string().trim().max(40),
+  weapons: z.string().trim().max(120),
+  template: z
+    .string()
+    .regex(/^\[&[A-Za-z0-9+/=]+\]$/, "Not a build template code.")
+    .max(400)
+    .nullable(),
+  gear: boundedObject(CUSTOM_BUILD_JSON_MAX),
+  categories: z
+    .array(z.enum(BUILD_CATEGORIES))
+    .max(BUILD_CATEGORIES.length)
+    .transform((c) => [...new Set(c)]),
+  custom: boundedObject(CUSTOM_BUILD_JSON_MAX),
+});
 
 /** Body of POST /builds/favorites/:id/move: the favorite takes the place of `overId` (drag & drop). */
 export const moveFavoriteBuildSchema = z.object({

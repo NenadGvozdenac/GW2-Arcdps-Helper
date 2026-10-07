@@ -99,7 +99,6 @@ export default function AppRouter() {
           <Route path="app-login/:id" element={<AppLoginPage />} />
           <Route element={<Layout />}>
             <Route path="upload" element={<UploadPage />} />
-            <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
           {/* Pages that use all the room beside the sidebar. */}
@@ -108,6 +107,7 @@ export default function AppRouter() {
             <Route path="fractals" element={<CategoryPage key="fractal" category="fractal" />} />
             <Route path="logs" element={<AllLogsPage />} />
             <Route path="logs/:id" element={<LogDetailPage />} />
+            <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="sessions" element={<SessionsPage />} />
             <Route path="builds" element={<BuildsPage />} />
           </Route>

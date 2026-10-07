@@ -1,11 +1,13 @@
-import { and, asc, count, desc, eq, min } from "drizzle-orm";
+import { and, asc, count, desc, eq, min, sql } from "drizzle-orm";
 import { getDb } from "../db/pool";
 import { favoriteBuilds } from "../db/schema";
-import type { BuildCategory, BuildDetails, FavoriteBuild } from "../types/build.types";
+import type { BuildCategory, BuildDetails, BuildGear, CustomBuildInput, FavoriteBuild } from "../types/build.types";
 
 const columns = {
   id: favoriteBuilds.id,
+  kind: favoriteBuilds.kind,
   url: favoriteBuilds.url,
+  custom: favoriteBuilds.custom,
   name: favoriteBuilds.name,
   weapons: favoriteBuilds.weapons,
   profession: favoriteBuilds.profession,
@@ -36,6 +38,21 @@ const snapshot = (build: BuildDetails, fetchedAt = new Date()) => ({
   benchmark: build.benchmark,
   gear: build.gear,
   fetchedAt,
+});
+
+/** The columns of a custom build (its "snapshot" is what the editor rendered). */
+const customColumns = (input: CustomBuildInput) => ({
+  name: input.name,
+  weapons: input.weapons,
+  profession: input.profession,
+  specialization: input.specialization,
+  template: input.template,
+  updated: null,
+  benchmark: null,
+  gear: input.gear as unknown as BuildGear,
+  categories: input.categories,
+  custom: input.custom,
+  fetchedAt: sql`now()`,
 });
 
 export const favoriteBuildRepository = {
@@ -120,6 +137,30 @@ export const favoriteBuildRepository = {
       }
       return true;
     });
+  },
+
+  /** Saves a build made in the editor at the top of the user's order. */
+  async createCustom(userId: string, input: CustomBuildInput): Promise<FavoriteBuild> {
+    const db = getDb();
+    const [{ lowest }] = await db
+      .select({ lowest: min(favoriteBuilds.sortOrder) })
+      .from(favoriteBuilds)
+      .where(eq(favoriteBuilds.userId, userId));
+    const [row] = await db
+      .insert(favoriteBuilds)
+      .values({ userId, kind: "custom", url: null, sortOrder: (lowest ?? 1) - 1, ...customColumns(input) })
+      .returning(columns);
+    return row;
+  },
+
+  /** Saves the editor's changes to a custom build; null if the user has no such custom build. */
+  async updateCustom(userId: string, id: string, input: CustomBuildInput): Promise<FavoriteBuild | null> {
+    const [row] = await getDb()
+      .update(favoriteBuilds)
+      .set(customColumns(input))
+      .where(and(own(userId, id), eq(favoriteBuilds.kind, "custom")))
+      .returning(columns);
+    return row ?? null;
   },
 
   /** false if the user has no such favorite. */

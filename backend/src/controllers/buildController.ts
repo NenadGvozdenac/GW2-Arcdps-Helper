@@ -1,9 +1,11 @@
 import type { Request, Response } from "express";
 import { buildService } from "../services/buildService";
 import type { AuthLocals } from "../types/auth.types";
+import type { CustomBuildInput } from "../types/build.types";
 import {
   buildDetailsSchema,
   buildSearchSchema,
+  customBuildSchema,
   favoriteBuildSchema,
   idParamSchema,
   moveFavoriteBuildSchema,
@@ -44,6 +46,19 @@ export const buildController = {
     const { overId } = validate(moveFavoriteBuildSchema, req.body);
     await buildService.moveFavorite(res.locals.userId, id, overId);
     res.status(204).end();
+  },
+
+  /** POST /builds/custom — saves a build made in the website's editor. */
+  async createCustom(req: Request, res: Response<unknown, AuthLocals>) {
+    const input: CustomBuildInput = validate(customBuildSchema, req.body);
+    res.status(201).json({ build: await buildService.createCustom(res.locals.userId, input) });
+  },
+
+  /** PUT /builds/custom/:id — saves the editor's changes. */
+  async updateCustom(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    const input: CustomBuildInput = validate(customBuildSchema, req.body);
+    res.json({ build: await buildService.updateCustom(res.locals.userId, id, input) });
   },
 
   async removeFavorite(req: Request, res: Response<unknown, AuthLocals>) {

@@ -208,6 +208,33 @@ export const sessionRepository = {
     return rows.length;
   },
 
+  /**
+   * Puts the owner's logs `logIds` into the session — only those whose fight started after `from` and at or before
+   * `to`. Returns the sessions they were in before (to refresh their Discord summaries) and how many were added.
+   */
+  async addLogs(
+    ownerId: string,
+    id: string,
+    logIds: string[],
+    from: Date,
+    to: Date,
+  ): Promise<{ added: number; previousSessionIds: string[] }> {
+    if (!logIds.length) return { added: 0, previousSessionIds: [] };
+    return getDb().transaction(async (tx) => {
+      const where = and(
+        eq(logs.ownerId, ownerId),
+        inArray(logs.id, logIds),
+        sql`${logs.sessionId} IS DISTINCT FROM ${id}`,
+        sql`${logs.encounterTime} > ${from}`,
+        sql`${logs.encounterTime} <= ${to}`,
+      );
+      const before = await tx.select({ sessionId: logs.sessionId }).from(logs).where(where);
+      const rows = await tx.update(logs).set({ sessionId: id }).where(where).returning({ id: logs.id });
+      const previousSessionIds = [...new Set(before.flatMap((r) => (r.sessionId ? [r.sessionId] : [])))];
+      return { added: rows.length, previousSessionIds };
+    });
+  },
+
   /** The session's logs, oldest first. */
   logsOf(ownerId: string, id: string): Promise<Log[]> {
     return getDb()

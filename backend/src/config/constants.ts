@@ -124,5 +124,8 @@ export const SNOW_CROWS_TIMEOUT_MS = 10_000;
 export const GW2_API_BASE_URL = "https://api.guildwars2.com";
 /** Longest text accepted by GET /builds/search. */
 export const BUILD_QUERY_MAX = 80;
+/** Longest name of a build made in the editor, and the most JSON its gear / editor state may take. */
+export const CUSTOM_BUILD_NAME_MAX = 80;
+export const CUSTOM_BUILD_JSON_MAX = 30_000;
 /** Most builds a user can keep in their favorites. */
 export const FAVORITE_BUILDS_MAX = 100;

@@ -3,6 +3,7 @@ import { SPECIALIZATION_ALIASES, SPECIALIZATIONS } from "../data/specializations
 import { favoriteBuildRepository } from "../repositories/favoriteBuildRepository";
 import type {
   BuildCategory,
+  CustomBuildInput,
   BuildDetails,
   BuildGear,
   BuildSearchResult,
@@ -15,6 +16,9 @@ import { fetchBuildList, fetchBuildPage } from "./clients/snowCrowsClient";
 import { parseBuildList, parseBuildPage, type BuildPage } from "./misc/snowCrowsParser";
 
 const SPEC_NAMES = Object.keys(SPECIALIZATIONS);
+
+/** A favorite Snow Crows build: always has its page's url. */
+type SnowCrowsFavorite = FavoriteBuild & { url: string };
 /** Shorthands players type that don't appear in build names. */
 const QUERY_ALIASES: Record<string, string> = { qdps: "quickness", adps: "alac" };
 
@@ -220,6 +224,18 @@ export const buildService = {
     if (!(await favoriteBuildRepository.move(userId, id, overId))) throw buildNotFound();
   },
 
+  /** Saves a build made in the website's editor to the user's builds. */
+  async createCustom(userId: string, input: CustomBuildInput): Promise<FavoriteBuild> {
+    if ((await favoriteBuildRepository.count(userId)) >= FAVORITE_BUILDS_MAX) throw favoriteBuildsLimit();
+    return favoriteBuildRepository.createCustom(userId, input);
+  },
+
+  async updateCustom(userId: string, id: string, input: CustomBuildInput): Promise<FavoriteBuild> {
+    const build = await favoriteBuildRepository.updateCustom(userId, id, input);
+    if (!build) throw buildNotFound();
+    return build;
+  },
+
   async removeFavorite(userId: string, id: string): Promise<void> {
     if (!(await favoriteBuildRepository.remove(userId, id))) throw buildNotFound();
   },
@@ -230,8 +246,11 @@ export const buildService = {
    * follow the current Snow Crows roles (kept as they were if the build list can't be fetched).
    */
   async refreshFavorites(userId: string): Promise<{ builds: FavoriteBuild[]; changed: string[]; failed: string[] }> {
-    const favorites = await favoriteBuildRepository.list(userId);
-    const pages: { favorite: FavoriteBuild; page: BuildPage }[] = [];
+    // Custom builds aren't on Snow Crows: nothing to refresh.
+    const favorites = (await favoriteBuildRepository.list(userId)).filter(
+      (f): f is SnowCrowsFavorite => f.kind === "snowcrows" && !!f.url,
+    );
+    const pages: { favorite: SnowCrowsFavorite; page: BuildPage }[] = [];
     const failed: string[] = [];
     for (let i = 0; i < favorites.length; i += PARALLEL_FETCHES) {
       const chunk = favorites.slice(i, i + PARALLEL_FETCHES);

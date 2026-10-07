@@ -55,6 +55,8 @@ export function createRouter(): Router {
   router.post("/builds/favorites", requireAuth, buildController.addFavorite);
   router.post("/builds/favorites/refresh", requireAuth, buildController.refreshFavorites);
   router.post("/builds/favorites/:id/move", requireAuth, buildController.moveFavorite);
+  router.post("/builds/custom", requireAuth, buildController.createCustom);
+  router.put("/builds/custom/:id", requireAuth, buildController.updateCustom);
   router.delete("/builds/favorites/:id", requireAuth, buildController.removeFavorite);
 
   router.get("/logs", requireAuth, logController.list);
@@ -79,6 +81,8 @@ export function createRouter(): Router {
   router.post("/sessions/:id/end", requireAuth, sessionController.end);
   router.post("/sessions/:id/move", requireAuth, sessionController.move);
   router.post("/sessions/:id/resume", requireAuth, sessionController.resume);
+  router.get("/sessions/:id/addable-logs", requireAuth, sessionController.addableLogs);
+  router.post("/sessions/:id/add-logs", requireAuth, sessionController.addLogs);
   router.post("/sessions/:id/remove-logs", requireAuth, sessionController.removeLogs);
   router.post("/sessions/:id/share", requireAuth, sessionController.share);
   router.delete("/sessions/:id/share", requireAuth, sessionController.unshare);

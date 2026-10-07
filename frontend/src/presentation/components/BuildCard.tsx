@@ -1,5 +1,15 @@
 import { useState, type ReactNode } from "react";
-import { CheckIcon, CopyIcon, ExternalLinkIcon, Loader2Icon, SparklesIcon, StarIcon } from "lucide-react";
+import {
+  CheckIcon,
+  CopyIcon,
+  CopyPlusIcon,
+  ExternalLinkIcon,
+  Loader2Icon,
+  PencilIcon,
+  SparklesIcon,
+  StarIcon,
+  Trash2Icon,
+} from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import {
   type BuildDetails,
@@ -14,15 +24,51 @@ import { Card, CardContent } from "@/presentation/components/ui/card";
 import { cn } from "@/presentation/lib/utils";
 import ProfessionIcon from "./ProfessionIcon";
 
+/** A build to show: a Snow Crows build (search result or favorite) or one the user made (no url). */
+export type CardBuild = Omit<BuildDetails, "url"> & { url: string | null };
+
 interface Props {
-  build: BuildDetails;
-  /** The saved favorite of this build, if it is one: shows when it was fetched and whether it changed. */
+  build: CardBuild;
+  /** The saved build, if it is one: a favorite shows when it was fetched and whether it changed. */
   favorite?: FavoriteBuild;
-  onToggleFavorite: () => void;
+  /** Snow Crows builds: the favorite star. */
+  onToggleFavorite?: () => void;
+  /** Snow Crows builds: open the editor with this build as the start of the user's own. */
+  onMakeCustom?: () => void;
+  /** The user's own builds: edit / delete. */
+  onEdit?: () => void;
+  onDelete?: () => void;
   busy?: boolean;
   /** Drag & drop handle of a sortable favorite, shown before the icon. */
   dragHandle?: ReactNode;
   className?: string;
+}
+
+/** A small icon button of the card's header. */
+function IconAction({
+  label,
+  onClick,
+  disabled,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className="size-8 shrink-0"
+      onClick={onClick}
+      disabled={disabled}
+      title={label}
+      aria-label={label}
+    >
+      {children}
+    </Button>
+  );
 }
 
 /** A GW2 item as its icon and name (the full name on hover). */
@@ -91,8 +137,21 @@ function TemplateCode({ template }: { template: string | null }) {
   );
 }
 
-/** A Snow Crows build at a glance: template, gear, link and the favorite star. */
-export default function BuildCard({ build, favorite, onToggleFavorite, busy, dragHandle, className }: Props) {
+/**
+ * A build at a glance: template and gear. A Snow Crows build has its link, the favorite star and "make my build from
+ * this"; the user's own build is marked as theirs, with edit and delete.
+ */
+export default function BuildCard({
+  build,
+  favorite,
+  onToggleFavorite,
+  onMakeCustom,
+  onEdit,
+  onDelete,
+  busy,
+  dragHandle,
+  className,
+}: Props) {
   const { t, fmt } = useI18n();
   const { gear } = build;
   const runes = buildService.countItems(gear.armor.flatMap((p) => p.upgrades));
@@ -119,6 +178,7 @@ export default function BuildCard({ build, favorite, onToggleFavorite, busy, dra
                   {t("builds.dps", { dps: fmt.number(build.benchmark.max) })}
                 </Badge>
               )}
+              {favorite?.kind === "custom" && <Badge variant="secondary">{t("builds.custom.badge")}</Badge>}
               {changed && (
                 <Badge title={t("builds.changedTitle", { time: fmt.dateTime(favorite.fetchedAt) })}>
                   <SparklesIcon /> {t("builds.changed")}
@@ -127,33 +187,52 @@ export default function BuildCard({ build, favorite, onToggleFavorite, busy, dra
             </div>
             <p className="truncate text-sm text-muted-foreground">{build.weapons}</p>
           </div>
-          <Button asChild variant="ghost" size="icon" className="size-8 shrink-0">
-            <a
-              href={build.url}
-              target="_blank"
-              rel="noreferrer"
-              title={t("builds.openOnSnowCrows")}
-              aria-label={t("builds.openOnSnowCrows")}
+          {build.url && (
+            <Button asChild variant="ghost" size="icon" className="size-8 shrink-0">
+              <a
+                href={build.url}
+                target="_blank"
+                rel="noreferrer"
+                title={t("builds.openOnSnowCrows")}
+                aria-label={t("builds.openOnSnowCrows")}
+              >
+                <ExternalLinkIcon />
+              </a>
+            </Button>
+          )}
+          {onMakeCustom && (
+            <IconAction label={t("builds.custom.makeFrom")} onClick={onMakeCustom}>
+              <CopyPlusIcon />
+            </IconAction>
+          )}
+          {onEdit && (
+            <IconAction label={t("builds.custom.edit")} onClick={onEdit}>
+              <PencilIcon />
+            </IconAction>
+          )}
+          {onDelete && (
+            <IconAction label={t("builds.custom.delete")} onClick={onDelete} disabled={busy}>
+              {busy ? <Loader2Icon className="animate-spin" /> : <Trash2Icon />}
+            </IconAction>
+          )}
+          {onToggleFavorite && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0"
+              onClick={onToggleFavorite}
+              disabled={busy}
+              title={favorite ? t("builds.removeFavorite") : t("builds.addFavorite")}
+              aria-label={favorite ? t("builds.removeFavorite") : t("builds.addFavorite")}
+              aria-pressed={!!favorite}
             >
-              <ExternalLinkIcon />
-            </a>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-8 shrink-0"
-            onClick={onToggleFavorite}
-            disabled={busy}
-            title={favorite ? t("builds.removeFavorite") : t("builds.addFavorite")}
-            aria-label={favorite ? t("builds.removeFavorite") : t("builds.addFavorite")}
-            aria-pressed={!!favorite}
-          >
-            {busy ? (
-              <Loader2Icon className="animate-spin" />
-            ) : (
-              <StarIcon className={cn(favorite && "fill-amber-400 text-amber-400")} />
-            )}
-          </Button>
+              {busy ? (
+                <Loader2Icon className="animate-spin" />
+              ) : (
+                <StarIcon className={cn(favorite && "fill-amber-400 text-amber-400")} />
+              )}
+            </Button>
+          )}
         </div>
 
         <TemplateCode template={build.template} />
@@ -218,7 +297,10 @@ export default function BuildCard({ build, favorite, onToggleFavorite, busy, dra
           <p className="mt-auto text-xs text-muted-foreground">
             {[
               build.updated && t("builds.snowCrowsUpdated", { date: build.updated }),
-              favorite && t("builds.fetchedAt", { time: fmt.dateTime(favorite.fetchedAt) }),
+              favorite &&
+                t(favorite.kind === "custom" ? "builds.custom.savedAt" : "builds.fetchedAt", {
+                  time: fmt.dateTime(favorite.fetchedAt),
+                }),
             ]
               .filter(Boolean)
               .join(" · ")}

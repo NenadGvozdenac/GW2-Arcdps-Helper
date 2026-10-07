@@ -21,6 +21,7 @@ import {
   FilterXIcon,
   GripVerticalIcon,
   Loader2Icon,
+  PlusIcon,
   RefreshCwIcon,
   SearchIcon,
   SparklesIcon,
@@ -40,13 +41,25 @@ import {
   type FavoritesRefresh,
 } from "../../domain/types/build.types";
 import { buildService } from "../../services/buildService";
+import { customBuildService } from "../../services/customBuildService";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/presentation/components/ui/alert-dialog";
 import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { cn } from "@/presentation/lib/utils";
 import BuildCard from "../components/BuildCard";
+import BuildEditorDialog, { type EditorTarget } from "../components/buildEditor/BuildEditorDialog";
 import PageHeader from "../components/PageHeader";
 import ProfessionIcon from "../components/ProfessionIcon";
 import { describeError } from "../utils/describeError";
@@ -83,6 +96,10 @@ function useBuildsController() {
   const [profession, setProfession] = useState<string | null>(null);
   /** Url of the build being added to / removed from the favorites. */
   const [busyUrl, setBusyUrl] = useState<string | null>(null);
+  /** The build editor, when open: what it edits. */
+  const [editor, setEditor] = useState<EditorTarget | null>(null);
+  /** A custom build waiting for its deletion to be confirmed. */
+  const [pendingDelete, setPendingDelete] = useState<FavoriteBuild | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [refreshResult, setRefreshResult] = useState<FavoritesRefresh | null>(null);
   const [error, setError] = useState<unknown>(null);
@@ -223,6 +240,42 @@ function useBuildsController() {
       });
     },
 
+    editor,
+    closeEditor: () => setEditor(null),
+    /** A new build from scratch. */
+    newBuild: () => setEditor({ draft: { name: "", categories: ["dps"], data: customBuildService.empty("Guardian") } }),
+    /** The editor on a copy of `build` (a Snow Crows build: its template and gear), or on the user's own build. */
+    async openEditor(build: BuildDetails | FavoriteBuild, editOwn: boolean) {
+      setError(null);
+      try {
+        // A search result brings its suggested categories (a favorite has its own).
+        const suggested = results?.find((r) => r.url === build.url)?.categories;
+        const draft = await customBuildService.fromBuild(build, build.name, suggested);
+        if (draft) setEditor({ draft, id: editOwn && "id" in build ? build.id : undefined });
+      } catch (err) {
+        setError(err);
+      }
+    },
+    /** A saved build replaces its old version, or (new) goes first. */
+    onSaved(build: FavoriteBuild) {
+      setFavorites((list) =>
+        list.some((f) => f.id === build.id) ? list.map((f) => (f.id === build.id ? build : f)) : [build, ...list],
+      );
+      setEditor(null);
+    },
+    pendingDelete,
+    askDelete: setPendingDelete,
+    /** Deletes the custom build waiting for confirmation. */
+    confirmDelete() {
+      const build = pendingDelete;
+      setPendingDelete(null);
+      if (!build) return;
+      run(build.id, async () => {
+        await buildService.removeFavorite(build.id);
+        setFavorites((list) => list.filter((f) => f.id !== build.id));
+      });
+    },
+
     /** Drag & drop: shown right away, then saved; on failure the saved order is loaded again. */
     move(activeId: string, overId: string) {
       const from = favorites.findIndex((f) => f.id === activeId);
@@ -357,6 +410,7 @@ function SearchSection({ c }: { c: Controller }) {
           build={c.selected}
           favorite={c.favoriteOf(c.selected.url)}
           onToggleFavorite={() => c.toggleFavorite(c.selected!.url)}
+          onMakeCustom={() => c.openEditor(c.selected!, false)}
           busy={c.busyUrl === c.selected.url}
         />
       ) : (
@@ -416,8 +470,10 @@ function SortableBuildCard({ build, c }: { build: FavoriteBuild; c: Controller }
       <BuildCard
         build={build}
         favorite={build}
-        onToggleFavorite={() => c.toggleFavorite(build.url)}
-        busy={c.busyUrl === build.url}
+        {...(build.kind === "custom"
+          ? { onEdit: () => c.openEditor(build, true), onDelete: () => c.askDelete(build) }
+          : { onToggleFavorite: () => c.toggleFavorite(build.url!), onMakeCustom: () => c.openEditor(build, false) })}
+        busy={c.busyUrl === (build.url ?? build.id)}
         className={cn(isDragging && "shadow-lg shadow-black/40 ring-1 ring-foreground/20")}
         dragHandle={
           !c.sortingByDps && (
@@ -580,12 +636,32 @@ export default function BuildsPage() {
         title={t("builds.title")}
         description={t("builds.description")}
         actions={
-          <Button variant="outline" onClick={c.refreshAll} disabled={c.refreshing || c.favorites.length === 0}>
-            <RefreshCwIcon className={cn(c.refreshing && "animate-spin")} />
-            {t("builds.refreshAll")}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={c.newBuild}>
+              <PlusIcon /> {t("builds.custom.new")}
+            </Button>
+            <Button variant="outline" onClick={c.refreshAll} disabled={c.refreshing || c.favorites.length === 0}>
+              <RefreshCwIcon className={cn(c.refreshing && "animate-spin")} />
+              {t("builds.refreshAll")}
+            </Button>
+          </div>
         }
       />
+      {c.editor && <BuildEditorDialog target={c.editor} onClose={c.closeEditor} onSaved={c.onSaved} />}
+      <AlertDialog open={!!c.pendingDelete} onOpenChange={(open) => !open && c.askDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("builds.custom.deleteTitle", { name: c.pendingDelete?.name ?? "" })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("builds.custom.deleteBody")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={c.confirmDelete}>
+              {t("common.delete")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {c.refreshResult && (
         <RefreshResult result={c.refreshResult} favorites={c.favorites} onDismiss={c.dismissRefreshResult} />
       )}
