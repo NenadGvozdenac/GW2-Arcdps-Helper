@@ -38,9 +38,15 @@ import AdminWebhooksPage from "./pages/admin/AdminWebhooksPage";
 import AdminSecurityPage from "./pages/admin/AdminSecurityPage";
 import GuestGuideShell from "./components/GuestGuideShell";
 
-/** A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. */
-const guide = (page: ReactNode) => (
-  <PublicRoute signedIn={<Layout>{page}</Layout>} guest={<GuestGuideShell>{page}</GuestGuideShell>} />
+/**
+ * A public guide page: inside the app Layout for signed-in users, a minimal frame for guests. `wide`: the page takes
+ * the full width (shared sessions, logs and builds).
+ */
+const guide = (page: ReactNode, wide = false) => (
+  <PublicRoute
+    signedIn={<Layout wide={wide}>{page}</Layout>}
+    guest={<GuestGuideShell wide={wide}>{page}</GuestGuideShell>}
+  />
 );
 
 /** Sends an old address to its new one, keeping the query (e.g. ?boss= from a log's "back" link). */
@@ -92,9 +98,9 @@ export default function AppRouter() {
         <Route path="terms" element={guide(<LegalPage key="terms" kind="terms" />)} />
         {/* Anyone can send feedback; signed in, it is linked to the account. */}
         <Route path="feedback" element={guide(<FeedbackPage />)} />
-        <Route path="shared/sessions/:token" element={guide(<SharedSessionPage />)} />
-        <Route path="shared/logs/:token" element={guide(<SharedLogPage />)} />
-        <Route path="shared/builds/:token" element={guide(<SharedBuildPage />)} />
+        <Route path="shared/sessions/:token" element={guide(<SharedSessionPage />, true)} />
+        <Route path="shared/logs/:token" element={guide(<SharedLogPage />, true)} />
+        <Route path="shared/builds/:token" element={guide(<SharedBuildPage />, true)} />
         <Route path="settings/discord" element={<Navigate to="/guide/discord" replace />} />
         <Route element={<RequireAuth />}>
           {/* "Sign in with the browser" of the desktop uploader / Nexus addon — a page of its own, outside the app layout. */}
