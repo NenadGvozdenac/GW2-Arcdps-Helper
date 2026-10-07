@@ -84,9 +84,8 @@ export default function GearEditor({
   onChange: (patch: Partial<CustomBuildData>) => void;
 }) {
   const { t } = useI18n();
-  const weapons = customBuildService
-    .weaponOptions(pd)
-    .filter((w) => customBuildService.fitsElite(data, w.specialization));
+  // Weapon mastery: every specialization of a profession wields its elite specializations' weapons too.
+  const weapons = customBuildService.weaponOptions(pd);
   const infusionCount = data.infusions.reduce((n, i) => n + i.count, 0);
 
   function setWeapon(setIndex: number, hand: "main" | "off", pick: WeaponPick | null) {
@@ -101,7 +100,8 @@ export default function GearEditor({
     const set = data.weapons[setIndex];
     const pick = set[hand];
     const twoHandedMain = !!set.main && customBuildService.isTwoHanded(pd, set.main.type);
-    const options = weapons.filter((w) => (hand === "main" ? w.mainHand : w.offHand));
+    // The weapon in the hand stays listed even if the hand wouldn't offer it (e.g. from an imported build).
+    const options = weapons.filter((w) => (hand === "main" ? w.mainHand : w.offHand) || w.type === pick?.type);
     const sigilCount = pick && customBuildService.isTwoHanded(pd, pick.type) ? 2 : 1;
     return (
       <div className="flex flex-col gap-1.5 rounded-md border p-2">
@@ -116,7 +116,11 @@ export default function GearEditor({
             )
           }
         >
-          <SelectTrigger size="sm" className="w-full" aria-label={t(hand === "main" ? "builds.editor.mainHand" : "builds.editor.offHand")}>
+          <SelectTrigger
+            size="sm"
+            className="w-full"
+            aria-label={t(hand === "main" ? "builds.editor.mainHand" : "builds.editor.offHand")}
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

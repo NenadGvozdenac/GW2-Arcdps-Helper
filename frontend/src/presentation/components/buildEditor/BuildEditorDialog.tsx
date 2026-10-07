@@ -30,7 +30,6 @@ import {
 } from "@/presentation/components/ui/dialog";
 import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/presentation/components/ui/tabs";
 import { cn } from "@/presentation/lib/utils";
 import ProfessionIcon from "../ProfessionIcon";
 import { describeError } from "../../utils/describeError";
@@ -234,12 +233,10 @@ export default function BuildEditorDialog({
                 <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <Tabs defaultValue="traits">
-                <TabsList>
-                  <TabsTrigger value="traits">{t("builds.editor.tabTraits")}</TabsTrigger>
-                  <TabsTrigger value="gear">{t("builds.editor.tabGear")}</TabsTrigger>
-                </TabsList>
-                <TabsContent value="traits" className="flex flex-col gap-4 pt-2">
+              // Everything on one page: traits & skills, then the gear.
+              <div className="flex flex-col gap-8">
+                <section className="flex flex-col gap-4">
+                  <h3 className="text-base font-semibold">{t("builds.editor.tabTraits")}</h3>
                   {data.specializations.map((line, i) => (
                     <SpecializationLine
                       key={i}
@@ -254,11 +251,12 @@ export default function BuildEditorDialog({
                     />
                   ))}
                   <SkillBar data={data} pd={c.pd} weaponSet={c.weaponSet} onChange={c.update} />
-                </TabsContent>
-                <TabsContent value="gear" className="pt-2">
+                </section>
+                <section className="flex flex-col gap-4 border-t pt-6">
+                  <h3 className="text-base font-semibold">{t("builds.editor.tabGear")}</h3>
                   <GearEditor data={data} pd={c.pd} onChange={c.update} />
-                </TabsContent>
-              </Tabs>
+                </section>
+              </div>
             )}
           </div>
 

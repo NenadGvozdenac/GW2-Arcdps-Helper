@@ -5,6 +5,8 @@ export interface Formatters {
   span: (ms: number) => string;
   dateTime: (d: Date) => string;
   date: (d: Date) => string;
+  /** Clock time only ("15:31"). */
+  time: (d: Date) => string;
   number: (n: number) => string;
   /** Time until something (a reset): "3d 04h", "5h 12m", "8m". */
   countdown: (ms: number) => string;
@@ -42,12 +44,14 @@ export function formatCountdown(ms: number): string {
 export function createFormatters(locale: string): Formatters {
   const dateTimeFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
   const dateFmt = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+  const timeFmt = new Intl.DateTimeFormat(locale, { timeStyle: "short" });
   const numberFmt = new Intl.NumberFormat(locale);
   return {
     duration: formatDuration,
     span: formatSpan,
     dateTime: (d) => dateTimeFmt.format(d),
     date: (d) => dateFmt.format(d),
+    time: (d) => timeFmt.format(d),
     number: (n) => numberFmt.format(n),
     countdown: formatCountdown,
   };

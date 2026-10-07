@@ -271,7 +271,7 @@ export default function SessionDetailPage() {
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {session.endedAt && <AddSessionLogsDialog session={session} />}
+              {session.endedAt && <AddSessionLogsDialog session={session} endedAt={session.endedAt} />}
               {session.endedAt && logs.length > 0 && (
                 <Button variant="outline" onClick={c.startOrganizing}>
                   <ListChecksIcon /> {t("sessions.removeLogs")}

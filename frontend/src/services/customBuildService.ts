@@ -45,7 +45,7 @@ function gearItem(list: CatalogItem[], id: number | null): GearItem | null {
   return item ? { id: item.id, name: item.name, icon: item.icon } : null;
 }
 
-/** A weapon of a profession: which hand(s) it goes in and the elite specialization it needs (if any). */
+/** A weapon of a profession: which hand(s) it goes in and the elite specialization that brought it (if any). */
 export interface WeaponOption {
   type: string;
   mainHand: boolean;
@@ -98,7 +98,10 @@ export const customBuildService = {
   /** A GW2 API description without its markup ("<c=@reminder>…</c>"). */
   plainText: (text: string | undefined) => (text ?? "").replace(/<[^>]*>/g, "").trim(),
 
-  /** Whether a skill / weapon needing elite specialization `specialization` (if any) fits the build's third line. */
+  /**
+   * Whether a skill needing elite specialization `specialization` (if any) fits the build's third line. (Weapons always
+   * do: with weapon mastery, every specialization wields the elite ones' weapons.)
+   */
   fitsElite: (data: CustomBuildData, specialization: number | null | undefined) =>
     !specialization || data.specializations[2]?.id === specialization,
 

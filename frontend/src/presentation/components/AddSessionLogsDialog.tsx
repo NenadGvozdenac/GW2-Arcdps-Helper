@@ -7,6 +7,7 @@ import type { Session } from "../../domain/types/session.types";
 import { sessionService } from "../../services/sessionService";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
 import { Button } from "@/presentation/components/ui/button";
+import { Checkbox } from "@/presentation/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +17,10 @@ import {
   DialogTitle,
 } from "@/presentation/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/presentation/components/ui/popover";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/presentation/components/ui/table";
+import { cn } from "@/presentation/lib/utils";
 import { describeError } from "../utils/describeError";
-import LogTable from "./LogTable";
+import ResultBadge from "./ResultBadge";
 
 function useAddSessionLogsController(session: Session) {
   const { refresh } = useLogs();
@@ -81,43 +84,108 @@ function useAddSessionLogsController(session: Session) {
   };
 }
 
+/** The logs to pick from: when each fight started and ended, how long after the session's end it started, and its length. */
+function CandidateTable({
+  logs,
+  endedAt,
+  selected,
+  onToggle,
+}: {
+  logs: Log[];
+  endedAt: Date;
+  selected: ReadonlySet<string>;
+  onToggle: (id: string) => void;
+}) {
+  const { t, fmt } = useI18n();
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead className="w-10" />
+          <TableHead>{t("logTable.boss")}</TableHead>
+          <TableHead>{t("logTable.result")}</TableHead>
+          <TableHead className="text-right">{t("sessions.addLogsStarted")}</TableHead>
+          <TableHead className="text-right">{t("sessions.addLogsEnded")}</TableHead>
+          <TableHead className="text-right">{t("sessions.addLogsAfterEnd")}</TableHead>
+          <TableHead className="text-right">{t("logTable.duration")}</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {logs.map((l) => {
+          const end = new Date(l.encounterTime.getTime() + l.durationMs);
+          return (
+            <TableRow
+              key={l.id}
+              className={cn("cursor-pointer", selected.has(l.id) && "bg-accent/40 hover:bg-accent/50")}
+              onClick={() => onToggle(l.id)}
+              data-state={selected.has(l.id) ? "selected" : undefined}
+            >
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <Checkbox checked={selected.has(l.id)} onCheckedChange={() => onToggle(l.id)} aria-label={l.bossName} />
+              </TableCell>
+              <TableCell className="whitespace-normal">
+                <div className="flex items-center gap-2.5">
+                  {l.bossIcon && <img src={l.bossIcon} alt="" className="size-7 shrink-0 rounded-md" loading="lazy" />}
+                  <span className="min-w-0 font-medium break-words">{l.bossName}</span>
+                </div>
+              </TableCell>
+              <TableCell className="whitespace-normal">
+                <ResultBadge log={l} />
+              </TableCell>
+              <TableCell className="text-right tabular-nums">{fmt.time(l.encounterTime)}</TableCell>
+              <TableCell className="text-right tabular-nums">{fmt.time(end)}</TableCell>
+              <TableCell className="text-right font-mono tabular-nums text-muted-foreground">
+                +{fmt.span(l.encounterTime.getTime() - endedAt.getTime())}
+              </TableCell>
+              <TableCell className="text-right font-mono tabular-nums">{fmt.duration(l.durationMs)}</TableCell>
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
 /**
  * "Add logs" of an ended session (e.g. it was ended too early): pick logs recorded in the 6 hours after it ended and
- * add them to it — and to its Discord summary. A help popover explains it.
+ * add them to it — and to its Discord summary. The button's "?" explains it.
  */
-export default function AddSessionLogsDialog({ session }: { session: Session }) {
+export default function AddSessionLogsDialog({ session, endedAt }: { session: Session; endedAt: Date }) {
   const c = useAddSessionLogsController(session);
-  const { t } = useI18n();
+  const { t, fmt } = useI18n();
   const inOtherSessions = c.candidates?.filter((l) => l.sessionId).length ?? 0;
 
   return (
-    <div className="flex items-center gap-0.5">
-      <Button variant="outline" onClick={() => c.setOpen(true)}>
-        <ListPlusIcon /> {t("sessions.addLogs")}
-      </Button>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-8 text-muted-foreground"
-            aria-label={t("sessions.addLogsHelpToggle")}
-            title={t("sessions.addLogsHelpToggle")}
-          >
-            <CircleHelpIcon />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent align="end" className="w-80 text-sm text-pretty">
-          {t("sessions.addLogsHelp")}
-        </PopoverContent>
-      </Popover>
+    <>
+      {/* One button in two parts: "Add logs", and its "?" (a button can't hold another button). */}
+      <div className="inline-flex items-stretch overflow-hidden rounded-md border bg-background shadow-xs dark:border-input dark:bg-input/30">
+        <Button variant="ghost" className="rounded-none border-0" onClick={() => c.setOpen(true)}>
+          <ListPlusIcon /> {t("sessions.addLogs")}
+        </Button>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="rounded-none border-0 border-l text-muted-foreground dark:border-input"
+              aria-label={t("sessions.addLogsHelpToggle")}
+              title={t("sessions.addLogsHelpToggle")}
+            >
+              <CircleHelpIcon />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="end" className="w-80 text-sm text-pretty">
+            {t("sessions.addLogsHelp")}
+          </PopoverContent>
+        </Popover>
+      </div>
 
       <Dialog open={c.open} onOpenChange={c.setOpen}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent className="sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>{t("sessions.addLogsTitle")}</DialogTitle>
-            <DialogDescription>{t("sessions.addLogsBody")}</DialogDescription>
+            <DialogDescription>{t("sessions.addLogsBody", { time: fmt.dateTime(endedAt) })}</DialogDescription>
           </DialogHeader>
 
           {c.candidates === null ? (
@@ -138,7 +206,12 @@ export default function AddSessionLogsDialog({ session }: { session: Session }) 
                   </span>
                 )}
               </div>
-              <LogTable logs={c.candidates} showGroup selection={{ selected: c.selected, onToggle: c.toggle }} />
+              <CandidateTable
+                logs={c.candidates}
+                endedAt={endedAt}
+                selected={c.selected}
+                onToggle={c.toggle}
+              />
             </div>
           )}
 
@@ -160,6 +233,6 @@ export default function AddSessionLogsDialog({ session }: { session: Session }) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
