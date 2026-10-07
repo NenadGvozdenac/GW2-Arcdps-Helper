@@ -42,10 +42,13 @@ export default function AttributesPanel({
   attributes,
   weaponSet,
   onWeaponSet,
+  showSets = true,
 }: {
   attributes: BuildAttributes;
   weaponSet: number;
   onWeaponSet: (set: number) => void;
+  /** The Set 1 / Set 2 switch (left out when there's only one set to look at). */
+  showSets?: boolean;
 }) {
   const { t, fmt } = useI18n();
   const percent = (key: keyof BuildAttributes, n: number) =>
@@ -55,22 +58,24 @@ export default function AttributesPanel({
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold">{t("builds.attributes.title")}</h3>
-        <div className="flex rounded-md border p-0.5 text-xs">
-          {[0, 1].map((set) => (
-            <button
-              key={set}
-              type="button"
-              aria-pressed={weaponSet === set}
-              onClick={() => onWeaponSet(set)}
-              className={cn(
-                "rounded px-2 py-0.5 text-muted-foreground",
-                weaponSet === set && "bg-accent text-accent-foreground",
+        {showSets && (
+          <div className="flex rounded-md border p-0.5 text-xs">
+            {[0, 1].map((set) => (
+              <button
+                key={set}
+                type="button"
+                aria-pressed={weaponSet === set}
+                onClick={() => onWeaponSet(set)}
+                className={cn(
+                  "rounded px-2 py-0.5 text-muted-foreground",
+                  weaponSet === set && "bg-accent text-accent-foreground",
               )}
             >
               {t("builds.editor.weaponSet", { set: set + 1 })}
             </button>
           ))}
         </div>
+        )}
       </div>
       <div className="divide-y rounded-md border px-3">
         <div className="py-1.5">

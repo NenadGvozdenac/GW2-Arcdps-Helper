@@ -28,6 +28,9 @@ export const buildService = {
   refreshFavorites: buildRepository.refreshFavorites,
   moveFavorite: buildRepository.moveFavorite,
   removeFavorite: buildRepository.removeFavorite,
+  share: buildRepository.share,
+  unshare: buildRepository.unshare,
+  getShared: buildRepository.getShared,
 
   /** Whether the latest refresh found the build changed on Snow Crows. */
   changedByLastRefresh: (build: FavoriteBuild): boolean =>

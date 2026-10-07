@@ -55,6 +55,10 @@ export function createRouter(): Router {
   router.post("/builds/favorites", requireAuth, buildController.addFavorite);
   router.post("/builds/favorites/refresh", requireAuth, buildController.refreshFavorites);
   router.post("/builds/favorites/:id/move", requireAuth, buildController.moveFavorite);
+  router.post("/builds/favorites/:id/share", requireAuth, buildController.share);
+  router.delete("/builds/favorites/:id/share", requireAuth, buildController.unshare);
+  // Public: anyone with the link can view a shared build.
+  router.get("/shared/builds/:token", buildController.shared);
   router.post("/builds/custom", requireAuth, buildController.createCustom);
   router.put("/builds/custom/:id", requireAuth, buildController.updateCustom);
   router.delete("/builds/favorites/:id", requireAuth, buildController.removeFavorite);

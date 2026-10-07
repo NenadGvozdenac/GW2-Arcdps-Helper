@@ -9,6 +9,7 @@ import {
   favoriteBuildSchema,
   idParamSchema,
   moveFavoriteBuildSchema,
+  shareTokenParamSchema,
 } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
@@ -59,6 +60,23 @@ export const buildController = {
     const { id } = validate(idParamSchema, req.params);
     const input: CustomBuildInput = validate(customBuildSchema, req.body);
     res.json({ build: await buildService.updateCustom(res.locals.userId, id, input) });
+  },
+
+  /** POST /builds/favorites/:id/share — creates the public link (or returns the existing one). */
+  async share(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ build: await buildService.share(res.locals.userId, id) });
+  },
+
+  async unshare(req: Request, res: Response<unknown, AuthLocals>) {
+    const { id } = validate(idParamSchema, req.params);
+    res.json({ build: await buildService.unshare(res.locals.userId, id) });
+  },
+
+  /** GET /shared/builds/:token — public: anyone with the link. */
+  async shared(req: Request, res: Response) {
+    const { token } = validate(shareTokenParamSchema, req.params);
+    res.json(await buildService.getShared(token));
   },
 
   async removeFavorite(req: Request, res: Response<unknown, AuthLocals>) {

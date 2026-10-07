@@ -237,9 +237,14 @@ export const favoriteBuilds = pgTable(
     fetchedAt: timestamp("fetched_at", { withTimezone: true }).notNull().defaultNow(),
     /** The last refresh that found the build changed on Snow Crows (= fetchedAt when the latest one did); null = never. */
     changedAt: timestamp("changed_at", { withTimezone: true }),
+    /** Secret for the public read-only link (/shared/builds/<token>); null = not shared. */
+    shareToken: text("share_token"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [uniqueIndex("favorite_builds_user_url_idx").on(t.userId, t.url)],
+  (t) => [
+    uniqueIndex("favorite_builds_user_url_idx").on(t.userId, t.url),
+    uniqueIndex("favorite_builds_share_token_idx").on(t.shareToken),
+  ],
 );
 
 /**

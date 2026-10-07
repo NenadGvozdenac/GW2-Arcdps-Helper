@@ -97,6 +97,15 @@ export interface FavoriteBuild extends Omit<BuildDetails, "url"> {
   /** The last refresh that found the build changed; equal to fetchedAt when the latest refresh did. */
   changedAt: Date | null;
   createdAt: Date;
+  /** Secret of the public link (/shared/builds/<token>); null = not shared. */
+  shareToken: string | null;
+}
+
+/** A build opened through its share link: the build (without its own ids) and who shared it. */
+export interface SharedBuild {
+  build: Omit<FavoriteBuild, "id" | "shareToken" | "fetchedAt" | "changedAt" | "createdAt">;
+  /** GW2 account of the player who shared it (may be empty). */
+  owner: string;
 }
 
 /** Result of refreshing every favorite: favorite ids that changed / could not be fetched. */

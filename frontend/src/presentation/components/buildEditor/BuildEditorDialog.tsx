@@ -19,6 +19,7 @@ import { attributeService } from "../../../services/attributeService";
 import { buildTemplateService } from "../../../services/buildTemplateService";
 import { customBuildService } from "../../../services/customBuildService";
 import { Alert, AlertDescription } from "@/presentation/components/ui/alert";
+import { Badge } from "@/presentation/components/ui/badge";
 import { Button } from "@/presentation/components/ui/button";
 import {
   Dialog,
@@ -35,6 +36,7 @@ import ProfessionIcon from "../ProfessionIcon";
 import { describeError } from "../../utils/describeError";
 import AttributesPanel from "./AttributesPanel";
 import GearEditor from "./GearEditor";
+import GearView from "./GearView";
 import SkillBar from "./SkillBar";
 import SpecializationLine from "./SpecializationLine";
 
@@ -44,7 +46,7 @@ export interface EditorTarget {
   id?: string;
 }
 
-function useBuildEditorController(target: EditorTarget, onSaved: (build: FavoriteBuild) => void) {
+export function useBuildEditorController(target: EditorTarget, onSaved?: (build: FavoriteBuild) => void) {
   const [draft, setDraft] = useState(target.draft);
   const [pd, setPd] = useState<ProfessionData | null>(null);
   const [loadError, setLoadError] = useState<unknown>(null);
@@ -94,7 +96,7 @@ function useBuildEditorController(target: EditorTarget, onSaved: (build: Favorit
         return { ...d, categories: on ? d.categories.filter((c) => c !== category) : [...others, category] };
       }),
     async save() {
-      if (!pd) return;
+      if (!pd || !onSaved) return;
       setSaving(true);
       setError(null);
       try {
@@ -161,32 +163,30 @@ function TemplateBox({ template }: { template: string | null }) {
   );
 }
 
+type Controller = ReturnType<typeof useBuildEditorController>;
+
 /**
- * The build editor, in a large dialog: name, profession and categories; specializations and traits, skills (legends,
- * pets) and weapon skills; weapons, armor, trinkets, runes, sigils, relic, food, utility and infusions — with the
- * attributes they add up to and the build template code, kept up to date.
+ * The build: name, profession and categories; specializations and traits, skills (legends, pets) and weapon skills;
+ * weapons, armor, trinkets, runes, sigils, relic, food, utility and infusions — with the attributes they add up to and
+ * the build template code, kept up to date. `readOnly`: shown as it is, nothing can be changed (details, shared link).
  */
-export default function BuildEditorDialog({
-  target,
-  onClose,
-  onSaved,
-}: {
-  target: EditorTarget;
-  onClose: () => void;
-  onSaved: (build: FavoriteBuild) => void;
-}) {
-  const c = useBuildEditorController(target, onSaved);
+export function BuildSheet({ c, readOnly = false }: { c: Controller; readOnly?: boolean }) {
   const { t } = useI18n();
   const { data } = c.draft;
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex h-[92svh] max-w-[calc(100%-1rem)] flex-col gap-4 sm:max-w-[calc(100%-2rem)]">
-        <DialogHeader>
-          <DialogTitle>{target.id ? t("builds.editor.editTitle") : t("builds.editor.newTitle")}</DialogTitle>
-          <DialogDescription>{t("builds.editor.description")}</DialogDescription>
-        </DialogHeader>
-
+    <>
+      {readOnly ? (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <ProfessionIcon profession={data.profession} className="size-6" />
+          <span className="font-medium">{data.profession}</span>
+          {c.draft.categories.map((cat) => (
+            <Badge key={cat} variant="secondary">
+              {t(`builds.categories.${cat}`)}
+            </Badge>
+          ))}
+        </div>
+      ) : (
         <div className="flex flex-wrap items-center gap-3">
           <Input
             value={c.draft.name}
@@ -220,21 +220,27 @@ export default function BuildEditorDialog({
             ))}
           </div>
         </div>
+      )}
 
-        <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
-          <div className="@container min-h-0 overflow-y-auto pr-1">
-            {c.loadError != null ? (
-              <Alert variant="destructive">
-                <AlertCircleIcon />
-                <AlertDescription>{t("builds.editor.loadFailed")}</AlertDescription>
-              </Alert>
-            ) : !c.pd ? (
-              <div className="grid h-full place-items-center" role="status">
-                <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : (
-              // Everything on one page: the build (traits & skills) and the gear side by side when there's room for the
-              // trait lines' fixed width next to the gear, otherwise the gear below.
+      <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="@container min-h-0 overflow-y-auto pr-1">
+          {c.loadError != null ? (
+            <Alert variant="destructive">
+              <AlertCircleIcon />
+              <AlertDescription>{t("builds.editor.loadFailed")}</AlertDescription>
+            </Alert>
+          ) : !c.pd ? (
+            <div className="grid h-full place-items-center" role="status">
+              <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            // Read-only: every control disabled, but shown as usual (not dimmed).
+            <fieldset
+              disabled={readOnly}
+              className="min-w-0 [&_:disabled]:cursor-default [&_:disabled]:opacity-100!"
+            >
+              {/* Everything on one page: the build (traits & skills) and the gear side by side when there's room for
+                  the trait lines' fixed width next to the gear, otherwise the gear below. */}
               <div className="grid items-start gap-8 @[64rem]:grid-cols-[auto_minmax(0,1fr)]">
                 <section className="flex flex-col gap-4">
                   <h3 className="text-base font-semibold">{t("builds.editor.tabTraits")}</h3>
@@ -255,17 +261,50 @@ export default function BuildEditorDialog({
                 </section>
                 <section className="flex min-w-0 flex-col gap-4 border-t pt-6 @[64rem]:border-t-0 @[64rem]:border-l @[64rem]:pt-0 @[64rem]:pl-6">
                   <h3 className="text-base font-semibold">{t("builds.editor.tabGear")}</h3>
-                  <GearEditor data={data} pd={c.pd} onChange={c.update} />
+                  {readOnly ? <GearView data={data} /> : <GearEditor data={data} pd={c.pd} onChange={c.update} />}
                 </section>
               </div>
-            )}
-          </div>
-
-          <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto border-t pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
-            <AttributesPanel attributes={c.attributes} weaponSet={c.weaponSet} onWeaponSet={c.setWeaponSet} />
-            <TemplateBox template={c.template} />
-          </aside>
+            </fieldset>
+          )}
         </div>
+
+        <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto border-t pt-4 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-4">
+          <AttributesPanel
+            attributes={c.attributes}
+            weaponSet={c.weaponSet}
+            onWeaponSet={c.setWeaponSet}
+            // Looking at a build with one weapon set, there's nothing to switch to.
+            showSets={!readOnly || !!(data.weapons[1]?.main || data.weapons[1]?.off)}
+          />
+          <TemplateBox template={c.template} />
+        </aside>
+      </div>
+    </>
+  );
+}
+
+/** The build editor in a large dialog: the build, with Cancel / Save. */
+export default function BuildEditorDialog({
+  target,
+  onClose,
+  onSaved,
+}: {
+  target: EditorTarget;
+  onClose: () => void;
+  onSaved: (build: FavoriteBuild) => void;
+}) {
+  const c = useBuildEditorController(target, onSaved);
+  const { t } = useI18n();
+
+  return (
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="flex h-[92svh] max-w-[calc(100%-1rem)] flex-col gap-4 sm:max-w-[calc(100%-2rem)]">
+        <DialogHeader>
+          <DialogTitle>{target.id ? t("builds.editor.editTitle") : t("builds.editor.newTitle")}</DialogTitle>
+          <DialogDescription>{t("builds.editor.description")}</DialogDescription>
+        </DialogHeader>
+
+        <BuildSheet c={c} />
 
         {c.error != null && (
           <Alert variant="destructive">

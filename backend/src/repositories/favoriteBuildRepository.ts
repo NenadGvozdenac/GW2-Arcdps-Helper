@@ -19,6 +19,7 @@ const columns = {
   categories: favoriteBuilds.categories,
   fetchedAt: favoriteBuilds.fetchedAt,
   changedAt: favoriteBuilds.changedAt,
+  shareToken: favoriteBuilds.shareToken,
   createdAt: favoriteBuilds.createdAt,
 };
 
@@ -160,6 +161,27 @@ export const favoriteBuildRepository = {
       .set(customColumns(input))
       .where(and(own(userId, id), eq(favoriteBuilds.kind, "custom")))
       .returning(columns);
+    return row ?? null;
+  },
+
+  async findById(userId: string, id: string): Promise<FavoriteBuild | null> {
+    const [row] = await getDb().select(columns).from(favoriteBuilds).where(own(userId, id));
+    return row ?? null;
+  },
+
+  /** Creates (a token) or revokes (null) the build's public link; null if the user has no such build. */
+  async setShareToken(userId: string, id: string, shareToken: string | null): Promise<FavoriteBuild | null> {
+    const [row] = await getDb().update(favoriteBuilds).set({ shareToken }).where(own(userId, id)).returning(columns);
+    return row ?? null;
+  },
+
+  /** The shared build of this link, with its owner; null for an unknown (or revoked) link. */
+  async findByShareToken(shareToken: string): Promise<(FavoriteBuild & { userId: string }) | null> {
+    const [row] = await getDb()
+      .select({ ...columns, userId: favoriteBuilds.userId })
+      .from(favoriteBuilds)
+      .where(eq(favoriteBuilds.shareToken, shareToken))
+      .limit(1);
     return row ?? null;
   },
 

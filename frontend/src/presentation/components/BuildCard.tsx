@@ -4,6 +4,7 @@ import {
   CopyIcon,
   CopyPlusIcon,
   ExternalLinkIcon,
+  EyeIcon,
   Loader2Icon,
   PencilIcon,
   SparklesIcon,
@@ -33,6 +34,8 @@ interface Props {
   favorite?: FavoriteBuild;
   /** Snow Crows builds: the favorite star. */
   onToggleFavorite?: () => void;
+  /** The build's details (read-only, like the editor), with sharing for a saved build. */
+  onDetails?: () => void;
   /** Snow Crows builds: open the editor with this build as the start of the user's own. */
   onMakeCustom?: () => void;
   /** The user's own builds: edit / delete. */
@@ -145,6 +148,7 @@ export default function BuildCard({
   build,
   favorite,
   onToggleFavorite,
+  onDetails,
   onMakeCustom,
   onEdit,
   onDelete,
@@ -199,6 +203,11 @@ export default function BuildCard({
                 <ExternalLinkIcon />
               </a>
             </Button>
+          )}
+          {onDetails && (
+            <IconAction label={t("builds.details")} onClick={onDetails}>
+              <EyeIcon />
+            </IconAction>
           )}
           {onMakeCustom && (
             <IconAction label={t("builds.custom.makeFrom")} onClick={onMakeCustom}>

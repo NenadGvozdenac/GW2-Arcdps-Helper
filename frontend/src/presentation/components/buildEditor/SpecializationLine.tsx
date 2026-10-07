@@ -8,11 +8,12 @@ import { cn } from "@/presentation/lib/utils";
 
 /** Width of a specialization's background texture and of the artwork in it (bottom left). */
 const BACKGROUND_SIZE = { width: 1024 };
-const BACKGROUND_ART = { width: 647 };
+const BACKGROUND_ART = { width: 647, height: 136 };
 
 // The line's layout, in px, as in the game's hero panel: the specialization's hexagon, then per tier a minor trait and
 // a column of three major traits; a dashed path runs from the hexagon through the minors to each chosen major.
-const HEIGHT = 150;
+/** Room above and below the three major traits (their column is 136px). */
+const HEIGHT = 164;
 const MAJOR = 40;
 const MAJOR_GAP = 8;
 const MINOR = 34;
@@ -45,7 +46,7 @@ function MajorTrait({ trait, selected, onClick }: { trait: Gw2Trait | undefined;
       aria-label={trait.name}
       aria-pressed={selected}
       className={cn(
-        "group block overflow-hidden rounded-[3px] border transition",
+        "block overflow-hidden rounded-[3px] border transition",
         selected ? "border-white/70 shadow-[0_0_12px_rgba(255,255,255,0.35)]" : "border-black/60",
       )}
       style={{ width: MAJOR, height: MAJOR }}
@@ -55,7 +56,7 @@ function MajorTrait({ trait, selected, onClick }: { trait: Gw2Trait | undefined;
         alt=""
         className={cn(
           "size-full transition",
-          !selected && "opacity-50 brightness-50 grayscale group-hover:opacity-80 group-hover:brightness-90 group-hover:grayscale-0",
+          !selected && "opacity-50 brightness-50 grayscale",
         )}
       />
     </button>
@@ -187,7 +188,10 @@ export default function SpecializationLine({
           className="absolute inset-0 bg-no-repeat"
           style={{
             backgroundImage: `url(${spec.background})`,
-            backgroundSize: `calc(100% * ${BACKGROUND_SIZE.width} / ${BACKGROUND_ART.width}) auto`,
+            // The artwork as wide as the panel, but never shorter than it (a narrow panel scales it up to its height).
+            backgroundSize: `max(calc(100% * ${BACKGROUND_SIZE.width} / ${BACKGROUND_ART.width}), ${
+              (HEIGHT * BACKGROUND_SIZE.width) / BACKGROUND_ART.height
+            }px) auto`,
             backgroundPosition: "0 100%",
           }}
         />

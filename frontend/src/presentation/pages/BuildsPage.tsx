@@ -59,6 +59,8 @@ import { Input } from "@/presentation/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import { cn } from "@/presentation/lib/utils";
 import BuildCard from "../components/BuildCard";
+import ShareButton from "../components/ShareButton";
+import BuildDetailsDialog from "../components/buildEditor/BuildDetailsDialog";
 import BuildEditorDialog, { type EditorTarget } from "../components/buildEditor/BuildEditorDialog";
 import PageHeader from "../components/PageHeader";
 import ProfessionIcon from "../components/ProfessionIcon";
@@ -98,6 +100,8 @@ function useBuildsController() {
   const [busyUrl, setBusyUrl] = useState<string | null>(null);
   /** The build editor, when open: what it edits. */
   const [editor, setEditor] = useState<EditorTarget | null>(null);
+  /** A build's details (read-only), when open: what it shows, and the saved build it is (for sharing). */
+  const [viewer, setViewer] = useState<{ target: EditorTarget; id?: string } | null>(null);
   /** A custom build waiting for its deletion to be confirmed. */
   const [pendingDelete, setPendingDelete] = useState<FavoriteBuild | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -256,6 +260,27 @@ function useBuildsController() {
         setError(err);
       }
     },
+    /** The build's details, read-only (a saved build's, with sharing). */
+    async openDetails(build: BuildDetails | FavoriteBuild) {
+      setError(null);
+      try {
+        const suggested = results?.find((r) => r.url === build.url)?.categories;
+        const draft = await customBuildService.fromBuild(build, build.name, suggested);
+        if (draft) setViewer({ target: { draft }, id: "id" in build ? build.id : undefined });
+      } catch (err) {
+        setError(err);
+      }
+    },
+    closeDetails: () => setViewer(null),
+    viewer,
+    /** The saved build shown in the details (its current share state). */
+    viewedBuild: viewer?.id ? favorites.find((f) => f.id === viewer.id) : undefined,
+    /** Creates (true) or revokes (false) a saved build's public link. */
+    async setShared(id: string, shared: boolean) {
+      const build = shared ? await buildService.share(id) : await buildService.unshare(id);
+      setFavorites((list) => list.map((f) => (f.id === build.id ? build : f)));
+    },
+
     /** A saved build replaces its old version, or (new) goes first. */
     onSaved(build: FavoriteBuild) {
       setFavorites((list) =>
@@ -411,6 +436,7 @@ function SearchSection({ c }: { c: Controller }) {
           favorite={c.favoriteOf(c.selected.url)}
           onToggleFavorite={() => c.toggleFavorite(c.selected!.url)}
           onMakeCustom={() => c.openEditor(c.selected!, false)}
+          onDetails={() => c.openDetails(c.favoriteOf(c.selected!.url) ?? c.selected!)}
           busy={c.busyUrl === c.selected.url}
         />
       ) : (
@@ -473,6 +499,7 @@ function SortableBuildCard({ build, c }: { build: FavoriteBuild; c: Controller }
         {...(build.kind === "custom"
           ? { onEdit: () => c.openEditor(build, true), onDelete: () => c.askDelete(build) }
           : { onToggleFavorite: () => c.toggleFavorite(build.url!), onMakeCustom: () => c.openEditor(build, false) })}
+        onDetails={() => c.openDetails(build)}
         busy={c.busyUrl === (build.url ?? build.id)}
         className={cn(isDragging && "shadow-lg shadow-black/40 ring-1 ring-foreground/20")}
         dragHandle={
@@ -648,6 +675,22 @@ export default function BuildsPage() {
         }
       />
       {c.editor && <BuildEditorDialog target={c.editor} onClose={c.closeEditor} onSaved={c.onSaved} />}
+      {c.viewer && (
+        <BuildDetailsDialog
+          target={c.viewer.target}
+          onClose={c.closeDetails}
+          actions={
+            c.viewedBuild && (
+              <ShareButton
+                kind="builds"
+                shareToken={c.viewedBuild.shareToken}
+                onSetShared={(shared) => c.setShared(c.viewedBuild!.id, shared)}
+                hint={t("builds.sharedHint")}
+              />
+            )
+          }
+        />
+      )}
       <AlertDialog open={!!c.pendingDelete} onOpenChange={(open) => !open && c.askDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>

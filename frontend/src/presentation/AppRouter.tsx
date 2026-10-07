@@ -22,6 +22,7 @@ import SessionsPage from "./pages/SessionsPage";
 import SessionsGuidePage from "./pages/SessionsGuidePage";
 import SharedSessionPage from "./pages/SharedSessionPage";
 import SharedLogPage from "./pages/SharedLogPage";
+import SharedBuildPage from "./pages/SharedBuildPage";
 import LegalPage from "./pages/LegalPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import BuildsPage from "./pages/BuildsPage";
@@ -93,6 +94,7 @@ export default function AppRouter() {
         <Route path="feedback" element={guide(<FeedbackPage />)} />
         <Route path="shared/sessions/:token" element={guide(<SharedSessionPage />)} />
         <Route path="shared/logs/:token" element={guide(<SharedLogPage />)} />
+        <Route path="shared/builds/:token" element={guide(<SharedBuildPage />)} />
         <Route path="settings/discord" element={<Navigate to="/guide/discord" replace />} />
         <Route element={<RequireAuth />}>
           {/* "Sign in with the browser" of the desktop uploader / Nexus addon — a page of its own, outside the app layout. */}

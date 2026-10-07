@@ -1,4 +1,5 @@
-import { FAVORITE_BUILDS_MAX, PARALLEL_FETCHES, SNOW_CROWS_BASE_URL } from "../config/constants";
+import { randomBytes } from "node:crypto";
+import { FAVORITE_BUILDS_MAX, PARALLEL_FETCHES, SHARE_TOKEN_BYTES, SNOW_CROWS_BASE_URL } from "../config/constants";
 import { SPECIALIZATION_ALIASES, SPECIALIZATIONS } from "../data/specializations";
 import { favoriteBuildRepository } from "../repositories/favoriteBuildRepository";
 import type {
@@ -9,10 +10,12 @@ import type {
   BuildSearchResult,
   FavoriteBuild,
   GearItem,
+  SharedBuildResponse,
 } from "../types/build.types";
 import { buildNotFound, buildSpecUnknown, favoriteBuildsLimit, snowCrowsUnavailable } from "../utils/httpError";
 import { fetchItems } from "./clients/gw2ApiClient";
 import { fetchBuildList, fetchBuildPage } from "./clients/snowCrowsClient";
+import { userService } from "./userService";
 import { parseBuildList, parseBuildPage, type BuildPage } from "./misc/snowCrowsParser";
 
 const SPEC_NAMES = Object.keys(SPECIALIZATIONS);
@@ -234,6 +237,31 @@ export const buildService = {
     const build = await favoriteBuildRepository.updateCustom(userId, id, input);
     if (!build) throw buildNotFound();
     return build;
+  },
+
+  /** Creates the public read-only link for the build (or returns the existing one). */
+  async share(userId: string, id: string): Promise<FavoriteBuild> {
+    const build = await favoriteBuildRepository.findById(userId, id);
+    if (!build) throw buildNotFound();
+    if (build.shareToken) return build;
+    const token = randomBytes(SHARE_TOKEN_BYTES).toString("base64url");
+    return (await favoriteBuildRepository.setShareToken(userId, id, token)) ?? build;
+  },
+
+  /** Revokes the public link; the old one stops working. */
+  async unshare(userId: string, id: string): Promise<FavoriteBuild> {
+    const build = await favoriteBuildRepository.setShareToken(userId, id, null);
+    if (!build) throw buildNotFound();
+    return build;
+  },
+
+  /** What anyone with the share link may see: the build and whose it is. */
+  async getShared(token: string): Promise<SharedBuildResponse> {
+    const found = await favoriteBuildRepository.findByShareToken(token);
+    if (!found) throw buildNotFound();
+    const { id: _id, shareToken: _token, fetchedAt: _f, changedAt: _c, createdAt: _cr, userId, ...build } = found;
+    const owner = await userService.get(userId);
+    return { build, owner: owner.gw2Account };
   },
 
   async removeFavorite(userId: string, id: string): Promise<void> {

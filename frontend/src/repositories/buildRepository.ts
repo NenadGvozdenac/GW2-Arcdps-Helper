@@ -5,6 +5,7 @@ import type {
   BuildSearchResult,
   FavoriteBuild,
   FavoritesRefresh,
+  SharedBuild,
 } from "../domain/types/build.types";
 import { http } from "./httpClient";
 
@@ -78,6 +79,20 @@ export const buildRepository = {
     const { build } = await http.put<{ build: FavoriteBuildDto }>(`/builds/custom/${encodeURIComponent(id)}`, input);
     return toFavorite(build);
   },
+
+  /** Creates the build's public link (or returns the existing one). */
+  async share(id: string): Promise<FavoriteBuild> {
+    const { build } = await http.post<{ build: FavoriteBuildDto }>(`${favoritePath(id)}/share`);
+    return toFavorite(build);
+  },
+
+  /** Revokes the public link. */
+  async unshare(id: string): Promise<FavoriteBuild> {
+    return toFavorite((await http.deleteJson<{ build: FavoriteBuildDto }>(`${favoritePath(id)}/share`)).build);
+  },
+
+  /** Public: a shared build (works without signing in). */
+  getShared: (token: string) => http.get<SharedBuild>(`/shared/builds/${encodeURIComponent(token)}`),
 
   /** Drag & drop: the favorite takes the place of `overId`. */
   moveFavorite: (id: string, overId: string) => http.post<void>(`${favoritePath(id)}/move`, { overId }),

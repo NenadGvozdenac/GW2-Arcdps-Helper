@@ -1,5 +1,5 @@
 import { AQUATIC_WEAPONS } from "../domain/data/professions";
-import type { BuildCategory, BuildDetails, BuildGear, FavoriteBuild, GearItem } from "../domain/types/build.types";
+import type { BuildCategory, BuildDetails, BuildGear, BuildKind, GearItem } from "../domain/types/build.types";
 import {
   ARMOR_SLOTS,
   PROFESSIONS,
@@ -44,6 +44,15 @@ function gearItem(list: CatalogItem[], id: number | null): GearItem | null {
   const item = id ? list.find((i) => i.id === id) : undefined;
   return item ? { id: item.id, name: item.name, icon: item.icon } : null;
 }
+
+/**
+ * A build to start a draft from: a Snow Crows build (search result or favorite), a custom one or a shared one.
+ */
+export type BuildSource = Omit<BuildDetails, "url"> & {
+  kind?: BuildKind;
+  custom?: unknown;
+  categories?: BuildCategory[];
+};
 
 /** A weapon of a profession: which hand(s) it goes in and the elite specialization that brought it (if any). */
 export interface WeaponOption {
@@ -132,13 +141,9 @@ export const customBuildService = {
    * A draft that starts from a saved build: a custom one as it was, a Snow Crows one from its template code (traits,
    * skills) and gear. Null when the build's profession is unknown.
    */
-  async fromBuild(
-    build: FavoriteBuild | BuildDetails,
-    name: string,
-    categories: BuildCategory[] = [],
-  ): Promise<CustomBuildDraft | null> {
-    if ("kind" in build && build.kind === "custom" && build.custom) {
-      return { name, categories: build.categories, data: build.custom as CustomBuildData };
+  async fromBuild(build: BuildSource, name: string, categories: BuildCategory[] = []): Promise<CustomBuildDraft | null> {
+    if (build.kind === "custom" && build.custom) {
+      return { name, categories: build.categories ?? categories, data: build.custom as CustomBuildData };
     }
     if (!isProfession(build.profession)) return null;
     const pd = await gw2ApiRepository.profession(build.profession);
@@ -186,7 +191,7 @@ export const customBuildService = {
       const id = catalogId(catalog.infusions, i.item);
       return id ? [{ id, count: i.count }] : [];
     });
-    return { name, categories: "categories" in build ? build.categories : categories, data };
+    return { name, categories: build.categories ?? categories, data };
   },
 
   /** The build's gear as the cards show it (like a Snow Crows build's). */
