@@ -3,6 +3,7 @@ import { appLoginController } from "../controllers/appLoginController";
 import { authController } from "../controllers/authController";
 import { buildController } from "../controllers/buildController";
 import { clearsController } from "../controllers/clearsController";
+import { raidController } from "../controllers/raidController";
 import { feedbackController } from "../controllers/feedbackController";
 import { logController } from "../controllers/logController";
 import { profileController } from "../controllers/profileController";
@@ -35,6 +36,8 @@ export function createRouter(): Router {
 
   // Raid and strike bosses killed since the weekly reset (desktop uploader and Nexus addon).
   router.get("/clears/weekly", requireAuth, clearsController.weekly);
+  // Which raid wings have Emboldened mode and Call of the Mists this week and the next ones.
+  router.get("/raids/weeklies", requireAuth, raidController.weeklies);
 
   router.patch("/profile", requireAuth, profileController.update);
   router.delete("/profile", requireAuth, profileController.deleteAccount);

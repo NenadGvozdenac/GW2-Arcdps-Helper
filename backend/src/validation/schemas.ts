@@ -20,6 +20,8 @@ import {
   LOGS_PAGE_SIZE,
   LOGS_PAGE_SIZE_MAX,
   MAX_URLS_PER_CALL,
+  RAID_WEEKLIES_DEFAULT_WEEKS,
+  RAID_WEEKLIES_MAX_WEEKS,
   SESSION_NAME_MAX,
   SESSIONS_PAGE_SIZE,
   SESSIONS_PAGE_SIZE_MAX,
@@ -181,6 +183,11 @@ export const fractalPlayOrderSchema = z.object({
     .refine((order) => FRACTAL_CM_LEVELS.every((level) => order.includes(level)), "Invalid fractal order.")
     .nullable(),
   hidden: fractalPlayOrderEntries.default([]),
+});
+
+/** GET /raids/weeklies: how many weeks, the current one included. */
+export const raidWeekliesSchema = z.object({
+  weeks: z.coerce.number().int().min(1).max(RAID_WEEKLIES_MAX_WEEKS).default(RAID_WEEKLIES_DEFAULT_WEEKS),
 });
 
 /** PUT /profile/skip-empty-logs */

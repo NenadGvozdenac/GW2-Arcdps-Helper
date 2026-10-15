@@ -137,3 +137,7 @@ export const FRACTAL_PLAY_ORDER_DAILIES = 0;
 export const FRACTAL_PLAY_ORDER_RECS = -1;
 /** Every entry a fractal play order can have: the CM levels, the dailies and the recommended fractals. */
 export const FRACTAL_PLAY_ORDER_ENTRIES = [...FRACTAL_CM_LEVELS, FRACTAL_PLAY_ORDER_DAILIES, FRACTAL_PLAY_ORDER_RECS];
+
+/** GET /raids/weeklies: weeks returned by default (the current one included) and at most. */
+export const RAID_WEEKLIES_DEFAULT_WEEKS = 6;
+export const RAID_WEEKLIES_MAX_WEEKS = 16;

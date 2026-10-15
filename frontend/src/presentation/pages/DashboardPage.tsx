@@ -15,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/pre
 import { BarList, SERIES, TimeChart } from "../components/charts/Charts";
 import ClearCard from "../components/ClearCard";
 import FractalInstabilitiesDialog from "../components/FractalInstabilitiesDialog";
+import RaidWeekliesDialog from "../components/RaidWeekliesDialog";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import SetupTipCard from "../components/SetupTipCard";
@@ -131,7 +132,8 @@ export default function DashboardPage() {
   } = useDashboardController();
   const { t } = useI18n();
   const navigate = useNavigate();
-  const [instabilitiesOpen, setInstabilitiesOpen] = useState(false);
+  // The dialog opened from a clear card: the fractal instabilities or the raid weeklies.
+  const [openDialog, setOpenDialog] = useState<"instabilities" | "weeklies" | null>(null);
 
   return (
     <div className="flex flex-col gap-6">
@@ -168,21 +170,22 @@ export default function DashboardPage() {
                 resetLabel={t(c.resetLabel)}
                 progress={c.progress}
                 titleAction={
-                  c.category === "fractal" && (
+                  (c.category === "fractal" || c.category === "raid") && (
                     <Button
                       variant="outline"
                       size="xs"
                       className="border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 hover:text-warning"
-                      onClick={() => setInstabilitiesOpen(true)}
+                      onClick={() => setOpenDialog(c.category === "fractal" ? "instabilities" : "weeklies")}
                     >
-                      <InfoIcon /> {t("instabilities.open")}
+                      <InfoIcon /> {t(c.category === "fractal" ? "instabilities.open" : "raidWeeklies.open")}
                     </Button>
                   )
                 }
               />
             ))}
           </div>
-          {instabilitiesOpen && <FractalInstabilitiesDialog onClose={() => setInstabilitiesOpen(false)} />}
+          {openDialog === "instabilities" && <FractalInstabilitiesDialog onClose={() => setOpenDialog(null)} />}
+          {openDialog === "weeklies" && <RaidWeekliesDialog onClose={() => setOpenDialog(null)} />}
 
           {/* The last 7 / 30 / 90 days, collapsible (remembered in this browser). */}
           <section className="flex flex-col gap-4" aria-labelledby="dashboard-charts">
