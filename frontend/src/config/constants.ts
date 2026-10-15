@@ -31,6 +31,10 @@ export const DOWNLOADS_STORAGE_KEY = "gw2arcdpshelper.downloads";
 export const SESSION_RESULT_FILTER_STORAGE_KEY = "gw2arcdpshelper.sessionResultFilter";
 /** Whether the dashboard's charts are collapsed ("collapsed" or nothing). */
 export const DASHBOARD_CHARTS_STORAGE_KEY = "gw2arcdpshelper.dashboardCharts";
+/** How the fractal instabilities dialog groups them: "fractal" or "instability". */
+export const INSTABILITIES_GROUP_BY_STORAGE_KEY = "gw2arcdpshelper.instabilitiesGroupBy";
+/** How the fractals page orders the fractals: "fractal" or "playOrder". */
+export const FRACTAL_ORDER_STORAGE_KEY = "gw2arcdpshelper.fractalOrder";
 /** Whether the app's sidebar is collapsed to icons. */
 export const SIDEBAR_STORAGE_KEY = "gw2arcdpshelper.sidebar";
 /** + ".<userId>": the overview's "finish your setup" tip was closed for that account. */

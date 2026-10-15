@@ -15,6 +15,8 @@ import {
   DPS_REPORT_TOKEN_RE,
   FEEDBACK_DESCRIPTION_MAX,
   FEEDBACK_TITLE_MAX,
+  FRACTAL_CM_LEVELS,
+  FRACTAL_PLAY_ORDER_ENTRIES,
   LOGS_PAGE_SIZE,
   LOGS_PAGE_SIZE_MAX,
   MAX_URLS_PER_CALL,
@@ -160,6 +162,25 @@ export const feedbackSchema = z.object({
     .or(z.literal(""))
     .nullish()
     .transform((v) => v || null),
+});
+
+/** Distinct entries of a fractal play order (CM levels, dailies, recs). */
+const fractalPlayOrderEntries = z
+  .array(z.number().int())
+  .refine(
+    (entries) => new Set(entries).size === entries.length && entries.every((e) => FRACTAL_PLAY_ORDER_ENTRIES.includes(e)),
+    "Invalid fractal order.",
+  );
+
+/**
+ * PUT /profile/fractal-play-order: `order` has every CM fractal level exactly once, and the dailies and the recs at
+ * most once each, or is null (the default order); `hidden` lists the entries left out of it.
+ */
+export const fractalPlayOrderSchema = z.object({
+  order: fractalPlayOrderEntries
+    .refine((order) => FRACTAL_CM_LEVELS.every((level) => order.includes(level)), "Invalid fractal order.")
+    .nullable(),
+  hidden: fractalPlayOrderEntries.default([]),
 });
 
 /** PUT /profile/skip-empty-logs */

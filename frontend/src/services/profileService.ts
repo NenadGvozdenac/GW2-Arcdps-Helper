@@ -63,6 +63,9 @@ export const profileService = {
 
   setSkipEmptyLogs: (enabled: boolean): Promise<User> => userRepository.setSkipEmptyLogs(enabled),
 
+  setFractalPlayOrder: (order: number[] | null, hidden: number[]): Promise<User> =>
+    userRepository.setFractalPlayOrder(order, hidden),
+
   deleteAccount: (password: string): Promise<void> => userRepository.deleteAccount(password),
 
   isOwnAccount: (user: User | null, account: string) =>

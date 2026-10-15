@@ -129,3 +129,11 @@ export const CUSTOM_BUILD_NAME_MAX = 80;
 export const CUSTOM_BUILD_JSON_MAX = 30_000;
 /** Most builds a user can keep in their favorites. */
 export const FAVORITE_BUILDS_MAX = 100;
+
+/** The Challenge Mote fractals' levels (a user's fractal play order must list each once). */
+export const FRACTAL_CM_LEVELS = [100, 99, 98, 97, 96, 95, 94];
+/** Stand for the daily and the recommended fractals in a user's fractal play order (each at most once). */
+export const FRACTAL_PLAY_ORDER_DAILIES = 0;
+export const FRACTAL_PLAY_ORDER_RECS = -1;
+/** Every entry a fractal play order can have: the CM levels, the dailies and the recommended fractals. */
+export const FRACTAL_PLAY_ORDER_ENTRIES = [...FRACTAL_CM_LEVELS, FRACTAL_PLAY_ORDER_DAILIES, FRACTAL_PLAY_ORDER_RECS];

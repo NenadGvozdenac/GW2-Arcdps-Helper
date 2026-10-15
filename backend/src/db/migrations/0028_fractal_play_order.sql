@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "fractal_play_order" integer[];

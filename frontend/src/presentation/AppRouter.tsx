@@ -107,7 +107,6 @@ export default function AppRouter() {
           <Route path="app-login/:id" element={<AppLoginPage />} />
           <Route element={<Layout />}>
             <Route path="upload" element={<UploadPage />} />
-            <Route path="profile" element={<ProfilePage />} />
           </Route>
           {/* Pages that use all the room beside the sidebar. */}
           <Route element={<Layout wide />}>
@@ -118,6 +117,7 @@ export default function AppRouter() {
             <Route path="sessions/:id" element={<SessionDetailPage />} />
             <Route path="sessions" element={<SessionsPage />} />
             <Route path="builds" element={<BuildsPage />} />
+            <Route path="profile" element={<ProfilePage />} />
           </Route>
           {/* Raids and strikes used to be pages of their own. */}
           <Route path="raids" element={<MovedTo to="/raids-strikes" />} />

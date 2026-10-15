@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { AlertCircleIcon, ArrowRightIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { AlertCircleIcon, ArrowRightIcon, ChevronDownIcon, ChevronUpIcon, InfoIcon } from "lucide-react";
 import { useAuth } from "../../controllers/AuthController";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
@@ -14,6 +14,7 @@ import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { BarList, SERIES, TimeChart } from "../components/charts/Charts";
 import ClearCard from "../components/ClearCard";
+import FractalInstabilitiesDialog from "../components/FractalInstabilitiesDialog";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import SetupTipCard from "../components/SetupTipCard";
@@ -130,6 +131,7 @@ export default function DashboardPage() {
   } = useDashboardController();
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [instabilitiesOpen, setInstabilitiesOpen] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -165,9 +167,22 @@ export default function DashboardPage() {
                 to={c.to}
                 resetLabel={t(c.resetLabel)}
                 progress={c.progress}
+                titleAction={
+                  c.category === "fractal" && (
+                    <Button
+                      variant="outline"
+                      size="xs"
+                      className="border-warning/40 bg-warning/10 text-warning hover:bg-warning/20 hover:text-warning"
+                      onClick={() => setInstabilitiesOpen(true)}
+                    >
+                      <InfoIcon /> {t("instabilities.open")}
+                    </Button>
+                  )
+                }
               />
             ))}
           </div>
+          {instabilitiesOpen && <FractalInstabilitiesDialog onClose={() => setInstabilitiesOpen(false)} />}
 
           {/* The last 7 / 30 / 90 days, collapsible (remembered in this browser). */}
           <section className="flex flex-col gap-4" aria-labelledby="dashboard-charts">

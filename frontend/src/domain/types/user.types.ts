@@ -27,6 +27,13 @@ export interface User {
   dpsReportToken: string | null;
   /** Skip empty logs (wipe at 100% with 0 DPS on the boss from everyone) that an ArcDPS bug sometimes writes. On by default. */
   skipEmptyLogs: boolean;
+  /**
+   * The CM fractals' levels in the order this user plays them, with 0 where the dailies and -1 where the recommended
+   * fractals come; null = the default (100, 99, 98, 95, 97, 96, 94, dailies, recs).
+   */
+  fractalPlayOrder: number[] | null;
+  /** Entries left out of the play order (not shown in "Play order"): CM levels, 0 dailies, -1 recs. */
+  fractalPlayOrderHidden: number[];
 }
 
 export interface AuthResponse {

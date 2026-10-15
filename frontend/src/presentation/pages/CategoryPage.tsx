@@ -1,11 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
-import { HistoryIcon, XIcon } from "lucide-react";
+import { CalendarDaysIcon, CheckIcon, HistoryIcon, Loader2Icon, StarIcon, XIcon } from "lucide-react";
 import { useI18n } from "../../controllers/I18nController";
 import { useLogs } from "../../controllers/LogsController";
 import { encounterService } from "../../services/encounterService";
+import { PLAY_ORDER_DAILIES, PLAY_ORDER_RECS, instabilityService } from "../../services/instabilityService";
 import { statsService } from "../../services/statsService";
-import type { Category, Encounter } from "../../domain/types/encounter.types";
+import { fractalOrderStorage } from "../../storage/fractalOrderStorage";
+import type { Category, Encounter, EncounterGroup } from "../../domain/types/encounter.types";
+import type { DailyFractal, FractalOrder } from "../../domain/types/instability.types";
 import type { CmMode } from "../../domain/types/log.types";
 import type { TranslationKey } from "../../i18n/i18n.types";
 import { Badge } from "@/presentation/components/ui/badge";
@@ -13,6 +16,13 @@ import { Button } from "@/presentation/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/presentation/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/presentation/components/ui/select";
 import BossRow from "../components/BossRow";
+import {
+  DailyBadge,
+  InstabilitiesError,
+  InstabilityList,
+  NoPainNoGainBar,
+  useTodayInstabilities,
+} from "../components/Instabilities";
 import LogTable from "../components/LogTable";
 import PageHeader from "../components/PageHeader";
 import StatCard from "../components/StatCard";
@@ -43,6 +53,12 @@ function usePageState() {
   const [params, setParams] = useSearchParams();
   const [mode, setMode] = useState<CmMode>("all");
   const [showPrevious, setShowPrevious] = useState(false);
+  // Fractals only: by level or in play order, remembered in this browser.
+  const [fractalOrder, setFractalOrderState] = useState<FractalOrder>(fractalOrderStorage.get);
+  const setFractalOrder = (next: FractalOrder) => {
+    fractalOrderStorage.set(next);
+    setFractalOrderState(next);
+  };
   const selectedBoss = params.get("boss");
   const now = useNow();
 
@@ -58,6 +74,8 @@ function usePageState() {
     setMode,
     showPrevious,
     togglePrevious: () => setShowPrevious((v) => !v),
+    fractalOrder,
+    setFractalOrder,
     selectedBoss,
     toggleBoss,
     now,
@@ -133,11 +151,30 @@ function useCategoryView(category: PageCategory, mode: CmMode, now: Date) {
 const previousLabelFor = (category: PageCategory): TranslationKey =>
   category === "fractal" ? "categories.showYesterday" : "categories.showLastWeek";
 
-/** The header's controls: the previous period (yesterday / last week) and the CM mode. */
-function PageActions({ state, previousLabel }: { state: PageState; previousLabel: TranslationKey }) {
+/** The header's controls: the previous period (yesterday / last week), the CM mode and (fractals) the order. */
+function PageActions({
+  state,
+  previousLabel,
+  withFractalOrder,
+}: {
+  state: PageState;
+  previousLabel: TranslationKey;
+  withFractalOrder?: boolean;
+}) {
   const { t } = useI18n();
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {withFractalOrder && (
+        <Select value={state.fractalOrder} onValueChange={(v) => state.setFractalOrder(v as FractalOrder)}>
+          <SelectTrigger className="w-44" aria-label={t("instabilities.orderLabel")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="fractal">{t("instabilities.byFractal")}</SelectItem>
+            <SelectItem value="playOrder">{t("instabilities.playOrder")}</SelectItem>
+          </SelectContent>
+        </Select>
+      )}
       <Button variant={state.showPrevious ? "secondary" : "outline"} onClick={state.togglePrevious}>
         <HistoryIcon /> {t(previousLabel)}
       </Button>
@@ -196,30 +233,204 @@ function CategorySection({ category, state, title }: { category: PageCategory; s
         </Card>
       )}
 
-      <div className="flex flex-col gap-4">
-        {groups.map(({ group, bosses }) => (
-          <Card key={group.id} className="gap-0 overflow-hidden py-0">
-            <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
-              <Badge variant="secondary" className="font-mono">
-                {group.short}
-              </Badge>
-              <CardTitle>{group.name}</CardTitle>
-            </CardHeader>
-            <ul>
-              {bosses.map((b) => (
-                <BossRow
-                  key={b.encounter.key}
-                  {...b}
-                  emptyLabel={t(labels.noLogs)}
-                  open={state.selectedBoss === b.encounter.key}
-                  onToggle={() => state.toggleBoss(b.encounter.key)}
-                />
-              ))}
-            </ul>
-          </Card>
-        ))}
-      </div>
+      {category === "fractal" ? (
+        <FractalGroups groups={groups} state={state} noLogsLabel={t(labels.noLogs)} />
+      ) : (
+        <div className="flex flex-col gap-4">
+          {groups.map((g) => (
+            <Card key={g.group.id} className="gap-0 overflow-hidden py-0">
+              <GroupHeader group={g.group} />
+              <BossList bosses={g.bosses} state={state} noLogsLabel={t(labels.noLogs)} />
+            </Card>
+          ))}
+        </div>
+      )}
     </section>
+  );
+}
+
+type GroupView = ReturnType<typeof useCategoryView>["groups"][number];
+
+/** A group's card header: its boss portrait, short name and name. */
+function GroupHeader({ group, isDaily }: { group: EncounterGroup; isDaily?: boolean }) {
+  return (
+    <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
+      <img
+        src={encounterService.groupIcon(group.id)}
+        alt=""
+        className="size-8 shrink-0 rounded-full object-cover ring-1 ring-border"
+        loading="lazy"
+      />
+      <Badge variant="secondary" className="font-mono">
+        {group.short}
+      </Badge>
+      <CardTitle>{group.name}</CardTitle>
+      {isDaily && <DailyBadge />}
+    </CardHeader>
+  );
+}
+
+function BossList({
+  bosses,
+  state,
+  noLogsLabel,
+}: {
+  bosses: GroupView["bosses"];
+  state: PageState;
+  noLogsLabel: string;
+}) {
+  return (
+    <ul>
+      {bosses.map((b) => (
+        <BossRow
+          key={b.encounter.key}
+          {...b}
+          emptyLabel={noLogsLabel}
+          open={state.selectedBoss === b.encounter.key}
+          onToggle={() => state.toggleBoss(b.encounter.key)}
+        />
+      ))}
+    </ul>
+  );
+}
+
+function ColumnHeading({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex h-9 items-center justify-between gap-2 border-b px-5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      {children}
+    </div>
+  );
+}
+
+/**
+ * The fractals, each with two columns: its bosses (cleared today or not) and today's instabilities, with the No Pain,
+ * No Gain ones at a glance above them. In play order: the user's sequence of CM fractals, dailies and recs, without the
+ * ones they left out.
+ */
+function FractalGroups({ groups, state, noLogsLabel }: { groups: GroupView[]; state: PageState; noLogsLabel: string }) {
+  const { t } = useI18n();
+  const instabilities = useTodayInstabilities();
+  const byGroup = new Map(groups.map((g) => [g.group.id, g]));
+  const card = (g: GroupView) => (
+    <FractalGroupCard key={g.group.id} view={g} instabilities={instabilities} state={state} noLogsLabel={noLogsLabel} />
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {instabilities.error != null ? (
+        <InstabilitiesError error={instabilities.error} />
+      ) : (
+        !instabilities.loading && <NoPainNoGainBar fractals={instabilities.noPainNoGain} />
+      )}
+
+      {state.fractalOrder === "playOrder"
+        ? instabilities.playSequence.map((entry) => {
+            if (entry === PLAY_ORDER_DAILIES || entry === PLAY_ORDER_RECS) {
+              const recs = entry === PLAY_ORDER_RECS;
+              return (
+                <ExtraFractalsCard
+                  key={entry}
+                  title={t(recs ? "fractalPlayOrder.recs" : "fractalPlayOrder.dailies")}
+                  icon={recs ? <StarIcon className="size-4" /> : <CalendarDaysIcon className="size-4" />}
+                  fractals={recs ? instabilities.recommended : instabilities.dailyT4}
+                  loading={instabilities.loading}
+                />
+              );
+            }
+            const groupId = instabilityService.groupIdOf(entry);
+            const view = groupId ? byGroup.get(groupId) : undefined;
+            return view ? card(view) : null;
+          })
+        : groups.map(card)}
+    </div>
+  );
+}
+
+/** One CM fractal: its bosses (cleared today or not) beside today's instabilities. */
+function FractalGroupCard({
+  view: { group, bosses },
+  instabilities,
+  state,
+  noLogsLabel,
+}: {
+  view: GroupView;
+  instabilities: ReturnType<typeof useTodayInstabilities>;
+  state: PageState;
+  noLogsLabel: string;
+}) {
+  const { t } = useI18n();
+  const fractal = instabilities.byGroup.get(group.id);
+  const cleared = bosses.length > 0 && bosses.every((b) => b.clearedSinceReset);
+  return (
+    <Card className="gap-0 overflow-hidden py-0">
+      <GroupHeader group={group} isDaily={fractal?.isDaily} />
+      <div className="grid md:grid-cols-[minmax(0,1fr)_17rem]">
+        <div className="min-w-0">
+          <ColumnHeading>
+            {t("instabilities.bossesColumn")}
+            {cleared && (
+              <span className="flex items-center gap-1 text-success">
+                <CheckIcon className="size-3.5" /> {t("categories.clearedToday")}
+              </span>
+            )}
+          </ColumnHeading>
+          <BossList bosses={bosses} state={state} noLogsLabel={noLogsLabel} />
+        </div>
+        <div className="border-t bg-muted/20 md:border-t-0 md:border-l">
+          <ColumnHeading>{t("instabilities.column")}</ColumnHeading>
+          <div className="p-3">
+            {instabilities.loading ? (
+              <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+            ) : fractal ? (
+              <InstabilityList instabilities={fractal.instabilities} />
+            ) : (
+              <span className="text-sm text-muted-foreground">{t("instabilities.none")}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/** Today's T4 dailies (CM levels left out) or recs with their instabilities, side by side. */
+function ExtraFractalsCard({
+  title,
+  icon,
+  fractals,
+  loading,
+}: {
+  title: string;
+  icon: ReactNode;
+  fractals: DailyFractal[];
+  loading: boolean;
+}) {
+  return (
+    <Card className="gap-0 overflow-hidden border-dashed py-0">
+      <CardHeader className="flex flex-row items-center gap-3 border-b py-4">
+        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-muted text-muted-foreground ring-1 ring-border">
+          {icon}
+        </span>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      {loading ? (
+        <Loader2Icon className="m-5 size-4 animate-spin text-muted-foreground" />
+      ) : (
+        <ul className="grid divide-y md:grid-cols-3 md:divide-x md:divide-y-0">
+          {fractals.map((d) => (
+            <li key={d.level} className="flex flex-col gap-2 p-3">
+              <span className="flex items-center justify-between gap-2 px-2 text-sm font-medium">
+                {d.name}
+                <span className="rounded-md border px-1.5 py-0.5 text-[11px] leading-none font-semibold text-muted-foreground tabular-nums">
+                  {d.level}
+                </span>
+              </span>
+              <InstabilityList instabilities={d.instabilities} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 
@@ -233,7 +444,13 @@ export default function CategoryPage({ category }: { category: PageCategory }) {
       <PageHeader
         title={t(`categories.${category}.title`)}
         description={t(`categories.${category}.subtitle`)}
-        actions={<PageActions state={state} previousLabel={previousLabelFor(category)} />}
+        actions={
+          <PageActions
+            state={state}
+            previousLabel={previousLabelFor(category)}
+            withFractalOrder={category === "fractal"}
+          />
+        }
       />
       <CategorySection category={category} state={state} />
     </div>

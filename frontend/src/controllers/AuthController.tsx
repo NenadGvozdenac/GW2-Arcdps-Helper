@@ -20,6 +20,8 @@ interface AuthContextValue {
   setDpsReportToken: (token: string) => Promise<void>;
   /** Whether empty logs (the ArcDPS bug) are skipped on import. */
   setSkipEmptyLogs: (enabled: boolean) => Promise<void>;
+  /** `order` null goes back to the default order; `hidden`: the entries left out of it. */
+  setFractalPlayOrder: (order: number[] | null, hidden: number[]) => Promise<void>;
   /** Permanently deletes the account (confirmed with the password), signs out and reloads on the landing page. */
   deleteAccount: (password: string) => Promise<void>;
 }
@@ -72,6 +74,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(await profileService.setSkipEmptyLogs(enabled));
   }, []);
 
+  const setFractalPlayOrder = useCallback(async (order: number[] | null, hidden: number[]) => {
+    setUser(await profileService.setFractalPlayOrder(order, hidden));
+  }, []);
+
   const deleteAccount = useCallback(async (password: string) => {
     await profileService.deleteAccount(password);
     authService.logout();
@@ -92,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile,
       setDpsReportToken,
       setSkipEmptyLogs,
+      setFractalPlayOrder,
       deleteAccount,
     }),
     [
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       updateProfile,
       setDpsReportToken,
       setSkipEmptyLogs,
+      setFractalPlayOrder,
       deleteAccount,
     ],
   );

@@ -43,6 +43,7 @@ export function createRouter(): Router {
   router.post("/profile/discord-webhooks/test", requireAuth, profileController.testDiscordWebhook);
   router.put("/profile/dps-report-token", requireAuth, profileController.setDpsReportToken);
   router.put("/profile/skip-empty-logs", requireAuth, profileController.setSkipEmptyLogs);
+  router.put("/profile/fractal-play-order", requireAuth, profileController.setFractalPlayOrder);
 
   // Feedback from the website, the desktop uploader and the Nexus addon, emailed to the developer.
   // Guests too; a signed-in user's feedback is linked to their account.

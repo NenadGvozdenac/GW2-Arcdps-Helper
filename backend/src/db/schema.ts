@@ -43,6 +43,13 @@ export const users = pgTable(
      * they are not saved, posted to Discord or shown as uploaded in the uploader / addon.
      */
     skipEmptyLogs: boolean("skip_empty_logs").notNull().default(true),
+    /**
+     * The order the user plays the CM fractals in: fractal levels (e.g. 100, 99, 98, 95, 97, 96, 94), with 0 where the
+     * dailies and -1 where the recommended fractals come; null = default.
+     */
+    fractalPlayOrder: integer("fractal_play_order").array(),
+    /** Entries of the fractal play order the user left out (not shown in "Play order"); 0 dailies, -1 recs. */
+    fractalPlayOrderHidden: integer("fractal_play_order_hidden").array().notNull().default([]),
     /** Set when the user clicks the link in the confirmation email; signing in is refused while null. */
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
     /** When the user accepted the Terms of Service and Privacy Policy at registration; null = registered before they existed. */

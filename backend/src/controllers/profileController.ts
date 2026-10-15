@@ -8,6 +8,7 @@ import {
   dpsReportTokenSchema,
   profileUpdateSchema,
   skipEmptyLogsSchema,
+  fractalPlayOrderSchema,
 } from "../validation/schemas";
 import { validate } from "../validation/validate";
 
@@ -36,6 +37,15 @@ export const profileController = {
   async setSkipEmptyLogs(req: Request, res: Response<unknown, AuthLocals>) {
     const { enabled } = validate(skipEmptyLogsSchema, req.body);
     res.json({ user: await userService.setSkipEmptyLogs(res.locals.userId, enabled) });
+  },
+
+  /**
+   * PUT /profile/fractal-play-order `{ order, hidden }` — the CM levels, dailies (0) and recs (-1) in play order (null
+   * for the default) and the ones left out.
+   */
+  async setFractalPlayOrder(req: Request, res: Response<unknown, AuthLocals>) {
+    const { order, hidden } = validate(fractalPlayOrderSchema, req.body);
+    res.json({ user: await userService.setFractalPlayOrder(res.locals.userId, order, hidden) });
   },
 
   /** DELETE /profile `{ password }` — deletes the account and everything in it. */

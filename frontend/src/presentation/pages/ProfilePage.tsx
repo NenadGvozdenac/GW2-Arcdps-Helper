@@ -21,6 +21,7 @@ import DeleteAccountCard from "../components/DeleteAccountCard";
 import DiscordWebhookCard from "../components/DiscordWebhookCard";
 import DpsReportTokenCard from "../components/DpsReportTokenCard";
 import EmptyLogsCard from "../components/EmptyLogsCard";
+import FractalPlayOrderCard from "../components/FractalPlayOrderCard";
 import FeedbackCard from "../components/FeedbackCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import PageHeader from "../components/PageHeader";
@@ -76,10 +77,14 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader title={t("profile.title")} />
-      {/* 2×2 grid of settings (one column on phones); Discord and the danger zone across the full width below it. */}
-      <div className="grid gap-6 md:grid-cols-2">
+      {/*
+        The settings in three columns on wide screens (two on tablets, one on phones): general, language and upload
+        settings, then the fractal play order, the dps.report token and feedback; Discord and the danger zone across the
+        full width below them.
+      */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <Card>
           <form
             className="flex flex-1 flex-col gap-6"
@@ -148,11 +153,12 @@ export default function ProfilePage() {
             </div>
           </CardFooter>
         </Card>
-        <DpsReportTokenCard />
         <EmptyLogsCard />
+        <FractalPlayOrderCard />
+        <DpsReportTokenCard />
+        <FeedbackCard />
       </div>
       <DiscordWebhookCard initialWebhooks={c.webhooks.list} loadError={c.webhooks.error} />
-      <FeedbackCard />
       <DeleteAccountCard />
     </div>
   );

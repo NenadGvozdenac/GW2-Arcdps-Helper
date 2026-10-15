@@ -54,6 +54,13 @@ export const userService = {
     return user;
   },
 
+  /** The order the user plays the fractals in (null goes back to the default) and the entries left out of it. */
+  async setFractalPlayOrder(id: string, order: number[] | null, hidden: number[]): Promise<User> {
+    const user = await userRepository.update(id, { fractalPlayOrder: order, fractalPlayOrderHidden: hidden });
+    if (!user) throw userNotFound();
+    return user;
+  },
+
   /** Whether empty logs (the ArcDPS bug) are skipped instead of imported. */
   async setSkipEmptyLogs(id: string, enabled: boolean): Promise<User> {
     const user = await userRepository.update(id, { skipEmptyLogs: enabled });

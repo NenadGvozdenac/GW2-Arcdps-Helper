@@ -24,6 +24,8 @@ export type UserPatch = Partial<
     | "gw2Account"
     | "dpsReportToken"
     | "skipEmptyLogs"
+    | "fractalPlayOrder"
+    | "fractalPlayOrderHidden"
     | "passwordHash"
     | "emailVerifiedAt"
     | "tokensValidAfter"

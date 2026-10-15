@@ -27,6 +27,11 @@ export const userRepository = {
     return (await http.put<{ user: User }>("/profile/dps-report-token", { token })).user;
   },
 
+  /** `order` null goes back to the default order; `hidden`: the entries left out of it. */
+  async setFractalPlayOrder(order: number[] | null, hidden: number[]): Promise<User> {
+    return (await http.put<{ user: User }>("/profile/fractal-play-order", { order, hidden })).user;
+  },
+
   async setSkipEmptyLogs(enabled: boolean): Promise<User> {
     return (await http.put<{ user: User }>("/profile/skip-empty-logs", { enabled })).user;
   },
