@@ -42,7 +42,10 @@ export function useTodayInstabilities() {
   const noPainNoGain = byInstability.find((i) => i.instability.isNoPainNoGain)?.fractals ?? [];
   const byGroup = useMemo(() => new Map(fractals.map((f) => [f.group.id, f])), [fractals]);
   const byLevel = useMemo(() => new Map(fractals.map((f) => [f.level, f])), [fractals]);
-  const dailyT4 = useMemo(() => (data ? instabilityService.dailyT4(data, lang) : []), [data, lang]);
+  const allDailies = useMemo(() => (data ? instabilityService.dailyT4(data, lang) : []), [data, lang]);
+  // A daily at a CM level is shown among the CM fractals; in play order, among the dailies when that CM is left out.
+  const dailyT4 = allDailies.filter((d) => !d.isCmLevel);
+  const playOrderDailies = allDailies.filter((d) => !d.isCmLevel || hidden?.includes(d.level));
   const recommended = useMemo(() => (data ? instabilityService.recommended(data, lang) : []), [data, lang]);
 
   return {
@@ -53,7 +56,10 @@ export function useTodayInstabilities() {
     noPainNoGain,
     byGroup,
     byLevel,
+    /** Today's T4 dailies that are not CM fractals. */
     dailyT4,
+    /** The dailies "Play order" shows: also one at a CM level when the user left that CM fractal out. */
+    playOrderDailies,
     recommended,
     /** The user's play order without the entries they left out (CM levels, PLAY_ORDER_DAILIES, PLAY_ORDER_RECS). */
     playSequence: instabilityService.playSequence(playOrder, hidden),

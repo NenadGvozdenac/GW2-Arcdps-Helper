@@ -38,14 +38,13 @@ export interface FractalInstabilities {
   instabilities: Instability[];
 }
 
-/**
- * One of today's daily fractals at its Tier 4 level (76–99, not a CM level), or a recommended fractal, with that level's
- * instabilities.
- */
+/** One of today's daily fractals at its Tier 4 level (76–100), or a recommended fractal, with that level's instabilities. */
 export interface DailyFractal {
   type: string;
   name: string;
   level: number;
+  /** Played at a CM level (e.g. Silent Surf at 99): then shown among the CM fractals rather than the dailies. */
+  isCmLevel: boolean;
   instabilities: Instability[];
 }
 

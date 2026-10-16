@@ -332,7 +332,7 @@ function FractalGroups({ groups, state, noLogsLabel }: { groups: GroupView[]; st
                   key={entry}
                   title={t(recs ? "fractalPlayOrder.recs" : "fractalPlayOrder.dailies")}
                   icon={recs ? <StarIcon className="size-4" /> : <CalendarDaysIcon className="size-4" />}
-                  fractals={recs ? instabilities.recommended : instabilities.dailyT4}
+                  fractals={recs ? instabilities.recommended : instabilities.playOrderDailies}
                   loading={instabilities.loading}
                 />
               );
@@ -393,7 +393,7 @@ function FractalGroupCard({
   );
 }
 
-/** Today's T4 dailies (CM levels left out) or recs with their instabilities, side by side. */
+/** Today's T4 dailies (a CM level only when that CM is left out of the play order) or recs, side by side. */
 function ExtraFractalsCard({
   title,
   icon,

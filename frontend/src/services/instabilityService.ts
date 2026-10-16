@@ -106,8 +106,8 @@ export const instabilityService = {
     instabilityService.playOrder(order).filter((e) => !hidden?.includes(e)),
 
   /**
-   * Today's daily fractals at their Tier 4 levels, highest level first, with their instabilities. A daily played at a CM
-   * level (e.g. Silent Surf at 99) is left out: it is already among the CM fractals, marked as daily.
+   * Today's daily fractals at their Tier 4 levels, highest level first, with their instabilities; `isCmLevel` marks one
+   * played at a CM level (e.g. Silent Surf at 99), which is usually shown among the CM fractals instead.
    */
   dailyT4(data: InstabilityData, lang: Language, now = new Date()): DailyFractal[] {
     const day = instabilityService.dayIndex(now);
@@ -118,8 +118,14 @@ export const instabilityService = {
         if (!details) return [];
         const name = (lang === "de" ? details.name.de : details.name.en) ?? type;
         return details.scales
-          .filter((level) => level >= T4_MIN_LEVEL && !cmLevels.has(level))
-          .map((level) => ({ type, name, level, instabilities: instabilitiesAt(data, level, day, lang) }));
+          .filter((level) => level >= T4_MIN_LEVEL)
+          .map((level) => ({
+            type,
+            name,
+            level,
+            isCmLevel: cmLevels.has(level),
+            instabilities: instabilitiesAt(data, level, day, lang),
+          }));
       })
       .sort((a, b) => b.level - a.level);
   },
@@ -133,7 +139,7 @@ export const instabilityService = {
         const type = Object.keys(data.fractal_details).find((t) => data.fractal_details[t].scales.includes(level)) ?? "";
         const details = data.fractal_details[type];
         const name = (details && (lang === "de" ? details.name.de : details.name.en)) ?? type;
-        return { type, name, level, instabilities: instabilitiesAt(data, level, day, lang) };
+        return { type, name, level, isCmLevel: false, instabilities: instabilitiesAt(data, level, day, lang) };
       })
       .sort((a, b) => b.level - a.level);
   },

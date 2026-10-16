@@ -210,7 +210,7 @@ export default function FractalInstabilitiesDialog({ onClose }: { onClose: () =>
                 {c.playSequence.flatMap((entry) => {
                   if (entry === PLAY_ORDER_DAILIES || entry === PLAY_ORDER_RECS) {
                     const recs = entry === PLAY_ORDER_RECS;
-                    return (recs ? c.recommended : c.dailyT4).map((f) => (
+                    return (recs ? c.recommended : c.playOrderDailies).map((f) => (
                       <PlayOrderRow
                         key={`${recs ? "rec" : "daily"}-${f.level}`}
                         dashed
